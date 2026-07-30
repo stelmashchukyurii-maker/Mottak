@@ -77,8 +77,8 @@
             border-radius: 4px;
         }
 
-        .scan-btn {
-            background-color: var(--primary-color);
+        .torch-btn {
+            background-color: #ff9800;
             color: white;
             border: none;
             padding: 12px;
@@ -101,23 +101,6 @@
             border-radius: 6px;
             cursor: pointer;
             margin-top: 10px;
-        }
-
-        #interactive {
-            width: 100%;
-            max-height: 300px;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 10px;
-            display: none;
-            background: black;
-            border-radius: 4px;
-        }
-
-        #interactive video {
-            width: 100%;
-            height: auto;
-            display: block;
         }
 
         .history-section {
@@ -147,8 +130,6 @@
             padding: 0 5px;
         }
     </style>
-    <!-- Підключення стабільної бібліотеки для сканування QR та штрих-кодів -->
-    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 
@@ -169,13 +150,11 @@
     </div>
 
     <div class="form-group">
-        <label id="labelTag">Номер бірки (код з камери):</label>
+        <label id="labelTag">Номер бірки (цифри та букви):</label>
         
-        <button class="scan-btn" onclick="startScanner()">📷 Сканувати бірку</button>
+        <button class="torch-btn" id="torchBtn" onclick="toggleTorch()">🔦 Увімкнути ліхтарик</button>
 
-        <div id="interactive"></div>
-
-        <input type="text" id="tagInput" placeholder="Введіть або зіскануйте номер">
+        <input type="text" id="tagInput" placeholder="Введіть номер з бірки або вставте скопійований">
     </div>
 
     <button class="save-btn" onclick="saveRecord()">Зберегти запис</button>
@@ -186,14 +165,14 @@
     </div>
     
     <div style="margin-top: 15px; font-size: 13px; color: #666; text-align: center;" id="updateTimeDisplay">
-        Оновлено: 30.07.2026, 16:05
+        Оновлено: 30.07.2026, 16:16
     </div>
 </div>
 
 <script>
     let currentOperation = 'Прихід';
-    let html5QrCode = null;
-    let isScanning = false;
+    let torchTrack = null;
+    let torchOn = false;
 
     function setOperation(op) {
         currentOperation = op;
@@ -208,47 +187,36 @@
         }
     }
 
-    function startScanner() {
-        const container = document.getElementById('interactive');
-        
-        if (isScanning) {
-            stopScanner();
-            return;
-        }
-
-        container.style.display = 'block';
-        isScanning = true;
-
-        html5QrCode = new Html5Qrcode("interactive");
-        
-        const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-
-        html5QrCode.start(
-            { facingMode: "environment" },
-            config,
-            (decodedText) => {
-                document.getElementById('tagInput').value = decodedText;
-                stopScanner();
-            },
-            (errorMessage) => {}
-        ).catch(err => {
-            alert("Помилка запуску камери: " + err);
-            isScanning = false;
-            container.style.display = 'none';
-        });
-    }
-
-    function stopScanner() {
-        if (html5QrCode && isScanning) {
-            html5QrCode.stop().then(() => {
-                isScanning = false;
-                document.getElementById('interactive').style.display = 'none';
-            }).catch(err => {
-                console.error("Не вдалося зупинити сканер", err);
-            });
-        } else {
-            isScanning = false;
-            document.getElementById('interactive').style.display = 'none';
+    async function toggleTorch() {
+        const btn = document.getElementById('torchBtn');
+        try {
+            if (!torchOn) {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                torchTrack = stream.getVideoTracks()[0];
+                const capabilities = torchTrack.getCapabilities();
+                
+                if (capabilities.torch) {
+                    await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
+                    torchOn = true;
+                    btn.innerText = "🔦 Вимкнути ліхтарик";
+                    btn.style.backgroundColor = "#d9534f";
+                } else {
+                    alert("Ліхтарик не підтримується цим пристроєм або браузером");
+                    stream.getTracks().forEach(t => t.stop());
+                }
+            } else {
+                if (torchTrack) {
+                    await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
+                    torchTrack.stop();
+                }
+                torchOn = false;
+                btn.innerText = "🔦 Увімкнути ліхтарик";
+                btn.style.backgroundColor = "#ff9800";
+            }
+        } catch (err) {
+            alert("Помилка управління ліхтариком: " + err);
         }
     }
 
@@ -257,7 +225,7 @@
         const tag = document.getElementById('tagInput').value.trim();
 
         if (!tag) {
-            alert('Будь ласка, введіть або зіскануйте номер бірки!');
+            alert('Будь ласка, введіть номер бірки!');
             return;
         }
 
