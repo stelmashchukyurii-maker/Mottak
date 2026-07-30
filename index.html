@@ -20,7 +20,7 @@
     body {
       margin: 0;
       background: #111;
-      color: white;
+      color: #fff;
       font-family: Arial, sans-serif;
       text-align: center;
     }
@@ -71,15 +71,15 @@
     }
 
     /*
-      МАЛЕНЬКА ВЕРТИКАЛЬНА РАМКА.
+      ЩЕ МЕНША ВЕРТИКАЛЬНА РАМКА.
 
       Попередня:
-      width: 48%;
-      height: 61%;
-
-      Нова приблизно у два рази менша:
       width: 24%;
       height: 30%;
+
+      Нова:
+      width: 18%;
+      height: 22%;
     */
     #scanFrame {
       position: absolute;
@@ -87,16 +87,16 @@
       left: 50%;
       top: 50%;
 
-      width: 24%;
-      height: 30%;
+      width: 18%;
+      height: 22%;
 
-      min-width: 105px;
-      min-height: 170px;
+      min-width: 82px;
+      min-height: 125px;
 
       transform: translate(-50%, -50%);
 
       border: 4px solid #00ff66;
-      border-radius: 13px;
+      border-radius: 12px;
 
       box-shadow:
         0 0 0 9999px rgba(0, 0, 0, 0.25),
@@ -108,22 +108,22 @@
     #scanFrameText {
       position: absolute;
 
-      bottom: calc(100% + 13px);
+      bottom: calc(100% + 12px);
       left: 50%;
 
-      width: 340px;
+      width: 350px;
       max-width: 90vw;
 
       transform: translateX(-50%);
 
-      color: white;
-      font-size: 17px;
+      color: #fff;
+      font-size: 16px;
       font-weight: bold;
       line-height: 1.25;
 
       text-shadow:
-        0 2px 6px black,
-        0 0 8px black;
+        0 2px 6px #000,
+        0 0 8px #000;
     }
 
     .buttons {
@@ -133,9 +133,7 @@
     button,
     .fileButton {
       display: inline-block;
-
       width: min(96%, 540px);
-
       margin: 6px;
       padding: 14px 16px;
 
@@ -155,12 +153,12 @@
 
     #startButton {
       background: #1689ef;
-      color: white;
+      color: #fff;
     }
 
     #captureButton {
       background: #00ad49;
-      color: white;
+      color: #fff;
     }
 
     #torchButton {
@@ -170,18 +168,18 @@
 
     #stopButton {
       background: #bd3327;
-      color: white;
+      color: #fff;
     }
 
     #copyButton {
       display: none;
       background: #16a085;
-      color: white;
+      color: #fff;
     }
 
     .fileButton {
       background: #805ad5;
-      color: white;
+      color: #fff;
     }
 
     #fileInput {
@@ -190,7 +188,6 @@
 
     .panel {
       width: 100%;
-
       margin-top: 14px;
       padding: 12px;
 
@@ -214,13 +211,10 @@
     #cropPreview,
     #processedPreview {
       display: block;
-
       width: 100%;
       max-height: 420px;
-
       object-fit: contain;
-
-      background: white;
+      background: #fff;
       border-radius: 9px;
     }
 
@@ -245,7 +239,6 @@
 
       background: #111;
       color: #bbb;
-
       border-radius: 9px;
 
       font-family: monospace;
@@ -265,9 +258,7 @@
     #progressTrack {
       width: 100%;
       height: 15px;
-
       overflow: hidden;
-
       background: #444;
       border-radius: 10px;
     }
@@ -275,9 +266,7 @@
     #progressBar {
       width: 0%;
       height: 100%;
-
       background: #00ad49;
-
       transition: width 0.15s linear;
     }
 
@@ -287,10 +276,8 @@
 
     footer {
       padding: 18px 10px 25px;
-
       color: #888;
       font-size: 12px;
-
       border-top: 1px solid #333;
     }
   </style>
@@ -320,7 +307,7 @@
     <div id="scanFrame">
 
       <div id="scanFrameText">
-        Помісти тільки два рядки номера всередину зеленої рамки
+        Помісти лише два рядки номера всередину зеленої рамки
       </div>
 
     </div>
@@ -422,16 +409,12 @@
 </main>
 
 <footer>
-  Версія 0.4 — зменшена вертикальна рамка
+  Версія 0.5 — ще менша вертикальна рамка
 </footer>
 
 <script>
 "use strict";
 
-
-/* =========================================================
-   ЕЛЕМЕНТИ
-   ========================================================= */
 
 const video =
   document.getElementById("video");
@@ -497,10 +480,6 @@ const processedCanvas =
   document.getElementById("processedCanvas");
 
 
-/* =========================================================
-   ЗМІННІ
-   ========================================================= */
-
 let cameraStream = null;
 let cameraTrack = null;
 
@@ -510,20 +489,12 @@ let isProcessing = false;
 let lastRecognizedText = "";
 
 
-/* =========================================================
-   ЗАТРИМКА
-   ========================================================= */
-
 function wait(milliseconds) {
   return new Promise(resolve => {
     setTimeout(resolve, milliseconds);
   });
 }
 
-
-/* =========================================================
-   ВІДКРИТТЯ КАМЕРИ
-   ========================================================= */
 
 async function openCamera() {
   startButton.disabled = true;
@@ -623,10 +594,6 @@ async function openCamera() {
 }
 
 
-/* =========================================================
-   ЗАКРИТТЯ КАМЕРИ
-   ========================================================= */
-
 function closeCamera() {
   if (cameraStream) {
     cameraStream
@@ -652,10 +619,6 @@ function closeCamera() {
     "Камеру закрито.";
 }
 
-
-/* =========================================================
-   ЛІХТАРИК
-   ========================================================= */
 
 async function toggleTorch() {
   if (!cameraTrack) {
@@ -692,10 +655,6 @@ async function toggleTorch() {
   }
 }
 
-
-/* =========================================================
-   ФОТО З КАМЕРИ
-   ========================================================= */
 
 function captureCameraPhoto() {
   if (
@@ -739,10 +698,6 @@ function captureCameraPhoto() {
   return photoCanvas;
 }
 
-
-/* =========================================================
-   ВІДКРИТТЯ ГОТОВОГО ФОТО
-   ========================================================= */
 
 async function loadPhotoFile(file) {
   const image =
@@ -816,11 +771,6 @@ async function loadPhotoFile(file) {
 }
 
 
-/* =========================================================
-   ПЕРЕВЕДЕННЯ ЗЕЛЕНОЇ РАМКИ
-   В КООРДИНАТИ РЕАЛЬНОГО ФОТО
-   ========================================================= */
-
 function getCameraCropRectangle(sourceCanvas) {
   const videoRectangle =
     video.getBoundingClientRect();
@@ -839,11 +789,6 @@ function getCameraCropRectangle(sourceCanvas) {
 
   const sourceHeight =
     sourceCanvas.height;
-
-  /*
-    Відео показується через object-fit: cover.
-    Частина справжнього кадру може бути прихована.
-  */
 
   const displayScale =
     Math.max(
@@ -914,10 +859,6 @@ function getCameraCropRectangle(sourceCanvas) {
 }
 
 
-/* =========================================================
-   ОБЛАСТЬ ДЛЯ ТЕСТОВОГО ГОТОВОГО ФОТО
-   ========================================================= */
-
 function getUploadedPhotoCropRectangle(sourceCanvas) {
   return {
     x: sourceCanvas.width * 0.15,
@@ -928,21 +869,16 @@ function getUploadedPhotoCropRectangle(sourceCanvas) {
 }
 
 
-/* =========================================================
-   ВИРІЗАННЯ ФРАГМЕНТА
-   ========================================================= */
-
 function cropTextArea(
   sourceCanvas,
   rectangle
 ) {
   /*
-    Маленька рамка має менше пікселів,
-    тому збільшуємо фрагмент у 4 рази.
+    Маленьку область збільшуємо у 5 разів.
   */
 
   const enlargement =
-    4;
+    5;
 
   cropCanvas.width =
     Math.max(
@@ -1009,10 +945,6 @@ function cropTextArea(
   return cropCanvas;
 }
 
-
-/* =========================================================
-   М’ЯКА ОБРОБКА ЗОБРАЖЕННЯ
-   ========================================================= */
 
 function preprocessImage(sourceCanvas) {
   processedCanvas.width =
@@ -1096,10 +1028,6 @@ function preprocessImage(sourceCanvas) {
 }
 
 
-/* =========================================================
-   ПІДГОТОВКА ТЕКСТУ OCR
-   ========================================================= */
-
 function normalizeOcrText(text) {
   return String(text || "")
     .toUpperCase()
@@ -1109,10 +1037,6 @@ function normalizeOcrText(text) {
     );
 }
 
-
-/* =========================================================
-   ПОШУК ПЕРШОГО РЯДКА
-   ========================================================= */
 
 function findFirstLine(text) {
   const normalized =
@@ -1167,10 +1091,6 @@ function findFirstLine(text) {
 }
 
 
-/* =========================================================
-   ПОШУК ДРУГОГО РЯДКА
-   ========================================================= */
-
 function findSecondLine(
   text,
   firstLine
@@ -1222,10 +1142,6 @@ function findSecondLine(
 }
 
 
-/* =========================================================
-   ОЧИЩЕННЯ РЕЗУЛЬТАТУ
-   ========================================================= */
-
 function cleanOcrText(text) {
   const firstLine =
     findFirstLine(text);
@@ -1273,10 +1189,6 @@ function cleanOcrText(text) {
 }
 
 
-/* =========================================================
-   ОЦІНКА ВАРІАНТА
-   ========================================================= */
-
 function calculateResultScore(
   cleanedText,
   confidence
@@ -1312,10 +1224,6 @@ function calculateResultScore(
   return score;
 }
 
-
-/* =========================================================
-   OCR
-   ========================================================= */
 
 async function runOcr(
   imageCanvas,
@@ -1387,10 +1295,6 @@ async function runOcr(
 }
 
 
-/* =========================================================
-   ГОЛОВНА ОБРОБКА
-   ========================================================= */
-
 async function processPhoto(
   sourceCanvas,
   fromCamera
@@ -1418,7 +1322,7 @@ async function processPhoto(
 
   try {
     statusElement.textContent =
-      "Вирізаємо маленьку область усередині рамки…";
+      "Вирізаємо область усередині маленької рамки…";
 
     const rectangle =
       fromCamera
@@ -1537,10 +1441,6 @@ async function processPhoto(
 }
 
 
-/* =========================================================
-   ФОТО З КАМЕРИ
-   ========================================================= */
-
 async function captureAndRecognize() {
   if (!cameraTrack) {
     statusElement.textContent =
@@ -1581,10 +1481,6 @@ async function captureAndRecognize() {
 }
 
 
-/* =========================================================
-   КОПІЮВАННЯ
-   ========================================================= */
-
 async function copyResult() {
   if (!lastRecognizedText) {
     return;
@@ -1606,10 +1502,6 @@ async function copyResult() {
   }
 }
 
-
-/* =========================================================
-   КНОПКИ
-   ========================================================= */
 
 startButton.addEventListener(
   "click",
@@ -1636,10 +1528,6 @@ copyButton.addEventListener(
   copyResult
 );
 
-
-/* =========================================================
-   ГОТОВЕ ФОТО
-   ========================================================= */
 
 fileInput.addEventListener(
   "change",
@@ -1682,10 +1570,6 @@ fileInput.addEventListener(
   }
 );
 
-
-/* =========================================================
-   ЗАКРИТТЯ СТОРІНКИ
-   ========================================================= */
 
 window.addEventListener(
   "pagehide",
