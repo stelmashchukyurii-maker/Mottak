@@ -1,1870 +1,1176 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
-  >
-
-  <title>Сканер бірки</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <title>AI Scanner Mottak v2</title>
 
   <style>
+    :root {
+      color-scheme: dark;
+
+      --bg: #0b1020;
+      --card: #151c30;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --bad: #ff6b6b;
+      --line: #303b59;
+    }
+
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      background: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #11182a 100%);
+      color: var(--text);
     }
 
-    header {
-      padding: 14px 10px;
-      background: #1f1f1f;
-      border-bottom: 1px solid #444;
+    .app {
+      width: min(720px, 100%);
+      margin: 0 auto;
+      padding: 18px 14px 40px;
     }
 
     h1 {
-      margin: 0;
-      font-size: 22px;
+      margin: 4px 0 6px;
+      font-size: clamp(25px, 7vw, 38px);
+      line-height: 1.05;
     }
 
-    #status {
-      min-height: 24px;
-      margin-top: 8px;
-      color: #ddd;
-      font-size: 15px;
-      line-height: 1.4;
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.45;
     }
 
-    main {
-      width: min(96%, 720px);
-      margin: 0 auto;
-      padding: 12px 0 30px;
+    .card {
+      margin: 12px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 28, 48, 0.94);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
     }
 
-    #cameraBox {
-      position: relative;
-      width: 100%;
-      height: 58vh;
-      min-height: 430px;
-      max-height: 760px;
-      overflow: hidden;
-      background: #000;
-      border: 2px solid #555;
-      border-radius: 14px;
-    }
-
-    #video {
+    label {
       display: block;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    input[type="password"],
+    input[type="text"] {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #000;
-    }
-
-    /*
-      Маленька вертикальна зелена рамка.
-
-      Усередині неї бажано розмістити:
-      - два рядки номера;
-      - невелику частину навколо них.
-
-      QR бажано залишити нижче рамки або
-      біля самого нижнього краю рамки.
-    */
-    #scanFrame {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-
-      width: 18%;
-      height: 22%;
-
-      min-width: 82px;
-      min-height: 125px;
-
-      transform: translate(-50%, -50%);
-
-      border: 4px solid #00ff66;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
       border-radius: 12px;
-
-      box-shadow:
-        0 0 0 9999px rgba(0, 0, 0, 0.25),
-        0 0 22px rgba(0, 255, 102, 0.95);
-
-      pointer-events: none;
-    }
-
-    #scanFrameText {
-      position: absolute;
-      bottom: calc(100% + 12px);
-      left: 50%;
-
-      width: 350px;
-      max-width: 90vw;
-
-      transform: translateX(-50%);
-
-      color: #fff;
+      background: #0d1426;
+      color: var(--text);
       font-size: 16px;
-      font-weight: bold;
-      line-height: 1.25;
-
-      text-shadow:
-        0 2px 6px #000,
-        0 0 8px #000;
+      outline: none;
     }
 
-    .buttons {
-      padding-top: 10px;
+    input:focus {
+      border-color: var(--accent);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 560px) {
+      .row.two {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     button,
-    .fileButton {
-      display: inline-block;
-      width: min(96%, 540px);
-      margin: 6px;
-      padding: 14px 16px;
-
-      border: none;
-      border-radius: 12px;
-
-      font-size: 18px;
-      font-weight: bold;
-
+    .file-button {
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 16px;
+      border: 0;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 800;
       cursor: pointer;
+      text-align: center;
+      transition: transform 0.08s ease, opacity 0.2s ease;
+    }
+
+    button:active,
+    .file-button:active {
+      transform: scale(0.985);
     }
 
     button:disabled {
-      opacity: 0.45;
       cursor: not-allowed;
+      opacity: 0.42;
     }
 
-    #startButton {
-      background: #1689ef;
-      color: #fff;
+    .primary {
+      background: var(--accent);
+      color: #151515;
     }
 
-    #captureButton {
-      background: #00ad49;
-      color: #fff;
+    .secondary {
+      background: #2c395c;
+      color: var(--text);
     }
 
-    #torchButton {
-      background: #ffc107;
-      color: #111;
+    .success {
+      background: var(--ok);
+      color: #062418;
     }
 
-    #stopButton {
-      background: #bd3327;
-      color: #fff;
-    }
-
-    #copyButton {
-      display: none;
-      background: #16a085;
-      color: #fff;
-    }
-
-    .fileButton {
-      background: #805ad5;
-      color: #fff;
-    }
-
-    #fileInput {
+    input[type="file"] {
       display: none;
     }
 
-    .panel {
-      width: 100%;
+    .preview-wrap {
+      display: none;
       margin-top: 14px;
-      padding: 12px;
-
-      background: #222;
-      border: 2px solid #555;
-      border-radius: 14px;
+      overflow: hidden;
+      border-radius: 15px;
+      background: #070a11;
+      border: 1px solid var(--line);
     }
 
-    .panelTitle {
-      margin-bottom: 10px;
-      color: #bbb;
-      font-size: 15px;
-    }
-
-    #frameCropPanel,
-    #textCropPanel,
-    #processedPanel,
-    #progressPanel {
-      display: none;
-    }
-
-    #frameCropPreview,
-    #textCropPreview,
-    #processedPreview {
+    #preview {
       display: block;
       width: 100%;
-      max-height: 420px;
+      max-height: 62vh;
       object-fit: contain;
-      background: #fff;
-      border-radius: 9px;
     }
 
-    #result {
-      min-height: 110px;
-      padding: 10px;
-
-      color: #00ff66;
-
-      font-family: monospace;
-      font-size: 40px;
-      font-weight: bold;
-      line-height: 1.35;
-
+    .status {
+      min-height: 26px;
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.4;
       white-space: pre-wrap;
-      word-break: break-word;
     }
 
-    #rawResult {
-      margin-top: 10px;
-      padding: 12px;
+    .status.ok {
+      color: var(--ok);
+    }
 
-      background: #111;
-      color: #bbb;
-      border-radius: 9px;
+    .status.bad {
+      color: var(--bad);
+    }
 
-      font-family: monospace;
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 520px) {
+      .result-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .result-box {
+      padding: 14px;
+      border-radius: 14px;
+      background: #0d1426;
+      border: 1px solid var(--line);
+    }
+
+    .result-box span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .result-value {
+      min-height: 42px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: clamp(27px, 8vw, 42px);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      word-break: break-all;
+    }
+
+    .confidence {
+      margin: 12px 0 0;
+      color: var(--muted);
+    }
+
+    .warning {
+      padding: 11px 12px;
+      border-radius: 12px;
+      background: rgba(244, 196, 48, 0.1);
+      border: 1px solid rgba(244, 196, 48, 0.34);
+      color: #f7df8b;
       font-size: 14px;
-      line-height: 1.5;
-
-      text-align: left;
-      white-space: pre-wrap;
-      word-break: break-word;
+      line-height: 1.4;
     }
 
-    #progressText {
-      margin-bottom: 9px;
-      color: #ddd;
+    .list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    #progressTrack {
-      width: 100%;
-      height: 15px;
-      overflow: hidden;
-      background: #444;
-      border-radius: 10px;
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      background: #0d1426;
+      border: 1px solid var(--line);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     }
 
-    #progressBar {
-      width: 0%;
-      height: 100%;
-      background: #00ad49;
-      transition: width 0.15s linear;
-    }
-
-    canvas {
-      display: none;
-    }
-
-    footer {
-      padding: 18px 10px 25px;
-      color: #888;
+    .tiny {
+      margin-top: 8px;
+      color: var(--muted);
       font-size: 12px;
-      line-height: 1.6;
-      border-top: 1px solid #333;
+      line-height: 1.4;
     }
   </style>
 </head>
 
 <body>
+  <main class="app">
 
-<header>
-  <h1>Сканер бірки</h1>
+    <h1>AI Scanner Mottak v2</h1>
 
-  <div id="status">
-    Відкрий камеру або вибери готове фото
-  </div>
-</header>
+    <p class="subtitle">
+      Фото жовтої бірки → Gemini Vision → два рядки над QR.
+    </p>
 
-<main>
+    <section class="card">
 
-  <div id="cameraBox">
+      <label for="apiKey">
+        Gemini API Key
+      </label>
 
-    <video
-      id="video"
-      autoplay
-      muted
-      playsinline
-    ></video>
+      <input
+        id="apiKey"
+        type="password"
+        autocomplete="off"
+        placeholder="Вставте ключ для тестування"
+      />
 
-    <div id="scanFrame">
-
-      <div id="scanFrameText">
-        Помісти два рядки номера в центр зеленої рамки
+      <div class="tiny">
+        Ключ зберігається лише до закриття вкладки та не записаний у HTML-файл.
       </div>
 
+    </section>
+
+    <section class="card">
+
+      <label class="file-button primary" for="photoInput">
+        📷 Зробити фото бірки
+      </label>
+
+      <input
+        id="photoInput"
+        type="file"
+        accept="image/*"
+        capture="environment"
+      />
+
+      <div id="previewWrap" class="preview-wrap">
+
+        <img
+          id="preview"
+          alt="Попередній перегляд фото"
+        />
+
+      </div>
+
+      <div class="row two" style="margin-top: 12px;">
+
+        <button
+          id="scanBtn"
+          class="primary"
+          disabled
+        >
+          Розпізнати номер
+        </button>
+
+        <button
+          id="clearBtn"
+          class="secondary"
+          disabled
+        >
+          Нове фото
+        </button>
+
+      </div>
+
+      <div id="status" class="status">
+        Спочатку зробіть фотографію.
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <div class="result-grid">
+
+        <div class="result-box">
+
+          <span>
+            Перший рядок
+          </span>
+
+          <div id="line1" class="result-value">
+            ------
+          </div>
+
+        </div>
+
+        <div class="result-box">
+
+          <span>
+            Другий рядок
+          </span>
+
+          <div id="line2" class="result-value">
+            ------
+          </div>
+
+        </div>
+
+      </div>
+
+      <p id="confidence" class="confidence">
+        Впевненість: —
+      </p>
+
+      <button
+        id="addBtn"
+        class="success"
+        disabled
+      >
+        Додати
+      </button>
+
+    </section>
+
+    <section class="card">
+
+      <strong>
+        Тестовий список
+      </strong>
+
+      <div id="list" class="list"></div>
+
+      <div class="tiny">
+        Список існує лише в цій вкладці.
+        Постійне збереження та експорт додамо після перевірки розпізнавання.
+      </div>
+
+    </section>
+
+    <div class="warning">
+
+      Це тестова версія.
+
+      Не публікуйте сторінку з ключем, записаним у коді.
+
+      Для робочої версії API-виклик буде перенесено на сервер
+      або Cloudflare Worker.
+
     </div>
 
-  </div>
+  </main>
 
-  <div class="buttons">
+  <canvas id="canvas" hidden></canvas>
 
-    <button id="startButton">
-      📷 Відкрити камеру
-    </button>
+  <script>
+    "use strict";
 
-    <button id="captureButton" disabled>
-      📸 Зробити фото і прочитати
-    </button>
+    const API_URL =
+      "https://generativelanguage.googleapis.com/v1beta/interactions";
 
-    <button id="torchButton" disabled>
-      🔦 Ліхтарик
-    </button>
+    const MODEL =
+      "gemini-3.6-flash";
 
-    <button id="stopButton" disabled>
-      ⛔ Закрити камеру
-    </button>
+    const PROMPT = `
+На фотографії знаходиться складська зона.
 
-    <button id="copyButton">
-      📋 Копіювати результат
-    </button>
+Потрібно знайти саме жовту складську бірку,
+а на ній — сіру або світло-сіру прямокутну наклейку.
 
-    <label class="fileButton" for="fileInput">
-      🖼️ Перевірити готове фото
-    </label>
+На сірій наклейці знайди рівно два надруковані рядки,
+які знаходяться безпосередньо над QR-кодом.
 
-    <input
-      id="fileInput"
-      type="file"
-      accept="image/*"
-    >
+Правила:
 
-  </div>
+1. Перший рядок має містити рівно 6 цифр.
 
-  <div id="progressPanel" class="panel">
+2. Другий рядок має містити рівно 6 символів:
+лише великі латинські літери A-Z та цифри 0-9.
 
-    <div id="progressText">
-      Підготовка OCR…
-    </div>
+3. Повністю ігноруй сам QR-код і не декодуй його.
 
-    <div id="progressTrack">
-      <div id="progressBar"></div>
-    </div>
+4. Ігноруй логотип CC, написи на металі,
+контейнері, фоні та інших наклейках.
 
-  </div>
+5. Не домислюй символи.
 
-  <div id="frameCropPanel" class="panel">
+Якщо будь-який рядок неможливо надійно прочитати,
+поверни для нього порожній рядок і низьку confidence.
 
-    <div class="panelTitle">
-      1. Усе, що було всередині зеленої рамки
-    </div>
+6. Поверни тільки дані відповідно до заданої JSON-схеми.
+`.trim();
 
-    <img
-      id="frameCropPreview"
-      alt="Уся область зеленої рамки"
-    >
+    const apiKeyInput =
+      document.getElementById("apiKey");
 
-  </div>
+    const photoInput =
+      document.getElementById("photoInput");
 
-  <div id="textCropPanel" class="panel">
+    const previewWrap =
+      document.getElementById("previewWrap");
 
-    <div class="panelTitle">
-      2. Автоматично обрізана область із двома рядками
-    </div>
+    const preview =
+      document.getElementById("preview");
 
-    <img
-      id="textCropPreview"
-      alt="Автоматично обрізаний текст"
-    >
+    const canvas =
+      document.getElementById("canvas");
 
-  </div>
+    const scanBtn =
+      document.getElementById("scanBtn");
 
-  <div id="processedPanel" class="panel">
+    const clearBtn =
+      document.getElementById("clearBtn");
 
-    <div class="panelTitle">
-      3. Оброблене зображення, яке читає OCR
-    </div>
+    const addBtn =
+      document.getElementById("addBtn");
 
-    <img
-      id="processedPreview"
-      alt="Оброблене зображення"
-    >
+    const statusEl =
+      document.getElementById("status");
 
-  </div>
+    const line1El =
+      document.getElementById("line1");
 
-  <div class="panel">
+    const line2El =
+      document.getElementById("line2");
 
-    <div class="panelTitle">
-      Результат
-    </div>
+    const confidenceEl =
+      document.getElementById("confidence");
 
-    <div id="result">
-      Очікування…
-    </div>
+    const listEl =
+      document.getElementById("list");
 
-    <div id="rawResult">
-      Повний результат OCR з’явиться тут.
-    </div>
+    let currentImage = null;
+    let currentResult = null;
 
-  </div>
+    const entries = [];
 
-  <canvas id="photoCanvas"></canvas>
-  <canvas id="frameCropCanvas"></canvas>
-  <canvas id="textCropCanvas"></canvas>
-  <canvas id="processedCanvas"></canvas>
+    apiKeyInput.value =
+      sessionStorage.getItem("gemini_api_key") || "";
 
-</main>
+    apiKeyInput.addEventListener("input", () => {
 
-<footer>
-  <div>Версія 0.6 — подвійна автоматична обрізка</div>
-  <div>Оновлено: 30.07.2026 20:25</div>
-</footer>
-
-<script>
-"use strict";
-
-
-/* =========================================================
-   ЕЛЕМЕНТИ СТОРІНКИ
-   ========================================================= */
-
-const video =
-  document.getElementById("video");
-
-const scanFrame =
-  document.getElementById("scanFrame");
-
-const startButton =
-  document.getElementById("startButton");
-
-const captureButton =
-  document.getElementById("captureButton");
-
-const torchButton =
-  document.getElementById("torchButton");
-
-const stopButton =
-  document.getElementById("stopButton");
-
-const copyButton =
-  document.getElementById("copyButton");
-
-const fileInput =
-  document.getElementById("fileInput");
-
-const statusElement =
-  document.getElementById("status");
-
-const resultElement =
-  document.getElementById("result");
-
-const rawResultElement =
-  document.getElementById("rawResult");
-
-const progressPanel =
-  document.getElementById("progressPanel");
-
-const progressText =
-  document.getElementById("progressText");
-
-const progressBar =
-  document.getElementById("progressBar");
-
-const frameCropPanel =
-  document.getElementById("frameCropPanel");
-
-const textCropPanel =
-  document.getElementById("textCropPanel");
-
-const processedPanel =
-  document.getElementById("processedPanel");
-
-const frameCropPreview =
-  document.getElementById("frameCropPreview");
-
-const textCropPreview =
-  document.getElementById("textCropPreview");
-
-const processedPreview =
-  document.getElementById("processedPreview");
-
-const photoCanvas =
-  document.getElementById("photoCanvas");
-
-const frameCropCanvas =
-  document.getElementById("frameCropCanvas");
-
-const textCropCanvas =
-  document.getElementById("textCropCanvas");
-
-const processedCanvas =
-  document.getElementById("processedCanvas");
-
-
-/* =========================================================
-   ЗМІННІ
-   ========================================================= */
-
-let cameraStream = null;
-let cameraTrack = null;
-
-let torchEnabled = false;
-let isProcessing = false;
-
-let lastRecognizedText = "";
-
-
-/* =========================================================
-   ЗАТРИМКА
-   ========================================================= */
-
-function wait(milliseconds) {
-  return new Promise(resolve => {
-    setTimeout(resolve, milliseconds);
-  });
-}
-
-
-/* =========================================================
-   ВІДКРИТТЯ КАМЕРИ
-   ========================================================= */
-
-async function openCamera() {
-  startButton.disabled = true;
-
-  statusElement.textContent =
-    "Відкриваємо задню камеру…";
-
-  try {
-    if (
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia
-    ) {
-      throw new Error(
-        "Цей браузер не підтримує доступ до камери."
+      sessionStorage.setItem(
+        "gemini_api_key",
+        apiKeyInput.value.trim()
       );
-    }
 
-    cameraStream =
-      await navigator.mediaDevices.getUserMedia({
-        audio: false,
-
-        video: {
-          facingMode: {
-            ideal: "environment"
-          },
-
-          width: {
-            ideal: 3840
-          },
-
-          height: {
-            ideal: 2160
-          },
-
-          frameRate: {
-            ideal: 30,
-            max: 30
-          }
-        }
-      });
-
-    video.srcObject =
-      cameraStream;
-
-    await video.play();
-
-    cameraTrack =
-      cameraStream.getVideoTracks()[0];
-
-    try {
-      const capabilities =
-        cameraTrack.getCapabilities
-          ? cameraTrack.getCapabilities()
-          : {};
-
-      if (
-        Array.isArray(capabilities.focusMode) &&
-        capabilities.focusMode.includes("continuous")
-      ) {
-        await cameraTrack.applyConstraints({
-          advanced: [
-            {
-              focusMode: "continuous"
-            }
-          ]
-        });
-      }
-
-      torchButton.disabled =
-        capabilities.torch !== true;
-
-    } catch (error) {
-      console.log(
-        "Керування автофокусом недоступне:",
-        error
-      );
-    }
-
-    captureButton.disabled = false;
-    stopButton.disabled = false;
-
-    statusElement.textContent =
-      "Помісти два рядки номера приблизно в центр зеленої рамки.";
-
-  } catch (error) {
-    console.error(error);
-
-    statusElement.textContent =
-      "Камера не відкрилася. Перевір дозвіл камери в Chrome.";
-
-    resultElement.textContent =
-      error.message ||
-      "Немає доступу до камери.";
-  }
-
-  startButton.disabled = false;
-}
-
-
-/* =========================================================
-   ЗАКРИТТЯ КАМЕРИ
-   ========================================================= */
-
-function closeCamera() {
-  if (cameraStream) {
-    cameraStream
-      .getTracks()
-      .forEach(track => track.stop());
-  }
-
-  cameraStream = null;
-  cameraTrack = null;
-
-  video.srcObject = null;
-
-  captureButton.disabled = true;
-  torchButton.disabled = true;
-  stopButton.disabled = true;
-
-  torchEnabled = false;
-
-  torchButton.textContent =
-    "🔦 Ліхтарик";
-
-  statusElement.textContent =
-    "Камеру закрито.";
-}
-
-
-/* =========================================================
-   ЛІХТАРИК
-   ========================================================= */
-
-async function toggleTorch() {
-  if (!cameraTrack) {
-    return;
-  }
-
-  torchEnabled =
-    !torchEnabled;
-
-  try {
-    await cameraTrack.applyConstraints({
-      advanced: [
-        {
-          torch: torchEnabled
-        }
-      ]
     });
 
-    torchButton.textContent =
-      torchEnabled
-        ? "💡 Вимкнути ліхтарик"
-        : "🔦 Ліхтарик";
+    function setStatus(message, type = "") {
 
-  } catch (error) {
-    console.error(error);
+      statusEl.textContent = message;
 
-    torchEnabled = false;
+      statusEl.className =
+        "status" + (type ? " " + type : "");
 
-    torchButton.textContent =
-      "🔦 Ліхтарик";
-
-    statusElement.textContent =
-      "Телефон не дозволив увімкнути ліхтарик.";
-  }
-}
-
-
-/* =========================================================
-   ФОТО З КАМЕРИ
-   ========================================================= */
-
-function captureCameraPhoto() {
-  if (
-    !video.videoWidth ||
-    !video.videoHeight
-  ) {
-    throw new Error(
-      "Камера ще не підготувала зображення."
-    );
-  }
-
-  photoCanvas.width =
-    video.videoWidth;
-
-  photoCanvas.height =
-    video.videoHeight;
-
-  const context =
-    photoCanvas.getContext(
-      "2d",
-      {
-        willReadFrequently: true
-      }
-    );
-
-  context.clearRect(
-    0,
-    0,
-    photoCanvas.width,
-    photoCanvas.height
-  );
-
-  context.drawImage(
-    video,
-    0,
-    0,
-    photoCanvas.width,
-    photoCanvas.height
-  );
-
-  return photoCanvas;
-}
-
-
-/* =========================================================
-   ВІДКРИТТЯ ГОТОВОГО ФОТО
-   ========================================================= */
-
-async function loadPhotoFile(file) {
-  const image =
-    new Image();
-
-  const temporaryUrl =
-    URL.createObjectURL(file);
-
-  try {
-    await new Promise(
-      (resolve, reject) => {
-        image.onload = resolve;
-        image.onerror = reject;
-        image.src = temporaryUrl;
-      }
-    );
-
-    const maximumSide =
-      3000;
-
-    const scale =
-      Math.min(
-        1,
-        maximumSide /
-        Math.max(
-          image.naturalWidth,
-          image.naturalHeight
-        )
-      );
-
-    photoCanvas.width =
-      Math.round(
-        image.naturalWidth * scale
-      );
-
-    photoCanvas.height =
-      Math.round(
-        image.naturalHeight * scale
-      );
-
-    const context =
-      photoCanvas.getContext(
-        "2d",
-        {
-          willReadFrequently: true
-        }
-      );
-
-    context.clearRect(
-      0,
-      0,
-      photoCanvas.width,
-      photoCanvas.height
-    );
-
-    context.drawImage(
-      image,
-      0,
-      0,
-      photoCanvas.width,
-      photoCanvas.height
-    );
-
-    return photoCanvas;
-
-  } finally {
-    URL.revokeObjectURL(
-      temporaryUrl
-    );
-  }
-}
-
-
-/* =========================================================
-   КООРДИНАТИ ЗЕЛЕНОЇ РАМКИ
-   ========================================================= */
-
-function getCameraCropRectangle(sourceCanvas) {
-  const videoRectangle =
-    video.getBoundingClientRect();
-
-  const frameRectangle =
-    scanFrame.getBoundingClientRect();
-
-  const visibleWidth =
-    videoRectangle.width;
-
-  const visibleHeight =
-    videoRectangle.height;
-
-  const sourceWidth =
-    sourceCanvas.width;
-
-  const sourceHeight =
-    sourceCanvas.height;
-
-  /*
-    Відео показується через object-fit: cover.
-    Частина реального кадру може бути прихована.
-  */
-
-  const displayScale =
-    Math.max(
-      visibleWidth / sourceWidth,
-      visibleHeight / sourceHeight
-    );
-
-  const displayedSourceWidth =
-    sourceWidth * displayScale;
-
-  const displayedSourceHeight =
-    sourceHeight * displayScale;
-
-  const hiddenLeft =
-    (displayedSourceWidth - visibleWidth) / 2;
-
-  const hiddenTop =
-    (displayedSourceHeight - visibleHeight) / 2;
-
-  const frameLeft =
-    frameRectangle.left -
-    videoRectangle.left;
-
-  const frameTop =
-    frameRectangle.top -
-    videoRectangle.top;
-
-  let sourceX =
-    (frameLeft + hiddenLeft) /
-    displayScale;
-
-  let sourceY =
-    (frameTop + hiddenTop) /
-    displayScale;
-
-  let cropWidth =
-    frameRectangle.width /
-    displayScale;
-
-  let cropHeight =
-    frameRectangle.height /
-    displayScale;
-
-  sourceX =
-    Math.max(0, sourceX);
-
-  sourceY =
-    Math.max(0, sourceY);
-
-  cropWidth =
-    Math.min(
-      cropWidth,
-      sourceWidth - sourceX
-    );
-
-  cropHeight =
-    Math.min(
-      cropHeight,
-      sourceHeight - sourceY
-    );
-
-  return {
-    x: sourceX,
-    y: sourceY,
-    width: cropWidth,
-    height: cropHeight
-  };
-}
-
-
-/* =========================================================
-   ОБЛАСТЬ ДЛЯ ГОТОВОГО ФОТО
-   ========================================================= */
-
-function getUploadedPhotoCropRectangle(sourceCanvas) {
-  /*
-    Для старого тестового квадратного фото.
-
-    Спочатку беремо відносно велику область,
-    а потім застосовуємо другу внутрішню обрізку.
-  */
-
-  return {
-    x: sourceCanvas.width * 0.12,
-    y: sourceCanvas.height * 0.48,
-    width: sourceCanvas.width * 0.68,
-    height: sourceCanvas.height * 0.50
-  };
-}
-
-
-/* =========================================================
-   ПЕРША ОБРІЗКА:
-   УСЕ ВСЕРЕДИНІ ЗЕЛЕНОЇ РАМКИ
-   ========================================================= */
-
-function cropFrameArea(
-  sourceCanvas,
-  rectangle
-) {
-  frameCropCanvas.width =
-    Math.max(
-      1,
-      Math.round(rectangle.width)
-    );
-
-  frameCropCanvas.height =
-    Math.max(
-      1,
-      Math.round(rectangle.height)
-    );
-
-  const context =
-    frameCropCanvas.getContext(
-      "2d",
-      {
-        willReadFrequently: true
-      }
-    );
-
-  context.clearRect(
-    0,
-    0,
-    frameCropCanvas.width,
-    frameCropCanvas.height
-  );
-
-  context.drawImage(
-    sourceCanvas,
-
-    rectangle.x,
-    rectangle.y,
-    rectangle.width,
-    rectangle.height,
-
-    0,
-    0,
-    frameCropCanvas.width,
-    frameCropCanvas.height
-  );
-
-  frameCropPreview.src =
-    frameCropCanvas.toDataURL(
-      "image/jpeg",
-      0.97
-    );
-
-  frameCropPanel.style.display =
-    "block";
-
-  return frameCropCanvas;
-}
-
-
-/* =========================================================
-   ДРУГА АВТОМАТИЧНА ОБРІЗКА:
-   ЗАЛИШАЄМО ЛИШЕ ЦЕНТРАЛЬНУ ОБЛАСТЬ ТЕКСТУ
-   ========================================================= */
-
-function cropInnerTextArea(sourceCanvas) {
-  /*
-    Ці значення визначають внутрішню обрізку.
-
-    По ширині:
-    - відрізаємо 8% зліва;
-    - відрізаємо 8% справа;
-    - залишаємо центральні 84%.
-
-    По висоті:
-    - починаємо з 24% висоти;
-    - беремо 48% висоти.
-
-    Тобто нижня частина з QR переважно відрізається.
-  */
-
-  const innerX =
-    sourceCanvas.width * 0.08;
-
-  const innerY =
-    sourceCanvas.height * 0.24;
-
-  const innerWidth =
-    sourceCanvas.width * 0.84;
-
-  const innerHeight =
-    sourceCanvas.height * 0.48;
-
-  /*
-    Збільшуємо текстовий фрагмент.
-  */
-
-  const enlargement =
-    5;
-
-  textCropCanvas.width =
-    Math.max(
-      1,
-      Math.round(
-        innerWidth * enlargement
-      )
-    );
-
-  textCropCanvas.height =
-    Math.max(
-      1,
-      Math.round(
-        innerHeight * enlargement
-      )
-    );
-
-  const context =
-    textCropCanvas.getContext(
-      "2d",
-      {
-        willReadFrequently: true
-      }
-    );
-
-  context.clearRect(
-    0,
-    0,
-    textCropCanvas.width,
-    textCropCanvas.height
-  );
-
-  context.imageSmoothingEnabled =
-    true;
-
-  context.imageSmoothingQuality =
-    "high";
-
-  context.drawImage(
-    sourceCanvas,
-
-    innerX,
-    innerY,
-    innerWidth,
-    innerHeight,
-
-    0,
-    0,
-    textCropCanvas.width,
-    textCropCanvas.height
-  );
-
-  textCropPreview.src =
-    textCropCanvas.toDataURL(
-      "image/jpeg",
-      0.98
-    );
-
-  textCropPanel.style.display =
-    "block";
-
-  return textCropCanvas;
-}
-
-
-/* =========================================================
-   М’ЯКА ОБРОБКА ЗОБРАЖЕННЯ
-   ========================================================= */
-
-function preprocessImage(sourceCanvas) {
-  processedCanvas.width =
-    sourceCanvas.width;
-
-  processedCanvas.height =
-    sourceCanvas.height;
-
-  const context =
-    processedCanvas.getContext(
-      "2d",
-      {
-        willReadFrequently: true
-      }
-    );
-
-  context.clearRect(
-    0,
-    0,
-    processedCanvas.width,
-    processedCanvas.height
-  );
-
-  context.drawImage(
-    sourceCanvas,
-    0,
-    0
-  );
-
-  const imageData =
-    context.getImageData(
-      0,
-      0,
-      processedCanvas.width,
-      processedCanvas.height
-    );
-
-  const pixels =
-    imageData.data;
-
-  for (
-    let index = 0;
-    index < pixels.length;
-    index += 4
-  ) {
-    let gray =
-      pixels[index] * 0.299 +
-      pixels[index + 1] * 0.587 +
-      pixels[index + 2] * 0.114;
-
-    /*
-      М’яке підсилення контрасту.
-    */
-
-    gray =
-      (gray - 128) * 1.35 + 128;
-
-    gray =
-      Math.max(
-        0,
-        Math.min(255, gray)
-      );
-
-    pixels[index] = gray;
-    pixels[index + 1] = gray;
-    pixels[index + 2] = gray;
-    pixels[index + 3] = 255;
-  }
-
-  context.putImageData(
-    imageData,
-    0,
-    0
-  );
-
-  processedPreview.src =
-    processedCanvas.toDataURL(
-      "image/png"
-    );
-
-  processedPanel.style.display =
-    "block";
-
-  return processedCanvas;
-}
-
-
-/* =========================================================
-   НОРМАЛІЗАЦІЯ OCR
-   ========================================================= */
-
-function normalizeOcrText(text) {
-  return String(text || "")
-    .toUpperCase()
-    .replace(
-      /[^A-Z0-9\n\r ]/g,
-      " "
-    );
-}
-
-
-/* =========================================================
-   ПОШУК ПЕРШОГО РЯДКА
-   ========================================================= */
-
-function findFirstLine(text) {
-  const normalized =
-    normalizeOcrText(text);
-
-  const lines =
-    normalized
-      .split(/\r?\n/)
-      .map(line =>
-        line
-          .replace(/\s+/g, "")
-          .trim()
-      )
-      .filter(Boolean);
-
-  /*
-    Спочатку шукаємо рівно 6 цифр.
-  */
-
-  for (const line of lines) {
-    if (/^\d{6}$/.test(line)) {
-      return line;
-    }
-  }
-
-  /*
-    Потім шукаємо 6 цифр
-    усередині довшого рядка.
-  */
-
-  for (const line of lines) {
-    const match =
-      line.match(/\d{6}/);
-
-    if (match) {
-      return match[0];
-    }
-  }
-
-  /*
-    Типові заміни букв на цифри.
-  */
-
-  for (const line of lines) {
-    const corrected =
-      line
-        .replace(/O/g, "0")
-        .replace(/Q/g, "0")
-        .replace(/I/g, "1")
-        .replace(/L/g, "1")
-        .replace(/Z/g, "2")
-        .replace(/S/g, "5")
-        .replace(/G/g, "6")
-        .replace(/B/g, "8");
-
-    const match =
-      corrected.match(/\d{6}/);
-
-    if (match) {
-      return match[0];
-    }
-  }
-
-  return "";
-}
-
-
-/* =========================================================
-   ПОШУК ДРУГОГО РЯДКА
-   ========================================================= */
-
-function findSecondLine(
-  text,
-  firstLine
-) {
-  const normalized =
-    normalizeOcrText(text);
-
-  const lines =
-    normalized
-      .split(/\r?\n/)
-      .map(line =>
-        line
-          .replace(/\s+/g, "")
-          .trim()
-      )
-      .filter(Boolean);
-
-  for (const line of lines) {
-    if (
-      /^[A-Z0-9]{6}$/.test(line) &&
-      line !== firstLine &&
-      /[A-Z]/.test(line) &&
-      /\d/.test(line)
-    ) {
-      return correctSecondLine(line);
-    }
-  }
-
-  for (const line of lines) {
-    const candidates =
-      line.match(/[A-Z0-9]{6}/g);
-
-    if (!candidates) {
-      continue;
     }
 
-    for (const candidate of candidates) {
-      if (
-        candidate !== firstLine &&
-        /[A-Z]/.test(candidate) &&
-        /\d/.test(candidate)
-      ) {
-        return correctSecondLine(candidate);
-      }
+    function resetResult() {
+
+      currentResult = null;
+
+      line1El.textContent = "------";
+      line2El.textContent = "------";
+
+      confidenceEl.textContent =
+        "Впевненість: —";
+
+      addBtn.disabled = true;
+
     }
-  }
 
-  return "";
-}
+    function loadImage(file) {
 
+      return new Promise((resolve, reject) => {
 
-/* =========================================================
-   ОБЕРЕЖНЕ ВИПРАВЛЕННЯ ДРУГОГО РЯДКА
-   ========================================================= */
+        const img = new Image();
 
-function correctSecondLine(line) {
-  let corrected =
-    String(line || "").toUpperCase();
+        const url =
+          URL.createObjectURL(file);
 
-  /*
-    Якщо останній символ OCR прочитав як Y,
-    виправляємо його на 9.
+        img.onload = () => {
 
-    Приклад:
-    2CB73Y → 2CB739
-  */
+          URL.revokeObjectURL(url);
 
-  if (
-    corrected.length === 6 &&
-    corrected.endsWith("Y")
-  ) {
-    corrected =
-      corrected.slice(0, 5) + "9";
-  }
+          resolve(img);
 
-  return corrected;
-}
+        };
 
+        img.onerror = () => {
 
-/* =========================================================
-   ОЧИЩЕНИЙ РЕЗУЛЬТАТ
-   ========================================================= */
+          URL.revokeObjectURL(url);
 
-function cleanOcrText(text) {
-  const firstLine =
-    findFirstLine(text);
-
-  const secondLine =
-    findSecondLine(
-      text,
-      firstLine
-    );
-
-  if (
-    firstLine &&
-    secondLine
-  ) {
-    return (
-      firstLine +
-      "\n" +
-      secondLine
-    );
-  }
-
-  if (firstLine) {
-    return firstLine;
-  }
-
-  const normalized =
-    normalizeOcrText(text);
-
-  const fallbackLines =
-    normalized
-      .split(/\r?\n/)
-      .map(line =>
-        line
-          .replace(/\s+/g, "")
-          .trim()
-      )
-      .filter(line =>
-        line.length >= 4 &&
-        line.length <= 10
-      );
-
-  return fallbackLines
-    .slice(0, 2)
-    .join("\n");
-}
-
-
-/* =========================================================
-   ОЦІНКА ЯКОСТІ РЕЗУЛЬТАТУ
-   ========================================================= */
-
-function calculateResultScore(
-  cleanedText,
-  confidence
-) {
-  const lines =
-    String(cleanedText || "")
-      .split("\n")
-      .filter(Boolean);
-
-  let score =
-    Number(confidence) || 0;
-
-  if (
-    lines.length >= 1 &&
-    /^\d{6}$/.test(lines[0])
-  ) {
-    score += 100;
-  }
-
-  if (
-    lines.length >= 2 &&
-    /^[A-Z0-9]{6}$/.test(lines[1]) &&
-    /[A-Z]/.test(lines[1]) &&
-    /\d/.test(lines[1])
-  ) {
-    score += 100;
-  }
-
-  if (lines.length === 2) {
-    score += 30;
-  }
-
-  return score;
-}
-
-
-/* =========================================================
-   ОДИН ПРОХІД OCR
-   ========================================================= */
-
-async function runOcr(
-  imageCanvas,
-  label
-) {
-  progressPanel.style.display =
-    "block";
-
-  progressText.textContent =
-    label;
-
-  const result =
-    await Tesseract.recognize(
-      imageCanvas,
-      "eng",
-      {
-        logger(message) {
-          if (
-            typeof message.progress ===
-            "number"
-          ) {
-            const percentage =
-              Math.round(
-                message.progress * 100
-              );
-
-            progressBar.style.width =
-              percentage + "%";
-
-            progressText.textContent =
-              label +
-              ": " +
-              percentage +
-              "%";
-          }
-        },
-
-        tessedit_char_whitelist:
-          "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-
-        preserve_interword_spaces:
-          "1",
-
-        tessedit_pageseg_mode:
-          "6"
-      }
-    );
-
-  const rawText =
-    result.data.text || "";
-
-  const cleanedText =
-    cleanOcrText(rawText);
-
-  return {
-    rawText: rawText,
-
-    cleanedText: cleanedText,
-
-    confidence:
-      result.data.confidence || 0,
-
-    score:
-      calculateResultScore(
-        cleanedText,
-        result.data.confidence
-      )
-  };
-}
-
-
-/* =========================================================
-   ГОЛОВНА ОБРОБКА
-   ========================================================= */
-
-async function processPhoto(
-  sourceCanvas,
-  fromCamera
-) {
-  if (isProcessing) {
-    return;
-  }
-
-  isProcessing = true;
-
-  captureButton.disabled = true;
-  copyButton.style.display = "none";
-
-  resultElement.textContent =
-    "Розпізнавання…";
-
-  rawResultElement.textContent =
-    "Очікування результату OCR…";
-
-  progressPanel.style.display =
-    "block";
-
-  progressBar.style.width =
-    "0%";
-
-  try {
-    statusElement.textContent =
-      "Перша обрізка: область зеленої рамки…";
-
-    const frameRectangle =
-      fromCamera
-        ? getCameraCropRectangle(
-            sourceCanvas
-          )
-        : getUploadedPhotoCropRectangle(
-            sourceCanvas
+          reject(
+            new Error(
+              "Не вдалося відкрити фотографію."
+            )
           );
 
-    const frameImage =
-      cropFrameArea(
-        sourceCanvas,
-        frameRectangle
-      );
+        };
 
-    statusElement.textContent =
-      "Друга обрізка: залишаємо тільки область тексту…";
+        img.src = url;
 
-    const textImage =
-      cropInnerTextArea(
-        frameImage
-      );
+      });
 
-    const processedImage =
-      preprocessImage(
-        textImage
-      );
+    }
 
-    statusElement.textContent =
-      "OCR читає два рядки…";
+    function compressToJpeg(img) {
 
-    /*
-      Перший прохід:
-      м’яко оброблене сіре зображення.
-    */
+      const maxSide = 1800;
 
-    const processedResult =
-      await runOcr(
-        processedImage,
-        "OCR сірого зображення"
-      );
+      let width = img.naturalWidth;
+      let height = img.naturalHeight;
 
-    /*
-      Другий прохід:
-      кольорове зображення після внутрішньої обрізки.
-    */
+      if (Math.max(width, height) > maxSide) {
 
-    const originalResult =
-      await runOcr(
-        textImage,
-        "OCR кольорового зображення"
-      );
+        const scale =
+          maxSide / Math.max(width, height);
 
-    const bestResult =
-      processedResult.score >=
-      originalResult.score
-        ? processedResult
-        : originalResult;
+        width =
+          Math.round(width * scale);
 
-    if (bestResult.cleanedText) {
-      lastRecognizedText =
-        bestResult.cleanedText;
+        height =
+          Math.round(height * scale);
 
-      resultElement.textContent =
-        bestResult.cleanedText;
-
-      copyButton.style.display =
-        "inline-block";
-
-      statusElement.textContent =
-        "✅ Готово.";
-
-      if (navigator.vibrate) {
-        navigator.vibrate([
-          100,
-          60,
-          120
-        ]);
       }
 
-    } else {
-      lastRecognizedText = "";
+      canvas.width = width;
+      canvas.height = height;
 
-      resultElement.textContent =
-        "Не розпізнано";
+      const ctx =
+        canvas.getContext(
+          "2d",
+          { alpha: false }
+        );
 
-      statusElement.textContent =
-        "OCR не знайшов потрібні два рядки.";
-    }
+      ctx.fillStyle = "#ffffff";
 
-    rawResultElement.textContent =
-      "Обраний результат:\n\n" +
-      (bestResult.rawText || "(порожньо)") +
-
-      "\n\nВпевненість: " +
-      Math.round(
-        bestResult.confidence
-      ) +
-      "%" +
-
-      "\n\nСірий варіант:\n" +
-      (processedResult.rawText ||
-        "(порожньо)") +
-
-      "\n\nКольоровий варіант:\n" +
-      (originalResult.rawText ||
-        "(порожньо)");
-
-  } catch (error) {
-    console.error(error);
-
-    resultElement.textContent =
-      "Помилка";
-
-    rawResultElement.textContent =
-      error.message ||
-      String(error);
-
-    statusElement.textContent =
-      "Сталася помилка під час обробки.";
-
-  } finally {
-    isProcessing = false;
-
-    captureButton.disabled =
-      !cameraTrack;
-
-    setTimeout(() => {
-      progressPanel.style.display =
-        "none";
-    }, 1200);
-  }
-}
-
-
-/* =========================================================
-   ФОТО З КАМЕРИ
-   ========================================================= */
-
-async function captureAndRecognize() {
-  if (!cameraTrack) {
-    statusElement.textContent =
-      "Спочатку відкрий камеру.";
-
-    return;
-  }
-
-  try {
-    captureButton.disabled = true;
-
-    statusElement.textContent =
-      "Чекаємо автофокус…";
-
-    await wait(1200);
-
-    const photo =
-      captureCameraPhoto();
-
-    await processPhoto(
-      photo,
-      true
-    );
-
-  } catch (error) {
-    console.error(error);
-
-    resultElement.textContent =
-      "Помилка камери";
-
-    statusElement.textContent =
-      error.message ||
-      "Не вдалося зробити фото.";
-
-    captureButton.disabled =
-      false;
-  }
-}
-
-
-/* =========================================================
-   КОПІЮВАННЯ
-   ========================================================= */
-
-async function copyResult() {
-  if (!lastRecognizedText) {
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(
-      lastRecognizedText
-    );
-
-    statusElement.textContent =
-      "📋 Результат скопійовано.";
-
-  } catch (error) {
-    console.error(error);
-
-    statusElement.textContent =
-      "Не вдалося скопіювати результат.";
-  }
-}
-
-
-/* =========================================================
-   КНОПКИ
-   ========================================================= */
-
-startButton.addEventListener(
-  "click",
-  openCamera
-);
-
-captureButton.addEventListener(
-  "click",
-  captureAndRecognize
-);
-
-torchButton.addEventListener(
-  "click",
-  toggleTorch
-);
-
-stopButton.addEventListener(
-  "click",
-  closeCamera
-);
-
-copyButton.addEventListener(
-  "click",
-  copyResult
-);
-
-
-/* =========================================================
-   ГОТОВЕ ФОТО
-   ========================================================= */
-
-fileInput.addEventListener(
-  "change",
-  async function() {
-    const file =
-      fileInput.files &&
-      fileInput.files[0];
-
-    if (!file) {
-      return;
-    }
-
-    try {
-      statusElement.textContent =
-        "Відкриваємо фотографію…";
-
-      const photo =
-        await loadPhotoFile(file);
-
-      await processPhoto(
-        photo,
-        false
+      ctx.fillRect(
+        0,
+        0,
+        width,
+        height
       );
 
-    } catch (error) {
-      console.error(error);
+      ctx.drawImage(
+        img,
+        0,
+        0,
+        width,
+        height
+      );
 
-      resultElement.textContent =
-        "Помилка фото";
-
-      rawResultElement.textContent =
-        error.message ||
-        String(error);
-
-      statusElement.textContent =
-        "Не вдалося відкрити фотографію.";
-    }
-
-    fileInput.value = "";
-  }
-);
-
-
-/* =========================================================
-   ЗАКРИТТЯ СТОРІНКИ
-   ========================================================= */
-
-window.addEventListener(
-  "pagehide",
-  function() {
-    if (cameraStream) {
-      cameraStream
-        .getTracks()
-        .forEach(
-          track => track.stop()
+      const dataUrl =
+        canvas.toDataURL(
+          "image/jpeg",
+          0.9
         );
-    }
-  }
-);
-</script>
 
+      return {
+
+        dataUrl: dataUrl,
+
+        base64:
+          dataUrl.split(",")[1],
+
+        mimeType:
+          "image/jpeg"
+
+      };
+
+    }
+
+    photoInput.addEventListener(
+      "change",
+      async () => {
+
+        const file =
+          photoInput.files &&
+          photoInput.files[0];
+
+        if (!file) {
+          return;
+        }
+
+        try {
+
+          setStatus(
+            "Обробляю фотографію…"
+          );
+
+          resetResult();
+
+          const img =
+            await loadImage(file);
+
+          currentImage =
+            compressToJpeg(img);
+
+          preview.src =
+            currentImage.dataUrl;
+
+          previewWrap.style.display =
+            "block";
+
+          scanBtn.disabled =
+            false;
+
+          clearBtn.disabled =
+            false;
+
+          setStatus(
+            "Фото готове. Натисніть «Розпізнати номер».",
+            "ok"
+          );
+
+        } catch (error) {
+
+          currentImage = null;
+
+          setStatus(
+            error.message ||
+            "Помилка фотографії.",
+            "bad"
+          );
+
+        }
+
+      }
+    );
+
+    clearBtn.addEventListener(
+      "click",
+      () => {
+
+        photoInput.value = "";
+
+        currentImage = null;
+
+        preview.removeAttribute(
+          "src"
+        );
+
+        previewWrap.style.display =
+          "none";
+
+        scanBtn.disabled =
+          true;
+
+        clearBtn.disabled =
+          true;
+
+        resetResult();
+
+        setStatus(
+          "Зробіть нову фотографію."
+        );
+
+      }
+    );
+
+    function extractOutputText(response) {
+
+      if (
+        typeof response.output_text === "string" &&
+        response.output_text.trim()
+      ) {
+
+        return response.output_text.trim();
+
+      }
+
+      const parts = [];
+
+      for (
+        const step of response.steps || []
+      ) {
+
+        if (
+          step.type !== "model_output"
+        ) {
+          continue;
+        }
+
+        for (
+          const content of step.content || []
+        ) {
+
+          if (
+            content.type === "text" &&
+            typeof content.text === "string"
+          ) {
+
+            parts.push(
+              content.text
+            );
+
+          }
+
+        }
+
+      }
+
+      return parts
+        .join("")
+        .trim();
+
+    }
+
+    function validateResult(value) {
+
+      const line1 =
+        String(
+          value.line1 || ""
+        ).trim();
+
+      const line2 =
+        String(
+          value.line2 || ""
+        )
+          .trim()
+          .toUpperCase();
+
+      const confidence =
+        Number(
+          value.confidence
+        );
+
+      const line1Valid =
+        /^\d{6}$/.test(line1);
+
+      const line2Valid =
+        /^[A-Z0-9]{6}$/.test(line2);
+
+      const confidenceValid =
+        Number.isFinite(confidence) &&
+        confidence >= 0 &&
+        confidence <= 1;
+
+      return {
+
+        line1: line1,
+
+        line2: line2,
+
+        confidence:
+          confidenceValid
+            ? confidence
+            : 0,
+
+        valid:
+          line1Valid &&
+          line2Valid
+
+      };
+
+    }
+
+    async function scanImage() {
+
+      const apiKey =
+        apiKeyInput.value.trim();
+
+      if (!apiKey) {
+
+        setStatus(
+          "Вставте Gemini API Key.",
+          "bad"
+        );
+
+        apiKeyInput.focus();
+
+        return;
+
+      }
+
+      if (!currentImage) {
+
+        setStatus(
+          "Спочатку зробіть фотографію.",
+          "bad"
+        );
+
+        return;
+
+      }
+
+      scanBtn.disabled =
+        true;
+
+      clearBtn.disabled =
+        true;
+
+      resetResult();
+
+      setStatus(
+        "Gemini аналізує бірку…"
+      );
+
+      const requestBody = {
+
+        model: MODEL,
+
+        store: false,
+
+        input: [
+
+          {
+            type: "text",
+            text: PROMPT
+          },
+
+          {
+            type: "image",
+
+            data:
+              currentImage.base64,
+
+            mime_type:
+              currentImage.mimeType
+          }
+
+        ],
+
+        response_format: {
+
+          type: "text",
+
+          mime_type:
+            "application/json",
+
+          schema: {
+
+            type:
+              "object",
+
+            properties: {
+
+              line1: {
+
+                type:
+                  "string",
+
+                description:
+                  "Exactly 6 digits from the first line above the QR code."
+
+              },
+
+              line2: {
+
+                type:
+                  "string",
+
+                description:
+                  "Exactly 6 uppercase Latin letters A-Z or digits 0-9 from the second line above the QR code."
+
+              },
+
+              confidence: {
+
+                type:
+                  "number",
+
+                minimum:
+                  0,
+
+                maximum:
+                  1,
+
+                description:
+                  "Estimated confidence from 0 to 1."
+
+              }
+
+            },
+
+            required: [
+              "line1",
+              "line2",
+              "confidence"
+            ],
+
+            additionalProperties:
+              false
+
+          }
+
+        },
+
+        generation_config: {
+
+          max_output_tokens:
+            120,
+
+          thinking_level:
+            "minimal"
+
+        }
+
+      };
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+
+              method:
+                "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "application/json",
+
+                "x-goog-api-key":
+                  apiKey
+
+              },
+
+              body:
+                JSON.stringify(
+                  requestBody
+                )
+
+            }
+          );
+
+        const data =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        if (!response.ok) {
+
+          const apiMessage =
+            data?.error?.message ||
+            `HTTP ${response.status}`;
+
+          throw new Error(
+            apiMessage
+          );
+
+        }
+
+        const outputText =
+          extractOutputText(data);
+
+        if (!outputText) {
+
+          throw new Error(
+            "Gemini не повернув текстовий результат."
+          );
+
+        }
+
+        let parsed;
+
+        try {
+
+          parsed =
+            JSON.parse(
+              outputText
+            );
+
+        } catch {
+
+          throw new Error(
+            "Gemini повернув некоректний JSON: " +
+            outputText.slice(
+              0,
+              180
+            )
+          );
+
+        }
+
+        const checked =
+          validateResult(
+            parsed
+          );
+
+        currentResult =
+          checked;
+
+        line1El.textContent =
+          checked.line1 ||
+          "------";
+
+        line2El.textContent =
+          checked.line2 ||
+          "------";
+
+        confidenceEl.textContent =
+          "Впевненість: " +
+          Math.round(
+            checked.confidence * 100
+          ) +
+          "%";
+
+        if (!checked.valid) {
+
+          addBtn.disabled =
+            true;
+
+          setStatus(
+            "Результат не пройшов перевірку.\n" +
+            "Потрібно: 6 цифр + 6 символів A-Z/0-9.\n" +
+            "Зробіть фото ближче або чіткіше.",
+            "bad"
+          );
+
+        } else {
+
+          addBtn.disabled =
+            false;
+
+          setStatus(
+            "Номер розпізнано і формат підтверджено.",
+            "ok"
+          );
+
+        }
+
+      } catch (error) {
+
+        currentResult =
+          null;
+
+        addBtn.disabled =
+          true;
+
+        setStatus(
+          "Помилка Gemini API:\n" +
+          (
+            error.message ||
+            String(error)
+          ),
+          "bad"
+        );
+
+      } finally {
+
+        scanBtn.disabled =
+          !currentImage;
+
+        clearBtn.disabled =
+          !currentImage;
+
+      }
+
+    }
+
+    scanBtn.addEventListener(
+      "click",
+      scanImage
+    );
+
+    addBtn.addEventListener(
+      "click",
+      () => {
+
+        if (
+          !currentResult ||
+          !currentResult.valid
+        ) {
+          return;
+        }
+
+        entries.unshift({
+
+          line1:
+            currentResult.line1,
+
+          line2:
+            currentResult.line2
+
+        });
+
+        const item =
+          document.createElement(
+            "div"
+          );
+
+        item.className =
+          "list-item";
+
+        const left =
+          document.createElement(
+            "span"
+          );
+
+        left.textContent =
+          currentResult.line1;
+
+        const right =
+          document.createElement(
+            "span"
+          );
+
+        right.textContent =
+          currentResult.line2;
+
+        item.append(
+          left,
+          right
+        );
+
+        listEl.prepend(
+          item
+        );
+
+        addBtn.disabled =
+          true;
+
+        setStatus(
+          "Додано: " +
+          currentResult.line1 +
+          " " +
+          currentResult.line2,
+          "ok"
+        );
+
+      }
+    );
+  </script>
 </body>
 </html>
