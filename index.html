@@ -10,10 +10,9 @@
 
 <style>
 body{
-    margin:0;
-    padding:20px;
     font-family:Arial,sans-serif;
     text-align:center;
+    margin:20px;
     background:#f4f4f4;
 }
 
@@ -26,17 +25,12 @@ body{
 #result{
     margin-top:20px;
     padding:15px;
-    background:white;
+    font-size:30px;
+    font-weight:bold;
+    color:#008000;
+    background:#fff;
     border-radius:10px;
-    font-size:22px;
     word-break:break-all;
-    color:#006400;
-}
-
-button{
-    margin-top:20px;
-    padding:12px 20px;
-    font-size:18px;
 }
 </style>
 
@@ -52,46 +46,34 @@ button{
 Очікування QR...
 </div>
 
-<button onclick="startScanner()">
-Запустити камеру
-</button>
-
 <script>
 
-let scanner;
+let lastCode = "";
 
-function startScanner(){
-
-scanner=new Html5Qrcode("reader");
+const scanner = new Html5Qrcode("reader");
 
 scanner.start(
+    { facingMode: "environment" },
+    {
+        fps: 15,
+        qrbox: { width: 250, height: 250 }
+    },
+    function(decodedText){
 
-{ facingMode:"environment" },
+        // Якщо потрібно лише другий рядок QR:
+        // let code = (decodedText.split(/\r?\n/)[1] || decodedText).trim();
 
-{
-fps:15,
-qrbox:{
-width:250,
-height:250
-}
-},
+        // Якщо потрібен весь текст QR:
+        let code = decodedText.trim();
 
-function(decodedText){
+        if(code !== lastCode){
+            lastCode = code;
+            document.getElementById("result").innerText = code;
+        }
 
-document.getElementById("result").innerHTML=decodedText;
-
-// якщо потрібно зупинити після першого QR
-// scanner.stop();
-
-},
-
-function(error){
-
-}
-
+    },
+    function(error){}
 );
-
-}
 
 </script>
 
