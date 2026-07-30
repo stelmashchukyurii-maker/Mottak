@@ -1,122 +1,79 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест розпізнавання тексту</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 15px;
-            text-align: center;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        video, canvas {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-            background: black;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-        pre {
-            background: #eee;
-            padding: 10px;
-            border-radius: 4px;
-            text-align: left;
-            white-space: pre-wrap;
-            word-break: break-all;
-            font-size: 14px;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Scanner</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    margin:20px;
+}
+#result{
+    margin-top:20px;
+    font-size:20px;
+    color:green;
+    word-break:break-all;
+}
+canvas{
+    display:none;
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>Тест камери та Tesseract</h2>
-    
-    <button onclick="startCamera()">1. Увімкнути камеру</button>
-    <video id="video" autoplay playsinline></video>
+<h2>Розпізнавання QR-коду</h2>
 
-    <button onclick="captureAndTest()" style="background-color: #28a745;">2. Зробити знімок і розпізнати</button>
-    
-    <h3>Результат розпізнавання:</h3>
-    <pre id="result">Тут з'явиться текст...</pre>
-</div>
+<input type="file" id="file" accept="image/*">
+
+<br><br>
+
+<div id="result">QR ще не знайдено</div>
+
+<canvas id="canvas"></canvas>
 
 <script>
-    let videoStream = null;
-    const video = document.getElementById('video');
-    const resultPre = document.getElementById('result');
 
-    async function startCamera() {
-        try {
-            if (videoStream) {
-                videoStream.getTracks().forEach(t => t.stop());
-            }
-            videoStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" }
-            });
-            video.srcObject = videoStream;
-            resultPre.innerText = "Камера працює. Наведіть на бірку.";
-        } catch (err) {
-            alert("Помилка камери: " + err);
+const fileInput=document.getElementById("file");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+fileInput.addEventListener("change",function(e){
+
+    const file=e.target.files[0];
+    if(!file) return;
+
+    const img=new Image();
+
+    img.onload=function(){
+
+        canvas.width=img.width;
+        canvas.height=img.height;
+
+        ctx.drawImage(img,0,0);
+
+        const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+
+        const code=jsQR(imageData.data,imageData.width,imageData.height);
+
+        if(code){
+            document.getElementById("result").innerText=code.data;
+            console.log(code.data);
+        }else{
+            document.getElementById("result").innerText="QR-код не знайдено";
         }
-    }
 
-    async function captureAndTest() {
-        if (!videoStream) {
-            alert("Спочатку увімкніть камеру!");
-            return;
-        }
+    };
 
-        resultPre.innerText = "Обробка та розпізнавання...";
+    img.src=URL.createObjectURL(file);
 
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth * 2;
-        canvas.height = video.videoHeight * 2;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+});
 
-        Tesseract.recognize(
-            canvas.toDataURL('image/png'),
-            'eng',
-            { 
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        resultPre.innerText = `Прогрес: ${Math.round(m.progress * 100)}%`;
-                    }
-                } 
-            }
-        ).then(({ data: { text } }) => {
-            resultPre.innerText = "Отриманий текст:\n\n" + (text.trim() ? text : "[Нічого не знайдено]");
-        }).catch(err => {
-            resultPre.innerText = "Помилка Tesseract: " + err;
-        });
-    }
 </script>
 
 </body>
