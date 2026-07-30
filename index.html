@@ -4,518 +4,305 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Склад: Bunner & Hyller</title>
-    <!-- Сканер QR та штрихкодів -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        * { 
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
+        :root {
+            --primary-color: #f5a623;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
         }
-        body { 
-            background-color: #f0f2f5;
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 12px;
-            color: #1c1e21;
+            padding: 10px;
+            line-height: 1.25;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        h1 { 
-            font-size: 18px;
-            color: #1877f2;
-            margin: 0;
-        }
-        /* Перемикач мов */
-        .lang-switch {
-            display: flex;
-            gap: 4px;
-        }
-        .lang-btn {
-            padding: 6px 8px;
-            border: 1px solid #ccd0d5;
-            background: white;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .lang-btn.active {
-            background: #1877f2;
-            color: white;
-            border-color: #1877f2;
-        }
-        /* Дашборд залишків */
-        .dashboard { 
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .card { 
-            background: white;
-            padding: 12px 5px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .card-title { 
-            font-size: 11px;
-            font-weight: bold;
-            color: #65676b;
-            text-transform: uppercase;
-        }
-        .card-value { 
-            font-size: 22px;
-            font-weight: bold;
-            color: #1877f2;
-            margin-top: 4px;
-        }
-        /* Форма */
-        .box { 
-            background: white;
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
             padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
             margin-bottom: 15px;
         }
-        .box-title { 
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-        .type-selector { 
+
+        .operation-buttons {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
-        .type-btn { 
+
+        .operation-buttons button {
             flex: 1;
             padding: 12px;
-            border: none;
-            border-radius: 8px;
+            font-size: 16px;
             font-weight: bold;
-            font-size: 15px;
+            border: none;
+            border-radius: 6px;
             cursor: pointer;
-            text-align: center;
-            background: #e4e6eb;
-            color: #050505;
-        }
-        .type-btn.active-in { 
-            background: #2e7d32;
             color: white;
         }
-        .type-btn.active-out { 
-            background: #c62828;
-            color: white;
+
+        .btn-income { background-color: var(--success-color); }
+        .btn-outcome { background-color: var(--danger-color); }
+        .inactive { opacity: 0.5; }
+
+        .form-group {
+            margin-bottom: 15px;
         }
-        label { 
+
+        label {
             display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #65676b;
             margin-bottom: 5px;
+            font-weight: bold;
         }
-        select, input { 
+
+        select, input {
             width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .scan-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
             padding: 12px;
-            border: 1px solid #ccd0d5;
-            border-radius: 8px;
             font-size: 16px;
-            margin-bottom: 12px;
-            background: #fff;
-        }
-        .btn-scan { 
-            width: 100%;
-            background: #ff9800;
-            color: white;
             font-weight: bold;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            width: 100%;
+            border-radius: 6px;
             cursor: pointer;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .btn-submit { 
-            width: 100%;
-            background: #1877f2;
+
+        .scan-btn.secondary {
+            background-color: #008CBA;
+        }
+
+        .save-btn {
+            background-color: #007bff;
             color: white;
-            font-weight: bold;
-            padding: 14px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            border-radius: 6px;
             cursor: pointer;
         }
-        #reader { 
+
+        #interactive {
             width: 100%;
-            display: none;
-            margin-bottom: 12px;
-            border-radius: 8px;
+            max-height: 300px;
             overflow: hidden;
-            background: #000;
-        }
-        /* Таблиця */
-        table { 
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        th, td { 
-            padding: 8px 4px;
-            text-align: left;
-            border-bottom: 1px solid #e4e6eb;
-        }
-        th { 
-            color: #65676b;
-            font-weight: 600;
-        }
-        .in-text { 
-            color: #2e7d32;
-            font-weight: bold;
-        }
-        .out-text { 
-            color: #c62828;
-            font-weight: bold;
-        }
-        .del-btn { 
-            color: #c62828;
-            border: none;
-            background: none;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        /* Підвал з інформацією про оновлення */
-        .footer-info {
-            text-align: center;
-            font-size: 11px;
-            color: #65676b;
-            margin-top: 20px;
+            position: relative;
             margin-bottom: 10px;
+            display: none;
+            background: black;
+            border-radius: 4px;
+        }
+
+        #interactive video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .history-section {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .history-item {
+            background: #f9f9f9;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
         }
     </style>
+    <!-- Підключення бібліотеки для сканування штрих/QR кодів -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 
-    <div class="header">
-        <h1 id="txt-title">Облік Складу</h1>
-        <div class="lang-switch">
-            <button class="lang-btn" onclick="setLanguage('uk')">UA</button>
-            <button class="lang-btn" onclick="setLanguage('no')">NO</button>
-            <button class="lang-btn" onclick="setLanguage('en')">EN</button>
-            <button class="lang-btn" onclick="setLanguage('pl')">PL</button>
-        </div>
+<div class="container">
+    <h2 id="app-title">Реєстрація операції</h2>
+
+    <div class="operation-buttons">
+        <button id="btnIncome" class="btn-income" onclick="setOperation('Прихід')">Прихід</button>
+        <button id="btnOutcome" class="btn-outcome inactive" onclick="setOperation('Вибуття')">Вибуття</button>
     </div>
 
-    <!-- 1. Дашборд -->
-    <div class="dashboard">
-        <div class="card">
-            <div class="card-title">Bunner</div>
-            <div class="card-value" id="cnt-bunner">0</div>
-        </div>
-        <div class="card">
-            <div class="card-title">Hyller x30</div>
-            <div class="card-value" id="cnt-h30">0</div>
-        </div>
-        <div class="card">
-            <div class="card-title">Hyller x60</div>
-            <div class="card-value" id="cnt-h60">0</div>
-        </div>
-    </div>
-
-    <!-- 2. Форма введення -->
-    <div class="box">
-        <div class="box-title" id="txt-reg-title">Реєстрація операції</div>
-        
-        <div class="type-selector">
-            <button type="button" id="btn-in" class="type-btn active-in" onclick="selectType('IN')">📥 Прихід</button>
-            <button type="button" id="btn-out" class="type-btn" onclick="selectType('OUT')">📤 Вибуття</button>
-        </div>
-
-        <label for="prod" id="txt-label-prod">Продукт:</label>
-        <select id="prod">
+    <div class="form-group">
+        <label id="labelProduct">Продукт:</label>
+        <select id="productSelect">
             <option value="Bunner">Bunner (Візок)</option>
-            <option value="Hyller x30">Hyller x30 (30 полиць)</option>
-            <option value="Hyller x60">Hyller x60 (60 полиць)</option>
+            <option value="Hyller">Hyller (Полиця)</option>
         </select>
-
-        <label id="txt-label-tag">Номер бірки (код з камери):</label>
-        <button type="button" class="btn-scan" id="btn-scan-txt" onclick="requestPermissionAndStart()">📷 Сканувати бірку</button>
-        <div id="reader"></div>
-
-        <input type="text" id="tag-input" placeholder="Введіть або зіскануйте номер">
-
-        <button type="button" class="btn-submit" id="btn-save-txt" onclick="saveRecord()">Зберегти запис</button>
     </div>
 
-    <!-- 3. Історія -->
-    <div class="box">
-        <div class="box-title" id="txt-history-title">Останні події</div>
-        <table>
-            <thead>
-                <tr>
-                    <th id="th-time">Час</th>
-                    <th id="th-action">Дія</th>
-                    <th id="th-product">Товар</th>
-                    <th id="th-tag">Бірка</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="logs"></tbody>
-        </table>
+    <div class="form-group">
+        <label id="labelTag">Номер бірки (код з камери):</label>
+        
+        <!-- Кнопка сканування QR / штрих-коду -->
+        <button class="scan-btn" onclick="startScanner('qr')">📷 Сканувати бірку (QR/Barcode)</button>
+        
+        <!-- Нова окрема кнопка для сканування тексту номера -->
+        <button class="scan-btn secondary" onclick="startTextScanner()">📸 Сканувати номер (Текст)</button>
+
+        <div id="interactive"></div>
+
+        <input type="text" id="tagInput" placeholder="Введіть або зіскануйте номер">
     </div>
 
-    <!-- Інформація про оновлення коду -->
-    <div class="footer-info">
-        Оновлено: <span id="update-time">30.07.2026, 15:42</span>
-    </div>
+    <button class="save-btn" onclick="saveRecord()">Зберегти запис</button>
 
-    <script>
-        const i18n = {
-            uk: {
-                title: "Облік Складу",
-                regTitle: "Реєстрація операції",
-                inBtn: "📥 Прихід",
-                outBtn: "📤 Вибуття",
-                labelProd: "Продукт:",
-                labelTag: "Номер бірки (код з камери):",
-                btnScan: "📷 Сканувати бірку",
-                placeholder: "Введіть або зіскануйте номер",
-                btnSave: "Зберегти запис",
-                historyTitle: "Останні події",
-                thTime: "Час",
-                thAction: "Дія",
-                thProduct: "Товар",
-                thTag: "Бірка",
-                inText: "Прихід",
-                outText: "Вибуття",
-                alertTag: "Введіть або зіскануйте номер бірки!",
-                confirmDel: "Видалити цей запис?",
-                camErr: "Доступ до камери відхилено або відкрийте файл через HTTPS."
+    <div class="history-section">
+        <h3 id="historyTitle">Останні події</h3>
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<script>
+    let currentOperation = 'Прихід';
+    let html5QrCode = null;
+    let isScanning = false;
+
+    function setOperation(op) {
+        currentOperation = op;
+        const inc = document.getElementById('btnIncome');
+        const out = document.getElementById('btnOutcome');
+        if (op === 'Прихід') {
+            inc.classList.remove('inactive');
+            out.classList.add('inactive');
+        } else {
+            out.classList.remove('inactive');
+            inc.classList.add('inactive');
+        }
+    }
+
+    function startScanner(mode) {
+        const container = document.getElementById('interactive');
+        
+        if (isScanning) {
+            stopScanner();
+            return;
+        }
+
+        container.style.display = 'block';
+        isScanning = true;
+
+        html5QrCode = new Html5Qrcode("interactive");
+        
+        const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            (decodedText) => {
+                // Успішне зчитування QR або штрих-коду (приймає і цифри, і букви)
+                document.getElementById('tagInput').value = decodedText;
+                stopScanner();
             },
-            no: {
-                title: "Lagerstyring",
-                regTitle: "Registrer operasjon",
-                inBtn: "📥 Inn",
-                outBtn: "📤 Ut",
-                labelProd: "Produkt:",
-                labelTag: "Lappenummer (kode fra kamera):",
-                btnScan: "📷 Skann lapp",
-                placeholder: "Skriv inn eller skann nummer",
-                btnSave: "Lagre registrering",
-                historyTitle: "Siste hendelser",
-                thTime: "Tid",
-                thAction: "Handling",
-                thProduct: "Produkt",
-                thTag: "Lapp",
-                inText: "Inn",
-                outText: "Ut",
-                alertTag: "Vennligst skriv inn eller skann lappenummer!",
-                confirmDel: "Slette denne registreringen?",
-                camErr: "Kameratilgang avvist eller åpne filen via HTTPS."
-            },
-            en: {
-                title: "Warehouse Inventory",
-                regTitle: "Register Operation",
-                inBtn: "📥 In",
-                outBtn: "📤 Out",
-                labelProd: "Product:",
-                labelTag: "Tag Number (code from camera):",
-                btnScan: "📷 Scan Tag",
-                placeholder: "Enter or scan tag number",
-                btnSave: "Save Record",
-                historyTitle: "Recent Events",
-                thTime: "Time",
-                thAction: "Action",
-                thProduct: "Product",
-                thTag: "Tag",
-                inText: "In",
-                outText: "Out",
-                alertTag: "Please enter or scan a tag number!",
-                confirmDel: "Delete this record?",
-                camErr: "Camera access denied or open file via HTTPS."
-            },
-            pl: {
-                title: "Ewidencja Magazynowa",
-                regTitle: "Rejestracja operacji",
-                inBtn: "📥 Przyjęcie",
-                outBtn: "📤 Wydanie",
-                labelProd: "Produkt:",
-                labelTag: "Numer etykiety (kod z kamery):",
-                btnScan: "📷 Skanuj etykietę",
-                placeholder: "Wprowadź lub zeskanuj numer",
-                btnSave: "Zapisz wpis",
-                historyTitle: "Ostatnie zdarzenia",
-                thTime: "Czas",
-                thAction: "Akcja",
-                thProduct: "Produkt",
-                thTag: "Etykieta",
-                inText: "Przyjęcie",
-                outText: "Wydanie",
-                alertTag: "Proszę wprowadzić lub zeskanować numer etykiety!",
-                confirmDel: "Usunąć ten wpis?",
-                camErr: "Brak dostępu do kamery lub otwórz plik przez HTTPS."
+            (errorMessage) => {
+                // Помилки сканування ігноруємо в реальному часі
             }
+        ).catch(err => {
+            alert("Помилка запуску камери: " + err);
+            isScanning = false;
+            container.style.display = 'none';
+        });
+    }
+
+    // Функція спеціально для виділеного сканування чистого текстового номера (номерного знаку на бірці)
+    function startTextScanner() {
+        // Запускаємо той самий сканер, але можна обмежити або використати стандартне розпізнавання, 
+        // або активувати режим розпізнавання літер/цифр без переходу за посиланнями
+        startScanner('text');
+    }
+
+    function stopScanner() {
+        if (html5QrCode && isScanning) {
+            html5QrCode.stop().then(() => {
+                isScanning = false;
+                document.getElementById('interactive').style.display = 'none';
+            }).catch(err => {
+                console.error("Не вдалося зупинити сканер", err);
+            });
+        } else {
+            isScanning = false;
+            document.getElementById('interactive').style.display = 'none';
+        }
+    }
+
+    function saveRecord() {
+        const product = document.getElementById('productSelect').value;
+        const tag = document.getElementById('tagInput').value.trim();
+
+        if (!tag) {
+            alert('Будь ласка, введіть або зіскануйте номер бірки!');
+            return;
+        }
+
+        const record = {
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            date: new Date().toLocaleDateString(),
+            operation: currentOperation,
+            product: product,
+            tag: tag
         };
 
-        let currentLang = localStorage.getItem('wh_lang') || 'uk';
-        let currentType = 'IN';
-        let qrScanner = null;
         let db = JSON.parse(localStorage.getItem('wh_db_v1')) || [];
+        db.unshift(record);
+        localStorage.setItem('wh_db_v1', JSON.stringify(db));
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('wh_lang', lang);
+        document.getElementById('tagInput').value = '';
+        renderHistory();
+    }
 
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent.toLowerCase() === lang);
-            });
+    function renderHistory() {
+        let db = JSON.parse(localStorage.getItem('wh_db_v1')) || [];
+        const historyList = document.getElementById('historyList');
+        historyList.innerHTML = '';
 
-            const t = i18n[lang];
-            document.getElementById('txt-title').innerText = t.title;
-            document.getElementById('txt-reg-title').innerText = t.regTitle;
-            document.getElementById('txt-label-prod').innerText = t.labelProd;
-            document.getElementById('txt-label-tag').innerText = t.labelTag;
-            document.getElementById('btn-scan-txt').innerText = t.btnScan;
-            document.getElementById('tag-input').placeholder = t.placeholder;
-            document.getElementById('btn-save-txt').innerText = t.btnSave;
-            document.getElementById('txt-history-title').innerText = t.historyTitle;
-            document.getElementById('th-time').innerText = t.thTime;
-            document.getElementById('th-action').innerText = t.thAction;
-            document.getElementById('th-product').innerText = t.thProduct;
-            document.getElementById('th-tag').innerText = t.thTag;
+        db.slice(0, 10).forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <span>${item.time} <b>${item.operation}</b> ${item.product}</span>
+                <span><b>${item.tag}</b></span>
+            `;
+            historyList.appendChild(div);
+        });
+    }
 
-            selectType(currentType);
-            updateApp();
-        }
+    window.onload = function() {
+        renderHistory();
+    };
+</script>
 
-        function selectType(t) {
-            currentType = t;
-            const langTexts = i18n[currentLang];
-            const btnIn = document.getElementById('btn-in');
-            const btnOut = document.getElementById('btn-out');
-
-            btnIn.innerText = langTexts.inBtn;
-            btnOut.innerText = langTexts.outBtn;
-
-            btnIn.className = 'type-btn ' + (t === 'IN' ? 'active-in' : '');
-            btnOut.className = 'type-btn ' + (t === 'OUT' ? 'active-out' : '');
-        }
-
-        async function requestPermissionAndStart() {
-            const reader = document.getElementById('reader');
-            if (reader.style.display === 'block') {
-                stopCamera();
-                return;
-            }
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                stream.getTracks().forEach(track => track.stop());
-                startCamera();
-            } catch (err) {
-                alert(i18n[currentLang].camErr);
-            }
-        }
-
-        function startCamera() {
-            const reader = document.getElementById('reader');
-            reader.style.display = 'block';
-            
-            qrScanner = new Html5Qrcode("reader");
-            const config = { fps: 15, qrbox: { width: 220, height: 220 } };
-            
-            qrScanner.start(
-                { facingMode: "environment" },
-                config,
-                (decodedText) => {
-                    // Зберігаємо повний текст (цифри та букви з QR-коду) без обмеження лише цифрами
-                    if (decodedText) {
-                        document.getElementById('tag-input').value = decodedText.trim();
-                        stopCamera();
-                    }
-                },
-                (errorMessage) => { }
-            ).catch(err => {
-                alert(i18n[currentLang].camErr);
-                stopCamera();
-            });
-        }
-
-        function stopCamera() {
-            if (qrScanner) {
-                qrScanner.stop().then(() => {
-                    qrScanner.clear();
-                    document.getElementById('reader').style.display = 'none';
-                }).catch(() => {
-                    document.getElementById('reader').style.display = 'none';
-                });
-            } else {
-                document.getElementById('reader').style.display = 'none';
-            }
-        }
-
-        function saveRecord() {
-            const prod = document.getElementById('prod').value;
-            const tag = document.getElementById('tag-input').value.trim();
-            if (!tag) {
-                alert(i18n[currentLang].alertTag);
-                return;
-            }
-
-            const item = {
-                id: Date.now(),
-                time: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
-                type: currentType,
-                product: prod,
-                tag: tag
-            };
-
-            db.unshift(item);
-            updateApp();
-            document.getElementById('tag-input').value = '';
-        }
-
-        function deleteItem(id) {
-            if (confirm(i18n[currentLang].confirmDel)) {
-                db = db.filter(x => x.id !== id);
-                updateApp();
-            }
-        }
-
-        function updateApp() {
-            localStorage.setItem('wh_db_v1', JSON.stringify(db));
-            let totals = { 'Bunner': 0, 'Hyller x30': 0, 'Hyller x60': 0 };
-            const logsTbody = document.getElementById('logs');
-            logsTbody.innerHTML = '';
-
-            const t = i18n[currentLang];
-
-            db.forEach(x => {
-                if (x.type === 'IN') totals[x.product]++;
-                else totals[x.product]--;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${x.time}</td>
-                    <td class="${x.type === 'IN' ? 'in-text' : 'out-text'}">${x.type === 'IN' ? t.inText : t.outText}</td>
-                    <td>${x.product}</td>
-                    <td><b>${x.tag}</b></td>
-                    <td><button class="del-btn" onclick="deleteItem(${x.id})">✕</button></td>
-                `;
-                logsTbody.appendChild(tr);
-            });
-
-            document.getElementById('cnt-bunner').innerText = totals['Bunner'];
-            document.getElementById('cnt-h30').innerText = totals['Hyller x30'];
-            document.getElementById('cnt-h60').innerText = totals['Hyller x60'];
-        }
-
-        setLanguage(currentLang);
-    </script>
 </body>
 </html>
