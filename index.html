@@ -77,6 +77,19 @@
             border-radius: 4px;
         }
 
+        .scan-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
         .torch-btn {
             background-color: #ff9800;
             color: white;
@@ -101,6 +114,23 @@
             border-radius: 6px;
             cursor: pointer;
             margin-top: 10px;
+        }
+
+        #interactive {
+            width: 100%;
+            max-height: 250px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 10px;
+            display: none;
+            background: black;
+            border-radius: 4px;
+        }
+
+        #interactive video {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
         .history-section {
@@ -129,7 +159,17 @@
             cursor: pointer;
             padding: 0 5px;
         }
+
+        #statusText {
+            font-size: 14px;
+            color: #d9534f;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
     </style>
+    <!-- Підключення бібліотеки Tesseract.js для розпізнавання тексту з камери -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -153,8 +193,15 @@
         <label id="labelTag">Номер бірки (цифри та букви):</label>
         
         <button class="torch-btn" id="torchBtn" onclick="toggleTorch()">🔦 Увімкнути ліхтарик</button>
+        <button class="scan-btn" onclick="captureAndRecognize()">📷 Розпізнати текст з камери</button>
 
-        <input type="text" id="tagInput" placeholder="Введіть номер з бірки або вставте скопійований">
+        <div id="interactive">
+            <video id="videoElement" autoplay playsinline></video>
+        </div>
+        
+        <div id="statusText"></div>
+
+        <input type="text" id="tagInput" placeholder="Введіть номер з бірки або розпізнайте">
     </div>
 
     <button class="save-btn" onclick="saveRecord()">Зберегти запис</button>
@@ -165,12 +212,13 @@
     </div>
     
     <div style="margin-top: 15px; font-size: 13px; color: #666; text-align: center;" id="updateTimeDisplay">
-        Оновлено: 30.07.2026, 16:16
+        Оновлено: 30.07.2026, 16:20
     </div>
 </div>
 
 <script>
     let currentOperation = 'Прихід';
+    let videoStream = null;
     let torchTrack = null;
     let torchOn = false;
 
@@ -203,7 +251,7 @@
                     btn.innerText = "🔦 Вимкнути ліхтарик";
                     btn.style.backgroundColor = "#d9534f";
                 } else {
-                    alert("Ліхтарик не підтримується цим пристроєм або браузером");
+                    alert("Ліхтарик не підтримується цим пристроєм");
                     stream.getTracks().forEach(t => t.stop());
                 }
             } else {
@@ -216,8 +264,56 @@
                 btn.style.backgroundColor = "#ff9800";
             }
         } catch (err) {
-            alert("Помилка управління ліхтариком: " + err);
+            alert("Помилка ліхтарика: " + err);
         }
+    }
+
+    async function captureAndRecognize() {
+        const container = document.getElementById('interactive');
+        const video = document.getElementById('videoElement');
+        const status = document.getElementById('statusText');
+
+        if (!videoStream) {
+            container.style.display = 'block';
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                video.srcObject = videoStream;
+                status.innerText = "Наведіть на бірку і натисніть кнопку ще раз для знімка";
+                return;
+            } catch (err) {
+                alert("Помилка камери: " + err);
+                return;
+            }
+        }
+
+        // Робимо знімок з відео
+        status.innerText = "Розпізнавання тексту...";
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Зупиняємо камеру
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+        container.style.display = 'none';
+
+        // Запускаємо Tesseract
+        Tesseract.recognize(
+            canvas.toDataURL('image/png'),
+            'eng',
+            { logger: m => console.log(m) }
+        ).then(({ data: { text } }) => {
+            status.innerText = "";
+            let cleanedText = text.replace(/[\n\r]+/g, ' ').trim();
+            document.getElementById('tagInput').value = cleanedText;
+        }).catch(err => {
+            status.innerText = "Помилка розпізнавання";
+            console.error(err);
+        });
     }
 
     function saveRecord() {
@@ -225,7 +321,7 @@
         const tag = document.getElementById('tagInput').value.trim();
 
         if (!tag) {
-            alert('Будь ласка, введіть номер бірки!');
+            alert('Будь ласка, введіть або розпізнайте номер бірки!');
             return;
         }
 
