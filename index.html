@@ -10,26 +10,31 @@
 
 <style>
 body{
+    margin:0;
+    padding:20px;
     font-family:Arial,sans-serif;
+    background:#f2f2f2;
     text-align:center;
-    margin:20px;
-    background:#f4f4f4;
+}
+
+h2{
+    margin-bottom:15px;
 }
 
 #reader{
     width:100%;
-    max-width:500px;
+    max-width:450px;
     margin:auto;
 }
 
 #result{
     margin-top:20px;
     padding:15px;
+    background:white;
+    border-radius:10px;
     font-size:30px;
     font-weight:bold;
-    color:#008000;
-    background:#fff;
-    border-radius:10px;
+    color:green;
     word-break:break-all;
 }
 </style>
@@ -50,30 +55,58 @@ body{
 
 let lastCode = "";
 
-const scanner = new Html5Qrcode("reader");
+const html5QrCode = new Html5Qrcode("reader");
 
-scanner.start(
-    { facingMode: "environment" },
-    {
-        fps: 15,
-        qrbox: { width: 250, height: 250 }
-    },
-    function(decodedText){
+html5QrCode.start(
 
-        // Якщо потрібно лише другий рядок QR:
-        // let code = (decodedText.split(/\r?\n/)[1] || decodedText).trim();
+{
+    facingMode: "environment"
+},
 
-        // Якщо потрібен весь текст QR:
-        let code = decodedText.trim();
+{
+    fps: 15,
+    qrbox: {
+        width: 250,
+        height: 250
+    }
+}
 
-        if(code !== lastCode){
-            lastCode = code;
-            document.getElementById("result").innerText = code;
+).then(() => {
+
+    // Пробуємо встановити 2× зум
+    html5QrCode.applyVideoConstraints({
+        advanced: [
+            { zoom: 2 }
+        ]
+    }).catch(() => {});
+
+    html5QrCode.render(
+        (decodedText) => {
+
+            let code = decodedText.trim();
+
+            if(code !== lastCode){
+
+                lastCode = code;
+
+                document.getElementById("result").innerText = code;
+
+            }
+
+        },
+
+        (errorMessage) => {
+
         }
 
-    },
-    function(error){}
-);
+    );
+
+}).catch(err => {
+
+    document.getElementById("result").innerText =
+        "Помилка запуску камери";
+
+});
 
 </script>
 
