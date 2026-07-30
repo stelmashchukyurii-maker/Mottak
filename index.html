@@ -90,10 +90,6 @@
             margin-bottom: 10px;
         }
 
-        .scan-btn.secondary {
-            background-color: #008CBA;
-        }
-
         .save-btn {
             background-color: #007bff;
             color: white;
@@ -151,9 +147,8 @@
             padding: 0 5px;
         }
     </style>
-    <!-- Підключення бібліотеки для сканування штрих/QR кодів та Tesseract для OCR тексту -->
+    <!-- Підключення стабільної бібліотеки для сканування QR та штрих-кодів -->
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -174,20 +169,13 @@
     </div>
 
     <div class="form-group">
-        <label id="labelTag">Номер бірки:</label>
+        <label id="labelTag">Номер бірки (код з камери):</label>
         
-        <!-- Кнопка сканування QR / штрих-коду -->
-        <button class="scan-btn" onclick="startBarcodeScanner()">📷 Сканувати бірку (QR/Barcode)</button>
-        
-        <!-- Окрема кнопка для сканування тексту номера з камери -->
-        <button class="scan-btn secondary" onclick="startTextOcrScanner()">📸 Сканувати номер (Текст з камери)</button>
+        <button class="scan-btn" onclick="startScanner()">📷 Сканувати бірку</button>
 
         <div id="interactive"></div>
 
         <input type="text" id="tagInput" placeholder="Введіть або зіскануйте номер">
-        
-        <!-- Кнопка фіксації розпізнаного тексту / внесення в базу -->
-        <button class="scan-btn secondary" id="captureBtn" style="display:none; background-color: #28a745; margin-top: 8px;" onclick="captureTextFromVideo()">✅ Зафіксувати номер</button>
     </div>
 
     <button class="save-btn" onclick="saveRecord()">Зберегти запис</button>
@@ -198,7 +186,7 @@
     </div>
     
     <div style="margin-top: 15px; font-size: 13px; color: #666; text-align: center;" id="updateTimeDisplay">
-        Оновлено: 30.07.2026, 16:00
+        Оновлено: 30.07.2026, 16:05
     </div>
 </div>
 
@@ -206,8 +194,6 @@
     let currentOperation = 'Прихід';
     let html5QrCode = null;
     let isScanning = false;
-    let activeStream = null;
-    let videoElement = null;
 
     function setOperation(op) {
         currentOperation = op;
@@ -222,32 +208,24 @@
         }
     }
 
-    function stopScanner() {
-        if (html5QrCode && isScanning) {
-            html5QrCode.stop().then(() => {
-                isScanning = false;
-                document.getElementById('interactive').style.display = 'none';
-            }).catch(err => console.error(err));
-        }
-        if (activeStream) {
-            activeStream.getTracks().forEach(track => track.stop());
-            activeStream = null;
-        }
-        isScanning = false;
-        document.getElementById('interactive').style.display = 'none';
-        document.getElementById('captureBtn').style.display = 'none';
-    }
-
-    function startBarcodeScanner() {
-        stopScanner();
+    function startScanner() {
         const container = document.getElementById('interactive');
+        
+        if (isScanning) {
+            stopScanner();
+            return;
+        }
+
         container.style.display = 'block';
         isScanning = true;
 
         html5QrCode = new Html5Qrcode("interactive");
+        
+        const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
         html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 250, height: 150 } },
+            config,
             (decodedText) => {
                 document.getElementById('tagInput').value = decodedText;
                 stopScanner();
@@ -255,55 +233,22 @@
             (errorMessage) => {}
         ).catch(err => {
             alert("Помилка запуску камери: " + err);
-            stopScanner();
+            isScanning = false;
+            container.style.display = 'none';
         });
     }
 
-    async function startTextOcrScanner() {
-        stopScanner();
-        const container = document.getElementById('interactive');
-        container.innerHTML = '';
-        container.style.display = 'block';
-        isScanning = true;
-
-        videoElement = document.createElement('video');
-        videoElement.setAttribute('autoplay', '');
-        videoElement.setAttribute('playsinline', '');
-        container.appendChild(videoElement);
-
-        document.getElementById('captureBtn').style.display = 'block';
-
-        try {
-            activeStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" }
+    function stopScanner() {
+        if (html5QrCode && isScanning) {
+            html5QrCode.stop().then(() => {
+                isScanning = false;
+                document.getElementById('interactive').style.display = 'none';
+            }).catch(err => {
+                console.error("Не вдалося зупинити сканер", err);
             });
-            videoElement.srcObject = activeStream;
-        } catch (err) {
-            alert("Не вдалося отримати доступ до камери: " + err);
-            stopScanner();
-        }
-    }
-
-    async function captureTextFromVideo() {
-        if (!videoElement) return;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElement.videoWidth || 640;
-        canvas.height = videoElement.videoHeight || 480;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-        stopScanner();
-
-        document.getElementById('tagInput').value = "Розпізнавання тексту...";
-
-        try {
-            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
-            let cleanText = text.replace(/[\n\r]+/g, ' ').trim();
-            document.getElementById('tagInput').value = cleanText;
-        } catch (err) {
-            alert("Помилка розпізнавання тексту: " + err);
-            document.getElementById('tagInput').value = '';
+        } else {
+            isScanning = false;
+            document.getElementById('interactive').style.display = 'none';
         }
     }
 
