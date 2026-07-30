@@ -3,169 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Склад: Bunner & Hyller</title>
+    <title>Тест розпізнавання тексту</title>
     <style>
-        :root {
-            --primary-color: #f5a623;
-            --success-color: #4CAF50;
-            --danger-color: #f44336;
-            --bg-color: #f4f4f9;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-        }
-
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background: #f4f4f9;
+            color: #333;
             margin: 0;
-            padding: 10px;
-            line-height: 1.25;
+            padding: 15px;
+            text-align: center;
         }
-
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: var(--card-bg);
-            padding: 15px;
+            background: #fff;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .operation-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .operation-buttons button {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            color: white;
-        }
-
-        .btn-income { background-color: var(--success-color); }
-        .btn-outcome { background-color: var(--danger-color); }
-        .inactive { opacity: 0.5; }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        select, input {
+        video, canvas {
             width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
+            max-height: 300px;
+            object-fit: contain;
+            background: black;
             border-radius: 4px;
-        }
-
-        .scan-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-            border-radius: 6px;
-            cursor: pointer;
             margin-bottom: 10px;
         }
-
-        .torch-btn {
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        .save-btn {
+        button {
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 14px;
-            font-size: 18px;
+            padding: 12px 20px;
+            font-size: 16px;
             font-weight: bold;
             width: 100%;
             border-radius: 6px;
             cursor: pointer;
-            margin-top: 10px;
-        }
-
-        #interactive {
-            width: 100%;
-            max-height: 250px;
-            overflow: hidden;
-            position: relative;
             margin-bottom: 10px;
-            display: none;
-            background: black;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
             border-radius: 4px;
-        }
-
-        #interactive video {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .history-section {
-            margin-top: 20px;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-        }
-
-        .history-item {
-            background: #f9f9f9;
-            padding: 8px;
-            margin-bottom: 6px;
-            border-radius: 4px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-break: break-all;
             font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--danger-color);
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 0 5px;
-        }
-
-        #statusText {
-            font-size: 14px;
-            color: #d9534f;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: bold;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -173,223 +56,67 @@
 <body>
 
 <div class="container">
-    <h2>Реєстрація операції</h2>
-
-    <div class="operation-buttons">
-        <button id="btnIncome" class="btn-income" onclick="setOperation('Прихід')">Прихід</button>
-        <button id="btnOutcome" class="btn-outcome inactive" onclick="setOperation('Вибуття')">Вибуття</button>
-    </div>
-
-    <div class="form-group">
-        <label>Продукт:</label>
-        <select id="productSelect">
-            <option value="Bunner">Bunner (Візок)</option>
-            <option value="Hyller">Hyller (Полиця)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Номер бірки (цифри та букви):</label>
-        
-        <button class="torch-btn" id="torchBtn" onclick="toggleTorch()">🔦 Увімкнути ліхтарик</button>
-        <button class="scan-btn" onclick="captureAndRecognize()">📷 Розпізнати текст з камери</button>
-
-        <div id="interactive">
-            <video id="videoElement" autoplay playsinline></video>
-        </div>
-        
-        <div id="statusText"></div>
-
-        <input type="text" id="tagInput" placeholder="Введіть номер з бірки або розпізнайте">
-    </div>
-
-    <button class="save-btn" onclick="saveRecord()">Зберегти запис</button>
-
-    <div class="history-section">
-        <h3>Останні події</h3>
-        <div id="historyList"></div>
-    </div>
+    <h2>Тест камери та Tesseract</h2>
     
-    <div style="margin-top: 15px; font-size: 13px; color: #666; text-align: center;" id="updateTimeDisplay">
-        Оновлено: 30.07.2026, 16:26
-    </div>
+    <button onclick="startCamera()">1. Увімкнути камеру</button>
+    <video id="video" autoplay playsinline></video>
+
+    <button onclick="captureAndTest()" style="background-color: #28a745;">2. Зробити знімок і розпізнати</button>
+    
+    <h3>Результат розпізнавання:</h3>
+    <pre id="result">Тут з'явиться текст...</pre>
 </div>
 
 <script>
-    let currentOperation = 'Прихід';
     let videoStream = null;
-    let torchTrack = null;
-    let torchOn = false;
-    let imageTrack = null;
+    const video = document.getElementById('video');
+    const resultPre = document.getElementById('result');
 
-    function setOperation(op) {
-        currentOperation = op;
-        const inc = document.getElementById('btnIncome');
-        const out = document.getElementById('btnOutcome');
-        if (op === 'Прихід') {
-            inc.classList.remove('inactive');
-            out.classList.add('inactive');
-        } else {
-            out.classList.remove('inactive');
-            inc.classList.add('inactive');
-        }
-    }
-
-    async function toggleTorch() {
-        const btn = document.getElementById('torchBtn');
+    async function startCamera() {
         try {
-            if (!torchOn) {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" }
-                });
-                torchTrack = stream.getVideoTracks()[0];
-                const capabilities = torchTrack.getCapabilities();
-                
-                if (capabilities.torch) {
-                    await torchTrack.applyConstraints({ advanced: [{ torch: true }] });
-                    torchOn = true;
-                    btn.innerText = "🔦 Вимкнути ліхтарик";
-                    btn.style.backgroundColor = "#d9534f";
-                } else {
-                    alert("Ліхтарик не підтримується цим пристроєм");
-                    stream.getTracks().forEach(t => t.stop());
-                }
-            } else {
-                if (torchTrack) {
-                    await torchTrack.applyConstraints({ advanced: [{ torch: false }] });
-                    torchTrack.stop();
-                }
-                torchOn = false;
-                btn.innerText = "🔦 Увімкнути ліхтарик";
-                btn.style.backgroundColor = "#ff9800";
+            if (videoStream) {
+                videoStream.getTracks().forEach(t => t.stop());
             }
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" }
+            });
+            video.srcObject = videoStream;
+            resultPre.innerText = "Камера працює. Наведіть на бірку.";
         } catch (err) {
-            alert("Помилка ліхтарика: " + err);
+            alert("Помилка камери: " + err);
         }
     }
 
-    async function captureAndRecognize() {
-        const container = document.getElementById('interactive');
-        const video = document.getElementById('videoElement');
-        const status = document.getElementById('statusText');
-
+    async function captureAndTest() {
         if (!videoStream) {
-            container.style.display = 'block';
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" }
-                });
-                video.srcObject = videoStream;
-                
-                imageTrack = videoStream.getVideoTracks()[0];
-                const capabilities = imageTrack.getCapabilities();
-                
-                if (capabilities.zoom) {
-                    const minZoom = capabilities.zoom.min || 1;
-                    const maxZoom = capabilities.zoom.max || 3;
-                    const targetZoom = Math.min(minZoom * 1.5, maxZoom);
-                    try {
-                        await imageTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] });
-                    } catch (e) {
-                        console.log("Зум не застосовано автоматично", e);
-                    }
-                }
-
-                status.innerText = "Наведіть на бірку і натисніть кнопку ще раз для знімка";
-                return;
-            } catch (err) {
-                alert("Помилка камери: " + err);
-                return;
-            }
+            alert("Спочатку увімкніть камеру!");
+            return;
         }
 
-        status.innerText = "Розпізнавання тексту...";
+        resultPre.innerText = "Обробка та розпізнавання...";
+
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth * 2;
         canvas.height = video.videoHeight * 2;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-        container.style.display = 'none';
-
         Tesseract.recognize(
             canvas.toDataURL('image/png'),
             'eng',
-            { logger: m => console.log(m) }
+            { 
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        resultPre.innerText = `Прогрес: ${Math.round(m.progress * 100)}%`;
+                    }
+                } 
+            }
         ).then(({ data: { text } }) => {
-            status.innerText = "";
-            let cleanedText = text.replace(/[\n\r]+/g, ' ').trim();
-            document.getElementById('tagInput').value = cleanedText;
+            resultPre.innerText = "Отриманий текст:\n\n" + (text.trim() ? text : "[Нічого не знайдено]");
         }).catch(err => {
-            status.innerText = "Помилка розпізнавання";
-            console.error(err);
+            resultPre.innerText = "Помилка Tesseract: " + err;
         });
     }
-
-    function saveRecord() {
-        const product = document.getElementById('productSelect').value;
-        const tag = document.getElementById('tagInput').value.trim();
-
-        if (!tag) {
-            alert('Будь ласка, введіть або розпізнайте номер бірки!');
-            return;
-        }
-
-        const now = new Date();
-        const record = {
-            id: Date.now(),
-            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            date: now.toLocaleDateString(),
-            operation: currentOperation,
-            product: product,
-            tag: tag
-        };
-
-        let db = JSON.parse(localStorage.getItem('wh_db_v1')) || [];
-        db.unshift(record);
-        localStorage.setItem('wh_db_v1', JSON.stringify(db));
-
-        document.getElementById('tagInput').value = '';
-        renderHistory();
-        updateTimestamp();
-    }
-
-    function deleteRecord(id) {
-        let db = JSON.parse(localStorage.getItem('wh_db_v1')) || [];
-        db = db.filter(item => item.id !== id);
-        localStorage.setItem('wh_db_v1', JSON.stringify(db));
-        renderHistory();
-        updateTimestamp();
-    }
-
-    function updateTimestamp() {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const dateStr = now.toLocaleDateString();
-        document.getElementById('updateTimeDisplay').innerText = `Оновлено: ${dateStr}, ${timeStr}`;
-    }
-
-    function renderHistory() {
-        let db = JSON.parse(localStorage.getItem('wh_db_v1')) || [];
-        const historyList = document.getElementById('historyList');
-        historyList.innerHTML = '';
-
-        db.slice(0, 10).forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerHTML = `
-                <span>${item.time} <b>${item.operation}</b> ${item.product}: <b>${item.tag}</b></span>
-                <button class="delete-btn" onclick="deleteRecord(${item.id})">✖</button>
-            `;
-            historyList.appendChild(div);
-        });
-    }
-
-    window.onload = function() {
-        renderHistory();
-    };
 </script>
 
 </body>
