@@ -401,11 +401,8 @@
             }
 
             try {
-                // Викликає системне вікно браузера з питанням про надання дозволу
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                // Зупиняємо тестовий потік, щоб віддати камеру сканеру
                 stream.getTracks().forEach(track => track.stop());
-                
                 startCamera();
             } catch (err) {
                 alert(i18n[currentLang].camErr);
@@ -423,7 +420,11 @@
                 { facingMode: "environment" },
                 config,
                 (decodedText) => {
-                    document.getElementById('tag-input').value = decodedText;
+                    // Витягуємо лише цифри з розпізнаного тексту за допомогою регулярного виразу
+                    const numbersOnly = decodedText.replace(/\D/g, '');
+                    
+                    // Якщо цифри знайдені — підставляємо їх, інакше вставляємо весь текст
+                    document.getElementById('tag-input').value = numbersOnly ? numbersOnly : decodedText;
                     stopCamera();
                 },
                 (errorMessage) => { }
