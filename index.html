@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
   >
 
-  <title>Тест OCR бірки</title>
+  <title>Сканер бірки</title>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -54,8 +54,8 @@
       position: relative;
       width: 100%;
       height: 58vh;
-      min-height: 380px;
-      max-height: 720px;
+      min-height: 430px;
+      max-height: 760px;
       overflow: hidden;
       background: #000;
       border: 2px solid #555;
@@ -70,31 +70,51 @@
       background: #000;
     }
 
+    /*
+      ВЕРТИКАЛЬНА ЗЕЛЕНА РАМКА.
+
+      Рамка вузька та висока.
+      Камера не повертається.
+      Повернута лише форма рамки.
+    */
     #scanFrame {
       position: absolute;
       left: 50%;
-      top: 62%;
-      width: 86%;
-      height: 34%;
+      top: 57%;
+
+      width: 48%;
+      height: 61%;
+
       transform: translate(-50%, -50%);
+
       border: 4px solid #00ff66;
-      border-radius: 12px;
+      border-radius: 14px;
+
       box-shadow:
         0 0 0 9999px rgba(0, 0, 0, 0.25),
-        0 0 18px rgba(0, 255, 102, 0.9);
+        0 0 22px rgba(0, 255, 102, 0.95);
+
       pointer-events: none;
     }
 
     #scanFrameText {
       position: absolute;
-      bottom: calc(100% + 10px);
+      bottom: calc(100% + 12px);
       left: 50%;
+
       width: 310px;
       max-width: 92vw;
+
       transform: translateX(-50%);
+
       color: #fff;
+      font-size: 18px;
       font-weight: bold;
-      text-shadow: 0 2px 6px #000;
+      line-height: 1.25;
+
+      text-shadow:
+        0 2px 6px #000,
+        0 0 8px #000;
     }
 
     .buttons {
@@ -107,10 +127,13 @@
       width: min(96%, 540px);
       margin: 6px;
       padding: 14px 16px;
+
       border: none;
       border-radius: 12px;
+
       font-size: 18px;
       font-weight: bold;
+
       cursor: pointer;
     }
 
@@ -139,6 +162,12 @@
       color: #fff;
     }
 
+    #copyButton {
+      background: #16a085;
+      color: #fff;
+      display: none;
+    }
+
     .fileButton {
       background: #805ad5;
       color: #fff;
@@ -152,6 +181,7 @@
       width: 100%;
       margin-top: 14px;
       padding: 12px;
+
       background: #222;
       border: 2px solid #555;
       border-radius: 14px;
@@ -173,20 +203,25 @@
     #processedPreview {
       display: block;
       width: 100%;
-      max-height: 360px;
+      max-height: 420px;
+
       object-fit: contain;
+
       background: #fff;
       border-radius: 9px;
     }
 
     #result {
-      min-height: 100px;
+      min-height: 110px;
       padding: 10px;
+
       color: #00ff66;
+
       font-family: monospace;
-      font-size: 38px;
+      font-size: 40px;
       font-weight: bold;
       line-height: 1.35;
+
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -194,12 +229,15 @@
     #rawResult {
       margin-top: 10px;
       padding: 12px;
+
       background: #111;
       color: #bbb;
       border-radius: 9px;
+
       font-family: monospace;
       font-size: 14px;
       line-height: 1.5;
+
       text-align: left;
       white-space: pre-wrap;
       word-break: break-word;
@@ -213,7 +251,9 @@
     #progressTrack {
       width: 100%;
       height: 15px;
+
       overflow: hidden;
+
       background: #444;
       border-radius: 10px;
     }
@@ -221,7 +261,9 @@
     #progressBar {
       width: 0%;
       height: 100%;
+
       background: #00ad49;
+
       transition: width 0.15s linear;
     }
 
@@ -241,7 +283,7 @@
 <body>
 
 <header>
-  <h1>Тест читання бірки</h1>
+  <h1>Сканер бірки</h1>
 
   <div id="status">
     Відкрий камеру або вибери готове фото
@@ -260,9 +302,11 @@
     ></video>
 
     <div id="scanFrame">
+
       <div id="scanFrameText">
-        Помісти обидва рядки всередину зеленої рамки
+        Помісти бірку вертикально всередину зеленої рамки
       </div>
+
     </div>
 
   </div>
@@ -283,6 +327,10 @@
 
     <button id="stopButton" disabled>
       ⛔ Закрити камеру
+    </button>
+
+    <button id="copyButton">
+      📋 Копіювати результат
     </button>
 
     <label class="fileButton" for="fileInput">
@@ -312,7 +360,7 @@
   <div id="cropPanel" class="panel">
 
     <div class="panelTitle">
-      Область, яку програма вирізала з фотографії
+      Область, яку програма вирізала
     </div>
 
     <img
@@ -358,7 +406,7 @@
 </main>
 
 <footer>
-  Версія 0.2 — читання двох рядків без QR
+  Версія 0.3 — вертикальна рамка
 </footer>
 
 <script>
@@ -386,6 +434,9 @@ const torchButton =
 
 const stopButton =
   document.getElementById("stopButton");
+
+const copyButton =
+  document.getElementById("copyButton");
 
 const fileInput =
   document.getElementById("fileInput");
@@ -436,8 +487,11 @@ const processedCanvas =
 
 let cameraStream = null;
 let cameraTrack = null;
+
 let torchEnabled = false;
 let isProcessing = false;
+
+let lastRecognizedText = "";
 
 
 /* =========================================================
@@ -535,7 +589,7 @@ async function openCamera() {
     stopButton.disabled = false;
 
     statusElement.textContent =
-      "Наведи обидва рядки всередину зеленої рамки.";
+      "Помісти бірку вертикально всередину зеленої рамки.";
 
   } catch (error) {
     console.error(error);
@@ -742,7 +796,7 @@ async function loadPhotoFile(file) {
 
 
 /* =========================================================
-   ОБЛАСТЬ ЗЕЛЕНОЇ РАМКИ НА КАМЕРІ
+   ОБЛАСТЬ ВЕРТИКАЛЬНОЇ РАМКИ НА КАМЕРІ
    ========================================================= */
 
 function getCameraCropRectangle(sourceCanvas) {
@@ -766,7 +820,7 @@ function getCameraCropRectangle(sourceCanvas) {
 
   /*
     Відео показується через object-fit: cover.
-    Тому частина кадру може бути прихована.
+    Частина кадру може бути обрізана.
   */
 
   const displayScale =
@@ -839,19 +893,16 @@ function getCameraCropRectangle(sourceCanvas) {
 
 
 /* =========================================================
-   ОБЛАСТЬ ДЛЯ ТВОГО ГОТОВОГО ФОТО
+   ОБЛАСТЬ ДЛЯ ГОТОВОГО ФОТО
    ========================================================= */
 
 function getUploadedPhotoCropRectangle(sourceCanvas) {
   /*
-    На твоєму квадратному фото наклейка з текстом
-    розташована в нижній частині.
+    Для твого тестового фото.
 
-    Ця область повинна захопити:
+    Область захоплює:
     078500
     2CB739
-
-    І не повинна захоплювати фактурну поверхню зверху.
   */
 
   return {
@@ -940,7 +991,7 @@ function cropTextArea(
 
 
 /* =========================================================
-   М’ЯКА ОБРОБКА ЗОБРАЖЕННЯ
+   ОБРОБКА ЗОБРАЖЕННЯ
    ========================================================= */
 
 function preprocessImage(sourceCanvas) {
@@ -982,14 +1033,6 @@ function preprocessImage(sourceCanvas) {
   const pixels =
     imageData.data;
 
-  /*
-    Переводимо в сірий колір.
-
-    Не робимо жорсткий чорний/білий поріг,
-    бо він перетворював фактуру поверхні
-    на несправжні літери.
-  */
-
   for (
     let index = 0;
     index < pixels.length;
@@ -999,10 +1042,6 @@ function preprocessImage(sourceCanvas) {
       pixels[index] * 0.299 +
       pixels[index + 1] * 0.587 +
       pixels[index + 2] * 0.114;
-
-    /*
-      М’яке підсилення контрасту.
-    */
 
     gray =
       (gray - 128) * 1.25 + 128;
@@ -1038,7 +1077,7 @@ function preprocessImage(sourceCanvas) {
 
 
 /* =========================================================
-   ОЧИЩЕННЯ ТЕКСТУ OCR
+   НОРМАЛІЗАЦІЯ OCR
    ========================================================= */
 
 function normalizeOcrText(text) {
@@ -1066,22 +1105,11 @@ function findFirstLine(text) {
       )
       .filter(Boolean);
 
-  /*
-    Спочатку шукаємо точно 6 цифр.
-  */
-
   for (const line of lines) {
-    const exactMatch =
-      line.match(/^\d{6}$/);
-
-    if (exactMatch) {
-      return exactMatch[0];
+    if (/^\d{6}$/.test(line)) {
+      return line;
     }
   }
-
-  /*
-    Потім шукаємо 6 цифр усередині довшого рядка.
-  */
 
   for (const line of lines) {
     const match =
@@ -1091,11 +1119,6 @@ function findFirstLine(text) {
       return match[0];
     }
   }
-
-  /*
-    Якщо OCR сплутав букви з цифрами,
-    пробуємо виправити типові помилки.
-  */
 
   for (const line of lines) {
     const corrected =
@@ -1142,13 +1165,6 @@ function findSecondLine(
       )
       .filter(Boolean);
 
-  /*
-    Другий рядок:
-    рівно 6 символів,
-    є хоча б одна літера,
-    є хоча б одна цифра.
-  */
-
   for (const line of lines) {
     if (
       /^[A-Z0-9]{6}$/.test(line) &&
@@ -1159,11 +1175,6 @@ function findSecondLine(
       return line;
     }
   }
-
-  /*
-    Пошук 6-символьного коду
-    всередині довшого рядка.
-  */
 
   for (const line of lines) {
     const candidates =
@@ -1189,7 +1200,7 @@ function findSecondLine(
 
 
 /* =========================================================
-   ФОРМУВАННЯ РЕЗУЛЬТАТУ
+   ОЧИЩЕНИЙ РЕЗУЛЬТАТ
    ========================================================= */
 
 function cleanOcrText(text) {
@@ -1240,7 +1251,7 @@ function cleanOcrText(text) {
 
 
 /* =========================================================
-   ОЦІНКА ЯКОСТІ РЕЗУЛЬТАТУ
+   ОЦІНКА РЕЗУЛЬТАТУ
    ========================================================= */
 
 function calculateResultScore(
@@ -1280,7 +1291,7 @@ function calculateResultScore(
 
 
 /* =========================================================
-   ОДИН ПРОХІД OCR
+   OCR
    ========================================================= */
 
 async function runOcr(
@@ -1368,6 +1379,7 @@ async function processPhoto(
   isProcessing = true;
 
   captureButton.disabled = true;
+  copyButton.style.display = "none";
 
   resultElement.textContent =
     "Розпізнавання…";
@@ -1383,7 +1395,7 @@ async function processPhoto(
 
   try {
     statusElement.textContent =
-      "Вирізаємо область із двома рядками…";
+      "Вирізаємо область усередині рамки…";
 
     const rectangle =
       fromCamera
@@ -1408,32 +1420,17 @@ async function processPhoto(
     statusElement.textContent =
       "OCR читає символи…";
 
-    /*
-      Перший прохід:
-      читаємо м’яко оброблене сіре зображення.
-    */
-
     const processedResult =
       await runOcr(
         processedImage,
         "OCR сірого зображення"
       );
 
-    /*
-      Другий прохід:
-      читаємо кольоровий вирізаний фрагмент.
-    */
-
     const originalResult =
       await runOcr(
         croppedImage,
         "OCR кольорового зображення"
       );
-
-    /*
-      Вибираємо результат,
-      який більше схожий на потрібний формат.
-    */
 
     const bestResult =
       processedResult.score >=
@@ -1442,8 +1439,14 @@ async function processPhoto(
         : originalResult;
 
     if (bestResult.cleanedText) {
+      lastRecognizedText =
+        bestResult.cleanedText;
+
       resultElement.textContent =
         bestResult.cleanedText;
+
+      copyButton.style.display =
+        "inline-block";
 
       statusElement.textContent =
         "✅ Готово.";
@@ -1457,6 +1460,8 @@ async function processPhoto(
       }
 
     } else {
+      lastRecognizedText = "";
+
       resultElement.textContent =
         "Не розпізнано";
 
@@ -1507,7 +1512,7 @@ async function processPhoto(
 
 
 /* =========================================================
-   ФОТО З КАМЕРИ ТА OCR
+   ФОТО З КАМЕРИ
    ========================================================= */
 
 async function captureAndRecognize() {
@@ -1551,6 +1556,32 @@ async function captureAndRecognize() {
 
 
 /* =========================================================
+   КОПІЮВАННЯ
+   ========================================================= */
+
+async function copyResult() {
+  if (!lastRecognizedText) {
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(
+      lastRecognizedText
+    );
+
+    statusElement.textContent =
+      "📋 Результат скопійовано.";
+
+  } catch (error) {
+    console.error(error);
+
+    statusElement.textContent =
+      "Не вдалося скопіювати результат.";
+  }
+}
+
+
+/* =========================================================
    КНОПКИ
    ========================================================= */
 
@@ -1574,9 +1605,14 @@ stopButton.addEventListener(
   closeCamera
 );
 
+copyButton.addEventListener(
+  "click",
+  copyResult
+);
+
 
 /* =========================================================
-   ВИБІР ГОТОВОГО ФОТО
+   ГОТОВЕ ФОТО
    ========================================================= */
 
 fileInput.addEventListener(
