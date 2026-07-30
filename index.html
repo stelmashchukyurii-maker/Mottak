@@ -1,113 +1,1059 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
 
-<title>QR Scanner</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0,
+                 maximum-scale=1.0, user-scalable=no"
+    >
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+    <title>Сканер складських бірок</title>
 
-<style>
-body{
-    margin:0;
-    padding:20px;
-    font-family:Arial,sans-serif;
-    background:#f2f2f2;
-    text-align:center;
-}
+    <!-- Бібліотека для читання дуже малих QR-кодів -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
-h2{
-    margin-bottom:15px;
-}
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-#reader{
-    width:100%;
-    max-width:450px;
-    margin:auto;
-}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
 
-#result{
-    margin-top:20px;
-    padding:15px;
-    background:white;
-    border-radius:10px;
-    font-size:30px;
-    font-weight:bold;
-    color:green;
-    word-break:break-all;
-}
-</style>
+        header {
+            padding: 12px 10px;
+            background: #1c1c1c;
+        }
 
+        h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        #status {
+            margin-top: 7px;
+            min-height: 22px;
+            font-size: 15px;
+            color: #ddd;
+        }
+
+        #camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            background: black;
+            overflow: hidden;
+        }
+
+        #video {
+            display: block;
+            width: 100%;
+            min-height: 320px;
+            max-height: 65vh;
+            object-fit: cover;
+            background: black;
+        }
+
+        /* Затемнення навколо рамки */
+        #camera-container::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+
+            background:
+                linear-gradient(
+                    rgba(0, 0, 0, 0.42),
+                    rgba(0, 0, 0, 0.42)
+                );
+        }
+
+        #scan-frame {
+            position: absolute;
+            z-index: 5;
+
+            width: 72%;
+            max-width: 420px;
+            height: 180px;
+
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50%, -50%);
+
+            border: 4px solid #00ff66;
+            border-radius: 15px;
+
+            box-shadow:
+                0 0 0 9999px rgba(0, 0, 0, 0.42),
+                0 0 18px rgba(0, 255, 102, 0.8);
+
+            pointer-events: none;
+        }
+
+        #scan-frame::before {
+            content: "Наведіть QR і цифри сюди";
+            position: absolute;
+
+            left: 50%;
+            top: -35px;
+
+            transform: translateX(-50%);
+
+            width: 100%;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+
+            text-shadow: 0 2px 4px black;
+        }
+
+        #scan-line {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            top: 15px;
+
+            height: 3px;
+            background: #00ff66;
+            box-shadow: 0 0 10px #00ff66;
+
+            animation: scanMove 2s linear infinite;
+        }
+
+        @keyframes scanMove {
+            0% {
+                top: 15px;
+            }
+
+            50% {
+                top: calc(100% - 18px);
+            }
+
+            100% {
+                top: 15px;
+            }
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .main-controls {
+            padding: 14px 10px 5px;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+
+            padding: 13px 18px;
+            margin: 5px;
+
+            font-size: 17px;
+            font-weight: bold;
+
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        #start-button {
+            width: min(92%, 420px);
+            background: #00a844;
+            color: white;
+            font-size: 20px;
+        }
+
+        #stop-button {
+            background: #a52323;
+            color: white;
+        }
+
+        #torch-button {
+            background: #ffc107;
+            color: #111;
+        }
+
+        .zoom-controls {
+            margin: 8px 0;
+        }
+
+        .zoom-button {
+            min-width: 62px;
+            background: #333;
+            color: white;
+        }
+
+        .zoom-button.active {
+            background: #007bff;
+        }
+
+        .zoom-button:disabled,
+        #torch-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        #result-box {
+            margin: 12px auto;
+            padding: 14px;
+
+            width: min(94%, 650px);
+            min-height: 92px;
+
+            background: #222;
+            border: 2px solid #555;
+            border-radius: 13px;
+        }
+
+        #result-label {
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        #result {
+            margin-top: 7px;
+
+            color: #00ff66;
+            font-size: 32px;
+            font-weight: bold;
+
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        #camera-info {
+            margin: 8px auto;
+            padding: 10px;
+
+            width: min(94%, 650px);
+
+            background: #181818;
+            border-radius: 10px;
+
+            font-size: 13px;
+            color: #bbb;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        footer {
+            margin-top: 18px;
+            padding: 14px 10px 20px;
+
+            border-top: 1px solid #333;
+
+            color: #888;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .success-flash {
+            animation: successFlash 0.5s ease;
+        }
+
+        @keyframes successFlash {
+            0% {
+                background: #222;
+            }
+
+            50% {
+                background: #075c2b;
+            }
+
+            100% {
+                background: #222;
+            }
+        }
+
+        @media (max-width: 430px) {
+            #scan-frame {
+                width: 82%;
+                height: 150px;
+            }
+
+            #result {
+                font-size: 27px;
+            }
+
+            button {
+                padding: 12px 14px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<h2>Сканування QR</h2>
+<header>
+    <h1>Сканер складських бірок</h1>
+    <div id="status">Натисніть «Відкрити камеру»</div>
+</header>
 
-<div id="reader"></div>
+<main>
 
-<div id="result">
-Очікування QR...
-</div>
+    <div id="camera-container">
+
+        <video
+            id="video"
+            autoplay
+            playsinline
+            muted
+        ></video>
+
+        <div id="scan-frame">
+            <div id="scan-line"></div>
+        </div>
+
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="main-controls">
+
+        <button id="start-button">
+            📷 Відкрити камеру
+        </button>
+
+        <div id="working-controls" hidden>
+
+            <div class="zoom-controls">
+                <button class="zoom-button" data-zoom="1">1×</button>
+                <button class="zoom-button active" data-zoom="2">2×</button>
+                <button class="zoom-button" data-zoom="3">3×</button>
+                <button class="zoom-button" data-zoom="4">4×</button>
+            </div>
+
+            <button id="torch-button" disabled>
+                🔦 Ліхтарик
+            </button>
+
+            <button id="stop-button">
+                ⛔ Закрити камеру
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="result-box">
+
+        <div id="result-label">
+            Результат із QR:
+        </div>
+
+        <div id="result">
+            Очікування…
+        </div>
+
+    </div>
+
+    <div id="camera-info">
+        Камера ще не запущена.
+    </div>
+
+</main>
+
+<footer>
+    <div><strong>Версія коду:</strong> 0.1</div>
+    <div><strong>Оновлено:</strong> 30.07.2026, 16:34</div>
+    <div>Етап 1: камера, рамка, зум, ліхтарик і читання QR</div>
+</footer>
 
 <script>
+"use strict";
+
+/* =========================================================
+   НАЛАШТУВАННЯ ВЕРСІЇ
+   При кожному оновленні будемо змінювати ці два значення.
+========================================================= */
+
+const APP_VERSION = "0.1";
+const CODE_UPDATED = "30.07.2026, 16:34";
+
+/* =========================================================
+   ЕЛЕМЕНТИ СТОРІНКИ
+========================================================= */
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+
+const statusElement = document.getElementById("status");
+const resultElement = document.getElementById("result");
+const resultBox = document.getElementById("result-box");
+const cameraInfo = document.getElementById("camera-info");
+
+const startButton = document.getElementById("start-button");
+const stopButton = document.getElementById("stop-button");
+const torchButton = document.getElementById("torch-button");
+const workingControls = document.getElementById("working-controls");
+
+const zoomButtons = document.querySelectorAll(".zoom-button");
+
+/* =========================================================
+   ЗМІННІ КАМЕРИ
+========================================================= */
+
+let stream = null;
+let videoTrack = null;
+
+let scanTimer = null;
+let scanning = false;
+
+let torchEnabled = false;
+let currentZoom = 2;
 
 let lastCode = "";
+let lastCodeTime = 0;
 
-const html5QrCode = new Html5Qrcode("reader");
+/*
+  Не дозволяємо одному й тому самому QR спрацьовувати
+  безперервно кілька разів.
+*/
+const REPEAT_DELAY = 2500;
 
-html5QrCode.start(
+/* =========================================================
+   ЗАПУСК КАМЕРИ
+========================================================= */
 
-{
-    facingMode: "environment"
-},
+async function startCamera() {
 
-{
-    fps: 15,
-    qrbox: {
-        width: 250,
-        height: 250
+    clearResult();
+
+    if (!window.isSecureContext) {
+        showError(
+            "Камера працює лише через HTTPS. " +
+            "Відкрийте сайт через адресу github.io."
+        );
+        return;
+    }
+
+    if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+    ) {
+        showError(
+            "Цей браузер не підтримує доступ до камери. " +
+            "Відкрийте сайт у Google Chrome."
+        );
+        return;
+    }
+
+    startButton.disabled = true;
+    startButton.textContent = "Відкриваємо камеру…";
+
+    statusElement.textContent = "Запит дозволу на камеру…";
+
+    try {
+
+        /*
+          Спочатку просимо задню камеру та високу роздільну
+          здатність. Значення ideal — це побажання, а не вимога.
+        */
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+
+            video: {
+                facingMode: {
+                    ideal: "environment"
+                },
+
+                width: {
+                    ideal: 3840
+                },
+
+                height: {
+                    ideal: 2160
+                },
+
+                frameRate: {
+                    ideal: 30,
+                    max: 30
+                }
+            }
+        });
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        videoTrack = stream.getVideoTracks()[0];
+
+        workingControls.hidden = false;
+        startButton.hidden = true;
+
+        statusElement.textContent =
+            "Камера працює. Наведіть бірку в рамку.";
+
+        readCameraCapabilities();
+
+        /*
+          Після запуску пробуємо встановити зум 2×.
+          Якщо телефон не підтримує зум через браузер,
+          програма продовжить працювати без нього.
+        */
+        await setZoom(2);
+
+        startScanning();
+
+    } catch (error) {
+
+        handleCameraError(error);
+
+    } finally {
+
+        startButton.disabled = false;
+        startButton.textContent = "📷 Відкрити камеру";
+
     }
 }
 
-).then(() => {
+/* =========================================================
+   ІНФОРМАЦІЯ ПРО КАМЕРУ
+========================================================= */
 
-    // Пробуємо встановити 2× зум
-    html5QrCode.applyVideoConstraints({
-        advanced: [
-            { zoom: 2 }
-        ]
-    }).catch(() => {});
+function readCameraCapabilities() {
 
-    html5QrCode.render(
-        (decodedText) => {
+    if (!videoTrack) {
+        return;
+    }
 
-            let code = decodedText.trim();
+    let capabilities = {};
+    let settings = {};
 
-            if(code !== lastCode){
+    try {
+        capabilities = videoTrack.getCapabilities
+            ? videoTrack.getCapabilities()
+            : {};
 
-                lastCode = code;
+        settings = videoTrack.getSettings
+            ? videoTrack.getSettings()
+            : {};
+    } catch (error) {
+        console.warn("Не вдалося прочитати можливості камери", error);
+    }
 
-                document.getElementById("result").innerText = code;
+    const width = settings.width || "невідомо";
+    const height = settings.height || "невідомо";
 
-            }
+    const zoomSupported =
+        capabilities.zoom !== undefined;
 
-        },
+    const torchSupported =
+        capabilities.torch === true ||
+        Array.isArray(capabilities.torch);
 
-        (errorMessage) => {
+    let zoomText = "не підтримується браузером";
 
+    if (zoomSupported) {
+        zoomText =
+            `${capabilities.zoom.min}–${capabilities.zoom.max}×`;
+    }
+
+    cameraInfo.innerHTML = `
+        <strong>Роздільна здатність:</strong>
+        ${width} × ${height}<br>
+
+        <strong>Апаратний зум:</strong>
+        ${zoomText}<br>
+
+        <strong>Ліхтарик:</strong>
+        ${torchSupported ? "підтримується" : "не підтримується"}<br>
+
+        <strong>Поточний зум:</strong>
+        <span id="current-zoom-info">1×</span>
+    `;
+
+    torchButton.disabled = !torchSupported;
+
+    zoomButtons.forEach((button) => {
+
+        if (!zoomSupported) {
+            button.disabled = true;
+            return;
         }
 
+        const requestedZoom =
+            Number(button.dataset.zoom);
+
+        button.disabled =
+            requestedZoom < capabilities.zoom.min ||
+            requestedZoom > capabilities.zoom.max;
+    });
+}
+
+/* =========================================================
+   ЗУМ
+========================================================= */
+
+async function setZoom(requestedZoom) {
+
+    if (!videoTrack) {
+        return;
+    }
+
+    let capabilities = {};
+
+    try {
+        capabilities = videoTrack.getCapabilities
+            ? videoTrack.getCapabilities()
+            : {};
+    } catch (error) {
+        return;
+    }
+
+    if (capabilities.zoom === undefined) {
+
+        statusElement.textContent =
+            "Камера працює, але браузер не дає керувати зумом.";
+
+        updateZoomButtons(1);
+        return;
+    }
+
+    const minimumZoom = capabilities.zoom.min;
+    const maximumZoom = capabilities.zoom.max;
+
+    const safeZoom = Math.min(
+        maximumZoom,
+        Math.max(minimumZoom, requestedZoom)
     );
 
-}).catch(err => {
+    try {
 
-    document.getElementById("result").innerText =
-        "Помилка запуску камери";
+        await videoTrack.applyConstraints({
+            advanced: [
+                {
+                    zoom: safeZoom
+                }
+            ]
+        });
 
+        currentZoom = safeZoom;
+
+        updateZoomButtons(requestedZoom);
+
+        const zoomInfo =
+            document.getElementById("current-zoom-info");
+
+        if (zoomInfo) {
+            zoomInfo.textContent = `${safeZoom}×`;
+        }
+
+        statusElement.textContent =
+            `Камера працює. Зум ${safeZoom}×.`;
+
+    } catch (error) {
+
+        console.warn("Не вдалося встановити зум", error);
+
+        statusElement.textContent =
+            "Не вдалося змінити зум на цьому телефоні.";
+
+    }
+}
+
+function updateZoomButtons(selectedZoom) {
+
+    zoomButtons.forEach((button) => {
+
+        const buttonZoom =
+            Number(button.dataset.zoom);
+
+        button.classList.toggle(
+            "active",
+            buttonZoom === selectedZoom
+        );
+    });
+}
+
+/* =========================================================
+   ЛІХТАРИК
+========================================================= */
+
+async function toggleTorch() {
+
+    if (!videoTrack) {
+        return;
+    }
+
+    torchEnabled = !torchEnabled;
+
+    try {
+
+        await videoTrack.applyConstraints({
+            advanced: [
+                {
+                    torch: torchEnabled
+                }
+            ]
+        });
+
+        torchButton.textContent = torchEnabled
+            ? "💡 Вимкнути ліхтарик"
+            : "🔦 Ліхтарик";
+
+        statusElement.textContent = torchEnabled
+            ? "Ліхтарик увімкнено."
+            : "Ліхтарик вимкнено.";
+
+    } catch (error) {
+
+        torchEnabled = false;
+
+        torchButton.textContent = "🔦 Ліхтарик";
+
+        statusElement.textContent =
+            "Цей телефон не дозволив увімкнути ліхтарик.";
+
+    }
+}
+
+/* =========================================================
+   СКАНУВАННЯ QR
+========================================================= */
+
+function startScanning() {
+
+    if (scanning) {
+        return;
+    }
+
+    scanning = true;
+
+    /*
+      Перевіряємо кадр приблизно 8 разів за секунду.
+      Це менше навантажує телефон, ніж кожен відеокадр.
+    */
+    scanTimer = setInterval(scanFrame, 125);
+}
+
+function scanFrame() {
+
+    if (
+        !video ||
+        video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA
+    ) {
+        return;
+    }
+
+    if (
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+    ) {
+        return;
+    }
+
+    const context = canvas.getContext(
+        "2d",
+        {
+            willReadFrequently: true
+        }
+    );
+
+    /*
+      Беремо центральну область відео.
+
+      QR і цифри мають бути всередині зеленої рамки.
+      Центральне обрізання дає QR більше корисних пікселів
+      і менше зайвого фону.
+    */
+
+    const sourceWidth = video.videoWidth;
+    const sourceHeight = video.videoHeight;
+
+    const cropWidth = Math.round(sourceWidth * 0.75);
+    const cropHeight = Math.round(sourceHeight * 0.48);
+
+    const cropX = Math.round(
+        (sourceWidth - cropWidth) / 2
+    );
+
+    const cropY = Math.round(
+        (sourceHeight - cropHeight) / 2
+    );
+
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    context.drawImage(
+        video,
+
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+
+        0,
+        0,
+        cropWidth,
+        cropHeight
+    );
+
+    let imageData;
+
+    try {
+        imageData = context.getImageData(
+            0,
+            0,
+            cropWidth,
+            cropHeight
+        );
+    } catch (error) {
+        return;
+    }
+
+    const qrResult = jsQR(
+        imageData.data,
+        imageData.width,
+        imageData.height,
+        {
+            inversionAttempts: "attemptBoth"
+        }
+    );
+
+    if (
+        qrResult &&
+        qrResult.data
+    ) {
+        processDetectedCode(qrResult.data);
+    }
+}
+
+/* =========================================================
+   ОБРОБКА ЗНАЙДЕНОГО КОДУ
+========================================================= */
+
+function processDetectedCode(rawCode) {
+
+    const cleanedCode = String(rawCode)
+        .trim()
+        .replace(/\r\n/g, "\n");
+
+    if (!cleanedCode) {
+        return;
+    }
+
+    const now = Date.now();
+
+    if (
+        cleanedCode === lastCode &&
+        now - lastCodeTime < REPEAT_DELAY
+    ) {
+        return;
+    }
+
+    lastCode = cleanedCode;
+    lastCodeTime = now;
+
+    resultElement.textContent = cleanedCode;
+
+    resultBox.classList.remove("success-flash");
+
+    /*
+      Це змушує браузер повторно запустити CSS-анімацію.
+    */
+    void resultBox.offsetWidth;
+
+    resultBox.classList.add("success-flash");
+
+    statusElement.textContent =
+        "QR успішно прочитано.";
+
+    /*
+      Легка вібрація, якщо телефон і браузер підтримують.
+      Нічого не копіюється в буфер.
+    */
+    if (navigator.vibrate) {
+        navigator.vibrate(100);
+    }
+}
+
+/* =========================================================
+   ЗУПИНКА КАМЕРИ
+========================================================= */
+
+function stopCamera() {
+
+    scanning = false;
+
+    if (scanTimer) {
+        clearInterval(scanTimer);
+        scanTimer = null;
+    }
+
+    if (stream) {
+
+        stream.getTracks().forEach((track) => {
+            track.stop();
+        });
+
+        stream = null;
+    }
+
+    video.srcObject = null;
+    videoTrack = null;
+
+    torchEnabled = false;
+
+    workingControls.hidden = true;
+    startButton.hidden = false;
+
+    statusElement.textContent =
+        "Камеру закрито.";
+
+    cameraInfo.textContent =
+        "Камера ще не запущена.";
+}
+
+/* =========================================================
+   ПОМИЛКИ КАМЕРИ
+========================================================= */
+
+function handleCameraError(error) {
+
+    console.error("Помилка камери:", error);
+
+    let message =
+        "Не вдалося відкрити камеру.";
+
+    switch (error.name) {
+
+        case "NotAllowedError":
+        case "PermissionDeniedError":
+
+            message =
+                "Доступ до камери заборонено. " +
+                "У Chrome відкрийте налаштування цього сайту " +
+                "та дозвольте використання камери.";
+
+            break;
+
+        case "NotFoundError":
+        case "DevicesNotFoundError":
+
+            message =
+                "Камеру на телефоні не знайдено.";
+
+            break;
+
+        case "NotReadableError":
+        case "TrackStartError":
+
+            message =
+                "Камера зайнята іншою програмою. " +
+                "Закрийте інші програми, які використовують камеру.";
+
+            break;
+
+        case "OverconstrainedError":
+
+            message =
+                "Телефон не підтримує запитані параметри камери.";
+
+            break;
+
+        case "SecurityError":
+
+            message =
+                "Браузер заблокував камеру через налаштування безпеки.";
+
+            break;
+
+        case "AbortError":
+
+            message =
+                "Запуск камери був перерваний.";
+
+            break;
+    }
+
+    showError(message);
+
+    workingControls.hidden = true;
+    startButton.hidden = false;
+}
+
+function showError(message) {
+
+    statusElement.textContent = message;
+
+    resultElement.textContent =
+        "Помилка";
+
+    resultElement.style.color =
+        "#ff5555";
+}
+
+function clearResult() {
+
+    resultElement.textContent =
+        "Очікування…";
+
+    resultElement.style.color =
+        "#00ff66";
+}
+
+/* =========================================================
+   ОБРОБНИКИ КНОПОК
+========================================================= */
+
+startButton.addEventListener(
+    "click",
+    startCamera
+);
+
+stopButton.addEventListener(
+    "click",
+    stopCamera
+);
+
+torchButton.addEventListener(
+    "click",
+    toggleTorch
+);
+
+zoomButtons.forEach((button) => {
+
+    button.addEventListener("click", () => {
+
+        const requestedZoom =
+            Number(button.dataset.zoom);
+
+        setZoom(requestedZoom);
+    });
 });
 
+/* =========================================================
+   КОРЕКТНЕ ЗАКРИТТЯ КАМЕРИ
+========================================================= */
+
+window.addEventListener("pagehide", () => {
+
+    if (stream) {
+        stream.getTracks().forEach((track) => {
+            track.stop();
+        });
+    }
+});
+
+/* =========================================================
+   ВИВІД ВЕРСІЇ В КОНСОЛЬ
+========================================================= */
+
+console.log(
+    `Сканер бірок, версія ${APP_VERSION}. ` +
+    `Оновлено: ${CODE_UPDATED}`
+);
 </script>
 
 </body>
