@@ -3,76 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>QR Scanner</title>
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 body{
+    margin:0;
+    padding:20px;
     font-family:Arial,sans-serif;
     text-align:center;
-    margin:20px;
+    background:#f4f4f4;
 }
+
+#reader{
+    width:100%;
+    max-width:500px;
+    margin:auto;
+}
+
 #result{
     margin-top:20px;
-    font-size:20px;
-    color:green;
+    padding:15px;
+    background:white;
+    border-radius:10px;
+    font-size:22px;
     word-break:break-all;
+    color:#006400;
 }
-canvas{
-    display:none;
+
+button{
+    margin-top:20px;
+    padding:12px 20px;
+    font-size:18px;
 }
 </style>
+
 </head>
 
 <body>
 
-<h2>Розпізнавання QR-коду</h2>
+<h2>Сканування QR</h2>
 
-<input type="file" id="file" accept="image/*">
+<div id="reader"></div>
 
-<br><br>
+<div id="result">
+Очікування QR...
+</div>
 
-<div id="result">QR ще не знайдено</div>
-
-<canvas id="canvas"></canvas>
+<button onclick="startScanner()">
+Запустити камеру
+</button>
 
 <script>
 
-const fileInput=document.getElementById("file");
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+let scanner;
 
-fileInput.addEventListener("change",function(e){
+function startScanner(){
 
-    const file=e.target.files[0];
-    if(!file) return;
+scanner=new Html5Qrcode("reader");
 
-    const img=new Image();
+scanner.start(
 
-    img.onload=function(){
+{ facingMode:"environment" },
 
-        canvas.width=img.width;
-        canvas.height=img.height;
+{
+fps:15,
+qrbox:{
+width:250,
+height:250
+}
+},
 
-        ctx.drawImage(img,0,0);
+function(decodedText){
 
-        const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+document.getElementById("result").innerHTML=decodedText;
 
-        const code=jsQR(imageData.data,imageData.width,imageData.height);
+// якщо потрібно зупинити після першого QR
+// scanner.stop();
 
-        if(code){
-            document.getElementById("result").innerText=code.data;
-            console.log(code.data);
-        }else{
-            document.getElementById("result").innerText="QR-код не знайдено";
-        }
+},
 
-    };
+function(error){
 
-    img.src=URL.createObjectURL(file);
+}
 
-});
+);
+
+}
 
 </script>
 
