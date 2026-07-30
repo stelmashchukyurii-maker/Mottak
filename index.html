@@ -243,7 +243,7 @@
             <option value="Hyller x60">Hyller x60 (60 полиць)</option>
         </select>
 
-        <label id="txt-label-tag">Номер бірки (з камери або вручну):</label>
+        <label id="txt-label-tag">Номер бірки (сканує QR-код всередині):</label>
         <button type="button" class="btn-scan" id="btn-scan-txt" onclick="requestPermissionAndStart()">📷 Сканувати бірку</button>
         <div id="reader"></div>
 
@@ -271,7 +271,7 @@
 
     <!-- Інформація про оновлення коду -->
     <div class="footer-info">
-        Оновлено: <span id="update-time">30.07.2026, 15:16</span>
+        Оновлено: <span id="update-time">30.07.2026, 15:37</span>
     </div>
 
     <script>
@@ -282,7 +282,7 @@
                 inBtn: "📥 Прихід",
                 outBtn: "📤 Вибуття",
                 labelProd: "Продукт:",
-                labelTag: "Номер бірки (з камери або вручну):",
+                labelTag: "Номер бірки (сканує QR-код всередині):",
                 btnScan: "📷 Сканувати бірку",
                 placeholder: "Введіть або зіскануйте номер",
                 btnSave: "Зберегти запис",
@@ -303,7 +303,7 @@
                 inBtn: "📥 Inn",
                 outBtn: "📤 Ut",
                 labelProd: "Produkt:",
-                labelTag: "Lappenummer (kamera eller manuelt):",
+                labelTag: "Lappenummer (skanner QR-kode inni):",
                 btnScan: "📷 Skann lapp",
                 placeholder: "Skriv inn eller skann nummer",
                 btnSave: "Lagre registrering",
@@ -324,7 +324,7 @@
                 inBtn: "📥 In",
                 outBtn: "📤 Out",
                 labelProd: "Product:",
-                labelTag: "Tag Number (camera or manual):",
+                labelTag: "Tag Number (scans inner QR code):",
                 btnScan: "📷 Scan Tag",
                 placeholder: "Enter or scan tag number",
                 btnSave: "Save Record",
@@ -345,7 +345,7 @@
                 inBtn: "📥 Przyjęcie",
                 outBtn: "📤 Wydanie",
                 labelProd: "Produkt:",
-                labelTag: "Numer etykiety (z kamery lub ręcznie):",
+                labelTag: "Numer etykiety (skanuje wewnętrzny QR):",
                 btnScan: "📷 Skanuj etykietę",
                 placeholder: "Wprowadź lub zeskanuj numer",
                 btnSave: "Zapisz wpis",
@@ -358,7 +358,7 @@
                 outText: "Wydanie",
                 alertTag: "Proszę wprowadzić lub zeskanować numer etykiety!",
                 confirmDel: "Usunąć ten wpis?",
-                camErr: "Brak dostępu do kamery lub otwórz plik przez HTTPS."
+                camErr: "Brak dostępu do kamery lub otwórz fil through HTTPS."
             }
         };
 
@@ -386,7 +386,7 @@
             document.getElementById('txt-history-title').innerText = t.historyTitle;
             document.getElementById('th-time').innerText = t.thTime;
             document.getElementById('th-action').innerText = t.thAction;
-            document.getElementById('th-product').innerText = t.thProduct;
+            document.getElementById('th-product').innerText, t.thProduct;
             document.getElementById('th-tag').innerText = t.thTag;
 
             selectType(currentType);
@@ -415,6 +415,7 @@
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                stream.getTracks().filesize = 0; // dummy
                 stream.getTracks().forEach(track => track.stop());
                 startCamera();
             } catch (err) {
@@ -427,15 +428,21 @@
             reader.style.display = 'block';
             
             qrScanner = new Html5Qrcode("reader");
-            const config = { fps: 15, qrbox: { width: 250, height: 150 } };
+            const config = { fps: 15, qrbox: { width: 220, height: 220 } };
             
             qrScanner.start(
                 { facingMode: "environment" },
                 config,
                 (decodedText) => {
+                    // Зчитуємо дані з QR-коду всередині та витягуємо з них усі цифри
                     const numbersOnly = decodedText.replace(/\D/g, '');
-                    document.getElementById('tag-input').value = numbersOnly ? numbersOnly : decodedText;
-                    stopCamera();
+                    if (numbersOnly) {
+                        document.getElementById('tag-input').value = numbersOnly;
+                        stopCamera();
+                    } else if (decodedText) {
+                        document.getElementById('tag-input').value = decodedText;
+                        stopCamera();
+                    }
                 },
                 (errorMessage) => { }
             ).catch(err => {
@@ -509,8 +516,8 @@
             });
 
             document.getElementById('cnt-bunner').innerText = totals['Bunner'];
-            document.getElementById('cnt-h30')->innerText = totals['Hyller x30'];
-            document.getElementById('cnt-h60')->innerText = totals['Hyller x60'];
+            document.getElementById('cnt-h30').innerText = totals['Hyller x30'];
+            document.getElementById('cnt-h60').innerText = totals['Hyller x60'];
         }
 
         setLanguage(currentLang);
