@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Склад: Bunner & Hyller</title>
+    <!-- Сканер QR та штрихкодів -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { 
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        body { 
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 12px;
+            color: #1c1e21;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        h1 { 
+            font-size: 18px;
+            color: #1877f2;
+            margin: 0;
+        }
+        /* Перемикач мов */
+        .lang-switch {
+            display: flex;
+            gap: 4px;
+        }
+        .lang-btn {
+            padding: 6px 8px;
+            border: 1px solid #ccd0d5;
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .lang-btn.active {
+            background: #1877f2;
+            color: white;
+            border-color: #1877f2;
+        }
+        /* Дашборд залишків */
+        .dashboard { 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .card { 
+            background: white;
+            padding: 12px 5px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .card-title { 
+            font-size: 11px;
+            font-weight: bold;
+            color: #65676b;
+            text-transform: uppercase;
+        }
+        .card-value { 
+            font-size: 22px;
+            font-weight: bold;
+            color: #1877f2;
+            margin-top: 4px;
+        }
+        /* Форма */
+        .box { 
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        .box-title { 
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .type-selector { 
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .type-btn { 
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            text-align: center;
+            background: #e4e6eb;
+            color: #050505;
+        }
+        .type-btn.active-in { 
+            background: #2e7d32;
+            color: white;
+        }
+        .type-btn.active-out { 
+            background: #c62828;
+            color: white;
+        }
+        label { 
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #65676b;
+            margin-bottom: 5px;
+        }
+        select, input { 
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd0d5;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+        .btn-scan { 
+            width: 100%;
+            background: #ff9800;
+            color: white;
+            font-weight: bold;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .btn-submit { 
+            width: 100%;
+            background: #1877f2;
+            color: white;
+            font-weight: bold;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #reader { 
+            width: 100%;
+            display: none;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+        }
+        /* Таблиця */
+        table { 
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td { 
+            padding: 8px 4px;
+            text-align: left;
+            border-bottom: 1px solid #e4e6eb;
+        }
+        th { 
+            color: #65676b;
+            font-weight: 600;
+        }
+        .in-text { 
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .out-text { 
+            color: #c62828;
+            font-weight: bold;
+        }
+        .del-btn { 
+            color: #c62828;
+            border: none;
+            background: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 id="txt-title">Облік Складу</h1>
+        <div class="lang-switch">
+            <button class="lang-btn" onclick="setLanguage('uk')">UA</button>
+            <button class="lang-btn" onclick="setLanguage('no')">NO</button>
+            <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+            <button class="lang-btn" onclick="setLanguage('pl')">PL</button>
+        </div>
+    </div>
+
+    <!-- 1. Дашборд -->
+    <div class="dashboard">
+        <div class="card">
+            <div class="card-title">Bunner</div>
+            <div class="card-value" id="cnt-bunner">0</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Hyller x30</div>
+            <div class="card-value" id="cnt-h30">0</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Hyller x60</div>
+            <div class="card-value" id="cnt-h60">0</div>
+        </div>
+    </div>
+
+    <!-- 2. Форма введення -->
+    <div class="box">
+        <div class="box-title" id="txt-reg-title">Реєстрація операції</div>
+        
+        <div class="type-selector">
+            <button type="button" id="btn-in" class="type-btn active-in" onclick="selectType('IN')">📥 Прихід</button>
+            <button type="button" id="btn-out" class="type-btn" onclick="selectType('OUT')">📤 Вибуття</button>
+        </div>
+
+        <label for="prod" id="txt-label-prod">Продукт:</label>
+        <select id="prod">
+            <option value="Bunner">Bunner (Візок)</option>
+            <option value="Hyller x30">Hyller x30 (30 полиць)</option>
+            <option value="Hyller x60">Hyller x60 (60 полиць)</option>
+        </select>
+
+        <label id="txt-label-tag">Номер бірки (з камери або вручну):</label>
+        <button type="button" class="btn-scan" id="btn-scan-txt" onclick="requestPermissionAndStart()">📷 Сканувати бірку</button>
+        <div id="reader"></div>
+
+        <input type="text" id="tag-input" placeholder="Введіть або зіскануйте номер">
+
+        <button type="button" class="btn-submit" id="btn-save-txt" onclick="saveRecord()">Зберегти запис</button>
+    </div>
+
+    <!-- 3. Історія -->
+    <div class="box">
+        <div class="box-title" id="txt-history-title">Останні події</div>
+        <table>
+            <thead>
+                <tr>
+                    <th id="th-time">Час</th>
+                    <th id="th-action">Дія</th>
+                    <th id="th-product">Товар</th>
+                    <th id="th-tag">Бірка</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="logs"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const i18n = {
+            uk: {
+                title: "Облік Складу",
+                regTitle: "Реєстрація операції",
+                inBtn: "📥 Прихід",
+                outBtn: "📤 Вибуття",
+                labelProd: "Продукт:",
+                labelTag: "Номер бірки (з камери або вручну):",
+                btnScan: "📷 Сканувати бірку",
+                placeholder: "Введіть або зіскануйте номер",
+                btnSave: "Зберегти запис",
+                historyTitle: "Останні події",
+                thTime: "Час",
+                thAction: "Дія",
+                thProduct: "Товар",
+                thTag: "Бірка",
+                inText: "Прихід",
+                outText: "Вибуття",
+                alertTag: "Введіть або зіскануйте номер бірки!",
+                confirmDel: "Видалити цей запис?",
+                camErr: "Доступ до камери відхилено або відкрийте файл через HTTPS."
+            },
+            no: {
+                title: "Lagerstyring",
+                regTitle: "Registrer operasjon",
+                inBtn: "📥 Inn",
+                outBtn: "📤 Ut",
+                labelProd: "Produkt:",
+                labelTag: "Lappenummer (kamera eller manuelt):",
+                btnScan: "📷 Skann lapp",
+                placeholder: "Skriv inn eller skann nummer",
+                btnSave: "Lagre registrering",
+                historyTitle: "Siste hendelser",
+                thTime: "Tid",
+                thAction: "Handling",
+                thProduct: "Produkt",
+                thTag: "Lapp",
+                inText: "Inn",
+                outText: "Ut",
+                alertTag: "Vennligst skriv inn eller skann lappenummer!",
+                confirmDel: "Slette denne registreringen?",
+                camErr: "Kameratilgang avvist eller åpne filen via HTTPS."
+            },
+            en: {
+                title: "Warehouse Inventory",
+                regTitle: "Register Operation",
+                inBtn: "📥 In",
+                outBtn: "📤 Out",
+                labelProd: "Product:",
+                labelTag: "Tag Number (camera or manual):",
+                btnScan: "📷 Scan Tag",
+                placeholder: "Enter or scan tag number",
+                btnSave: "Save Record",
+                historyTitle: "Recent Events",
+                thTime: "Time",
+                thAction: "Action",
+                thProduct: "Product",
+                thTag: "Tag",
+                inText: "In",
+                outText: "Out",
+                alertTag: "Please enter or scan a tag number!",
+                confirmDel: "Delete this record?",
+                camErr: "Camera access denied or open file via HTTPS."
+            },
+            pl: {
+                title: "Ewidencja Magazynowa",
+                regTitle: "Rejestracja operacji",
+                inBtn: "📥 Przyjęcie",
+                outBtn: "📤 Wydanie",
+                labelProd: "Produkt:",
+                labelTag: "Numer etykiety (z kamery lub ręcznie):",
+                btnScan: "📷 Skanuj etykietę",
+                placeholder: "Wprowadź lub zeskanuj numer",
+                btnSave: "Zapisz wpis",
+                historyTitle: "Ostatnie zdarzenia",
+                thTime: "Czas",
+                thAction: "Akcja",
+                thProduct: "Produkt",
+                thTag: "Etykieta",
+                inText: "Przyjęcie",
+                outText: "Wydanie",
+                alertTag: "Proszę wprowadzić lub zeskanować numer etykiety!",
+                confirmDel: "Usunąć ten wpis?",
+                camErr: "Brak dostępu do kamery lub otwórz plik przez HTTPS."
+            }
+        };
+
+        let currentLang = localStorage.getItem('wh_lang') || 'uk';
+        let currentType = 'IN';
+        let qrScanner = null;
+        let db = JSON.parse(localStorage.getItem('wh_db_v1')) || [];
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('wh_lang', lang);
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase() === lang);
+            });
+
+            const t = i18n[lang];
+            document.getElementById('txt-title').innerText = t.title;
+            document.getElementById('txt-reg-title').innerText = t.regTitle;
+            document.getElementById('txt-label-prod').innerText = t.labelProd;
+            document.getElementById('txt-label-tag').innerText = t.labelTag;
+            document.getElementById('btn-scan-txt').innerText = t.btnScan;
+            document.getElementById('tag-input').placeholder = t.placeholder;
+            document.getElementById('btn-save-txt').innerText = t.btnSave;
+            document.getElementById('txt-history-title').innerText = t.historyTitle;
+            document.getElementById('th-time').innerText = t.thTime;
+            document.getElementById('th-action').innerText = t.thAction;
+            document.getElementById('th-product').innerText = t.thProduct;
+            document.getElementById('th-tag').innerText = t.thTag;
+
+            selectType(currentType);
+            updateApp();
+        }
+
+        function selectType(t) {
+            currentType = t;
+            const langTexts = i18n[currentLang];
+            const btnIn = document.getElementById('btn-in');
+            const btnOut = document.getElementById('btn-out');
+
+            btnIn.innerText = langTexts.inBtn;
+            btnOut.innerText = langTexts.outBtn;
+
+            btnIn.className = 'type-btn ' + (t === 'IN' ? 'active-in' : '');
+            btnOut.className = 'type-btn ' + (t === 'OUT' ? 'active-out' : '');
+        }
+
+        async function requestPermissionAndStart() {
+            const reader = document.getElementById('reader');
+            if (reader.style.display === 'block') {
+                stopCamera();
+                return;
+            }
+
+            try {
+                // Викликає системне вікно браузера з питанням про надання дозволу
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                // Зупиняємо тестовий потік, щоб віддати камеру сканеру
+                stream.getTracks().forEach(track => track.stop());
+                
+                startCamera();
+            } catch (err) {
+                alert(i18n[currentLang].camErr);
+            }
+        }
+
+        function startCamera() {
+            const reader = document.getElementById('reader');
+            reader.style.display = 'block';
+            
+            qrScanner = new Html5Qrcode("reader");
+            const config = { fps: 15, qrbox: { width: 250, height: 150 } };
+            
+            qrScanner.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => {
+                    document.getElementById('tag-input').value = decodedText;
+                    stopCamera();
+                },
+                (errorMessage) => { }
+            ).catch(err => {
+                alert(i18n[currentLang].camErr);
+                stopCamera();
+            });
+        }
+
+        function stopCamera() {
+            if (qrScanner) {
+                qrScanner.stop().then(() => {
+                    qrScanner.clear();
+                    document.getElementById('reader').style.display = 'none';
+                }).catch(() => {
+                    document.getElementById('reader').style.display = 'none';
+                });
+            } else {
+                document.getElementById('reader').style.display = 'none';
+            }
+        }
+
+        function saveRecord() {
+            const prod = document.getElementById('prod').value;
+            const tag = document.getElementById('tag-input').value.trim();
+            if (!tag) {
+                alert(i18n[currentLang].alertTag);
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                time: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+                type: currentType,
+                product: prod,
+                tag: tag
+            };
+
+            db.unshift(item);
+            updateApp();
+            document.getElementById('tag-input').value = '';
+        }
+
+        function deleteItem(id) {
+            if (confirm(i18n[currentLang].confirmDel)) {
+                db = db.filter(x => x.id !== id);
+                updateApp();
+            }
+        }
+
+        function updateApp() {
+            localStorage.setItem('wh_db_v1', JSON.stringify(db));
+            let totals = { 'Bunner': 0, 'Hyller x30': 0, 'Hyller x60': 0 };
+            const logsTbody = document.getElementById('logs');
+            logsTbody.innerHTML = '';
+
+            const t = i18n[currentLang];
+
+            db.forEach(x => {
+                if (x.type === 'IN') totals[x.product]++;
+                else totals[x.product]--;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${x.time}</td>
+                    <td class="${x.type === 'IN' ? 'in-text' : 'out-text'}">${x.type === 'IN' ? t.inText : t.outText}</td>
+                    <td>${x.product}</td>
+                    <td><b>${x.tag}</b></td>
+                    <td><button class="del-btn" onclick="deleteItem(${x.id})">✕</button></td>
+                `;
+                logsTbody.appendChild(tr);
+            });
+
+            document.getElementById('cnt-bunner').innerText = totals['Bunner'];
+            document.getElementById('cnt-h30').innerText = totals['Hyller x30'];
+            document.getElementById('cnt-h60').innerText = totals['Hyller x60'];
+        }
+
+        setLanguage(currentLang);
+    </script>
+</body>
+</html>
