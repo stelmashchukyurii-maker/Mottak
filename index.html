@@ -1,11 +1,234 @@
 <!DOCTYPE html>
-Сканер бірок — QR як орієнтир
-Сканер бірок
-Відкрийте камеру або виберіть готове фото
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Сканер бірок — QR як орієнтир</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@7/dist/tesseract.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #101010;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    header {
+      padding: 13px 10px;
+      background: #1c1c1c;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    #status {
+      margin-top: 8px;
+      min-height: 23px;
+      color: #ddd;
+      line-height: 1.4;
+      font-size: 15px;
+    }
+    main {
+      width: min(96%, 760px);
+      margin: 0 auto;
+      padding: 12px 0 28px;
+    }
+
+    #camera-box {
+      position: relative;
+      width: 100%;
+      height: 54vh;
+      min-height: 360px;
+      max-height: 680px;
+      overflow: hidden;
+      background: #000;
+      border-radius: 14px;
+      border: 2px solid #333;
+    }
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #000;
+    }
+    #guide {
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      width: 48%;
+      max-width: 320px;
+      aspect-ratio: 1 / 1.5;
+      transform: translate(-50%, -50%);
+      border: 3px solid #00ff66;
+      border-radius: 14px;
+      background: rgba(0,255,102,0.05);
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.22), 0 0 18px rgba(0,255,102,0.9);
+      pointer-events: none;
+    }
+    #guide::before {
+      content: "Помістіть QR і номер у цю область";
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      width: 290px;
+      transform: translateX(-50%);
+      font-weight: bold;
+      text-shadow: 0 2px 5px #000;
+    }
+
+    .controls {
+      padding: 10px 4px;
+    }
+    button, .file-label {
+      display: inline-block;
+      border: 0;
+      border-radius: 12px;
+      margin: 5px;
+      padding: 13px 17px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    #start-btn, #capture-btn {
+      width: min(95%, 520px);
+      color: #fff;
+      background: #00ad49;
+      font-size: 20px;
+    }
+    #torch-btn {
+      background: #ffc107;
+      color: #111;
+    }
+    #stop-btn {
+      background: #b22e2e;
+      color: #fff;
+    }
+    .file-label {
+      width: min(95%, 520px);
+      background: #1685ee;
+      color: #fff;
+    }
+    #file-input {
+      display: none;
+    }
+
+    #progress-box,
+    #diagnostic-box,
+    #crop-box,
+    #result-box {
+      width: 100%;
+      margin: 12px auto;
+      padding: 12px;
+      background: #222;
+      border: 2px solid #555;
+      border-radius: 14px;
+    }
+    #progress-box,
+    #diagnostic-box,
+    #crop-box {
+      display: none;
+    }
+    #progress-text {
+      margin-bottom: 8px;
+      color: #ddd;
+    }
+    #progress-track {
+      height: 13px;
+      background: #444;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #progress-bar {
+      width: 0;
+      height: 100%;
+      background: #00ad49;
+      transition: width 0.15s linear;
+    }
+
+    .box-title {
+      margin-bottom: 9px;
+      color: #bbb;
+      font-size: 14px;
+    }
+    #diagnostic-canvas,
+    #crop-preview {
+      display: block;
+      width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 9px;
+    }
+    #debug-text {
+      margin-top: 9px;
+      color: #aaa;
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    #recognized-text {
+      margin-top: 10px;
+      color: #00ff66;
+      font-family: monospace;
+      font-size: 34px;
+      font-weight: bold;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    #confidence {
+      margin-top: 9px;
+      color: #bbb;
+      font-size: 14px;
+    }
+    #result-note {
+      margin-top: 9px;
+      color: #aaa;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    canvas.hidden-canvas {
+      display: none;
+    }
+
+    footer {
+      padding: 15px 10px 25px;
+      border-top: 1px solid #333;
+      color: #888;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Сканер бірок</h1>
+  <div id="status">Відкрийте камеру або виберіть готове фото</div>
+</header>
+
+<main>
+  <div id="camera-box">
     <video id="video" autoplay playsinline muted></video>
     <div id="guide"></div>
+  </div>
 
+  <canvas id="full-canvas" class="hidden-canvas"></canvas>
+  <canvas id="work-canvas" class="hidden-canvas"></canvas>
+  <canvas id="bw-canvas" class="hidden-canvas"></canvas>
+
+  <div class="controls">
     <button id="start-btn">📷 Відкрити камеру</button>
 
     <div id="camera-controls" hidden>
@@ -16,26 +239,647 @@
 
     <label class="file-label" for="file-input">🖼️ Або вибрати готове фото</label>
     <input id="file-input" type="file" accept="image/*">
+  </div>
 
+  <div id="progress-box">
     <div id="progress-text">Підготовка…</div>
     <div id="progress-track"><div id="progress-bar"></div></div>
+  </div>
 
+  <div id="diagnostic-box">
     <div class="box-title">Фото з рамками: червона — QR, зелена — зона тексту</div>
     <canvas id="diagnostic-canvas"></canvas>
     <div id="debug-text"></div>
+  </div>
 
+  <div id="crop-box">
     <div class="box-title">Фрагмент, який отримав OCR</div>
     <img id="crop-preview" alt="Фрагмент над QR">
+  </div>
 
+  <div id="result-box">
     <div class="box-title">Розпізнані цифри та літери</div>
     <div id="recognized-text">Очікування…</div>
     <div id="confidence"></div>
     <div id="result-note">
       Програма знаходить QR і читає квадрат такого самого розміру безпосередньо над ним.
     </div>
+  </div>
+</main>
 
-Версія: 0.5
+<footer>
+  <div><strong>Версія:</strong> 0.5</div>
+  <div><strong>Оновлено:</strong> 30.07.2026</div>
+  <div>QR використовується лише як орієнтир для області тексту</div>
+</footer>
 
-Оновлено: 30.07.2026
+<script>
+"use strict";
 
-QR використовується лише як орієнтир для області тексту
+const video = document.getElementById("video");
+const startBtn = document.getElementById("start-btn");
+const captureBtn = document.getElementById("capture-btn");
+const stopBtn = document.getElementById("stop-btn");
+const torchBtn = document.getElementById("torch-btn");
+const cameraControls = document.getElementById("camera-controls");
+const fileInput = document.getElementById("file-input");
+const statusEl = document.getElementById("status");
+
+const fullCanvas = document.getElementById("full-canvas");
+const workCanvas = document.getElementById("work-canvas");
+const bwCanvas = document.getElementById("bw-canvas");
+const diagnosticCanvas = document.getElementById("diagnostic-canvas");
+
+const progressBox = document.getElementById("progress-box");
+const progressText = document.getElementById("progress-text");
+const progressBar = document.getElementById("progress-bar");
+
+const diagnosticBox = document.getElementById("diagnostic-box");
+const cropBox = document.getElementById("crop-box");
+const cropPreview = document.getElementById("crop-preview");
+const debugText = document.getElementById("debug-text");
+
+const recognizedText = document.getElementById("recognized-text");
+const confidence = document.getElementById("confidence");
+const resultNote = document.getElementById("result-note");
+
+let stream = null;
+let track = null;
+let torchOn = false;
+let busy = false;
+let worker = null;
+let workerReady = false;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function startCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showError("Браузер не підтримує камеру.");
+    return;
+  }
+
+  startBtn.disabled = true;
+  statusEl.textContent = "Відкриваємо камеру…";
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 3840 },
+        height: { ideal: 2160 },
+        frameRate: { ideal: 30, max: 30 }
+      }
+    });
+
+    video.srcObject = stream;
+    await video.play();
+
+    track = stream.getVideoTracks()[0];
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+
+    if (Array.isArray(caps.focusMode) && caps.focusMode.includes("continuous")) {
+      try {
+        await track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+      } catch (e) {
+        console.warn("Без примусового continuous focus", e);
+      }
+    }
+
+    torchBtn.disabled = !(caps.torch === true || Array.isArray(caps.torch));
+
+    cameraControls.hidden = false;
+    startBtn.hidden = true;
+    statusEl.textContent = "Наведіть бірку. QR і два рядки над ним мають бути чіткими.";
+  } catch (error) {
+    console.error(error);
+    showError("Не вдалося відкрити камеру. Перевірте дозвіл у Chrome.");
+  } finally {
+    startBtn.disabled = false;
+  }
+}
+
+function stopCamera() {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+  }
+  stream = null;
+  track = null;
+  video.srcObject = null;
+  cameraControls.hidden = true;
+  startBtn.hidden = false;
+  statusEl.textContent = "Камеру закрито.";
+}
+
+async function toggleTorch() {
+  if (!track) return;
+  torchOn = !torchOn;
+  try {
+    await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+    torchBtn.textContent = torchOn ? "💡 Вимкнути ліхтарик" : "🔦 Ліхтарик";
+  } catch (error) {
+    torchOn = false;
+    torchBtn.textContent = "🔦 Ліхтарик";
+  }
+}
+
+function captureVideoFrame() {
+  if (!video.videoWidth || !video.videoHeight) {
+    throw new Error("Камера ще не підготувала кадр.");
+  }
+
+  fullCanvas.width = video.videoWidth;
+  fullCanvas.height = video.videoHeight;
+
+  const ctx = fullCanvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(video, 0, 0, fullCanvas.width, fullCanvas.height);
+
+  return fullCanvas;
+}
+
+async function fileToCanvas(file) {
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+
+  try {
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = url;
+    });
+
+    const maxSide = 3000;
+    const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+
+    fullCanvas.width = Math.round(img.naturalWidth * scale);
+    fullCanvas.height = Math.round(img.naturalHeight * scale);
+
+    const ctx = fullCanvas.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, fullCanvas.width, fullCanvas.height);
+
+    return fullCanvas;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function cloneCanvas(source) {
+  const c = document.createElement("canvas");
+  c.width = source.width;
+  c.height = source.height;
+  c.getContext("2d").drawImage(source, 0, 0);
+  return c;
+}
+
+function toGrayscaleCanvas(source, contrast = 1.0) {
+  const c = cloneCanvas(source);
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  const img = ctx.getImageData(0, 0, c.width, c.height);
+  const p = img.data;
+
+  for (let i = 0; i < p.length; i += 4) {
+    let g = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+    g = (g - 128) * contrast + 128;
+    g = Math.max(0, Math.min(255, g));
+    p[i] = p[i + 1] = p[i + 2] = g;
+  }
+
+  ctx.putImageData(img, 0, 0);
+  return c;
+}
+
+function scaleCanvas(source, scale) {
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(source.width * scale));
+  c.height = Math.max(1, Math.round(source.height * scale));
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(source, 0, 0, c.width, c.height);
+  return c;
+}
+
+function readQrFromCanvas(source) {
+  const ctx = source.getContext("2d", { willReadFrequently: true });
+  const img = ctx.getImageData(0, 0, source.width, source.height);
+
+  return jsQR(img.data, img.width, img.height, {
+    inversionAttempts: "attemptBoth"
+  });
+}
+
+function transformLocation(location, scaleBack) {
+  const map = p => ({ x: p.x * scaleBack, y: p.y * scaleBack });
+
+  return {
+    topLeftCorner: map(location.topLeftCorner),
+    topRightCorner: map(location.topRightCorner),
+    bottomLeftCorner: map(location.bottomLeftCorner),
+    bottomRightCorner: map(location.bottomRightCorner)
+  };
+}
+
+function detectQrMultiPass(source) {
+  const passes = [
+    { name: "оригінал", canvas: source, scaleBack: 1 },
+    { name: "сіре", canvas: toGrayscaleCanvas(source, 1.0), scaleBack: 1 },
+    { name: "контраст 1.5", canvas: toGrayscaleCanvas(source, 1.5), scaleBack: 1 },
+    { name: "контраст 2.0", canvas: toGrayscaleCanvas(source, 2.0), scaleBack: 1 }
+  ];
+
+  if (Math.max(source.width, source.height) > 1600) {
+    const s = 0.6;
+    passes.push({
+      name: "зменшене 60%",
+      canvas: scaleCanvas(source, s),
+      scaleBack: 1 / s
+    });
+  }
+
+  for (const pass of passes) {
+    const result = readQrFromCanvas(pass.canvas);
+    if (result?.location) {
+      return {
+        data: result.data || "",
+        location: transformLocation(result.location, pass.scaleBack),
+        method: pass.name
+      };
+    }
+  }
+
+  return null;
+}
+
+function boundsFromQr(location) {
+  const points = [
+    location.topLeftCorner,
+    location.topRightCorner,
+    location.bottomLeftCorner,
+    location.bottomRightCorner
+  ];
+
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+
+  return {
+    left: Math.min(...xs),
+    right: Math.max(...xs),
+    top: Math.min(...ys),
+    bottom: Math.max(...ys)
+  };
+}
+
+function clampRect(rect, maxW, maxH) {
+  const left = Math.max(0, Math.min(maxW - 1, rect.left));
+  const top = Math.max(0, Math.min(maxH - 1, rect.top));
+  const right = Math.max(left + 1, Math.min(maxW, rect.right));
+  const bottom = Math.max(top + 1, Math.min(maxH, rect.bottom));
+
+  return { left, top, right, bottom, width: right - left, height: bottom - top };
+}
+
+function createTextRectFromQr(qrBounds, canvasW, canvasH) {
+  const qrWidth = qrBounds.right - qrBounds.left;
+  const qrHeight = qrBounds.bottom - qrBounds.top;
+  const size = Math.max(qrWidth, qrHeight);
+
+  /*
+    Перший тест:
+    зона тексту = 100% розміру QR,
+    одразу над QR.
+  */
+  const gap = size * 0.06;
+  const centerX = (qrBounds.left + qrBounds.right) / 2;
+
+  return clampRect({
+    left: centerX - size / 2,
+    right: centerX + size / 2,
+    bottom: qrBounds.top - gap,
+    top: qrBounds.top - gap - size
+  }, canvasW, canvasH);
+}
+
+function cropRect(source, rect, outputScale = 6) {
+  workCanvas.width = Math.max(1, Math.round(rect.width * outputScale));
+  workCanvas.height = Math.max(1, Math.round(rect.height * outputScale));
+
+  const ctx = workCanvas.getContext("2d", { willReadFrequently: true });
+  ctx.clearRect(0, 0, workCanvas.width, workCanvas.height);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+
+  ctx.drawImage(
+    source,
+    rect.left, rect.top, rect.width, rect.height,
+    0, 0, workCanvas.width, workCanvas.height
+  );
+
+  return workCanvas;
+}
+
+function drawDiagnostics(source, qrLocation, textRect) {
+  diagnosticCanvas.width = source.width;
+  diagnosticCanvas.height = source.height;
+
+  const ctx = diagnosticCanvas.getContext("2d");
+  ctx.drawImage(source, 0, 0);
+
+  const qrPoints = [
+    qrLocation.topLeftCorner,
+    qrLocation.topRightCorner,
+    qrLocation.bottomRightCorner,
+    qrLocation.bottomLeftCorner
+  ];
+
+  ctx.lineWidth = Math.max(4, source.width / 350);
+  ctx.strokeStyle = "#ff3030";
+  ctx.beginPath();
+  ctx.moveTo(qrPoints[0].x, qrPoints[0].y);
+  for (let i = 1; i < qrPoints.length; i++) {
+    ctx.lineTo(qrPoints[i].x, qrPoints[i].y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.strokeStyle = "#00ff66";
+  ctx.strokeRect(textRect.left, textRect.top, textRect.width, textRect.height);
+
+  diagnosticBox.style.display = "block";
+}
+
+function createBinaryCanvas(source) {
+  bwCanvas.width = source.width;
+  bwCanvas.height = source.height;
+
+  const ctx = bwCanvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(source, 0, 0);
+
+  const img = ctx.getImageData(0, 0, bwCanvas.width, bwCanvas.height);
+  const p = img.data;
+
+  let sum = 0;
+  let count = 0;
+
+  for (let i = 0; i < p.length; i += 4) {
+    const g = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+    sum += g;
+    count++;
+  }
+
+  const avg = count ? sum / count : 128;
+  const threshold = Math.max(80, Math.min(200, avg * 0.82));
+
+  for (let i = 0; i < p.length; i += 4) {
+    let g = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+    g = (g - 128) * 1.7 + 128;
+    const v = g > threshold ? 255 : 0;
+    p[i] = p[i + 1] = p[i + 2] = v;
+    p[i + 3] = 255;
+  }
+
+  ctx.putImageData(img, 0, 0);
+  return bwCanvas;
+}
+
+async function prepareWorker() {
+  if (workerReady && worker) return;
+
+  progressBox.style.display = "block";
+  progressBar.style.width = "3%";
+  progressText.textContent = "Завантаження OCR…";
+
+  worker = await Tesseract.createWorker("eng", 1, {
+    logger(message) {
+      if (typeof message.progress !== "number") return;
+
+      const pct = Math.round(message.progress * 100);
+      progressBar.style.width = `${pct}%`;
+
+      const names = {
+        "loading tesseract core": "Завантаження OCR",
+        "initializing tesseract": "Запуск OCR",
+        "loading language traineddata": "Завантаження мовної моделі",
+        "initializing api": "Підготовка",
+        "recognizing text": "Розпізнавання"
+      };
+
+      progressText.textContent =
+        `${names[message.status] || message.status || "Обробка"}: ${pct}%`;
+    }
+  });
+
+  await worker.setParameters({
+    tessedit_char_whitelist: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    preserve_interword_spaces: "1",
+    tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK
+  });
+
+  workerReady = true;
+}
+
+function cleanText(text) {
+  return String(text || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9\r\n ]/g, "")
+    .split(/\r?\n/)
+    .map(line => line.replace(/\s+/g, "").trim())
+    .filter(line => line.length >= 3 && line.length <= 12)
+    .slice(0, 3)
+    .join("\n")
+    .trim();
+}
+
+function textScore(text, conf) {
+  const lines = text.split("\n").filter(Boolean);
+  let score = Number(conf) || 0;
+
+  if (lines.length === 2) score += 35;
+
+  for (const line of lines) {
+    if (line.length === 6) score += 25;
+    if (/^[A-Z0-9]+$/.test(line)) score += 5;
+  }
+
+  return score;
+}
+
+async function ocrBest(cropCanvas) {
+  await prepareWorker();
+
+  progressText.textContent = "OCR: кольоровий фрагмент…";
+  const colorResult = await worker.recognize(cropCanvas);
+  const colorText = cleanText(colorResult.data.text);
+  const colorScore = textScore(colorText, colorResult.data.confidence);
+
+  const binary = createBinaryCanvas(cropCanvas);
+
+  progressText.textContent = "OCR: чорно-білий фрагмент…";
+  const bwResult = await worker.recognize(binary);
+  const bwText = cleanText(bwResult.data.text);
+  const bwScore = textScore(bwText, bwResult.data.confidence);
+
+  if (bwScore > colorScore) {
+    return {
+      text: bwText,
+      confidence: bwResult.data.confidence || 0,
+      method: "чорно-білий",
+      canvas: binary
+    };
+  }
+
+  return {
+    text: colorText,
+    confidence: colorResult.data.confidence || 0,
+    method: "кольоровий",
+    canvas: cropCanvas
+  };
+}
+
+async function processCanvas(source) {
+  if (busy) return;
+  busy = true;
+
+  captureBtn.disabled = true;
+  recognizedText.textContent = "Пошук QR…";
+  confidence.textContent = "";
+  diagnosticBox.style.display = "none";
+  cropBox.style.display = "none";
+  progressBox.style.display = "block";
+  progressBar.style.width = "5%";
+
+  try {
+    statusEl.textContent = "Шукаємо QR-код на повному фото…";
+    progressText.textContent = "Пошук QR…";
+
+    const qr = detectQrMultiPass(source);
+
+    if (!qr) {
+      throw new Error(
+        "QR не знайдено. Піднесіть ближче, увімкніть світло або зробіть чіткіше фото."
+      );
+    }
+
+    const qrBounds = boundsFromQr(qr.location);
+    const textRect = createTextRectFromQr(
+      qrBounds,
+      source.width,
+      source.height
+    );
+
+    drawDiagnostics(source, qr.location, textRect);
+
+    const crop = cropRect(source, textRect, 6);
+    cropPreview.src = crop.toDataURL("image/jpeg", 0.97);
+    cropBox.style.display = "block";
+
+    debugText.textContent =
+      `Метод пошуку QR: ${qr.method}\n` +
+      `Розмір QR: ${Math.round(qrBounds.right - qrBounds.left)} × ` +
+      `${Math.round(qrBounds.bottom - qrBounds.top)} px\n` +
+      `Зона тексту: ${Math.round(textRect.width)} × ${Math.round(textRect.height)} px\n` +
+      `Вміст QR: ${qr.data || "(геометрія знайдена, текст не прочитано)"}`;
+
+    statusEl.textContent = "QR знайдено. Розпізнаємо квадрат над ним…";
+    recognizedText.textContent = "Розпізнавання…";
+
+    const result = await ocrBest(crop);
+
+    cropPreview.src = result.canvas.toDataURL("image/png");
+
+    if (result.text) {
+      recognizedText.textContent = result.text;
+      confidence.textContent =
+        `Впевненість OCR: ${Math.round(result.confidence)}%. Метод: ${result.method}.`;
+      resultNote.textContent =
+        "Перевірте два рядки. Якщо зелена рамка захопила зайве, у наступній версії зменшимо її до 80% або 60%.";
+      statusEl.textContent = "✅ Готово.";
+
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 60, 120]);
+      }
+    } else {
+      recognizedText.textContent = "Не розпізнано";
+      confidence.textContent = "";
+      resultNote.textContent =
+        "QR знайдено, але текст у зеленій області OCR не прочитав. Подивіться на вирізаний фрагмент.";
+      statusEl.textContent = "QR знайдено, текст не прочитано.";
+    }
+  } catch (error) {
+    console.error(error);
+    recognizedText.textContent = "Помилка";
+    confidence.textContent = "";
+    resultNote.textContent = error.message || "Невідома помилка.";
+    statusEl.textContent = error.message || "Сталася помилка.";
+  } finally {
+    busy = false;
+    captureBtn.disabled = false;
+
+    setTimeout(() => {
+      progressBox.style.display = "none";
+    }, 1100);
+  }
+}
+
+async function captureAndProcess() {
+  if (!track) {
+    showError("Спочатку відкрийте камеру.");
+    return;
+  }
+
+  captureBtn.disabled = true;
+  statusEl.textContent = "Чекаємо автофокус…";
+
+  try {
+    await sleep(850);
+
+    const candidates = [];
+    for (let i = 0; i < 3; i++) {
+      const c = cloneCanvas(captureVideoFrame());
+      const qr = detectQrMultiPass(c);
+      candidates.push({ canvas: c, qr });
+      if (qr) break;
+      await sleep(220);
+    }
+
+    const withQr = candidates.find(x => x.qr);
+    await processCanvas(withQr ? withQr.canvas : candidates[0].canvas);
+  } finally {
+    captureBtn.disabled = false;
+  }
+}
+
+function showError(message) {
+  recognizedText.textContent = "Помилка";
+  confidence.textContent = "";
+  resultNote.textContent = message;
+  statusEl.textContent = message;
+}
+
+startBtn.addEventListener("click", startCamera);
+stopBtn.addEventListener("click", stopCamera);
+torchBtn.addEventListener("click", toggleTorch);
+captureBtn.addEventListener("click", captureAndProcess);
+
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files?.[0];
+  if (!file) return;
+
+  try {
+    const canvas = await fileToCanvas(file);
+    await processCanvas(canvas);
+  } catch (error) {
+    showError(error.message || "Не вдалося відкрити фото.");
+  } finally {
+    fileInput.value = "";
+  }
+});
+
+window.addEventListener("pagehide", () => {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  if (worker) worker.terminate();
+});
+</script>
+</body>
+</html>
