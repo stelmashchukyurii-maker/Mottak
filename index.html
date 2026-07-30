@@ -2,10 +2,13 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
   <meta name="theme-color" content="#111827" />
 
-  <title>AI Scanner Mottak v2</title>
+  <title>AI Scanner Mottak v3</title>
 
   <style>
     :root {
@@ -19,6 +22,7 @@
       --ok: #48d597;
       --bad: #ff6b6b;
       --line: #303b59;
+      --selected: #4b67ac;
     }
 
     * {
@@ -29,20 +33,30 @@
       margin: 0;
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #0b1020 0%, #11182a 100%);
+      background:
+        linear-gradient(
+          180deg,
+          #0b1020 0%,
+          #11182a 100%
+        );
       color: var(--text);
     }
 
     .app {
       width: min(720px, 100%);
       margin: 0 auto;
-      padding: 18px 14px 40px;
+      padding: 18px 14px 50px;
     }
 
     h1 {
       margin: 4px 0 6px;
       font-size: clamp(25px, 7vw, 38px);
       line-height: 1.05;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 21px;
     }
 
     .subtitle {
@@ -56,8 +70,11 @@
       padding: 16px;
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: rgba(21, 28, 48, 0.94);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+      background:
+        rgba(21, 28, 48, 0.94);
+      box-shadow:
+        0 12px 28px
+        rgba(0, 0, 0, 0.22);
     }
 
     label {
@@ -89,24 +106,25 @@
       gap: 10px;
     }
 
-    @media (min-width: 560px) {
-      .row.two {
-        grid-template-columns: 1fr 1fr;
-      }
+    .row.two {
+      grid-template-columns: 1fr 1fr;
     }
 
     button,
     .file-button {
       width: 100%;
-      min-height: 52px;
-      padding: 12px 16px;
+      min-height: 54px;
+      padding: 12px 14px;
       border: 0;
       border-radius: 14px;
       font-size: 17px;
       font-weight: 800;
       cursor: pointer;
       text-align: center;
-      transition: transform 0.08s ease, opacity 0.2s ease;
+      transition:
+        transform 0.08s ease,
+        opacity 0.2s ease,
+        background 0.2s ease;
     }
 
     button:active,
@@ -132,6 +150,12 @@
     .success {
       background: var(--ok);
       color: #062418;
+    }
+
+    .danger {
+      background: rgba(255, 107, 107, 0.18);
+      border: 1px solid rgba(255, 107, 107, 0.45);
+      color: #ffb2b2;
     }
 
     input[type="file"] {
@@ -200,7 +224,11 @@
 
     .result-value {
       min-height: 42px;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Consolas,
+        monospace;
       font-size: clamp(27px, 8vw, 42px);
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -208,18 +236,110 @@
     }
 
     .confidence {
-      margin: 12px 0 0;
+      margin: 12px 0;
       color: var(--muted);
     }
 
-    .warning {
-      padding: 11px 12px;
-      border-radius: 12px;
-      background: rgba(244, 196, 48, 0.1);
-      border: 1px solid rgba(244, 196, 48, 0.34);
-      color: #f7df8b;
+    .product-title {
+      margin: 18px 0 10px;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       font-size: 14px;
-      line-height: 1.4;
+    }
+
+    .product-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (min-width: 520px) {
+      .product-buttons {
+        grid-template-columns:
+          repeat(3, 1fr);
+      }
+    }
+
+    .product-btn {
+      min-height: 66px;
+      background: #2c395c;
+      color: var(--text);
+      border: 2px solid transparent;
+    }
+
+    .product-btn.selected {
+      background: var(--selected);
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 2px
+        rgba(244, 196, 48, 0.15);
+    }
+
+    .selected-product {
+      min-height: 25px;
+      margin: 2px 0 12px;
+      color: var(--accent);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .summary-main {
+      margin-bottom: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #0d1426;
+      border: 1px solid var(--accent);
+      text-align: center;
+    }
+
+    .summary-main .label {
+      color: var(--muted);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .summary-main .number {
+      margin-top: 5px;
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 500px) {
+      .summary-grid {
+        grid-template-columns:
+          repeat(3, 1fr);
+      }
+    }
+
+    .summary-box {
+      padding: 14px 10px;
+      border-radius: 14px;
+      background: #0d1426;
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .summary-box .name {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .summary-box .count {
+      margin-top: 4px;
+      font-size: 34px;
+      font-weight: 900;
     }
 
     .list {
@@ -228,15 +348,72 @@
       margin-top: 12px;
     }
 
+    .list-empty {
+      padding: 16px;
+      border-radius: 12px;
+      background: #0d1426;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      text-align: center;
+    }
+
     .list-item {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns:
+        auto 1fr auto;
       gap: 10px;
+      align-items: center;
       padding: 11px 12px;
       border-radius: 12px;
       background: #0d1426;
       border: 1px solid var(--line);
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .item-number {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .item-main {
+      min-width: 0;
+    }
+
+    .item-product {
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .item-code {
+      margin-top: 4px;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Consolas,
+        monospace;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      overflow-wrap: anywhere;
+    }
+
+    .item-time {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .warning {
+      margin-top: 14px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      background:
+        rgba(244, 196, 48, 0.1);
+      border:
+        1px solid
+        rgba(244, 196, 48, 0.34);
+      color: #f7df8b;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
     .tiny {
@@ -251,10 +428,11 @@
 <body>
   <main class="app">
 
-    <h1>AI Scanner Mottak v2</h1>
+    <h1>AI Scanner Mottak v3</h1>
 
     <p class="subtitle">
-      Фото жовтої бірки → Gemini Vision → два рядки над QR.
+      Фото жовтої бірки → Gemini Vision →
+      вибір продукції → облік приймання.
     </p>
 
     <section class="card">
@@ -271,14 +449,27 @@
       />
 
       <div class="tiny">
-        Ключ зберігається лише до закриття вкладки та не записаний у HTML-файл.
+        Ключ зберігається лише у браузері цього телефона.
+        У GitHub-код він не записується.
       </div>
+
+      <button
+        id="forgetKeyBtn"
+        class="secondary"
+        style="margin-top: 12px;"
+        type="button"
+      >
+        Забути збережений ключ
+      </button>
 
     </section>
 
     <section class="card">
 
-      <label class="file-button primary" for="photoInput">
+      <label
+        class="file-button primary"
+        for="photoInput"
+      >
         📷 Зробити фото бірки
       </label>
 
@@ -289,21 +480,26 @@
         capture="environment"
       />
 
-      <div id="previewWrap" class="preview-wrap">
-
+      <div
+        id="previewWrap"
+        class="preview-wrap"
+      >
         <img
           id="preview"
           alt="Попередній перегляд фото"
         />
-
       </div>
 
-      <div class="row two" style="margin-top: 12px;">
+      <div
+        class="row two"
+        style="margin-top: 12px;"
+      >
 
         <button
           id="scanBtn"
           class="primary"
           disabled
+          type="button"
         >
           Розпізнати номер
         </button>
@@ -312,13 +508,17 @@
           id="clearBtn"
           class="secondary"
           disabled
+          type="button"
         >
           Нове фото
         </button>
 
       </div>
 
-      <div id="status" class="status">
+      <div
+        id="status"
+        class="status"
+      >
         Спочатку зробіть фотографію.
       </div>
 
@@ -334,7 +534,10 @@
             Перший рядок
           </span>
 
-          <div id="line1" class="result-value">
+          <div
+            id="line1"
+            class="result-value"
+          >
             ------
           </div>
 
@@ -346,7 +549,10 @@
             Другий рядок
           </span>
 
-          <div id="line2" class="result-value">
+          <div
+            id="line2"
+            class="result-value"
+          >
             ------
           </div>
 
@@ -354,49 +560,192 @@
 
       </div>
 
-      <p id="confidence" class="confidence">
+      <p
+        id="confidence"
+        class="confidence"
+      >
         Впевненість: —
       </p>
+
+      <div class="product-title">
+        Виберіть продукцію
+      </div>
+
+      <div class="product-buttons">
+
+        <button
+          class="product-btn"
+          data-product="Bunner"
+          type="button"
+        >
+          Bunner
+        </button>
+
+        <button
+          class="product-btn"
+          data-product="Hyller x30"
+          type="button"
+        >
+          Hyller x30
+        </button>
+
+        <button
+          class="product-btn"
+          data-product="Hyller x60"
+          type="button"
+        >
+          Hyller x60
+        </button>
+
+      </div>
+
+      <div
+        id="selectedProduct"
+        class="selected-product"
+      >
+        Продукцію не вибрано
+      </div>
 
       <button
         id="addBtn"
         class="success"
         disabled
+        type="button"
       >
-        Додати
+        Додати на склад
       </button>
 
     </section>
 
     <section class="card">
 
-      <strong>
-        Тестовий список
-      </strong>
+      <h2>
+        Прийнято на склад
+      </h2>
 
-      <div id="list" class="list"></div>
+      <div class="summary-main">
+
+        <div class="label">
+          Загальна кількість
+        </div>
+
+        <div
+          id="totalCount"
+          class="number"
+        >
+          0
+        </div>
+
+      </div>
+
+      <div class="summary-grid">
+
+        <div class="summary-box">
+
+          <div class="name">
+            Bunner
+          </div>
+
+          <div
+            id="bunnerCount"
+            class="count"
+          >
+            0
+          </div>
+
+        </div>
+
+        <div class="summary-box">
+
+          <div class="name">
+            Hyller x30
+          </div>
+
+          <div
+            id="hyller30Count"
+            class="count"
+          >
+            0
+          </div>
+
+        </div>
+
+        <div class="summary-box">
+
+          <div class="name">
+            Hyller x60
+          </div>
+
+          <div
+            id="hyller60Count"
+            class="count"
+          >
+            0
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>
+        Список приймання
+      </h2>
+
+      <div
+        id="list"
+        class="list"
+      ></div>
+
+      <div
+        class="row two"
+        style="margin-top: 14px;"
+      >
+
+        <button
+          id="deleteLastBtn"
+          class="secondary"
+          disabled
+          type="button"
+        >
+          Видалити останній
+        </button>
+
+        <button
+          id="clearAllBtn"
+          class="danger"
+          disabled
+          type="button"
+        >
+          Очистити все
+        </button>
+
+      </div>
 
       <div class="tiny">
-        Список існує лише в цій вкладці.
-        Постійне збереження та експорт додамо після перевірки розпізнавання.
+        Список і лічильники автоматично
+        зберігаються у браузері телефона.
       </div>
 
     </section>
 
     <div class="warning">
-
-      Це тестова версія.
-
-      Не публікуйте сторінку з ключем, записаним у коді.
-
-      Для робочої версії API-виклик буде перенесено на сервер
-      або Cloudflare Worker.
-
+      Це тестова версія. API-ключ зберігається
+      тільки у браузері цього пристрою.
+      Для робочої публічної версії API-виклик
+      потрібно перенести на сервер або
+      Cloudflare Worker.
     </div>
 
   </main>
 
-  <canvas id="canvas" hidden></canvas>
+  <canvas
+    id="canvas"
+    hidden
+  ></canvas>
 
   <script>
     "use strict";
@@ -431,13 +780,24 @@
 5. Не домислюй символи.
 
 Якщо будь-який рядок неможливо надійно прочитати,
-поверни для нього порожній рядок і низьку confidence.
+поверни для нього порожній рядок
+і низьку confidence.
 
-6. Поверни тільки дані відповідно до заданої JSON-схеми.
+6. Поверни тільки дані відповідно
+до заданої JSON-схеми.
 `.trim();
+
+    const STORAGE_KEY =
+      "mottak_entries_v3";
+
+    const API_KEY_STORAGE =
+      "gemini_api_key";
 
     const apiKeyInput =
       document.getElementById("apiKey");
+
+    const forgetKeyBtn =
+      document.getElementById("forgetKeyBtn");
 
     const photoInput =
       document.getElementById("photoInput");
@@ -472,81 +832,284 @@
     const confidenceEl =
       document.getElementById("confidence");
 
+    const selectedProductEl =
+      document.getElementById(
+        "selectedProduct"
+      );
+
+    const productButtons =
+      document.querySelectorAll(
+        ".product-btn"
+      );
+
+    const totalCountEl =
+      document.getElementById(
+        "totalCount"
+      );
+
+    const bunnerCountEl =
+      document.getElementById(
+        "bunnerCount"
+      );
+
+    const hyller30CountEl =
+      document.getElementById(
+        "hyller30Count"
+      );
+
+    const hyller60CountEl =
+      document.getElementById(
+        "hyller60Count"
+      );
+
     const listEl =
       document.getElementById("list");
 
-    let currentImage = null;
-    let currentResult = null;
-
-    const entries = [];
-
-    apiKeyInput.value =
-      sessionStorage.getItem("gemini_api_key") || "";
-
-    apiKeyInput.addEventListener("input", () => {
-
-      sessionStorage.setItem(
-        "gemini_api_key",
-        apiKeyInput.value.trim()
+    const deleteLastBtn =
+      document.getElementById(
+        "deleteLastBtn"
       );
 
-    });
+    const clearAllBtn =
+      document.getElementById(
+        "clearAllBtn"
+      );
 
-    function setStatus(message, type = "") {
+    let currentImage = null;
+    let currentResult = null;
+    let selectedProduct = "";
 
-      statusEl.textContent = message;
+    let entries =
+      loadEntries();
 
-      statusEl.className =
-        "status" + (type ? " " + type : "");
+    apiKeyInput.value =
+      localStorage.getItem(
+        API_KEY_STORAGE
+      ) || "";
+
+    apiKeyInput.addEventListener(
+      "input",
+      () => {
+
+        const value =
+          apiKeyInput.value.trim();
+
+        if (value) {
+
+          localStorage.setItem(
+            API_KEY_STORAGE,
+            value
+          );
+
+        } else {
+
+          localStorage.removeItem(
+            API_KEY_STORAGE
+          );
+
+        }
+
+      }
+    );
+
+    forgetKeyBtn.addEventListener(
+      "click",
+      () => {
+
+        const confirmed =
+          confirm(
+            "Видалити збережений Gemini API Key із цього телефона?"
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        localStorage.removeItem(
+          API_KEY_STORAGE
+        );
+
+        apiKeyInput.value = "";
+
+        setStatus(
+          "Збережений API-ключ видалено.",
+          "ok"
+        );
+
+      }
+    );
+
+    function loadEntries() {
+
+      try {
+
+        const saved =
+          localStorage.getItem(
+            STORAGE_KEY
+          );
+
+        if (!saved) {
+          return [];
+        }
+
+        const parsed =
+          JSON.parse(saved);
+
+        return Array.isArray(parsed)
+          ? parsed
+          : [];
+
+      } catch {
+
+        return [];
+
+      }
 
     }
+
+    function saveEntries() {
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(entries)
+      );
+
+    }
+
+    function setStatus(
+      message,
+      type = ""
+    ) {
+
+      statusEl.textContent =
+        message;
+
+      statusEl.className =
+        "status" +
+        (type ? " " + type : "");
+
+    }
+
+    function updateAddButton() {
+
+      addBtn.disabled =
+        !currentResult ||
+        !currentResult.valid ||
+        !selectedProduct;
+
+    }
+
+    function resetProductSelection() {
+
+      selectedProduct = "";
+
+      selectedProductEl.textContent =
+        "Продукцію не вибрано";
+
+      for (
+        const button of productButtons
+      ) {
+
+        button.classList.remove(
+          "selected"
+        );
+
+      }
+
+      updateAddButton();
+
+    }
+
+    productButtons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            selectedProduct =
+              button.dataset.product || "";
+
+            for (
+              const other of productButtons
+            ) {
+
+              other.classList.remove(
+                "selected"
+              );
+
+            }
+
+            button.classList.add(
+              "selected"
+            );
+
+            selectedProductEl.textContent =
+              "Вибрано: " +
+              selectedProduct;
+
+            updateAddButton();
+
+          }
+        );
+
+      }
+    );
 
     function resetResult() {
 
       currentResult = null;
 
-      line1El.textContent = "------";
-      line2El.textContent = "------";
+      line1El.textContent =
+        "------";
+
+      line2El.textContent =
+        "------";
 
       confidenceEl.textContent =
         "Впевненість: —";
 
-      addBtn.disabled = true;
+      resetProductSelection();
+
+      updateAddButton();
 
     }
 
     function loadImage(file) {
 
-      return new Promise((resolve, reject) => {
+      return new Promise(
+        (resolve, reject) => {
 
-        const img = new Image();
+          const img =
+            new Image();
 
-        const url =
-          URL.createObjectURL(file);
+          const url =
+            URL.createObjectURL(file);
 
-        img.onload = () => {
+          img.onload = () => {
 
-          URL.revokeObjectURL(url);
+            URL.revokeObjectURL(url);
 
-          resolve(img);
+            resolve(img);
 
-        };
+          };
 
-        img.onerror = () => {
+          img.onerror = () => {
 
-          URL.revokeObjectURL(url);
+            URL.revokeObjectURL(url);
 
-          reject(
-            new Error(
-              "Не вдалося відкрити фотографію."
-            )
-          );
+            reject(
+              new Error(
+                "Не вдалося відкрити фотографію."
+              )
+            );
 
-        };
+          };
 
-        img.src = url;
+          img.src = url;
 
-      });
+        }
+      );
 
     }
 
@@ -554,19 +1117,30 @@
 
       const maxSide = 1800;
 
-      let width = img.naturalWidth;
-      let height = img.naturalHeight;
+      let width =
+        img.naturalWidth;
 
-      if (Math.max(width, height) > maxSide) {
+      let height =
+        img.naturalHeight;
+
+      if (
+        Math.max(width, height) >
+        maxSide
+      ) {
 
         const scale =
-          maxSide / Math.max(width, height);
+          maxSide /
+          Math.max(width, height);
 
         width =
-          Math.round(width * scale);
+          Math.round(
+            width * scale
+          );
 
         height =
-          Math.round(height * scale);
+          Math.round(
+            height * scale
+          );
 
       }
 
@@ -579,7 +1153,8 @@
           { alpha: false }
         );
 
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle =
+        "#ffffff";
 
       ctx.fillRect(
         0,
@@ -604,7 +1179,7 @@
 
       return {
 
-        dataUrl: dataUrl,
+        dataUrl,
 
         base64:
           dataUrl.split(",")[1],
@@ -674,66 +1249,78 @@
       }
     );
 
+    function clearCurrentPhoto() {
+
+      photoInput.value = "";
+
+      currentImage = null;
+
+      preview.removeAttribute(
+        "src"
+      );
+
+      previewWrap.style.display =
+        "none";
+
+      scanBtn.disabled =
+        true;
+
+      clearBtn.disabled =
+        true;
+
+      resetResult();
+
+      setStatus(
+        "Зробіть нову фотографію."
+      );
+
+    }
+
     clearBtn.addEventListener(
       "click",
-      () => {
-
-        photoInput.value = "";
-
-        currentImage = null;
-
-        preview.removeAttribute(
-          "src"
-        );
-
-        previewWrap.style.display =
-          "none";
-
-        scanBtn.disabled =
-          true;
-
-        clearBtn.disabled =
-          true;
-
-        resetResult();
-
-        setStatus(
-          "Зробіть нову фотографію."
-        );
-
-      }
+      clearCurrentPhoto
     );
 
-    function extractOutputText(response) {
+    function extractOutputText(
+      response
+    ) {
 
       if (
-        typeof response.output_text === "string" &&
+        typeof response.output_text ===
+          "string" &&
         response.output_text.trim()
       ) {
 
-        return response.output_text.trim();
+        return response
+          .output_text
+          .trim();
 
       }
 
       const parts = [];
 
       for (
-        const step of response.steps || []
+        const step of
+        response.steps || []
       ) {
 
         if (
-          step.type !== "model_output"
+          step.type !==
+          "model_output"
         ) {
           continue;
         }
 
         for (
-          const content of step.content || []
+          const content of
+          step.content || []
         ) {
 
           if (
-            content.type === "text" &&
-            typeof content.text === "string"
+            content.type ===
+              "text" &&
+            typeof content.text ===
+              "string"
           ) {
 
             parts.push(
@@ -752,7 +1339,9 @@
 
     }
 
-    function validateResult(value) {
+    function validateResult(
+      value
+    ) {
 
       const line1 =
         String(
@@ -772,21 +1361,27 @@
         );
 
       const line1Valid =
-        /^\d{6}$/.test(line1);
+        /^\d{6}$/.test(
+          line1
+        );
 
       const line2Valid =
-        /^[A-Z0-9]{6}$/.test(line2);
+        /^[A-Z0-9]{6}$/.test(
+          line2
+        );
 
       const confidenceValid =
-        Number.isFinite(confidence) &&
+        Number.isFinite(
+          confidence
+        ) &&
         confidence >= 0 &&
         confidence <= 1;
 
       return {
 
-        line1: line1,
+        line1,
 
-        line2: line2,
+        line2,
 
         confidence:
           confidenceValid
@@ -804,7 +1399,9 @@
     async function scanImage() {
 
       const apiKey =
-        apiKeyInput.value.trim();
+        apiKeyInput
+          .value
+          .trim();
 
       if (!apiKey) {
 
@@ -830,11 +1427,8 @@
 
       }
 
-      scanBtn.disabled =
-        true;
-
-      clearBtn.disabled =
-        true;
+      scanBtn.disabled = true;
+      clearBtn.disabled = true;
 
       resetResult();
 
@@ -876,15 +1470,13 @@
 
           schema: {
 
-            type:
-              "object",
+            type: "object",
 
             properties: {
 
               line1: {
 
-                type:
-                  "string",
+                type: "string",
 
                 description:
                   "Exactly 6 digits from the first line above the QR code."
@@ -893,8 +1485,7 @@
 
               line2: {
 
-                type:
-                  "string",
+                type: "string",
 
                 description:
                   "Exactly 6 uppercase Latin letters A-Z or digits 0-9 from the second line above the QR code."
@@ -903,14 +1494,10 @@
 
               confidence: {
 
-                type:
-                  "number",
+                type: "number",
 
-                minimum:
-                  0,
-
-                maximum:
-                  1,
+                minimum: 0,
+                maximum: 1,
 
                 description:
                   "Estimated confidence from 0 to 1."
@@ -934,8 +1521,7 @@
 
         generation_config: {
 
-          max_output_tokens:
-            120,
+          max_output_tokens: 120,
 
           thinking_level:
             "minimal"
@@ -951,8 +1537,7 @@
             API_URL,
             {
 
-              method:
-                "POST",
+              method: "POST",
 
               headers: {
 
@@ -970,207 +1555,4 @@
                 )
 
             }
-          );
-
-        const data =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (!response.ok) {
-
-          const apiMessage =
-            data?.error?.message ||
-            `HTTP ${response.status}`;
-
-          throw new Error(
-            apiMessage
-          );
-
-        }
-
-        const outputText =
-          extractOutputText(data);
-
-        if (!outputText) {
-
-          throw new Error(
-            "Gemini не повернув текстовий результат."
-          );
-
-        }
-
-        let parsed;
-
-        try {
-
-          parsed =
-            JSON.parse(
-              outputText
-            );
-
-        } catch {
-
-          throw new Error(
-            "Gemini повернув некоректний JSON: " +
-            outputText.slice(
-              0,
-              180
-            )
-          );
-
-        }
-
-        const checked =
-          validateResult(
-            parsed
-          );
-
-        currentResult =
-          checked;
-
-        line1El.textContent =
-          checked.line1 ||
-          "------";
-
-        line2El.textContent =
-          checked.line2 ||
-          "------";
-
-        confidenceEl.textContent =
-          "Впевненість: " +
-          Math.round(
-            checked.confidence * 100
-          ) +
-          "%";
-
-        if (!checked.valid) {
-
-          addBtn.disabled =
-            true;
-
-          setStatus(
-            "Результат не пройшов перевірку.\n" +
-            "Потрібно: 6 цифр + 6 символів A-Z/0-9.\n" +
-            "Зробіть фото ближче або чіткіше.",
-            "bad"
-          );
-
-        } else {
-
-          addBtn.disabled =
-            false;
-
-          setStatus(
-            "Номер розпізнано і формат підтверджено.",
-            "ok"
-          );
-
-        }
-
-      } catch (error) {
-
-        currentResult =
-          null;
-
-        addBtn.disabled =
-          true;
-
-        setStatus(
-          "Помилка Gemini API:\n" +
-          (
-            error.message ||
-            String(error)
-          ),
-          "bad"
-        );
-
-      } finally {
-
-        scanBtn.disabled =
-          !currentImage;
-
-        clearBtn.disabled =
-          !currentImage;
-
-      }
-
-    }
-
-    scanBtn.addEventListener(
-      "click",
-      scanImage
-    );
-
-    addBtn.addEventListener(
-      "click",
-      () => {
-
-        if (
-          !currentResult ||
-          !currentResult.valid
-        ) {
-          return;
-        }
-
-        entries.unshift({
-
-          line1:
-            currentResult.line1,
-
-          line2:
-            currentResult.line2
-
-        });
-
-        const item =
-          document.createElement(
-            "div"
-          );
-
-        item.className =
-          "list-item";
-
-        const left =
-          document.createElement(
-            "span"
-          );
-
-        left.textContent =
-          currentResult.line1;
-
-        const right =
-          document.createElement(
-            "span"
-          );
-
-        right.textContent =
-          currentResult.line2;
-
-        item.append(
-          left,
-          right
-        );
-
-        listEl.prepend(
-          item
-        );
-
-        addBtn.disabled =
-          true;
-
-        setStatus(
-          "Додано: " +
-          currentResult.line1 +
-          " " +
-          currentResult.line2,
-          "ok"
-        );
-
-      }
-    );
-  </script>
-</body>
-</html>
+         
