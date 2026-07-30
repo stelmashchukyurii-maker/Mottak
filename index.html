@@ -37,8 +37,8 @@
     }
 
     #status {
-      margin-top: 8px;
       min-height: 24px;
+      margin-top: 8px;
       color: #ddd;
       font-size: 15px;
       line-height: 1.4;
@@ -71,19 +71,17 @@
     }
 
     /*
-      ЩЕ МЕНША ВЕРТИКАЛЬНА РАМКА.
+      Маленька вертикальна зелена рамка.
 
-      Попередня:
-      width: 24%;
-      height: 30%;
+      Усередині неї бажано розмістити:
+      - два рядки номера;
+      - невелику частину навколо них.
 
-      Нова:
-      width: 18%;
-      height: 22%;
+      QR бажано залишити нижче рамки або
+      біля самого нижнього краю рамки.
     */
     #scanFrame {
       position: absolute;
-
       left: 50%;
       top: 50%;
 
@@ -107,7 +105,6 @@
 
     #scanFrameText {
       position: absolute;
-
       bottom: calc(100% + 12px);
       left: 50%;
 
@@ -202,13 +199,15 @@
       font-size: 15px;
     }
 
-    #cropPanel,
+    #frameCropPanel,
+    #textCropPanel,
     #processedPanel,
     #progressPanel {
       display: none;
     }
 
-    #cropPreview,
+    #frameCropPreview,
+    #textCropPreview,
     #processedPreview {
       display: block;
       width: 100%;
@@ -278,6 +277,7 @@
       padding: 18px 10px 25px;
       color: #888;
       font-size: 12px;
+      line-height: 1.6;
       border-top: 1px solid #333;
     }
   </style>
@@ -307,7 +307,7 @@
     <div id="scanFrame">
 
       <div id="scanFrameText">
-        Помісти лише два рядки номера всередину зеленої рамки
+        Помісти два рядки номера в центр зеленої рамки
       </div>
 
     </div>
@@ -360,15 +360,28 @@
 
   </div>
 
-  <div id="cropPanel" class="panel">
+  <div id="frameCropPanel" class="panel">
 
     <div class="panelTitle">
-      Область усередині зеленої рамки
+      1. Усе, що було всередині зеленої рамки
     </div>
 
     <img
-      id="cropPreview"
-      alt="Вирізаний фрагмент"
+      id="frameCropPreview"
+      alt="Уся область зеленої рамки"
+    >
+
+  </div>
+
+  <div id="textCropPanel" class="panel">
+
+    <div class="panelTitle">
+      2. Автоматично обрізана область із двома рядками
+    </div>
+
+    <img
+      id="textCropPreview"
+      alt="Автоматично обрізаний текст"
     >
 
   </div>
@@ -376,12 +389,12 @@
   <div id="processedPanel" class="panel">
 
     <div class="panelTitle">
-      Оброблене зображення, яке читає OCR
+      3. Оброблене зображення, яке читає OCR
     </div>
 
     <img
       id="processedPreview"
-      alt="Оброблений фрагмент"
+      alt="Оброблене зображення"
     >
 
   </div>
@@ -403,18 +416,24 @@
   </div>
 
   <canvas id="photoCanvas"></canvas>
-  <canvas id="cropCanvas"></canvas>
+  <canvas id="frameCropCanvas"></canvas>
+  <canvas id="textCropCanvas"></canvas>
   <canvas id="processedCanvas"></canvas>
 
 </main>
 
 <footer>
-  Версія 0.5 — ще менша вертикальна рамка
+  <div>Версія 0.6 — подвійна автоматична обрізка</div>
+  <div>Оновлено: 30.07.2026 20:25</div>
 </footer>
 
 <script>
 "use strict";
 
+
+/* =========================================================
+   ЕЛЕМЕНТИ СТОРІНКИ
+   ========================================================= */
 
 const video =
   document.getElementById("video");
@@ -458,14 +477,20 @@ const progressText =
 const progressBar =
   document.getElementById("progressBar");
 
-const cropPanel =
-  document.getElementById("cropPanel");
+const frameCropPanel =
+  document.getElementById("frameCropPanel");
+
+const textCropPanel =
+  document.getElementById("textCropPanel");
 
 const processedPanel =
   document.getElementById("processedPanel");
 
-const cropPreview =
-  document.getElementById("cropPreview");
+const frameCropPreview =
+  document.getElementById("frameCropPreview");
+
+const textCropPreview =
+  document.getElementById("textCropPreview");
 
 const processedPreview =
   document.getElementById("processedPreview");
@@ -473,12 +498,19 @@ const processedPreview =
 const photoCanvas =
   document.getElementById("photoCanvas");
 
-const cropCanvas =
-  document.getElementById("cropCanvas");
+const frameCropCanvas =
+  document.getElementById("frameCropCanvas");
+
+const textCropCanvas =
+  document.getElementById("textCropCanvas");
 
 const processedCanvas =
   document.getElementById("processedCanvas");
 
+
+/* =========================================================
+   ЗМІННІ
+   ========================================================= */
 
 let cameraStream = null;
 let cameraTrack = null;
@@ -489,12 +521,20 @@ let isProcessing = false;
 let lastRecognizedText = "";
 
 
+/* =========================================================
+   ЗАТРИМКА
+   ========================================================= */
+
 function wait(milliseconds) {
   return new Promise(resolve => {
     setTimeout(resolve, milliseconds);
   });
 }
 
+
+/* =========================================================
+   ВІДКРИТТЯ КАМЕРИ
+   ========================================================= */
 
 async function openCamera() {
   startButton.disabled = true;
@@ -577,7 +617,7 @@ async function openCamera() {
     stopButton.disabled = false;
 
     statusElement.textContent =
-      "Помісти два рядки номера всередину маленької зеленої рамки.";
+      "Помісти два рядки номера приблизно в центр зеленої рамки.";
 
   } catch (error) {
     console.error(error);
@@ -593,6 +633,10 @@ async function openCamera() {
   startButton.disabled = false;
 }
 
+
+/* =========================================================
+   ЗАКРИТТЯ КАМЕРИ
+   ========================================================= */
 
 function closeCamera() {
   if (cameraStream) {
@@ -619,6 +663,10 @@ function closeCamera() {
     "Камеру закрито.";
 }
 
+
+/* =========================================================
+   ЛІХТАРИК
+   ========================================================= */
 
 async function toggleTorch() {
   if (!cameraTrack) {
@@ -655,6 +703,10 @@ async function toggleTorch() {
   }
 }
 
+
+/* =========================================================
+   ФОТО З КАМЕРИ
+   ========================================================= */
 
 function captureCameraPhoto() {
   if (
@@ -698,6 +750,10 @@ function captureCameraPhoto() {
   return photoCanvas;
 }
 
+
+/* =========================================================
+   ВІДКРИТТЯ ГОТОВОГО ФОТО
+   ========================================================= */
 
 async function loadPhotoFile(file) {
   const image =
@@ -771,6 +827,10 @@ async function loadPhotoFile(file) {
 }
 
 
+/* =========================================================
+   КООРДИНАТИ ЗЕЛЕНОЇ РАМКИ
+   ========================================================= */
+
 function getCameraCropRectangle(sourceCanvas) {
   const videoRectangle =
     video.getBoundingClientRect();
@@ -789,6 +849,11 @@ function getCameraCropRectangle(sourceCanvas) {
 
   const sourceHeight =
     sourceCanvas.height;
+
+  /*
+    Відео показується через object-fit: cover.
+    Частина реального кадру може бути прихована.
+  */
 
   const displayScale =
     Math.max(
@@ -859,47 +924,50 @@ function getCameraCropRectangle(sourceCanvas) {
 }
 
 
+/* =========================================================
+   ОБЛАСТЬ ДЛЯ ГОТОВОГО ФОТО
+   ========================================================= */
+
 function getUploadedPhotoCropRectangle(sourceCanvas) {
+  /*
+    Для старого тестового квадратного фото.
+
+    Спочатку беремо відносно велику область,
+    а потім застосовуємо другу внутрішню обрізку.
+  */
+
   return {
-    x: sourceCanvas.width * 0.15,
-    y: sourceCanvas.height * 0.63,
-    width: sourceCanvas.width * 0.60,
-    height: sourceCanvas.height * 0.36
+    x: sourceCanvas.width * 0.12,
+    y: sourceCanvas.height * 0.48,
+    width: sourceCanvas.width * 0.68,
+    height: sourceCanvas.height * 0.50
   };
 }
 
 
-function cropTextArea(
+/* =========================================================
+   ПЕРША ОБРІЗКА:
+   УСЕ ВСЕРЕДИНІ ЗЕЛЕНОЇ РАМКИ
+   ========================================================= */
+
+function cropFrameArea(
   sourceCanvas,
   rectangle
 ) {
-  /*
-    Маленьку область збільшуємо у 5 разів.
-  */
-
-  const enlargement =
-    5;
-
-  cropCanvas.width =
+  frameCropCanvas.width =
     Math.max(
       1,
-      Math.round(
-        rectangle.width *
-        enlargement
-      )
+      Math.round(rectangle.width)
     );
 
-  cropCanvas.height =
+  frameCropCanvas.height =
     Math.max(
       1,
-      Math.round(
-        rectangle.height *
-        enlargement
-      )
+      Math.round(rectangle.height)
     );
 
   const context =
-    cropCanvas.getContext(
+    frameCropCanvas.getContext(
       "2d",
       {
         willReadFrequently: true
@@ -909,15 +977,9 @@ function cropTextArea(
   context.clearRect(
     0,
     0,
-    cropCanvas.width,
-    cropCanvas.height
+    frameCropCanvas.width,
+    frameCropCanvas.height
   );
-
-  context.imageSmoothingEnabled =
-    true;
-
-  context.imageSmoothingQuality =
-    "high";
 
   context.drawImage(
     sourceCanvas,
@@ -929,22 +991,130 @@ function cropTextArea(
 
     0,
     0,
-    cropCanvas.width,
-    cropCanvas.height
+    frameCropCanvas.width,
+    frameCropCanvas.height
   );
 
-  cropPreview.src =
-    cropCanvas.toDataURL(
+  frameCropPreview.src =
+    frameCropCanvas.toDataURL(
       "image/jpeg",
       0.97
     );
 
-  cropPanel.style.display =
+  frameCropPanel.style.display =
     "block";
 
-  return cropCanvas;
+  return frameCropCanvas;
 }
 
+
+/* =========================================================
+   ДРУГА АВТОМАТИЧНА ОБРІЗКА:
+   ЗАЛИШАЄМО ЛИШЕ ЦЕНТРАЛЬНУ ОБЛАСТЬ ТЕКСТУ
+   ========================================================= */
+
+function cropInnerTextArea(sourceCanvas) {
+  /*
+    Ці значення визначають внутрішню обрізку.
+
+    По ширині:
+    - відрізаємо 8% зліва;
+    - відрізаємо 8% справа;
+    - залишаємо центральні 84%.
+
+    По висоті:
+    - починаємо з 24% висоти;
+    - беремо 48% висоти.
+
+    Тобто нижня частина з QR переважно відрізається.
+  */
+
+  const innerX =
+    sourceCanvas.width * 0.08;
+
+  const innerY =
+    sourceCanvas.height * 0.24;
+
+  const innerWidth =
+    sourceCanvas.width * 0.84;
+
+  const innerHeight =
+    sourceCanvas.height * 0.48;
+
+  /*
+    Збільшуємо текстовий фрагмент.
+  */
+
+  const enlargement =
+    5;
+
+  textCropCanvas.width =
+    Math.max(
+      1,
+      Math.round(
+        innerWidth * enlargement
+      )
+    );
+
+  textCropCanvas.height =
+    Math.max(
+      1,
+      Math.round(
+        innerHeight * enlargement
+      )
+    );
+
+  const context =
+    textCropCanvas.getContext(
+      "2d",
+      {
+        willReadFrequently: true
+      }
+    );
+
+  context.clearRect(
+    0,
+    0,
+    textCropCanvas.width,
+    textCropCanvas.height
+  );
+
+  context.imageSmoothingEnabled =
+    true;
+
+  context.imageSmoothingQuality =
+    "high";
+
+  context.drawImage(
+    sourceCanvas,
+
+    innerX,
+    innerY,
+    innerWidth,
+    innerHeight,
+
+    0,
+    0,
+    textCropCanvas.width,
+    textCropCanvas.height
+  );
+
+  textCropPreview.src =
+    textCropCanvas.toDataURL(
+      "image/jpeg",
+      0.98
+    );
+
+  textCropPanel.style.display =
+    "block";
+
+  return textCropCanvas;
+}
+
+
+/* =========================================================
+   М’ЯКА ОБРОБКА ЗОБРАЖЕННЯ
+   ========================================================= */
 
 function preprocessImage(sourceCanvas) {
   processedCanvas.width =
@@ -995,6 +1165,10 @@ function preprocessImage(sourceCanvas) {
       pixels[index + 1] * 0.587 +
       pixels[index + 2] * 0.114;
 
+    /*
+      М’яке підсилення контрасту.
+    */
+
     gray =
       (gray - 128) * 1.35 + 128;
 
@@ -1028,6 +1202,10 @@ function preprocessImage(sourceCanvas) {
 }
 
 
+/* =========================================================
+   НОРМАЛІЗАЦІЯ OCR
+   ========================================================= */
+
 function normalizeOcrText(text) {
   return String(text || "")
     .toUpperCase()
@@ -1037,6 +1215,10 @@ function normalizeOcrText(text) {
     );
 }
 
+
+/* =========================================================
+   ПОШУК ПЕРШОГО РЯДКА
+   ========================================================= */
 
 function findFirstLine(text) {
   const normalized =
@@ -1052,11 +1234,20 @@ function findFirstLine(text) {
       )
       .filter(Boolean);
 
+  /*
+    Спочатку шукаємо рівно 6 цифр.
+  */
+
   for (const line of lines) {
     if (/^\d{6}$/.test(line)) {
       return line;
     }
   }
+
+  /*
+    Потім шукаємо 6 цифр
+    усередині довшого рядка.
+  */
 
   for (const line of lines) {
     const match =
@@ -1066,6 +1257,10 @@ function findFirstLine(text) {
       return match[0];
     }
   }
+
+  /*
+    Типові заміни букв на цифри.
+  */
 
   for (const line of lines) {
     const corrected =
@@ -1091,6 +1286,10 @@ function findFirstLine(text) {
 }
 
 
+/* =========================================================
+   ПОШУК ДРУГОГО РЯДКА
+   ========================================================= */
+
 function findSecondLine(
   text,
   firstLine
@@ -1115,7 +1314,7 @@ function findSecondLine(
       /[A-Z]/.test(line) &&
       /\d/.test(line)
     ) {
-      return line;
+      return correctSecondLine(line);
     }
   }
 
@@ -1133,7 +1332,7 @@ function findSecondLine(
         /[A-Z]/.test(candidate) &&
         /\d/.test(candidate)
       ) {
-        return candidate;
+        return correctSecondLine(candidate);
       }
     }
   }
@@ -1141,6 +1340,38 @@ function findSecondLine(
   return "";
 }
 
+
+/* =========================================================
+   ОБЕРЕЖНЕ ВИПРАВЛЕННЯ ДРУГОГО РЯДКА
+   ========================================================= */
+
+function correctSecondLine(line) {
+  let corrected =
+    String(line || "").toUpperCase();
+
+  /*
+    Якщо останній символ OCR прочитав як Y,
+    виправляємо його на 9.
+
+    Приклад:
+    2CB73Y → 2CB739
+  */
+
+  if (
+    corrected.length === 6 &&
+    corrected.endsWith("Y")
+  ) {
+    corrected =
+      corrected.slice(0, 5) + "9";
+  }
+
+  return corrected;
+}
+
+
+/* =========================================================
+   ОЧИЩЕНИЙ РЕЗУЛЬТАТ
+   ========================================================= */
 
 function cleanOcrText(text) {
   const firstLine =
@@ -1189,6 +1420,10 @@ function cleanOcrText(text) {
 }
 
 
+/* =========================================================
+   ОЦІНКА ЯКОСТІ РЕЗУЛЬТАТУ
+   ========================================================= */
+
 function calculateResultScore(
   cleanedText,
   confidence
@@ -1224,6 +1459,10 @@ function calculateResultScore(
   return score;
 }
 
+
+/* =========================================================
+   ОДИН ПРОХІД OCR
+   ========================================================= */
 
 async function runOcr(
   imageCanvas,
@@ -1295,6 +1534,10 @@ async function runOcr(
 }
 
 
+/* =========================================================
+   ГОЛОВНА ОБРОБКА
+   ========================================================= */
+
 async function processPhoto(
   sourceCanvas,
   fromCamera
@@ -1322,9 +1565,9 @@ async function processPhoto(
 
   try {
     statusElement.textContent =
-      "Вирізаємо область усередині маленької рамки…";
+      "Перша обрізка: область зеленої рамки…";
 
-    const rectangle =
+    const frameRectangle =
       fromCamera
         ? getCameraCropRectangle(
             sourceCanvas
@@ -1333,19 +1576,32 @@ async function processPhoto(
             sourceCanvas
           );
 
-    const croppedImage =
-      cropTextArea(
+    const frameImage =
+      cropFrameArea(
         sourceCanvas,
-        rectangle
+        frameRectangle
+      );
+
+    statusElement.textContent =
+      "Друга обрізка: залишаємо тільки область тексту…";
+
+    const textImage =
+      cropInnerTextArea(
+        frameImage
       );
 
     const processedImage =
       preprocessImage(
-        croppedImage
+        textImage
       );
 
     statusElement.textContent =
-      "OCR читає символи…";
+      "OCR читає два рядки…";
+
+    /*
+      Перший прохід:
+      м’яко оброблене сіре зображення.
+    */
 
     const processedResult =
       await runOcr(
@@ -1353,9 +1609,14 @@ async function processPhoto(
         "OCR сірого зображення"
       );
 
+    /*
+      Другий прохід:
+      кольорове зображення після внутрішньої обрізки.
+    */
+
     const originalResult =
       await runOcr(
-        croppedImage,
+        textImage,
         "OCR кольорового зображення"
       );
 
@@ -1425,7 +1686,7 @@ async function processPhoto(
       String(error);
 
     statusElement.textContent =
-      "Сталася помилка під час OCR.";
+      "Сталася помилка під час обробки.";
 
   } finally {
     isProcessing = false;
@@ -1440,6 +1701,10 @@ async function processPhoto(
   }
 }
 
+
+/* =========================================================
+   ФОТО З КАМЕРИ
+   ========================================================= */
 
 async function captureAndRecognize() {
   if (!cameraTrack) {
@@ -1481,6 +1746,10 @@ async function captureAndRecognize() {
 }
 
 
+/* =========================================================
+   КОПІЮВАННЯ
+   ========================================================= */
+
 async function copyResult() {
   if (!lastRecognizedText) {
     return;
@@ -1502,6 +1771,10 @@ async function copyResult() {
   }
 }
 
+
+/* =========================================================
+   КНОПКИ
+   ========================================================= */
 
 startButton.addEventListener(
   "click",
@@ -1528,6 +1801,10 @@ copyButton.addEventListener(
   copyResult
 );
 
+
+/* =========================================================
+   ГОТОВЕ ФОТО
+   ========================================================= */
 
 fileInput.addEventListener(
   "change",
@@ -1570,6 +1847,10 @@ fileInput.addEventListener(
   }
 );
 
+
+/* =========================================================
+   ЗАКРИТТЯ СТОРІНКИ
+   ========================================================= */
 
 window.addEventListener(
   "pagehide",
