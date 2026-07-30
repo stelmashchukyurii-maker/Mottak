@@ -189,6 +189,14 @@
             font-size: 16px;
             cursor: pointer;
         }
+        /* Підвал з інформацією про оновлення */
+        .footer-info {
+            text-align: center;
+            font-size: 11px;
+            color: #65676b;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -259,6 +267,11 @@
             </thead>
             <tbody id="logs"></tbody>
         </table>
+    </div>
+
+    <!-- Інформація про оновлення коду -->
+    <div class="footer-info">
+        Оновлено: <span id="update-time">30.07.2026, 15:16</span>
     </div>
 
     <script>
@@ -420,10 +433,7 @@
                 { facingMode: "environment" },
                 config,
                 (decodedText) => {
-                    // Витягуємо лише цифри з розпізнаного тексту за допомогою регулярного виразу
                     const numbersOnly = decodedText.replace(/\D/g, '');
-                    
-                    // Якщо цифри знайдені — підставляємо їх, інакше вставляємо весь текст
                     document.getElementById('tag-input').value = numbersOnly ? numbersOnly : decodedText;
                     stopCamera();
                 },
@@ -499,8 +509,8 @@
             });
 
             document.getElementById('cnt-bunner').innerText = totals['Bunner'];
-            document.getElementById('cnt-h30').innerText = totals['Hyller x30'];
-            document.getElementById('cnt-h60').innerText = totals['Hyller x60'];
+            document.getElementById('cnt-h30')->innerText = totals['Hyller x30'];
+            document.getElementById('cnt-h60')->innerText = totals['Hyller x60'];
         }
 
         setLanguage(currentLang);
