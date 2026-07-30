@@ -138,6 +138,17 @@
             font-size: 14px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 5px;
         }
     </style>
     <!-- Підключення бібліотеки для сканування штрих/QR кодів та Tesseract для OCR тексту -->
@@ -184,6 +195,10 @@
     <div class="history-section">
         <h3 id="historyTitle">Останні події</h3>
         <div id="historyList"></div>
+    </div>
+    
+    <div style="margin-top: 15px; font-size: 13px; color: #666; text-align: center;" id="updateTimeDisplay">
+        Оновлено: 30.07.2026, 16:00
     </div>
 </div>
 
@@ -244,7 +259,6 @@
         });
     }
 
-    // Режим чистого текстового сканування (OCR через прямий доступ до медіапотоку та Tesseract)
     async function startTextOcrScanner() {
         stopScanner();
         const container = document.getElementById('interactive');
@@ -270,7 +284,6 @@
         }
     }
 
-    // Фіксація стоп-кадру та розпізнавання тексту з нього
     async function captureTextFromVideo() {
         if (!videoElement) return;
 
@@ -282,12 +295,10 @@
 
         stopScanner();
 
-        // Показуємо статус розпізнавання
         document.getElementById('tagInput').value = "Розпізнавання тексту...";
 
         try {
             const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
-            // Очищуємо зайві символи, залишаємо букви, цифри та пробіли/дефіси
             let cleanText = text.replace(/[\n\r]+/g, ' ').trim();
             document.getElementById('tagInput').value = cleanText;
         } catch (err) {
@@ -305,9 +316,11 @@
             return;
         }
 
+        const now = new Date();
         const record = {
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            date: new Date().toLocaleDateString(),
+            id: Date.now(),
+            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            date: now.toLocaleDateString(),
             operation: currentOperation,
             product: product,
             tag: tag
@@ -319,6 +332,22 @@
 
         document.getElementById('tagInput').value = '';
         renderHistory();
+        updateTimestamp();
+    }
+
+    function deleteRecord(id) {
+        let db = JSON.parse(localStorage.getItem('wh_db_v1')) || [];
+        db = db.filter(item => item.id !== id);
+        localStorage.setItem('wh_db_v1', JSON.stringify(db));
+        renderHistory();
+        updateTimestamp();
+    }
+
+    function updateTimestamp() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = now.toLocaleDateString();
+        document.getElementById('updateTimeDisplay').innerText = `Оновлено: ${dateStr}, ${timeStr}`;
     }
 
     function renderHistory() {
@@ -330,8 +359,8 @@
             const div = document.createElement('div');
             div.className = 'history-item';
             div.innerHTML = `
-                <span>${item.time} <b>${item.operation}</b> ${item.product}</span>
-                <span><b>${item.tag}</b></span>
+                <span>${item.time} <b>${item.operation}</b> ${item.product}: <b>${item.tag}</b></span>
+                <button class="delete-btn" onclick="deleteRecord(${item.id})">✖</button>
             `;
             historyList.appendChild(div);
         });
