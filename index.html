@@ -88,10 +88,6 @@
             border-radius: 6px;
             cursor: pointer;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
         .scan-btn.secondary {
@@ -108,6 +104,7 @@
             width: 100%;
             border-radius: 6px;
             cursor: pointer;
+            margin-top: 10px;
         }
 
         #interactive {
@@ -143,8 +140,9 @@
             justify-content: space-between;
         }
     </style>
-    <!-- Підключення бібліотеки для сканування штрих/QR кодів -->
+    <!-- Підключення бібліотеки для сканування штрих/QR кодів та Tesseract для OCR тексту -->
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -165,17 +163,20 @@
     </div>
 
     <div class="form-group">
-        <label id="labelTag">Номер бірки (код з камери):</label>
+        <label id="labelTag">Номер бірки:</label>
         
         <!-- Кнопка сканування QR / штрих-коду -->
-        <button class="scan-btn" onclick="startScanner('qr')">📷 Сканувати бірку (QR/Barcode)</button>
+        <button class="scan-btn" onclick="startBarcodeScanner()">📷 Сканувати бірку (QR/Barcode)</button>
         
-        <!-- Нова окрема кнопка для сканування тексту номера -->
-        <button class="scan-btn secondary" onclick="startTextScanner()">📸 Сканувати номер (Текст)</button>
+        <!-- Окрема кнопка для сканування тексту номера з камери -->
+        <button class="scan-btn secondary" onclick="startTextOcrScanner()">📸 Сканувати номер (Текст з камери)</button>
 
         <div id="interactive"></div>
 
         <input type="text" id="tagInput" placeholder="Введіть або зіскануйте номер">
+        
+        <!-- Кнопка фіксації розпізнаного тексту / внесення в базу -->
+        <button class="scan-btn secondary" id="captureBtn" style="display:none; background-color: #28a745; margin-top: 8px;" onclick="captureTextFromVideo()">✅ Зафіксувати номер</button>
     </div>
 
     <button class="save-btn" onclick="saveRecord()">Зберегти запис</button>
@@ -190,6 +191,8 @@
     let currentOperation = 'Прихід';
     let html5QrCode = null;
     let isScanning = false;
+    let activeStream = null;
+    let videoElement = null;
 
     function setOperation(op) {
         currentOperation = op;
@@ -204,57 +207,92 @@
         }
     }
 
-    function startScanner(mode) {
-        const container = document.getElementById('interactive');
-        
-        if (isScanning) {
-            stopScanner();
-            return;
-        }
-
-        container.style.display = 'block';
-        isScanning = true;
-
-        html5QrCode = new Html5Qrcode("interactive");
-        
-        const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-
-        html5QrCode.start(
-            { facingMode: "environment" },
-            config,
-            (decodedText) => {
-                // Успішне зчитування QR або штрих-коду (приймає і цифри, і букви)
-                document.getElementById('tagInput').value = decodedText;
-                stopScanner();
-            },
-            (errorMessage) => {
-                // Помилки сканування ігноруємо в реальному часі
-            }
-        ).catch(err => {
-            alert("Помилка запуску камери: " + err);
-            isScanning = false;
-            container.style.display = 'none';
-        });
-    }
-
-    // Функція спеціально для виділеного сканування чистого текстового номера (номерного знаку на бірці)
-    function startTextScanner() {
-        // Запускаємо той самий сканер, але можна обмежити або використати стандартне розпізнавання, 
-        // або активувати режим розпізнавання літер/цифр без переходу за посиланнями
-        startScanner('text');
-    }
-
     function stopScanner() {
         if (html5QrCode && isScanning) {
             html5QrCode.stop().then(() => {
                 isScanning = false;
                 document.getElementById('interactive').style.display = 'none';
-            }).catch(err => {
-                console.error("Не вдалося зупинити сканер", err);
+            }).catch(err => console.error(err));
+        }
+        if (activeStream) {
+            activeStream.getTracks().forEach(track => track.stop());
+            activeStream = null;
+        }
+        isScanning = false;
+        document.getElementById('interactive').style.display = 'none';
+        document.getElementById('captureBtn').style.display = 'none';
+    }
+
+    function startBarcodeScanner() {
+        stopScanner();
+        const container = document.getElementById('interactive');
+        container.style.display = 'block';
+        isScanning = true;
+
+        html5QrCode = new Html5Qrcode("interactive");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                document.getElementById('tagInput').value = decodedText;
+                stopScanner();
+            },
+            (errorMessage) => {}
+        ).catch(err => {
+            alert("Помилка запуску камери: " + err);
+            stopScanner();
+        });
+    }
+
+    // Режим чистого текстового сканування (OCR через прямий доступ до медіапотоку та Tesseract)
+    async function startTextOcrScanner() {
+        stopScanner();
+        const container = document.getElementById('interactive');
+        container.innerHTML = '';
+        container.style.display = 'block';
+        isScanning = true;
+
+        videoElement = document.createElement('video');
+        videoElement.setAttribute('autoplay', '');
+        videoElement.setAttribute('playsinline', '');
+        container.appendChild(videoElement);
+
+        document.getElementById('captureBtn').style.display = 'block';
+
+        try {
+            activeStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" }
             });
-        } else {
-            isScanning = false;
-            document.getElementById('interactive').style.display = 'none';
+            videoElement.srcObject = activeStream;
+        } catch (err) {
+            alert("Не вдалося отримати доступ до камери: " + err);
+            stopScanner();
+        }
+    }
+
+    // Фіксація стоп-кадру та розпізнавання тексту з нього
+    async function captureTextFromVideo() {
+        if (!videoElement) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth || 640;
+        canvas.height = videoElement.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        stopScanner();
+
+        // Показуємо статус розпізнавання
+        document.getElementById('tagInput').value = "Розпізнавання тексту...";
+
+        try {
+            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
+            // Очищуємо зайві символи, залишаємо букви, цифри та пробіли/дефіси
+            let cleanText = text.replace(/[\n\r]+/g, ' ').trim();
+            document.getElementById('tagInput').value = cleanText;
+        } catch (err) {
+            alert("Помилка розпізнавання тексту: " + err);
+            document.getElementById('tagInput').value = '';
         }
     }
 
