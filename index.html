@@ -168,13 +168,12 @@
             font-weight: bold;
         }
     </style>
-    <!-- Підключення бібліотеки Tesseract.js для розпізнавання тексту з камери -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
 <div class="container">
-    <h2 id="app-title">Реєстрація операції</h2>
+    <h2>Реєстрація операції</h2>
 
     <div class="operation-buttons">
         <button id="btnIncome" class="btn-income" onclick="setOperation('Прихід')">Прихід</button>
@@ -182,7 +181,7 @@
     </div>
 
     <div class="form-group">
-        <label id="labelProduct">Продукт:</label>
+        <label>Продукт:</label>
         <select id="productSelect">
             <option value="Bunner">Bunner (Візок)</option>
             <option value="Hyller">Hyller (Полиця)</option>
@@ -190,7 +189,7 @@
     </div>
 
     <div class="form-group">
-        <label id="labelTag">Номер бірки (цифри та букви):</label>
+        <label>Номер бірки (цифри та букви):</label>
         
         <button class="torch-btn" id="torchBtn" onclick="toggleTorch()">🔦 Увімкнути ліхтарик</button>
         <button class="scan-btn" onclick="captureAndRecognize()">📷 Розпізнати текст з камери</button>
@@ -207,12 +206,12 @@
     <button class="save-btn" onclick="saveRecord()">Зберегти запис</button>
 
     <div class="history-section">
-        <h3 id="historyTitle">Останні події</h3>
+        <h3>Останні події</h3>
         <div id="historyList"></div>
     </div>
     
     <div style="margin-top: 15px; font-size: 13px; color: #666; text-align: center;" id="updateTimeDisplay">
-        Оновлено: 30.07.2026, 16:20
+        Оновлено: 30.07.2026, 16:26
     </div>
 </div>
 
@@ -221,6 +220,7 @@
     let videoStream = null;
     let torchTrack = null;
     let torchOn = false;
+    let imageTrack = null;
 
     function setOperation(op) {
         currentOperation = op;
@@ -280,6 +280,21 @@
                     video: { facingMode: "environment" }
                 });
                 video.srcObject = videoStream;
+                
+                imageTrack = videoStream.getVideoTracks()[0];
+                const capabilities = imageTrack.getCapabilities();
+                
+                if (capabilities.zoom) {
+                    const minZoom = capabilities.zoom.min || 1;
+                    const maxZoom = capabilities.zoom.max || 3;
+                    const targetZoom = Math.min(minZoom * 1.5, maxZoom);
+                    try {
+                        await imageTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] });
+                    } catch (e) {
+                        console.log("Зум не застосовано автоматично", e);
+                    }
+                }
+
                 status.innerText = "Наведіть на бірку і натисніть кнопку ще раз для знімка";
                 return;
             } catch (err) {
@@ -288,20 +303,17 @@
             }
         }
 
-        // Робимо знімок з відео
         status.innerText = "Розпізнавання тексту...";
         const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth * 2;
+        canvas.height = video.videoHeight * 2;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Зупиняємо камеру
         videoStream.getTracks().forEach(track => track.stop());
         videoStream = null;
         container.style.display = 'none';
 
-        // Запускаємо Tesseract
         Tesseract.recognize(
             canvas.toDataURL('image/png'),
             'eng',
