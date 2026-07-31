@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="nb">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+
   <meta name="theme-color" content="#111827" />
-  <title>AI Scanner Mottak v2</title>
+
+  <title>AI Scanner Mottak v3</title>
 
   <style>
     :root {
       color-scheme: dark;
+
       --bg: #0b1020;
       --card: #151c30;
       --card-dark: #0d1426;
@@ -18,7 +25,6 @@
       --ok: #48d597;
       --bad: #ff6b6b;
       --line: #303b59;
-      --blue: #75a7ff;
     }
 
     * {
@@ -29,7 +35,11 @@
       margin: 0;
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #0b1020 0%, #11182a 100%);
+      background: linear-gradient(
+        180deg,
+        #0b1020 0%,
+        #11182a 100%
+      );
       color: var(--text);
     }
 
@@ -114,7 +124,10 @@
       font-weight: 800;
       cursor: pointer;
       text-align: center;
-      transition: transform 0.08s ease, opacity 0.2s ease, border-color 0.2s ease;
+      transition:
+        transform 0.08s ease,
+        opacity 0.2s ease,
+        border-color 0.2s ease;
     }
 
     button:active,
@@ -158,6 +171,28 @@
       .row.two {
         grid-template-columns: 1fr 1fr;
       }
+    }
+
+    .language-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .language-button {
+      min-height: 48px;
+      padding: 9px 6px;
+      background: var(--card-dark);
+      color: var(--text);
+      border: 2px solid var(--line);
+      font-size: clamp(13px, 3.7vw, 16px);
+    }
+
+    .language-button.active {
+      background: var(--accent);
+      color: #17130a;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.18);
     }
 
     .product-grid {
@@ -314,7 +349,11 @@
 
     .result-value {
       min-height: 42px;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Consolas,
+        monospace;
       font-size: clamp(27px, 8vw, 42px);
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -359,7 +398,11 @@
 
     .history-code {
       margin-top: 4px;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Consolas,
+        monospace;
       font-size: 17px;
       font-weight: 800;
       word-break: break-word;
@@ -396,18 +439,50 @@
 
 <body>
   <main class="app">
-    <h1>AI Scanner Mottak v2</h1>
+    <h1>AI Scanner Mottak v3</h1>
 
-    <p class="subtitle">
-      Вибір продукту → фото бірки → Gemini Vision → додавання до обліку.
-    </p>
+    <p
+      class="subtitle"
+      data-i18n="subtitle"
+    ></p>
 
     <section class="card">
-      <h2 class="section-title">1. Виберіть продукт</h2>
+      <div class="language-grid" id="languageGrid">
+        <button
+          class="language-button"
+          type="button"
+          data-language="nb"
+        >
+          Norsk
+        </button>
+
+        <button
+          class="language-button"
+          type="button"
+          data-language="pl"
+        >
+          Polski
+        </button>
+
+        <button
+          class="language-button"
+          type="button"
+          data-language="uk"
+        >
+          Українська
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2
+        class="section-title"
+        data-i18n="selectProduct"
+      ></h2>
 
       <div class="product-grid" id="productGrid">
         <button
-          class="product-button active"
+          class="product-button"
           type="button"
           data-product="bunner"
         >
@@ -432,13 +507,16 @@
       </div>
 
       <p class="selected-product">
-        Вибрано:
+        <span data-i18n="selected"></span>:
         <strong id="selectedProductName">Bunner</strong>
       </p>
     </section>
 
     <section class="card">
-      <h2 class="section-title">Загальна кількість</h2>
+      <h2
+        class="section-title"
+        data-i18n="totalAmount"
+      ></h2>
 
       <div class="totals-grid">
         <div class="total-box">
@@ -458,40 +536,47 @@
       </div>
 
       <p class="grand-total">
-        Всього записів:
+        <span data-i18n="totalRecords"></span>:
         <strong id="grandTotal">0</strong>
       </p>
 
-      <div class="tiny">
-        Одне сканування будь-якого продукту рахується як 1 одиниця.
-        x30, x60 та кількість у стопці зараз не множаться.
-      </div>
+      <div
+        class="tiny"
+        data-i18n="countNote"
+      ></div>
     </section>
 
     <section class="card">
-      <label class="field-label" for="apiKey">
-        Gemini API Key
-      </label>
+      <label
+        class="field-label"
+        for="apiKey"
+        data-i18n="apiKey"
+      ></label>
 
       <input
         id="apiKey"
         type="password"
         autocomplete="off"
-        placeholder="Вставте ключ для тестування"
+        data-i18n-placeholder="apiPlaceholder"
       />
 
-      <div class="tiny">
-        Ключ зберігається лише до закриття вкладки та не записаний
-        у HTML-файл.
-      </div>
+      <div
+        class="tiny"
+        data-i18n="apiNote"
+      ></div>
     </section>
 
     <section class="card">
-      <h2 class="section-title">2. Зробіть фото</h2>
+      <h2
+        class="section-title"
+        data-i18n="takePhotoTitle"
+      ></h2>
 
-      <label class="file-button primary" for="photoInput">
-        📷 Зробити фото бірки
-      </label>
+      <label
+        class="file-button primary"
+        for="photoInput"
+        data-i18n="takePhoto"
+      ></label>
 
       <input
         id="photoInput"
@@ -503,7 +588,7 @@
       <div id="previewWrap" class="preview-wrap">
         <img
           id="preview"
-          alt="Попередній перегляд фото"
+          alt=""
         />
       </div>
 
@@ -512,37 +597,36 @@
           id="scanBtn"
           class="primary"
           type="button"
+          data-i18n="scanNumber"
           disabled
-        >
-          Розпізнати номер
-        </button>
+        ></button>
 
         <button
           id="clearBtn"
           class="secondary"
           type="button"
+          data-i18n="newPhoto"
           disabled
-        >
-          Нове фото
-        </button>
+        ></button>
       </div>
 
-      <div id="status" class="status">
-        Спочатку зробіть фотографію.
-      </div>
+      <div id="status" class="status"></div>
     </section>
 
     <section class="card">
-      <h2 class="section-title">3. Результат</h2>
+      <h2
+        class="section-title"
+        data-i18n="result"
+      ></h2>
 
       <p class="result-product">
-        Продукт для цього запису:
+        <span data-i18n="productForRecord"></span>:
         <strong id="resultProductName">—</strong>
       </p>
 
       <div class="result-grid">
         <div class="result-box">
-          <span>Перший рядок</span>
+          <span data-i18n="firstLine"></span>
 
           <div id="line1" class="result-value">
             ------
@@ -550,7 +634,7 @@
         </div>
 
         <div class="result-box">
-          <span>Другий рядок</span>
+          <span data-i18n="secondLine"></span>
 
           <div id="line2" class="result-value">
             ------
@@ -558,50 +642,48 @@
         </div>
       </div>
 
-      <p id="confidence" class="confidence">
-        Впевненість: —
-      </p>
+      <p id="confidence" class="confidence"></p>
 
       <button
         id="addBtn"
         class="success"
         type="button"
+        data-i18n="add"
         disabled
-      >
-        Додати
-      </button>
+      ></button>
     </section>
 
     <section class="card">
-      <h2 class="section-title">Історія</h2>
+      <h2
+        class="section-title"
+        data-i18n="history"
+      ></h2>
 
       <div class="row two">
         <button
           id="undoBtn"
           class="secondary"
           type="button"
+          data-i18n="undoLast"
           disabled
-        >
-          ↩ Скасувати останнє
-        </button>
+        ></button>
 
         <button
           id="clearAllBtn"
           class="danger"
           type="button"
+          data-i18n="clearShift"
           disabled
-        >
-          Очистити всю зміну
-        </button>
+        ></button>
       </div>
 
       <div id="historyList" class="history-list"></div>
     </section>
 
-    <div class="warning">
-      Це тестова версія. Дані обліку зберігаються у браузері
-      цього телефона. Не очищайте дані браузера до завершення роботи.
-    </div>
+    <div
+      class="warning"
+      data-i18n="warning"
+    ></div>
   </main>
 
   <canvas id="canvas" hidden></canvas>
@@ -621,6 +703,9 @@
     const SELECTED_PRODUCT_KEY =
       "ai_scanner_mottak_v2_selected_product";
 
+    const LANGUAGE_KEY =
+      "ai_scanner_mottak_v3_language";
+
     const PRODUCTS = {
       bunner: {
         name: "Bunner"
@@ -632,6 +717,463 @@
 
       hyller60: {
         name: "Hyller x60"
+      }
+    };
+
+    const LANGUAGES = {
+      nb: {
+        htmlLanguage: "nb",
+        locale: "nb-NO"
+      },
+
+      pl: {
+        htmlLanguage: "pl",
+        locale: "pl-PL"
+      },
+
+      uk: {
+        htmlLanguage: "uk",
+        locale: "uk-UA"
+      }
+    };
+
+    const I18N = {
+      nb: {
+        subtitle:
+          "Velg produkt → ta bilde av etiketten → Gemini Vision → legg til i registreringen.",
+
+        selectProduct:
+          "1. Velg produkt",
+
+        selected:
+          "Valgt",
+
+        totalAmount:
+          "Totalt antall",
+
+        totalRecords:
+          "Totalt antall registreringer",
+
+        countNote:
+          "Ett skann av hvert produkt teller som 1 enhet. x30, x60 og antallet i stabelen multipliseres ikke nå.",
+
+        apiKey:
+          "Gemini API-nøkkel",
+
+        apiPlaceholder:
+          "Lim inn nøkkelen for testing",
+
+        apiNote:
+          "Nøkkelen lagres bare til fanen lukkes og er ikke skrevet inn i HTML-filen.",
+
+        takePhotoTitle:
+          "2. Ta bilde",
+
+        takePhoto:
+          "📷 Ta bilde av etiketten",
+
+        scanNumber:
+          "Les av nummer",
+
+        newPhoto:
+          "Nytt bilde",
+
+        result:
+          "3. Resultat",
+
+        productForRecord:
+          "Produkt for denne registreringen",
+
+        firstLine:
+          "Første linje",
+
+        secondLine:
+          "Andre linje",
+
+        confidence:
+          "Sikkerhet",
+
+        add:
+          "Legg til",
+
+        history:
+          "Historikk",
+
+        undoLast:
+          "↩ Angre siste",
+
+        clearShift:
+          "Tøm hele skiftet",
+
+        warning:
+          "Dette er en testversjon. Registreringene lagres i nettleseren på denne telefonen. Ikke slett nettleserdata før arbeidet er ferdig.",
+
+        statusInitial:
+          "Ta først et bilde.",
+
+        selectedStatus:
+          "Valgt produkt: {product}.",
+
+        productChanged:
+          "Produktet er endret til {product}. Trykk «Les av nummer» på nytt.",
+
+        processingPhoto:
+          "Behandler bildet…",
+
+        photoReady:
+          "Bildet er klart. Produkt: {product}. Trykk «Les av nummer».",
+
+        photoOpenError:
+          "Kunne ikke åpne bildet.",
+
+        photoError:
+          "Bildefeil.",
+
+        takeNewPhoto:
+          "Ta et nytt bilde.",
+
+        insertApiKey:
+          "Lim inn Gemini API-nøkkelen.",
+
+        analyzing:
+          "Gemini analyserer etiketten for produktet {product}…",
+
+        noTextResult:
+          "Gemini returnerte ikke noe tekstresultat.",
+
+        invalidJson:
+          "Gemini returnerte ugyldig JSON: {details}",
+
+        invalidResult:
+          "Resultatet besto ikke kontrollen.\nKrav: 6 sifre + 6 tegn A-Z/0-9.\nTa et nærmere eller skarpere bilde.",
+
+        recognized:
+          "Nummeret er lest av og formatet er bekreftet.",
+
+        apiError:
+          "Feil i Gemini API:\n{message}",
+
+        duplicate:
+          "Dette nummeret er allerede lagt til: {line1} {line2}",
+
+        added:
+          "Lagt til: {product} — {line1} {line2}",
+
+        undone:
+          "Angret: {product} — {line1} {line2}",
+
+        allCleared:
+          "Alle registreringer og tellere er slettet.",
+
+        recordDeleted:
+          "Registreringen er slettet: {product} — {line1} {line2}",
+
+        historyEmpty:
+          "Ingen registreringer ennå.",
+
+        deleteRecord:
+          "Slett denne registreringen",
+
+        confirmClear:
+          "Tømme hele historikken og alle tellere for dette skiftet?",
+
+        confirmDelete:
+          "Slette registreringen {product} — {line1} {line2}?",
+
+        previewAlt:
+          "Forhåndsvisning av bildet"
+      },
+
+      pl: {
+        subtitle:
+          "Wybór produktu → zdjęcie etykiety → Gemini Vision → dodanie do ewidencji.",
+
+        selectProduct:
+          "1. Wybierz produkt",
+
+        selected:
+          "Wybrano",
+
+        totalAmount:
+          "Łączna liczba",
+
+        totalRecords:
+          "Łącznie wpisów",
+
+        countNote:
+          "Jedno skanowanie dowolnego produktu liczy się jako 1 sztuka. x30, x60 oraz liczba w stosie nie są teraz mnożone.",
+
+        apiKey:
+          "Klucz Gemini API",
+
+        apiPlaceholder:
+          "Wklej klucz do testowania",
+
+        apiNote:
+          "Klucz jest przechowywany tylko do zamknięcia karty i nie jest zapisany w pliku HTML.",
+
+        takePhotoTitle:
+          "2. Zrób zdjęcie",
+
+        takePhoto:
+          "📷 Zrób zdjęcie etykiety",
+
+        scanNumber:
+          "Rozpoznaj numer",
+
+        newPhoto:
+          "Nowe zdjęcie",
+
+        result:
+          "3. Wynik",
+
+        productForRecord:
+          "Produkt dla tego wpisu",
+
+        firstLine:
+          "Pierwszy wiersz",
+
+        secondLine:
+          "Drugi wiersz",
+
+        confidence:
+          "Pewność",
+
+        add:
+          "Dodaj",
+
+        history:
+          "Historia",
+
+        undoLast:
+          "↩ Cofnij ostatni",
+
+        clearShift:
+          "Wyczyść całą zmianę",
+
+        warning:
+          "To jest wersja testowa. Dane są zapisywane w przeglądarce tego telefonu. Nie usuwaj danych przeglądarki przed zakończeniem pracy.",
+
+        statusInitial:
+          "Najpierw zrób zdjęcie.",
+
+        selectedStatus:
+          "Wybrano produkt: {product}.",
+
+        productChanged:
+          "Produkt zmieniono na {product}. Naciśnij ponownie „Rozpoznaj numer”.",
+
+        processingPhoto:
+          "Przetwarzanie zdjęcia…",
+
+        photoReady:
+          "Zdjęcie jest gotowe. Produkt: {product}. Naciśnij „Rozpoznaj numer”.",
+
+        photoOpenError:
+          "Nie udało się otworzyć zdjęcia.",
+
+        photoError:
+          "Błąd zdjęcia.",
+
+        takeNewPhoto:
+          "Zrób nowe zdjęcie.",
+
+        insertApiKey:
+          "Wklej klucz Gemini API.",
+
+        analyzing:
+          "Gemini analizuje etykietę produktu {product}…",
+
+        noTextResult:
+          "Gemini nie zwrócił wyniku tekstowego.",
+
+        invalidJson:
+          "Gemini zwrócił nieprawidłowy JSON: {details}",
+
+        invalidResult:
+          "Wynik nie przeszedł kontroli.\nWymagane: 6 cyfr + 6 znaków A-Z/0-9.\nZrób zdjęcie bliżej lub wyraźniej.",
+
+        recognized:
+          "Numer został rozpoznany, a format potwierdzony.",
+
+        apiError:
+          "Błąd Gemini API:\n{message}",
+
+        duplicate:
+          "Ten numer został już dodany: {line1} {line2}",
+
+        added:
+          "Dodano: {product} — {line1} {line2}",
+
+        undone:
+          "Cofnięto: {product} — {line1} {line2}",
+
+        allCleared:
+          "Wszystkie wpisy i liczniki zostały wyczyszczone.",
+
+        recordDeleted:
+          "Usunięto wpis: {product} — {line1} {line2}",
+
+        historyEmpty:
+          "Nie ma jeszcze żadnych wpisów.",
+
+        deleteRecord:
+          "Usuń ten wpis",
+
+        confirmClear:
+          "Wyczyścić całą historię i wszystkie liczniki tej zmiany?",
+
+        confirmDelete:
+          "Usunąć wpis {product} — {line1} {line2}?",
+
+        previewAlt:
+          "Podgląd zdjęcia"
+      },
+
+      uk: {
+        subtitle:
+          "Вибір продукту → фото бірки → Gemini Vision → додавання до обліку.",
+
+        selectProduct:
+          "1. Виберіть продукт",
+
+        selected:
+          "Вибрано",
+
+        totalAmount:
+          "Загальна кількість",
+
+        totalRecords:
+          "Всього записів",
+
+        countNote:
+          "Одне сканування будь-якого продукту рахується як 1 одиниця. x30, x60 та кількість у стопці зараз не множаться.",
+
+        apiKey:
+          "Gemini API Key",
+
+        apiPlaceholder:
+          "Вставте ключ для тестування",
+
+        apiNote:
+          "Ключ зберігається лише до закриття вкладки та не записаний у HTML-файл.",
+
+        takePhotoTitle:
+          "2. Зробіть фото",
+
+        takePhoto:
+          "📷 Зробити фото бірки",
+
+        scanNumber:
+          "Розпізнати номер",
+
+        newPhoto:
+          "Нове фото",
+
+        result:
+          "3. Результат",
+
+        productForRecord:
+          "Продукт для цього запису",
+
+        firstLine:
+          "Перший рядок",
+
+        secondLine:
+          "Другий рядок",
+
+        confidence:
+          "Впевненість",
+
+        add:
+          "Додати",
+
+        history:
+          "Історія",
+
+        undoLast:
+          "↩ Скасувати останнє",
+
+        clearShift:
+          "Очистити всю зміну",
+
+        warning:
+          "Це тестова версія. Дані обліку зберігаються у браузері цього телефона. Не очищайте дані браузера до завершення роботи.",
+
+        statusInitial:
+          "Спочатку зробіть фотографію.",
+
+        selectedStatus:
+          "Вибрано продукт: {product}.",
+
+        productChanged:
+          "Продукт змінено на {product}. Натисніть «Розпізнати номер» ще раз.",
+
+        processingPhoto:
+          "Обробляю фотографію…",
+
+        photoReady:
+          "Фото готове. Продукт: {product}. Натисніть «Розпізнати номер».",
+
+        photoOpenError:
+          "Не вдалося відкрити фотографію.",
+
+        photoError:
+          "Помилка фотографії.",
+
+        takeNewPhoto:
+          "Зробіть нову фотографію.",
+
+        insertApiKey:
+          "Вставте Gemini API Key.",
+
+        analyzing:
+          "Gemini аналізує бірку для продукту {product}…",
+
+        noTextResult:
+          "Gemini не повернув текстовий результат.",
+
+        invalidJson:
+          "Gemini повернув некоректний JSON: {details}",
+
+        invalidResult:
+          "Результат не пройшов перевірку.\nПотрібно: 6 цифр + 6 символів A-Z/0-9.\nЗробіть фото ближче або чіткіше.",
+
+        recognized:
+          "Номер розпізнано і формат підтверджено.",
+
+        apiError:
+          "Помилка Gemini API:\n{message}",
+
+        duplicate:
+          "Цей номер уже доданий: {line1} {line2}",
+
+        added:
+          "Додано: {product} — {line1} {line2}",
+
+        undone:
+          "Скасовано: {product} — {line1} {line2}",
+
+        allCleared:
+          "Усі записи та лічильники очищено.",
+
+        recordDeleted:
+          "Запис видалено: {product} — {line1} {line2}",
+
+        historyEmpty:
+          "Ще немає доданих записів.",
+
+        deleteRecord:
+          "Видалити цей запис",
+
+        confirmClear:
+          "Очистити всю історію та всі лічильники цієї зміни?",
+
+        confirmDelete:
+          "Видалити запис {product} — {line1} {line2}?",
+
+        previewAlt:
+          "Попередній перегляд фото"
       }
     };
 
@@ -664,11 +1206,14 @@
 6. Поверни тільки дані відповідно до заданої JSON-схеми.
 `.trim();
 
-    const apiKeyInput =
-      document.getElementById("apiKey");
+    const languageGrid =
+      document.getElementById("languageGrid");
 
     const productGrid =
       document.getElementById("productGrid");
+
+    const apiKeyInput =
+      document.getElementById("apiKey");
 
     const selectedProductNameEl =
       document.getElementById("selectedProductName");
@@ -730,14 +1275,26 @@
     const historyListEl =
       document.getElementById("historyList");
 
+    let currentLanguage =
+      getSavedLanguage();
+
     let selectedProduct =
       getSavedSelectedProduct();
 
-    let currentImage = null;
-    let currentResult = null;
+    let currentImage =
+      null;
+
+    let currentResult =
+      null;
 
     let entries =
       loadEntries();
+
+    let statusState = {
+      key: "statusInitial",
+      type: "",
+      params: {}
+    };
 
     apiKeyInput.value =
       sessionStorage.getItem("gemini_api_key") || "";
@@ -751,6 +1308,17 @@
         );
       }
     );
+
+    function getSavedLanguage() {
+      const saved =
+        localStorage.getItem(
+          LANGUAGE_KEY
+        );
+
+      return LANGUAGES[saved]
+        ? saved
+        : "nb";
+    }
 
     function getSavedSelectedProduct() {
       const saved =
@@ -806,24 +1374,142 @@
       );
     }
 
-    function setStatus(
-      message,
-      type = ""
+    function t(
+      key,
+      params = {}
     ) {
+      const languageDictionary =
+        I18N[currentLanguage] ||
+        I18N.nb;
+
+      let text =
+        languageDictionary[key] ??
+        I18N.nb[key] ??
+        key;
+
+      return String(text).replace(
+        /\{(\w+)\}/g,
+        (
+          match,
+          parameterName
+        ) => {
+          return Object.prototype.hasOwnProperty.call(
+            params,
+            parameterName
+          )
+            ? String(
+                params[parameterName]
+              )
+            : match;
+        }
+      );
+    }
+
+    function setStatus(
+      key,
+      type = "",
+      params = {}
+    ) {
+      statusState = {
+        key,
+        type,
+        params
+      };
+
+      renderStatus();
+    }
+
+    function renderStatus() {
       statusEl.textContent =
-        message;
+        t(
+          statusState.key,
+          statusState.params
+        );
 
       statusEl.className =
         "status" +
         (
-          type
-            ? " " + type
+          statusState.type
+            ? " " + statusState.type
             : ""
         );
     }
 
+    function applyTranslations() {
+      document.documentElement.lang =
+        LANGUAGES[currentLanguage].htmlLanguage;
+
+      document.title =
+        "AI Scanner Mottak v3";
+
+      document
+        .querySelectorAll(
+          "[data-i18n]"
+        )
+        .forEach(
+          (element) => {
+            const key =
+              element.dataset.i18n;
+
+            element.textContent =
+              t(key);
+          }
+        );
+
+      document
+        .querySelectorAll(
+          "[data-i18n-placeholder]"
+        )
+        .forEach(
+          (element) => {
+            const key =
+              element.dataset.i18nPlaceholder;
+
+            element.placeholder =
+              t(key);
+          }
+        );
+
+      preview.alt =
+        t("previewAlt");
+
+      updateLanguageButtons();
+      updateProductButtons();
+      renderConfidence();
+      renderStatus();
+      renderHistory();
+    }
+
+    function updateLanguageButtons() {
+      const buttons =
+        languageGrid.querySelectorAll(
+          "[data-language]"
+        );
+
+      buttons.forEach(
+        (button) => {
+          const active =
+            button.dataset.language ===
+            currentLanguage;
+
+          button.classList.toggle(
+            "active",
+            active
+          );
+
+          button.setAttribute(
+            "aria-pressed",
+            active
+              ? "true"
+              : "false"
+          );
+        }
+      );
+    }
+
     function resetResult() {
-      currentResult = null;
+      currentResult =
+        null;
 
       line1El.textContent =
         "------";
@@ -831,14 +1517,31 @@
       line2El.textContent =
         "------";
 
-      confidenceEl.textContent =
-        "Впевненість: —";
-
       resultProductNameEl.textContent =
         "—";
 
       addBtn.disabled =
         true;
+
+      renderConfidence();
+    }
+
+    function renderConfidence() {
+      if (
+        currentResult &&
+        Number.isFinite(
+          currentResult.confidence
+        )
+      ) {
+        confidenceEl.textContent =
+          `${t("confidence")}: ` +
+          `${Math.round(
+            currentResult.confidence * 100
+          )}%`;
+      } else {
+        confidenceEl.textContent =
+          `${t("confidence")}: —`;
+      }
     }
 
     function updateProductButtons() {
@@ -849,19 +1552,33 @@
 
       buttons.forEach(
         (button) => {
-          const isActive =
+          const active =
             button.dataset.product ===
             selectedProduct;
 
           button.classList.toggle(
             "active",
-            isActive
+            active
+          );
+
+          button.setAttribute(
+            "aria-pressed",
+            active
+              ? "true"
+              : "false"
           );
         }
       );
 
       selectedProductNameEl.textContent =
         PRODUCTS[selectedProduct].name;
+
+      if (currentResult) {
+        resultProductNameEl.textContent =
+          PRODUCTS[
+            currentResult.product
+          ].name;
+      }
 
       localStorage.setItem(
         SELECTED_PRODUCT_KEY,
@@ -895,16 +1612,24 @@
         calculateTotals();
 
       totalBunnerEl.textContent =
-        String(totals.bunner);
+        String(
+          totals.bunner
+        );
 
       totalHyller30El.textContent =
-        String(totals.hyller30);
+        String(
+          totals.hyller30
+        );
 
       totalHyller60El.textContent =
-        String(totals.hyller60);
+        String(
+          totals.hyller60
+        );
 
       grandTotalEl.textContent =
-        String(entries.length);
+        String(
+          entries.length
+        );
 
       undoBtn.disabled =
         entries.length === 0;
@@ -917,7 +1642,9 @@
       isoString
     ) {
       const date =
-        new Date(isoString);
+        new Date(
+          isoString
+        );
 
       if (
         Number.isNaN(
@@ -928,7 +1655,7 @@
       }
 
       return new Intl.DateTimeFormat(
-        "uk-UA",
+        LANGUAGES[currentLanguage].locale,
         {
           day: "2-digit",
           month: "2-digit",
@@ -954,7 +1681,7 @@
           "history-empty";
 
         empty.textContent =
-          "Ще немає доданих записів.";
+          t("historyEmpty");
 
         historyListEl.appendChild(
           empty
@@ -1033,11 +1760,11 @@
             "×";
 
           deleteButton.title =
-            "Видалити цей запис";
+            t("deleteRecord");
 
           deleteButton.setAttribute(
             "aria-label",
-            "Видалити цей запис"
+            t("deleteRecord")
           );
 
           deleteButton.dataset.id =
@@ -1062,10 +1789,43 @@
     }
 
     function renderAll() {
-      updateProductButtons();
+      applyTranslations();
       renderTotals();
       renderHistory();
     }
+
+    languageGrid.addEventListener(
+      "click",
+      (event) => {
+        const button =
+          event.target.closest(
+            "[data-language]"
+          );
+
+        if (!button) {
+          return;
+        }
+
+        const language =
+          button.dataset.language;
+
+        if (
+          !LANGUAGES[language]
+        ) {
+          return;
+        }
+
+        currentLanguage =
+          language;
+
+        localStorage.setItem(
+          LANGUAGE_KEY,
+          currentLanguage
+        );
+
+        applyTranslations();
+      }
+    );
 
     productGrid.addEventListener(
       "click",
@@ -1084,7 +1844,8 @@
 
         if (
           !PRODUCTS[nextProduct] ||
-          nextProduct === selectedProduct
+          nextProduct ===
+            selectedProduct
         ) {
           return;
         }
@@ -1098,21 +1859,38 @@
           resetResult();
 
           setStatus(
-            `Продукт змінено на ${PRODUCTS[selectedProduct].name}. Натисніть «Розпізнати номер» ще раз.`,
-            "ok"
+            "productChanged",
+            "ok",
+            {
+              product:
+                PRODUCTS[
+                  selectedProduct
+                ].name
+            }
           );
         } else {
           setStatus(
-            `Вибрано продукт: ${PRODUCTS[selectedProduct].name}.`,
-            "ok"
+            "selectedStatus",
+            "ok",
+            {
+              product:
+                PRODUCTS[
+                  selectedProduct
+                ].name
+            }
           );
         }
       }
     );
 
-    function loadImage(file) {
+    function loadImage(
+      file
+    ) {
       return new Promise(
-        (resolve, reject) => {
+        (
+          resolve,
+          reject
+        ) => {
           const img =
             new Image();
 
@@ -1121,25 +1899,27 @@
               file
             );
 
-          img.onload = () => {
-            URL.revokeObjectURL(
-              url
-            );
+          img.onload =
+            () => {
+              URL.revokeObjectURL(
+                url
+              );
 
-            resolve(img);
-          };
+              resolve(img);
+            };
 
-          img.onerror = () => {
-            URL.revokeObjectURL(
-              url
-            );
+          img.onerror =
+            () => {
+              URL.revokeObjectURL(
+                url
+              );
 
-            reject(
-              new Error(
-                "Не вдалося відкрити фотографію."
-              )
-            );
-          };
+              reject(
+                new Error(
+                  "photoOpenError"
+                )
+              );
+            };
 
           img.src =
             url;
@@ -1147,7 +1927,9 @@
       );
     }
 
-    function compressToJpeg(img) {
+    function compressToJpeg(
+      img
+    ) {
       const maxSide =
         1800;
 
@@ -1220,7 +2002,7 @@
         );
 
       return {
-        dataUrl: dataUrl,
+        dataUrl,
 
         base64:
           dataUrl.split(",")[1],
@@ -1243,16 +2025,20 @@
 
         try {
           setStatus(
-            "Обробляю фотографію…"
+            "processingPhoto"
           );
 
           resetResult();
 
           const img =
-            await loadImage(file);
+            await loadImage(
+              file
+            );
 
           currentImage =
-            compressToJpeg(img);
+            compressToJpeg(
+              img
+            );
 
           preview.src =
             currentImage.dataUrl;
@@ -1267,16 +2053,27 @@
             false;
 
           setStatus(
-            `Фото готове. Продукт: ${PRODUCTS[selectedProduct].name}. Натисніть «Розпізнати номер».`,
-            "ok"
+            "photoReady",
+            "ok",
+            {
+              product:
+                PRODUCTS[
+                  selectedProduct
+                ].name
+            }
           );
         } catch (error) {
           currentImage =
             null;
 
+          const errorKey =
+            error.message ===
+            "photoOpenError"
+              ? "photoOpenError"
+              : "photoError";
+
           setStatus(
-            error.message ||
-            "Помилка фотографії.",
+            errorKey,
             "bad"
           );
         }
@@ -1308,7 +2105,7 @@
         resetResult();
 
         setStatus(
-          "Зробіть нову фотографію."
+          "takeNewPhoto"
         );
       }
     );
@@ -1398,9 +2195,9 @@
         confidence <= 1;
 
       return {
-        line1: line1,
+        line1,
 
-        line2: line2,
+        line2,
 
         confidence:
           confidenceValid
@@ -1419,7 +2216,7 @@
 
       if (!apiKey) {
         setStatus(
-          "Вставте Gemini API Key.",
+          "insertApiKey",
           "bad"
         );
 
@@ -1430,7 +2227,7 @@
 
       if (!currentImage) {
         setStatus(
-          "Спочатку зробіть фотографію.",
+          "statusInitial",
           "bad"
         );
 
@@ -1449,22 +2246,35 @@
       resetResult();
 
       setStatus(
-        `Gemini аналізує бірку для продукту ${PRODUCTS[productForThisScan].name}…`
+        "analyzing",
+        "",
+        {
+          product:
+            PRODUCTS[
+              productForThisScan
+            ].name
+        }
       );
 
       const requestBody = {
-        model: MODEL,
+        model:
+          MODEL,
 
-        store: false,
+        store:
+          false,
 
         input: [
           {
-            type: "text",
-            text: PROMPT
+            type:
+              "text",
+
+            text:
+              PROMPT
           },
 
           {
-            type: "image",
+            type:
+              "image",
 
             data:
               currentImage.base64,
@@ -1475,35 +2285,42 @@
         ],
 
         response_format: {
-          type: "text",
+          type:
+            "text",
 
           mime_type:
             "application/json",
 
           schema: {
-            type: "object",
+            type:
+              "object",
 
             properties: {
               line1: {
-                type: "string",
+                type:
+                  "string",
 
                 description:
                   "Exactly 6 digits from the first line above the QR code."
               },
 
               line2: {
-                type: "string",
+                type:
+                  "string",
 
                 description:
                   "Exactly 6 uppercase Latin letters A-Z or digits 0-9 from the second line above the QR code."
               },
 
               confidence: {
-                type: "number",
+                type:
+                  "number",
 
-                minimum: 0,
+                minimum:
+                  0,
 
-                maximum: 1,
+                maximum:
+                  1,
 
                 description:
                   "Estimated confidence from 0 to 1."
@@ -1577,7 +2394,7 @@
 
         if (!outputText) {
           throw new Error(
-            "Gemini не повернув текстовий результат."
+            "NO_TEXT_RESULT"
           );
         }
 
@@ -1589,13 +2406,19 @@
               outputText
             );
         } catch {
-          throw new Error(
-            "Gemini повернув некоректний JSON: " +
-            outputText.slice(
-              0,
-              180
-            )
+          setStatus(
+            "invalidJson",
+            "bad",
+            {
+              details:
+                outputText.slice(
+                  0,
+                  180
+                )
+            }
           );
+
+          return;
         }
 
         const checked =
@@ -1623,21 +2446,14 @@
             productForThisScan
           ].name;
 
-        confidenceEl.textContent =
-          "Впевненість: " +
-          Math.round(
-            checked.confidence * 100
-          ) +
-          "%";
+        renderConfidence();
 
         if (!checked.valid) {
           addBtn.disabled =
             true;
 
           setStatus(
-            "Результат не пройшов перевірку.\n" +
-            "Потрібно: 6 цифр + 6 символів A-Z/0-9.\n" +
-            "Зробіть фото ближче або чіткіше.",
+            "invalidResult",
             "bad"
           );
         } else {
@@ -1645,7 +2461,7 @@
             false;
 
           setStatus(
-            "Номер розпізнано і формат підтверджено.",
+            "recognized",
             "ok"
           );
         }
@@ -1656,14 +2472,25 @@
         addBtn.disabled =
           true;
 
-        setStatus(
-          "Помилка Gemini API:\n" +
-          (
-            error.message ||
-            String(error)
-          ),
-          "bad"
-        );
+        if (
+          error.message ===
+          "NO_TEXT_RESULT"
+        ) {
+          setStatus(
+            "noTextResult",
+            "bad"
+          );
+        } else {
+          setStatus(
+            "apiError",
+            "bad",
+            {
+              message:
+                error.message ||
+                String(error)
+            }
+          );
+        }
       } finally {
         scanBtn.disabled =
           !currentImage;
@@ -1685,8 +2512,10 @@
       return entries.some(
         (entry) => {
           return (
-            entry.line1 === line1 &&
-            entry.line2 === line2
+            entry.line1 ===
+              line1 &&
+            entry.line2 ===
+              line2
           );
         }
       );
@@ -1709,8 +2538,15 @@
           )
         ) {
           setStatus(
-            `Цей номер уже доданий: ${currentResult.line1} ${currentResult.line2}`,
-            "bad"
+            "duplicate",
+            "bad",
+            {
+              line1:
+                currentResult.line1,
+
+              line2:
+                currentResult.line2
+            }
           );
 
           addBtn.disabled =
@@ -1759,8 +2595,20 @@
           true;
 
         setStatus(
-          `Додано: ${PRODUCTS[entry.product].name} — ${entry.line1} ${entry.line2}`,
-          "ok"
+          "added",
+          "ok",
+          {
+            product:
+              PRODUCTS[
+                entry.product
+              ].name,
+
+            line1:
+              entry.line1,
+
+            line2:
+              entry.line2
+          }
         );
       }
     );
@@ -1782,8 +2630,20 @@
         renderHistory();
 
         setStatus(
-          `Скасовано: ${PRODUCTS[removed.product].name} — ${removed.line1} ${removed.line2}`,
-          "ok"
+          "undone",
+          "ok",
+          {
+            product:
+              PRODUCTS[
+                removed.product
+              ].name,
+
+            line1:
+              removed.line1,
+
+            line2:
+              removed.line2
+          }
         );
       }
     );
@@ -1799,7 +2659,7 @@
 
         const confirmed =
           window.confirm(
-            "Очистити всю історію та всі лічильники цієї зміни?"
+            t("confirmClear")
           );
 
         if (!confirmed) {
@@ -1815,7 +2675,7 @@
         resetResult();
 
         setStatus(
-          "Усі записи та лічильники очищено.",
+          "allCleared",
           "ok"
         );
       }
@@ -1835,9 +2695,12 @@
 
         const entryIndex =
           entries.findIndex(
-            (entry) =>
-              entry.id ===
-              button.dataset.id
+            (entry) => {
+              return (
+                entry.id ===
+                button.dataset.id
+              );
+            }
           );
 
         if (
@@ -1847,11 +2710,27 @@
         }
 
         const entry =
-          entries[entryIndex];
+          entries[
+            entryIndex
+          ];
 
         const confirmed =
           window.confirm(
-            `Видалити запис ${PRODUCTS[entry.product].name} — ${entry.line1} ${entry.line2}?`
+            t(
+              "confirmDelete",
+              {
+                product:
+                  PRODUCTS[
+                    entry.product
+                  ].name,
+
+                line1:
+                  entry.line1,
+
+                line2:
+                  entry.line2
+              }
+            )
           );
 
         if (!confirmed) {
@@ -1868,8 +2747,20 @@
         renderHistory();
 
         setStatus(
-          `Запис видалено: ${PRODUCTS[entry.product].name} — ${entry.line1} ${entry.line2}`,
-          "ok"
+          "recordDeleted",
+          "ok",
+          {
+            product:
+              PRODUCTS[
+                entry.product
+              ].name,
+
+            line1:
+              entry.line1,
+
+            line2:
+              entry.line2
+          }
         );
       }
     );
