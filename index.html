@@ -2,15 +2,10 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
 
-  <title>AI Scanner Mottak v4</title>
+  <title>AI Scanner Mottak v2</title>
 
   <style>
     :root {
@@ -24,7 +19,6 @@
       --ok: #48d597;
       --bad: #ff6b6b;
       --line: #303b59;
-      --selected: #4b67ac;
     }
 
     * {
@@ -35,30 +29,20 @@
       margin: 0;
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      background:
-        linear-gradient(
-          180deg,
-          #0b1020 0%,
-          #11182a 100%
-        );
+      background: linear-gradient(180deg, #0b1020 0%, #11182a 100%);
       color: var(--text);
     }
 
     .app {
       width: min(720px, 100%);
       margin: 0 auto;
-      padding: 18px 14px 50px;
+      padding: 18px 14px 40px;
     }
 
     h1 {
       margin: 4px 0 6px;
       font-size: clamp(25px, 7vw, 38px);
       line-height: 1.05;
-    }
-
-    h2 {
-      margin: 0 0 14px;
-      font-size: 21px;
     }
 
     .subtitle {
@@ -73,9 +57,7 @@
       border: 1px solid var(--line);
       border-radius: 18px;
       background: rgba(21, 28, 48, 0.94);
-      box-shadow:
-        0 12px 28px
-        rgba(0, 0, 0, 0.22);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
     }
 
     label {
@@ -84,7 +66,8 @@
       font-weight: 700;
     }
 
-    input[type="password"] {
+    input[type="password"],
+    input[type="text"] {
       width: 100%;
       min-height: 48px;
       padding: 12px 14px;
@@ -100,24 +83,30 @@
       border-color: var(--accent);
     }
 
-    input[type="file"] {
-      display: none;
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 560px) {
+      .row.two {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     button,
     .file-button {
       width: 100%;
-      min-height: 54px;
-      padding: 12px 14px;
+      min-height: 52px;
+      padding: 12px 16px;
       border: 0;
       border-radius: 14px;
       font-size: 17px;
       font-weight: 800;
       cursor: pointer;
       text-align: center;
-      transition:
-        transform 0.08s ease,
-        opacity 0.2s ease;
+      transition: transform 0.08s ease, opacity 0.2s ease;
     }
 
     button:active,
@@ -145,82 +134,8 @@
       color: #062418;
     }
 
-    .danger {
-      background: rgba(255, 107, 107, 0.18);
-      border: 1px solid rgba(255, 107, 107, 0.45);
-      color: #ffb2b2;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .row.two {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .camera-wrap {
+    input[type="file"] {
       display: none;
-      margin-top: 14px;
-      overflow: hidden;
-      border-radius: 16px;
-      border: 2px solid var(--accent);
-      background: #000;
-    }
-
-    .camera-stage {
-      position: relative;
-      width: 100%;
-      min-height: 420px;
-      background: #000;
-    }
-
-    #cameraVideo {
-      display: block;
-      width: 100%;
-      height: min(68vh, 720px);
-      object-fit: cover;
-      background: #000;
-    }
-
-    .camera-frame {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: min(58%, 300px);
-      height: min(78%, 540px);
-      transform: translate(-50%, -50%);
-      border: 3px solid var(--accent);
-      border-radius: 24px;
-      box-shadow:
-        0 0 0 9999px
-        rgba(0, 0, 0, 0.30);
-      pointer-events: none;
-    }
-
-    .camera-frame::before {
-      content: "Розмістіть бірку всередині рамки";
-      position: absolute;
-      left: 50%;
-      bottom: 12px;
-      width: 90%;
-      transform: translateX(-50%);
-      padding: 7px 8px;
-      border-radius: 9px;
-      background: rgba(0, 0, 0, 0.68);
-      color: #fff;
-      font-size: 13px;
-      text-align: center;
-    }
-
-    .camera-controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 12px;
-      background: #0d1426;
     }
 
     .preview-wrap {
@@ -285,11 +200,7 @@
 
     .result-value {
       min-height: 42px;
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Consolas,
-        monospace;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
       font-size: clamp(27px, 8vw, 42px);
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -297,108 +208,18 @@
     }
 
     .confidence {
-      margin: 12px 0;
+      margin: 12px 0 0;
       color: var(--muted);
     }
 
-    .product-title {
-      margin: 18px 0 10px;
-      color: var(--muted);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .warning {
+      padding: 11px 12px;
+      border-radius: 12px;
+      background: rgba(244, 196, 48, 0.1);
+      border: 1px solid rgba(244, 196, 48, 0.34);
+      color: #f7df8b;
       font-size: 14px;
-    }
-
-    .product-buttons {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    @media (min-width: 520px) {
-      .product-buttons {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .product-btn {
-      min-height: 66px;
-      background: #2c395c;
-      color: var(--text);
-      border: 2px solid transparent;
-    }
-
-    .product-btn.selected {
-      background: var(--selected);
-      border-color: var(--accent);
-      box-shadow:
-        0 0 0 2px
-        rgba(244, 196, 48, 0.15);
-    }
-
-    .selected-product {
-      min-height: 25px;
-      margin: 2px 0 12px;
-      color: var(--accent);
-      font-weight: 800;
-      text-align: center;
-    }
-
-    .summary-main {
-      margin-bottom: 12px;
-      padding: 16px;
-      border-radius: 16px;
-      background: #0d1426;
-      border: 1px solid var(--accent);
-      text-align: center;
-    }
-
-    .summary-main .label {
-      color: var(--muted);
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .summary-main .number {
-      margin-top: 5px;
-      font-size: 48px;
-      font-weight: 900;
-      color: var(--accent);
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    @media (min-width: 500px) {
-      .summary-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .summary-box {
-      padding: 14px 10px;
-      border-radius: 14px;
-      background: #0d1426;
-      border: 1px solid var(--line);
-      text-align: center;
-    }
-
-    .summary-box .name {
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .summary-box .count {
-      margin-top: 4px;
-      font-size: 34px;
-      font-weight: 900;
+      line-height: 1.4;
     }
 
     .list {
@@ -407,63 +228,15 @@
       margin-top: 12px;
     }
 
-    .list-empty {
-      padding: 16px;
-      border-radius: 12px;
-      background: #0d1426;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      text-align: center;
-    }
-
     .list-item {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
+      display: flex;
+      justify-content: space-between;
       gap: 10px;
-      align-items: center;
       padding: 11px 12px;
       border-radius: 12px;
       background: #0d1426;
       border: 1px solid var(--line);
-    }
-
-    .item-number {
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .item-product {
-      font-weight: 900;
-      color: var(--accent);
-    }
-
-    .item-code {
-      margin-top: 4px;
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Consolas,
-        monospace;
-      font-size: 15px;
-      letter-spacing: 0.04em;
-    }
-
-    .item-time {
-      color: var(--muted);
-      font-size: 12px;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .warning {
-      margin-top: 14px;
-      padding: 11px 12px;
-      border-radius: 12px;
-      background: rgba(244, 196, 48, 0.1);
-      border: 1px solid rgba(244, 196, 48, 0.34);
-      color: #f7df8b;
-      font-size: 14px;
-      line-height: 1.4;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     }
 
     .tiny {
@@ -478,11 +251,10 @@
 <body>
   <main class="app">
 
-    <h1>AI Scanner Mottak v4</h1>
+    <h1>AI Scanner Mottak v2</h1>
 
     <p class="subtitle">
-      Вбудована камера → Gemini Vision →
-      вибір продукції → облік приймання.
+      Фото жовтої бірки → Gemini Vision → два рядки над QR.
     </p>
 
     <section class="card">
@@ -499,104 +271,39 @@
       />
 
       <div class="tiny">
-        Ключ зберігається тільки у браузері цього телефона.
+        Ключ зберігається лише до закриття вкладки та не записаний у HTML-файл.
       </div>
-
-      <button
-        id="forgetKeyBtn"
-        class="secondary"
-        style="margin-top: 12px;"
-        type="button"
-      >
-        Забути збережений ключ
-      </button>
 
     </section>
 
     <section class="card">
 
-      <button
-        id="openCameraBtn"
-        class="primary"
-        type="button"
-      >
-        📷 Відкрити камеру
-      </button>
-
-      <div
-        id="cameraWrap"
-        class="camera-wrap"
-      >
-
-        <div class="camera-stage">
-
-          <video
-            id="cameraVideo"
-            autoplay
-            playsinline
-            muted
-          ></video>
-
-          <div class="camera-frame"></div>
-
-        </div>
-
-        <div class="camera-controls">
-
-          <button
-            id="captureBtn"
-            class="success"
-            type="button"
-          >
-            📸 Зробити фото
-          </button>
-
-          <button
-            id="closeCameraBtn"
-            class="secondary"
-            type="button"
-          >
-            Закрити камеру
-          </button>
-
-        </div>
-
-      </div>
-
-      <label
-        class="file-button secondary"
-        for="photoInput"
-        style="display: block; margin-top: 10px;"
-      >
-        Вибрати готове фото
+      <label class="file-button primary" for="photoInput">
+        📷 Зробити фото бірки
       </label>
 
       <input
         id="photoInput"
         type="file"
         accept="image/*"
+        capture="environment"
       />
 
-      <div
-        id="previewWrap"
-        class="preview-wrap"
-      >
+      <div id="previewWrap" class="preview-wrap">
+
         <img
           id="preview"
           alt="Попередній перегляд фото"
         />
+
       </div>
 
-      <div
-        class="row two"
-        style="margin-top: 12px;"
-      >
+      <div class="row two" style="margin-top: 12px;">
 
         <button
           id="scanBtn"
           class="primary"
           disabled
-          type="button"
         >
           Розпізнати номер
         </button>
@@ -605,18 +312,14 @@
           id="clearBtn"
           class="secondary"
           disabled
-          type="button"
         >
           Нове фото
         </button>
 
       </div>
 
-      <div
-        id="status"
-        class="status"
-      >
-        Відкрийте камеру та зробіть фотографію.
+      <div id="status" class="status">
+        Спочатку зробіть фотографію.
       </div>
 
     </section>
@@ -627,12 +330,11 @@
 
         <div class="result-box">
 
-          <span>Перший рядок</span>
+          <span>
+            Перший рядок
+          </span>
 
-          <div
-            id="line1"
-            class="result-value"
-          >
+          <div id="line1" class="result-value">
             ------
           </div>
 
@@ -640,12 +342,11 @@
 
         <div class="result-box">
 
-          <span>Другий рядок</span>
+          <span>
+            Другий рядок
+          </span>
 
-          <div
-            id="line2"
-            class="result-value"
-          >
+          <div id="line2" class="result-value">
             ------
           </div>
 
@@ -653,186 +354,49 @@
 
       </div>
 
-      <p
-        id="confidence"
-        class="confidence"
-      >
+      <p id="confidence" class="confidence">
         Впевненість: —
       </p>
-
-      <div class="product-title">
-        Виберіть продукцію
-      </div>
-
-      <div class="product-buttons">
-
-        <button
-          class="product-btn"
-          data-product="Bunner"
-          type="button"
-        >
-          Bunner
-        </button>
-
-        <button
-          class="product-btn"
-          data-product="Hyller x30"
-          type="button"
-        >
-          Hyller x30
-        </button>
-
-        <button
-          class="product-btn"
-          data-product="Hyller x60"
-          type="button"
-        >
-          Hyller x60
-        </button>
-
-      </div>
-
-      <div
-        id="selectedProduct"
-        class="selected-product"
-      >
-        Продукцію не вибрано
-      </div>
 
       <button
         id="addBtn"
         class="success"
         disabled
-        type="button"
       >
-        Додати на склад
+        Додати
       </button>
 
     </section>
 
     <section class="card">
 
-      <h2>Прийнято на склад</h2>
+      <strong>
+        Тестовий список
+      </strong>
 
-      <div class="summary-main">
-
-        <div class="label">
-          Загальна кількість
-        </div>
-
-        <div
-          id="totalCount"
-          class="number"
-        >
-          0
-        </div>
-
-      </div>
-
-      <div class="summary-grid">
-
-        <div class="summary-box">
-
-          <div class="name">
-            Bunner
-          </div>
-
-          <div
-            id="bunnerCount"
-            class="count"
-          >
-            0
-          </div>
-
-        </div>
-
-        <div class="summary-box">
-
-          <div class="name">
-            Hyller x30
-          </div>
-
-          <div
-            id="hyller30Count"
-            class="count"
-          >
-            0
-          </div>
-
-        </div>
-
-        <div class="summary-box">
-
-          <div class="name">
-            Hyller x60
-          </div>
-
-          <div
-            id="hyller60Count"
-            class="count"
-          >
-            0
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <section class="card">
-
-      <h2>Список приймання</h2>
-
-      <div
-        id="list"
-        class="list"
-      ></div>
-
-      <div
-        class="row two"
-        style="margin-top: 14px;"
-      >
-
-        <button
-          id="deleteLastBtn"
-          class="secondary"
-          disabled
-          type="button"
-        >
-          Видалити останній
-        </button>
-
-        <button
-          id="clearAllBtn"
-          class="danger"
-          disabled
-          type="button"
-        >
-          Очистити все
-        </button>
-
-      </div>
+      <div id="list" class="list"></div>
 
       <div class="tiny">
-        Фото тимчасово зберігається у вкладці.
-        Список постійно зберігається у браузері телефона.
+        Список існує лише в цій вкладці.
+        Постійне збереження та експорт додамо після перевірки розпізнавання.
       </div>
 
     </section>
 
     <div class="warning">
-      Це тестова версія. Для публічної робочої
-      версії Gemini API потрібно перенести
-      на сервер або Cloudflare Worker.
+
+      Це тестова версія.
+
+      Не публікуйте сторінку з ключем, записаним у коді.
+
+      Для робочої версії API-виклик буде перенесено на сервер
+      або Cloudflare Worker.
+
     </div>
 
   </main>
 
-  <canvas
-    id="canvas"
-    hidden
-  ></canvas>
+  <canvas id="canvas" hidden></canvas>
 
   <script>
     "use strict";
@@ -842,15 +406,6 @@
 
     const MODEL =
       "gemini-3.6-flash";
-
-    const STORAGE_KEY =
-      "mottak_entries_v4";
-
-    const API_KEY_STORAGE =
-      "gemini_api_key";
-
-    const PHOTO_STORAGE =
-      "mottak_current_photo_v4";
 
     const PROMPT = `
 На фотографії знаходиться складська зона.
@@ -868,40 +423,21 @@
 2. Другий рядок має містити рівно 6 символів:
 лише великі латинські літери A-Z та цифри 0-9.
 
-3. Повністю ігноруй QR-код і не декодуй його.
+3. Повністю ігноруй сам QR-код і не декодуй його.
 
 4. Ігноруй логотип CC, написи на металі,
 контейнері, фоні та інших наклейках.
 
 5. Не домислюй символи.
 
-6. Якщо рядок неможливо надійно прочитати,
-поверни порожній рядок і низьку confidence.
+Якщо будь-який рядок неможливо надійно прочитати,
+поверни для нього порожній рядок і низьку confidence.
 
-7. Поверни тільки дані відповідно
-до заданої JSON-схеми.
+6. Поверни тільки дані відповідно до заданої JSON-схеми.
 `.trim();
 
     const apiKeyInput =
       document.getElementById("apiKey");
-
-    const forgetKeyBtn =
-      document.getElementById("forgetKeyBtn");
-
-    const openCameraBtn =
-      document.getElementById("openCameraBtn");
-
-    const cameraWrap =
-      document.getElementById("cameraWrap");
-
-    const cameraVideo =
-      document.getElementById("cameraVideo");
-
-    const captureBtn =
-      document.getElementById("captureBtn");
-
-    const closeCameraBtn =
-      document.getElementById("closeCameraBtn");
 
     const photoInput =
       document.getElementById("photoInput");
@@ -936,60 +472,201 @@
     const confidenceEl =
       document.getElementById("confidence");
 
-    const selectedProductEl =
-      document.getElementById("selectedProduct");
-
-    const productButtons =
-      document.querySelectorAll(".product-btn");
-
-    const totalCountEl =
-      document.getElementById("totalCount");
-
-    const bunnerCountEl =
-      document.getElementById("bunnerCount");
-
-    const hyller30CountEl =
-      document.getElementById("hyller30Count");
-
-    const hyller60CountEl =
-      document.getElementById("hyller60Count");
-
     const listEl =
       document.getElementById("list");
 
-    const deleteLastBtn =
-      document.getElementById("deleteLastBtn");
-
-    const clearAllBtn =
-      document.getElementById("clearAllBtn");
-
-    let cameraStream = null;
     let currentImage = null;
     let currentResult = null;
-    let selectedProduct = "";
-    let entries = loadEntries();
+
+    const entries = [];
 
     apiKeyInput.value =
-      localStorage.getItem(API_KEY_STORAGE) || "";
+      sessionStorage.getItem("gemini_api_key") || "";
 
-    apiKeyInput.addEventListener(
-      "input",
-      () => {
+    apiKeyInput.addEventListener("input", () => {
 
-        const value =
-          apiKeyInput.value.trim();
+      sessionStorage.setItem(
+        "gemini_api_key",
+        apiKeyInput.value.trim()
+      );
 
-        if (value) {
+    });
 
-          localStorage.setItem(
-            API_KEY_STORAGE,
-            value
+    function setStatus(message, type = "") {
+
+      statusEl.textContent = message;
+
+      statusEl.className =
+        "status" + (type ? " " + type : "");
+
+    }
+
+    function resetResult() {
+
+      currentResult = null;
+
+      line1El.textContent = "------";
+      line2El.textContent = "------";
+
+      confidenceEl.textContent =
+        "Впевненість: —";
+
+      addBtn.disabled = true;
+
+    }
+
+    function loadImage(file) {
+
+      return new Promise((resolve, reject) => {
+
+        const img = new Image();
+
+        const url =
+          URL.createObjectURL(file);
+
+        img.onload = () => {
+
+          URL.revokeObjectURL(url);
+
+          resolve(img);
+
+        };
+
+        img.onerror = () => {
+
+          URL.revokeObjectURL(url);
+
+          reject(
+            new Error(
+              "Не вдалося відкрити фотографію."
+            )
           );
 
-        } else {
+        };
 
-          localStorage.removeItem(
-            API_KEY_STORAGE
+        img.src = url;
+
+      });
+
+    }
+
+    function compressToJpeg(img) {
+
+      const maxSide = 1800;
+
+      let width = img.naturalWidth;
+      let height = img.naturalHeight;
+
+      if (Math.max(width, height) > maxSide) {
+
+        const scale =
+          maxSide / Math.max(width, height);
+
+        width =
+          Math.round(width * scale);
+
+        height =
+          Math.round(height * scale);
+
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx =
+        canvas.getContext(
+          "2d",
+          { alpha: false }
+        );
+
+      ctx.fillStyle = "#ffffff";
+
+      ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+      );
+
+      ctx.drawImage(
+        img,
+        0,
+        0,
+        width,
+        height
+      );
+
+      const dataUrl =
+        canvas.toDataURL(
+          "image/jpeg",
+          0.9
+        );
+
+      return {
+
+        dataUrl: dataUrl,
+
+        base64:
+          dataUrl.split(",")[1],
+
+        mimeType:
+          "image/jpeg"
+
+      };
+
+    }
+
+    photoInput.addEventListener(
+      "change",
+      async () => {
+
+        const file =
+          photoInput.files &&
+          photoInput.files[0];
+
+        if (!file) {
+          return;
+        }
+
+        try {
+
+          setStatus(
+            "Обробляю фотографію…"
+          );
+
+          resetResult();
+
+          const img =
+            await loadImage(file);
+
+          currentImage =
+            compressToJpeg(img);
+
+          preview.src =
+            currentImage.dataUrl;
+
+          previewWrap.style.display =
+            "block";
+
+          scanBtn.disabled =
+            false;
+
+          clearBtn.disabled =
+            false;
+
+          setStatus(
+            "Фото готове. Натисніть «Розпізнати номер».",
+            "ok"
+          );
+
+        } catch (error) {
+
+          currentImage = null;
+
+          setStatus(
+            error.message ||
+            "Помилка фотографії.",
+            "bad"
           );
 
         }
@@ -997,96 +674,503 @@
       }
     );
 
-    forgetKeyBtn.addEventListener(
+    clearBtn.addEventListener(
+      "click",
+      () => {
+
+        photoInput.value = "";
+
+        currentImage = null;
+
+        preview.removeAttribute(
+          "src"
+        );
+
+        previewWrap.style.display =
+          "none";
+
+        scanBtn.disabled =
+          true;
+
+        clearBtn.disabled =
+          true;
+
+        resetResult();
+
+        setStatus(
+          "Зробіть нову фотографію."
+        );
+
+      }
+    );
+
+    function extractOutputText(response) {
+
+      if (
+        typeof response.output_text === "string" &&
+        response.output_text.trim()
+      ) {
+
+        return response.output_text.trim();
+
+      }
+
+      const parts = [];
+
+      for (
+        const step of response.steps || []
+      ) {
+
+        if (
+          step.type !== "model_output"
+        ) {
+          continue;
+        }
+
+        for (
+          const content of step.content || []
+        ) {
+
+          if (
+            content.type === "text" &&
+            typeof content.text === "string"
+          ) {
+
+            parts.push(
+              content.text
+            );
+
+          }
+
+        }
+
+      }
+
+      return parts
+        .join("")
+        .trim();
+
+    }
+
+    function validateResult(value) {
+
+      const line1 =
+        String(
+          value.line1 || ""
+        ).trim();
+
+      const line2 =
+        String(
+          value.line2 || ""
+        )
+          .trim()
+          .toUpperCase();
+
+      const confidence =
+        Number(
+          value.confidence
+        );
+
+      const line1Valid =
+        /^\d{6}$/.test(line1);
+
+      const line2Valid =
+        /^[A-Z0-9]{6}$/.test(line2);
+
+      const confidenceValid =
+        Number.isFinite(confidence) &&
+        confidence >= 0 &&
+        confidence <= 1;
+
+      return {
+
+        line1: line1,
+
+        line2: line2,
+
+        confidence:
+          confidenceValid
+            ? confidence
+            : 0,
+
+        valid:
+          line1Valid &&
+          line2Valid
+
+      };
+
+    }
+
+    async function scanImage() {
+
+      const apiKey =
+        apiKeyInput.value.trim();
+
+      if (!apiKey) {
+
+        setStatus(
+          "Вставте Gemini API Key.",
+          "bad"
+        );
+
+        apiKeyInput.focus();
+
+        return;
+
+      }
+
+      if (!currentImage) {
+
+        setStatus(
+          "Спочатку зробіть фотографію.",
+          "bad"
+        );
+
+        return;
+
+      }
+
+      scanBtn.disabled =
+        true;
+
+      clearBtn.disabled =
+        true;
+
+      resetResult();
+
+      setStatus(
+        "Gemini аналізує бірку…"
+      );
+
+      const requestBody = {
+
+        model: MODEL,
+
+        store: false,
+
+        input: [
+
+          {
+            type: "text",
+            text: PROMPT
+          },
+
+          {
+            type: "image",
+
+            data:
+              currentImage.base64,
+
+            mime_type:
+              currentImage.mimeType
+          }
+
+        ],
+
+        response_format: {
+
+          type: "text",
+
+          mime_type:
+            "application/json",
+
+          schema: {
+
+            type:
+              "object",
+
+            properties: {
+
+              line1: {
+
+                type:
+                  "string",
+
+                description:
+                  "Exactly 6 digits from the first line above the QR code."
+
+              },
+
+              line2: {
+
+                type:
+                  "string",
+
+                description:
+                  "Exactly 6 uppercase Latin letters A-Z or digits 0-9 from the second line above the QR code."
+
+              },
+
+              confidence: {
+
+                type:
+                  "number",
+
+                minimum:
+                  0,
+
+                maximum:
+                  1,
+
+                description:
+                  "Estimated confidence from 0 to 1."
+
+              }
+
+            },
+
+            required: [
+              "line1",
+              "line2",
+              "confidence"
+            ],
+
+            additionalProperties:
+              false
+
+          }
+
+        },
+
+        generation_config: {
+
+          max_output_tokens:
+            120,
+
+          thinking_level:
+            "minimal"
+
+        }
+
+      };
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+
+              method:
+                "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "application/json",
+
+                "x-goog-api-key":
+                  apiKey
+
+              },
+
+              body:
+                JSON.stringify(
+                  requestBody
+                )
+
+            }
+          );
+
+        const data =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        if (!response.ok) {
+
+          const apiMessage =
+            data?.error?.message ||
+            `HTTP ${response.status}`;
+
+          throw new Error(
+            apiMessage
+          );
+
+        }
+
+        const outputText =
+          extractOutputText(data);
+
+        if (!outputText) {
+
+          throw new Error(
+            "Gemini не повернув текстовий результат."
+          );
+
+        }
+
+        let parsed;
+
+        try {
+
+          parsed =
+            JSON.parse(
+              outputText
+            );
+
+        } catch {
+
+          throw new Error(
+            "Gemini повернув некоректний JSON: " +
+            outputText.slice(
+              0,
+              180
+            )
+          );
+
+        }
+
+        const checked =
+          validateResult(
+            parsed
+          );
+
+        currentResult =
+          checked;
+
+        line1El.textContent =
+          checked.line1 ||
+          "------";
+
+        line2El.textContent =
+          checked.line2 ||
+          "------";
+
+        confidenceEl.textContent =
+          "Впевненість: " +
+          Math.round(
+            checked.confidence * 100
+          ) +
+          "%";
+
+        if (!checked.valid) {
+
+          addBtn.disabled =
+            true;
+
+          setStatus(
+            "Результат не пройшов перевірку.\n" +
+            "Потрібно: 6 цифр + 6 символів A-Z/0-9.\n" +
+            "Зробіть фото ближче або чіткіше.",
+            "bad"
+          );
+
+        } else {
+
+          addBtn.disabled =
+            false;
+
+          setStatus(
+            "Номер розпізнано і формат підтверджено.",
+            "ok"
+          );
+
+        }
+
+      } catch (error) {
+
+        currentResult =
+          null;
+
+        addBtn.disabled =
+          true;
+
+        setStatus(
+          "Помилка Gemini API:\n" +
+          (
+            error.message ||
+            String(error)
+          ),
+          "bad"
+        );
+
+      } finally {
+
+        scanBtn.disabled =
+          !currentImage;
+
+        clearBtn.disabled =
+          !currentImage;
+
+      }
+
+    }
+
+    scanBtn.addEventListener(
+      "click",
+      scanImage
+    );
+
+    addBtn.addEventListener(
       "click",
       () => {
 
         if (
-          !confirm(
-            "Видалити збережений Gemini API Key?"
-          )
+          !currentResult ||
+          !currentResult.valid
         ) {
           return;
         }
 
-        localStorage.removeItem(
-          API_KEY_STORAGE
+        entries.unshift({
+
+          line1:
+            currentResult.line1,
+
+          line2:
+            currentResult.line2
+
+        });
+
+        const item =
+          document.createElement(
+            "div"
+          );
+
+        item.className =
+          "list-item";
+
+        const left =
+          document.createElement(
+            "span"
+          );
+
+        left.textContent =
+          currentResult.line1;
+
+        const right =
+          document.createElement(
+            "span"
+          );
+
+        right.textContent =
+          currentResult.line2;
+
+        item.append(
+          left,
+          right
         );
 
-        apiKeyInput.value = "";
+        listEl.prepend(
+          item
+        );
+
+        addBtn.disabled =
+          true;
 
         setStatus(
-          "Збережений API-ключ видалено.",
+          "Додано: " +
+          currentResult.line1 +
+          " " +
+          currentResult.line2,
           "ok"
         );
 
       }
     );
-
-    function setStatus(
-      message,
-      type = ""
-    ) {
-
-      statusEl.textContent = message;
-
-      statusEl.className =
-        "status" +
-        (type ? " " + type : "");
-
-    }
-
-    function loadEntries() {
-
-      try {
-
-        const saved =
-          localStorage.getItem(
-            STORAGE_KEY
-          );
-
-        const parsed =
-          saved
-            ? JSON.parse(saved)
-            : [];
-
-        return Array.isArray(parsed)
-          ? parsed
-          : [];
-
-      } catch {
-
-        return [];
-
-      }
-
-    }
-
-    function saveEntries() {
-
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(entries)
-      );
-
-    }
-
-    function updateAddButton() {
-
-      addBtn.disabled =
-        !currentResult ||
-        !currentResult.valid ||
-        !selectedProduct;
-
-    }
-
-    function resetProductSelection() {
-
-      selectedProduct = "";
-
-      selectedProductEl.textContent =
-        "Продукцію не вибрано";
-
-      productButtons.forEach(
-        button =>
-          button
+  </script>
+</body>
+</html>
