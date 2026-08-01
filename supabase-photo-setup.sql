@@ -1,0 +1,94 @@
+-- BaMavaremottak: photographs for camera + Nordic ID matching
+-- DEMO setup. Run in Supabase SQL Editor.
+
+alter table public.mottak_scans
+  add column if not exists photo_url text not null default '',
+  add column if not exists photo_path text not null default '',
+  add column if not exists confidence numeric;
+
+alter table public.mottak_scans
+  drop constraint if exists mottak_confidence_range;
+
+alter table public.mottak_scans
+  add constraint mottak_confidence_range
+  check (
+    confidence is null
+    or (confidence >= 0 and confidence <= 1)
+  );
+
+create index if not exists mottak_scans_upper_number_idx
+on public.mottak_scans (upper_number);
+
+insert into storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
+values (
+  'mottak-photos',
+  'mottak-photos',
+  true,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+-- Table deletion for the temporary demonstration version.
+drop policy if exists "mottak_demo_delete"
+on public.mottak_scans;
+
+create policy "mottak_demo_delete"
+on public.mottak_scans
+for delete
+to anon, authenticated
+using (true);
+
+grant delete
+on public.mottak_scans
+to anon, authenticated;
+
+-- Storage policies.
+drop policy if exists "mottak_photos_public_read"
+on storage.objects;
+
+drop policy if exists "mottak_photos_demo_insert"
+on storage.objects;
+
+drop policy if exists "mottak_photos_demo_update"
+on storage.objects;
+
+drop policy if exists "mottak_photos_demo_delete"
+on storage.objects;
+
+create policy "mottak_photos_public_read"
+on storage.objects
+for select
+to anon, authenticated
+using (bucket_id = 'mottak-photos');
+
+create policy "mottak_photos_demo_insert"
+on storage.objects
+for insert
+to anon, authenticated
+with check (bucket_id = 'mottak-photos');
+
+create policy "mottak_photos_demo_update"
+on storage.objects
+for update
+to anon, authenticated
+using (bucket_id = 'mottak-photos')
+with check (bucket_id = 'mottak-photos');
+
+create policy "mottak_photos_demo_delete"
+on storage.objects
+for delete
+to anon, authenticated
+using (bucket_id = 'mottak-photos');
+
+-- IMPORTANT: anonymous DELETE is enabled only for this temporary demo.
