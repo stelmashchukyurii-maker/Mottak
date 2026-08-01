@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <title>Mottak Live v1</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #151c30;
+      --card2: #0e1629;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --warn: #f6b94b;
+      --bad: #ff6b6b;
+      --line: #303b59;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg), #11182a);
+    }
+    button, input, select, textarea { font: inherit; }
+    .app { width: min(1280px, 100%); margin: auto; padding: 14px 12px 46px; }
+    h1 { margin: 0 0 5px; font-size: clamp(28px, 5vw, 43px); }
+    h2 { margin: 0 0 12px; font-size: 20px; }
+    .subtitle, .note { color: var(--muted); line-height: 1.45; }
+    .version { color: var(--muted); font-size: 12px; }
+    .card {
+      margin: 12px 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+    }
+    .topbar, .toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+    .languages, .products, .actions, .stats { display: grid; gap: 9px; }
+    .languages, .products { grid-template-columns: repeat(3, 1fr); }
+    .actions { grid-template-columns: repeat(4, 1fr); }
+    .stats { grid-template-columns: repeat(6, 1fr); }
+    button, .link-button {
+      min-height: 48px;
+      padding: 10px 13px;
+      border: 0;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+    .language, .product, .secondary {
+      color: var(--text);
+      background: var(--card2);
+      border: 2px solid var(--line);
+    }
+    .language.active, .product.active {
+      color: #17130a;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .primary { color: #17130a; background: var(--accent); }
+    .success { color: #062418; background: var(--ok); }
+    .danger { color: #ffd0d0; background: rgba(255,107,107,.17); border: 1px solid rgba(255,107,107,.42); }
+    .link-button { display: inline-flex; align-items: center; justify-content: center; color: var(--text); background: #2c395c; text-decoration: none; }
+    .connection {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card2);
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--warn); }
+    .connection.online .dot { background: var(--ok); }
+    .connection.offline .dot { background: var(--bad); }
+    textarea, input, select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      color: var(--text);
+      background: #070b14;
+    }
+    textarea {
+      min-height: 110px;
+      border: 3px solid var(--accent);
+      font: 900 clamp(20px, 5vw, 31px) Consolas, monospace;
+      resize: vertical;
+    }
+    .message { min-height: 24px; margin-top: 10px; color: var(--muted); white-space: pre-wrap; }
+    .message.ok { color: var(--ok); }
+    .message.bad { color: var(--bad); }
+    .message.warn { color: var(--warn); }
+    .stat { padding: 10px 5px; border: 1px solid var(--line); border-radius: 12px; background: var(--card2); text-align: center; }
+    .stat span { display: block; min-height: 28px; color: var(--muted); font-size: 11px; }
+    .stat strong { font-size: 29px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; min-width: 1120px; border-collapse: collapse; background: var(--card2); }
+    th, td { padding: 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    th { color: var(--muted); background: #111a31; font-size: 11px; text-transform: uppercase; }
+    td input, td select { min-height: 38px; padding: 6px; }
+    .mono { font-family: Consolas, monospace; font-weight: 800; }
+    .empty { padding: 25px; text-align: center; color: var(--muted); }
+    .source { padding: 4px 7px; border-radius: 999px; background: #263354; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .filters { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; margin: 10px 0; }
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .actions { grid-template-columns: repeat(2, 1fr); }
+      .filters { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .languages, .products, .actions, .stats, .filters { grid-template-columns: 1fr; }
+      .toolbar > * { width: 100%; }
+      .toolbar .link-button, .toolbar button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <div>
+        <h1 data-t="title">Mottak Live</h1>
+        <div class="version">Mottak Live v1 · 01.08.2026 21:45 Europe/Oslo</div>
+      </div>
+      <div class="connection" id="connection"><span class="dot"></span><span id="connectionText">Kobler til…</span></div>
+    </div>
+    <p class="subtitle" data-t="subtitle"></p>
+
+    <section class="card">
+      <div class="languages" id="languages">
+        <button class="language" data-language="nb">Norsk</button>
+        <button class="language" data-language="pl">Polski</button>
+        <button class="language" data-language="uk">Українська</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-t="chooseProduct"></h2>
+      <div class="products" id="products">
+        <button class="product" data-product="bunner">Bunner</button>
+        <button class="product" data-product="hyller30">Hyller x30</button>
+        <button class="product" data-product="hyller60">Hyller x60</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-t="scanTitle"></h2>
+      <textarea id="scanInput" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none"></textarea>
+      <p class="note" data-t="scanHelp"></p>
+      <div class="actions">
+        <button class="primary" id="addButton" data-t="add"></button>
+        <button class="secondary" id="clearInputButton" data-t="clearInput"></button>
+        <button class="secondary" id="focusButton" data-t="focus"></button>
+        <button class="success" id="verifyButton" data-t="verifyAll"></button>
+      </div>
+      <div class="message" id="message"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-t="counts"></h2>
+      <div class="stats">
+        <div class="stat"><span data-t="queue"></span><strong id="queueCount">0</strong></div>
+        <div class="stat"><span data-t="pending"></span><strong id="pendingCount">0</strong></div>
+        <div class="stat"><span data-t="verified"></span><strong id="verifiedCount">0</strong></div>
+        <div class="stat"><span data-t="invalid"></span><strong id="invalidCount">0</strong></div>
+        <div class="stat"><span data-t="cloud"></span><strong id="cloudCount">0</strong></div>
+        <div class="stat"><span data-t="duplicates"></span><strong id="duplicateCount">0</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <h2 data-t="queueTitle"></h2>
+        <div>
+          <button class="success" id="saveButton" data-t="saveChecked"></button>
+          <button class="danger" id="clearQueueButton" data-t="clearQueue"></button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th data-t="time"></th>
+              <th data-t="product"></th>
+              <th data-t="scannerCode"></th>
+              <th data-t="upper"></th>
+              <th data-t="lower"></th>
+              <th data-t="status"></th>
+              <th data-t="action"></th>
+            </tr>
+          </thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+      </div>
+      <p class="note" data-t="queueNote"></p>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <h2 data-t="cloudTitle"></h2>
+        <div>
+          <button class="secondary" id="refreshButton" data-t="refresh"></button>
+          <a class="link-button" href="index.html" data-t="camera"></a>
+        </div>
+      </div>
+      <div class="filters">
+        <input id="searchInput" data-placeholder="searchPlaceholder">
+        <select id="productFilter">
+          <option value="" data-t="allProducts"></option>
+          <option value="bunner">Bunner</option>
+          <option value="hyller30">Hyller x30</option>
+          <option value="hyller60">Hyller x60</option>
+        </select>
+        <select id="statusFilter">
+          <option value="" data-t="allStatuses"></option>
+          <option value="pending" data-t="pendingStatus"></option>
+          <option value="verified" data-t="verifiedStatus"></option>
+          <option value="invalid" data-t="invalidStatus"></option>
+          <option value="duplicate" data-t="duplicateStatus"></option>
+          <option value="blocked" data-t="blockedStatus"></option>
+        </select>
+        <button class="secondary" id="clearFiltersButton" data-t="clearFilters"></button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th data-t="time"></th>
+              <th data-t="product"></th>
+              <th data-t="scannerCode"></th>
+              <th data-t="upper"></th>
+              <th data-t="lower"></th>
+              <th data-t="status"></th>
+              <th data-t="source"></th>
+              <th data-t="device"></th>
+            </tr>
+          </thead>
+          <tbody id="cloudBody"></tbody>
+        </table>
+      </div>
+      <p class="note" data-t="cloudNote"></p>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+    const TABLE_NAME = "mottak_scans";
+    const QUEUE_KEY = "mottak_live_queue_v1";
+    const LANGUAGE_KEY = "mottak_live_language";
+    const PRODUCT_KEY = "mottak_live_product";
+    const DEVICE_KEY = "mottak_live_device_id";
+
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+    });
+
+    const PRODUCTS = {
+      bunner: "Bunner",
+      hyller30: "Hyller x30",
+      hyller60: "Hyller x60"
+    };
+
+    const TEXT = {
+      nb: {
+        title: "Mottak Live",
+        subtitle: "Skann på én enhet og se resultatet på alle enheter i sanntid.",
+        chooseProduct: "1. Velg produkt",
+        scanTitle: "2. Masseskanning med Nordic ID",
+        scanHelp: "Enter, Tab eller en kort pause avslutter skanningen. Hver skanning går først til kontrollkøen.",
+        add: "Legg i kø", clearInput: "Tøm felt", focus: "Aktiver skannerfelt", verifyAll: "Godkjenn komplette",
+        counts: "Telling", queue: "I kø", pending: "Venter", verified: "Godkjent", invalid: "Feil / skadet",
+        cloud: "I databasen", duplicates: "Duplikater stoppet",
+        queueTitle: "3. Kontroll og lagring", saveChecked: "Lagre kontrollerte i skyen", clearQueue: "Tøm kø",
+        time: "Tid", product: "Produkt", scannerCode: "Scannerkode / rådata", upper: "Øvre nummer",
+        lower: "Nedre nummer", status: "Status", action: "Handling", source: "Kilde", device: "Enhet",
+        queueNote: "Poster som venter lagres ikke. Ved nettfeil blir de liggende i lokal kø og kan sendes på nytt.",
+        cloudTitle: "Felles Mottak-tabell", refresh: "Oppdater", camera: "Åpne kameraskanneren",
+        searchPlaceholder: "Søk i koder…", allProducts: "Alle produkter", allStatuses: "Alle statuser",
+        clearFilters: "Nullstill filter", cloudNote: "Tabellen oppdateres automatisk når en annen telefon eller skanner lagrer en post.",
+        pendingStatus: "Venter på kontroll", verifiedStatus: "Godkjent", invalidStatus: "Feil / skadet",
+        duplicateStatus: "Duplikat", blockedStatus: "Blokkert", remove: "Fjern", emptyQueue: "Køen er tom.",
+        emptyCloud: "Ingen poster i databasen.", connecting: "Kobler til…", online: "Tilkoblet – sanntid aktiv",
+        offline: "Ingen forbindelse", added: "Skanningen ble lagt i kø.", duplicate: "Duplikatet ble stoppet.",
+        noCode: "Skann eller skriv inn en kode først.", verifiedMessage: n => `${n} komplette poster ble godkjent.`,
+        nothing: "Ingen kontrollerte poster å lagre.", savedMessage: n => `${n} poster ble lagret i felles database.`,
+        saveError: "Kunne ikke lagre. Postene er fortsatt i køen.", loadError: "Kunne ikke laste felles tabell.",
+        confirmClear: "Vil du tømme hele den lokale køen?"
+      },
+      pl: {
+        title: "Mottak Live",
+        subtitle: "Skanuj na jednym urządzeniu i obserwuj wynik na wszystkich urządzeniach w czasie rzeczywistym.",
+        chooseProduct: "1. Wybierz produkt",
+        scanTitle: "2. Skanowanie masowe Nordic ID",
+        scanHelp: "Enter, Tab lub krótka przerwa kończy skan. Każdy skan najpierw trafia do kolejki kontroli.",
+        add: "Dodaj do kolejki", clearInput: "Wyczyść pole", focus: "Aktywuj pole skanera", verifyAll: "Potwierdź kompletne",
+        counts: "Liczniki", queue: "W kolejce", pending: "Oczekuje", verified: "Potwierdzone", invalid: "Błędne / uszkodzone",
+        cloud: "W bazie", duplicates: "Duplikaty zatrzymane",
+        queueTitle: "3. Kontrola i zapis", saveChecked: "Zapisz sprawdzone w chmurze", clearQueue: "Wyczyść kolejkę",
+        time: "Czas", product: "Produkt", scannerCode: "Kod skanera / surowe dane", upper: "Górny numer",
+        lower: "Dolny numer", status: "Status", action: "Działanie", source: "Źródło", device: "Urządzenie",
+        queueNote: "Wpisy oczekujące nie są zapisywane. Przy braku sieci pozostają w lokalnej kolejce.",
+        cloudTitle: "Wspólna tabela Mottak", refresh: "Odśwież", camera: "Otwórz skaner aparatu",
+        searchPlaceholder: "Szukaj kodów…", allProducts: "Wszystkie produkty", allStatuses: "Wszystkie statusy",
+        clearFilters: "Wyczyść filtry", cloudNote: "Tabela aktualizuje się automatycznie, gdy inny telefon lub skaner zapisze wpis.",
+        pendingStatus: "Oczekuje na kontrolę", verifiedStatus: "Potwierdzona", invalidStatus: "Błędna / uszkodzona",
+        duplicateStatus: "Duplikat", blockedStatus: "Zablokowana", remove: "Usuń", emptyQueue: "Kolejka jest pusta.",
+        emptyCloud: "Brak wpisów w bazie.", connecting: "Łączenie…", online: "Połączono – realtime aktywny",
+        offline: "Brak połączenia", added: "Skan dodano do kolejki.", duplicate: "Duplikat został zatrzymany.",
+        noCode: "Najpierw zeskanuj lub wpisz kod.", verifiedMessage: n => `Potwierdzono kompletne wpisy: ${n}.`,
+        nothing: "Brak sprawdzonych wpisów do zapisania.", savedMessage: n => `Zapisano we wspólnej bazie: ${n}.`,
+        saveError: "Nie udało się zapisać. Wpisy nadal są w kolejce.", loadError: "Nie udało się pobrać wspólnej tabeli.",
+        confirmClear: "Wyczyścić całą lokalną kolejkę?"
+      },
+      uk: {
+        title: "Mottak Live",
+        subtitle: "Скануйте на одному пристрої та бачте результат на всіх пристроях у реальному часі.",
+        chooseProduct: "1. Виберіть продукт",
+        scanTitle: "2. Масове сканування Nordic ID",
+        scanHelp: "Enter, Tab або коротка пауза завершують скан. Кожен скан спочатку потрапляє в чергу перевірки.",
+        add: "Додати в чергу", clearInput: "Очистити поле", focus: "Активувати поле сканера", verifyAll: "Підтвердити повні",
+        counts: "Лічильники", queue: "У черзі", pending: "Очікує", verified: "Підтверджено", invalid: "Невірні / пошкоджені",
+        cloud: "У базі", duplicates: "Дублі заблоковано",
+        queueTitle: "3. Перевірка та збереження", saveChecked: "Зберегти перевірені в хмару", clearQueue: "Очистити чергу",
+        time: "Час", product: "Продукт", scannerCode: "Код сканера / сирі дані", upper: "Верхній номер",
+        lower: "Нижній номер", status: "Статус", action: "Дія", source: "Джерело", device: "Пристрій",
+        queueNote: "Записи зі статусом «Очікує» не зберігаються. Без інтернету вони залишаються в локальній черзі.",
+        cloudTitle: "Спільна таблиця Mottak", refresh: "Оновити", camera: "Відкрити сканер камери",
+        searchPlaceholder: "Пошук у кодах…", allProducts: "Усі продукти", allStatuses: "Усі статуси",
+        clearFilters: "Очистити фільтри", cloudNote: "Таблиця оновлюється автоматично, коли інший телефон або сканер зберігає запис.",
+        pendingStatus: "Очікує перевірки", verifiedStatus: "Підтверджена", invalidStatus: "Невірна / пошкоджена",
+        duplicateStatus: "Дублікат", blockedStatus: "Заблокована", remove: "Видалити", emptyQueue: "Черга порожня.",
+        emptyCloud: "У базі ще немає записів.", connecting: "Підключення…", online: "Підключено — Realtime активний",
+        offline: "Немає з’єднання", added: "Скан додано в чергу.", duplicate: "Дублікат заблоковано.",
+        noCode: "Спочатку відскануйте або введіть код.", verifiedMessage: n => `Підтверджено повних записів: ${n}.`,
+        nothing: "Немає перевірених записів для збереження.", savedMessage: n => `Збережено у спільній базі: ${n}.`,
+        saveError: "Не вдалося зберегти. Записи залишилися в черзі.", loadError: "Не вдалося завантажити спільну таблицю.",
+        confirmClear: "Очистити всю локальну чергу?"
+      }
+    };
+
+    const $ = id => document.getElementById(id);
+    const queueBody = $("queueBody");
+    const cloudBody = $("cloudBody");
+    const scanInput = $("scanInput");
+    const message = $("message");
+    const connection = $("connection");
+    const connectionText = $("connectionText");
+
+    let language = TEXT[localStorage.getItem(LANGUAGE_KEY)] ? localStorage.getItem(LANGUAGE_KEY) : "nb";
+    let product = PRODUCTS[localStorage.getItem(PRODUCT_KEY)] ? localStorage.getItem(PRODUCT_KEY) : "bunner";
+    let queue = loadLocal(QUEUE_KEY);
+    let cloudRows = [];
+    let duplicates = 0;
+    let scanTimer = null;
+    let channel = null;
+
+    const deviceId = getDeviceId();
+    const t = () => TEXT[language];
+
+    function loadLocal(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveQueue() {
+      localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+    }
+
+    function getDeviceId() {
+      let value = localStorage.getItem(DEVICE_KEY);
+      if (!value) {
+        value = `web-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+        localStorage.setItem(DEVICE_KEY, value);
+      }
+      return value;
+    }
+
+    function makeId() {
+      return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+    }
+
+    function normalizeRaw(value) {
+      return String(value || "").replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim().toUpperCase();
+    }
+
+    function parseScan(value) {
+      const raw = normalizeRaw(value);
+      const parts = raw.split(/[\s|;,/:]+/).filter(Boolean);
+      const upperNumber = parts.find(item => /^\d{6}$/.test(item)) || (raw.match(/\d{6}/) || [""])[0];
+      const lowerNumber = parts.find(item => /^[A-Z0-9]{6}$/.test(item) && item !== upperNumber)
+        || ((raw.match(/[A-Z0-9]{6}/g) || []).find(item => item !== upperNumber) || "");
+      return { scannerCode: raw, upperNumber, lowerNumber };
+    }
+
+    function localKey(row) {
+      return `${row.scannerCode}|${row.upperNumber}|${row.lowerNumber}`;
+    }
+
+    function cloudKey(row) {
+      return `${row.scanner_code}|${row.upper_number}|${row.lower_number}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function showMessage(text, type = "") {
+      message.textContent = text;
+      message.className = `message ${type}`;
+    }
+
+    function setConnection(state) {
+      connection.className = `connection ${state}`;
+      connectionText.textContent = state === "online" ? t().online : state === "offline" ? t().offline : t().connecting;
+    }
+
+    function statusOptions(value) {
+      const options = [
+        ["pending", t().pendingStatus],
+        ["verified", t().verifiedStatus],
+        ["invalid", t().invalidStatus]
+      ];
+      return options.map(([key, label]) => `<option value="${key}" ${key === value ? "selected" : ""}>${label}</option>`).join("");
+    }
+
+    function formatDate(value) {
+      const locale = language === "uk" ? "uk-UA" : language === "pl" ? "pl-PL" : "nb-NO";
+      try { return new Date(value).toLocaleString(locale); } catch { return value || ""; }
+    }
+
+    function addScan() {
+      clearTimeout(scanTimer);
+      const parsed = parseScan(scanInput.value);
+      if (!parsed.scannerCode) {
+        showMessage(t().noCode, "bad");
+        return;
+      }
+      const item = {
+        id: makeId(),
+        createdAt: new Date().toISOString(),
+        product,
+        ...parsed,
+        status: "pending"
+      };
+      const key = localKey(item);
+      const duplicateInQueue = queue.some(row => localKey(row) === key);
+      const duplicateInCloud = cloudRows.some(row => cloudKey(row) === key);
+      if (duplicateInQueue || duplicateInCloud) {
+        duplicates += 1;
+        showMessage(t().duplicate, "bad");
+        renderAll();
+        scanInput.value = "";
+        scanInput.focus();
+        return;
+      }
+      queue.unshift(item);
+      saveQueue();
+      scanInput.value = "";
+      showMessage(t().added, "ok");
+      renderAll();
+      scanInput.focus();
+    }
+
+    function renderQueue() {
+      if (!queue.length) {
+        queueBody.innerHTML = `<tr><td class="empty" colspan="8">${t().emptyQueue}</td></tr>`;
+        return;
+      }
+      queueBody.innerHTML = queue.map((row, index) => `
+        <tr data-id="${row.id}">
+          <td>${queue.length - index}</td>
+          <td>${escapeHtml(formatDate(row.createdAt))}</td>
+          <td>
+            <select data-field="product">
+              <option value="bunner" ${row.product === "bunner" ? "selected" : ""}>Bunner</option>
+              <option value="hyller30" ${row.product === "hyller30" ? "selected" : ""}>Hyller x30</option>
+              <option value="hyller60" ${row.product === "hyller60" ? "selected" : ""}>Hyller x60</option>
+            </select>
+          </td>
+          <td><input class="mono" data-field="scannerCode" value="${escapeHtml(row.scannerCode)}"></td>
+          <td><input class="mono" data-field="upperNumber" maxlength="6" value="${escapeHtml(row.upperNumber)}"></td>
+          <td><input class="mono" data-field="lowerNumber" maxlength="6" value="${escapeHtml(row.lowerNumber)}"></td>
+          <td><select data-field="status">${statusOptions(row.status)}</select></td>
+          <td><button class="danger" data-remove="${row.id}">${t().remove}</button></td>
+        </tr>
+      `).join("");
+    }
+
+    function filteredCloudRows() {
+      const search = normalizeRaw($("searchInput").value);
+      const productValue = $("productFilter").value;
+      const statusValue = $("statusFilter").value;
+      return cloudRows.filter(row => {
+        if (productValue && row.product !== productValue) return false;
+        if (statusValue && row.status !== statusValue) return false;
+        if (search) {
+          const haystack = `${row.scanner_code} ${row.upper_number} ${row.lower_number} ${row.device_id}`.toUpperCase();
+          if (!haystack.includes(search)) return false;
+        }
+        return true;
+      });
+    }
+
+    function statusLabel(status) {
+      return ({
+        pending: t().pendingStatus,
+        verified: t().verifiedStatus,
+        invalid: t().invalidStatus,
+        duplicate: t().duplicateStatus,
+        blocked: t().blockedStatus
+      })[status] || status;
+    }
+
+    function renderCloud() {
+      const rows = filteredCloudRows();
+      if (!rows.length) {
+        cloudBody.innerHTML = `<tr><td class="empty" colspan="9">${t().emptyCloud}</td></tr>`;
+        return;
+      }
+      cloudBody.innerHTML = rows.map((row, index) => `
+        <tr>
+          <td>${rows.length - index}</td>
+          <td>${escapeHtml(formatDate(row.created_at))}</td>
+          <td>${escapeHtml(PRODUCTS[row.product] || row.product)}</td>
+          <td class="mono">${escapeHtml(row.scanner_code)}</td>
+          <td class="mono">${escapeHtml(row.upper_number)}</td>
+          <td class="mono">${escapeHtml(row.lower_number)}</td>
+          <td>${escapeHtml(statusLabel(row.status))}</td>
+          <td><span class="source">${escapeHtml(row.source)}</span></td>
+          <td class="mono">${escapeHtml(row.device_id)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderCounts() {
+      $("queueCount").textContent = queue.length;
+      $("pendingCount").textContent = queue.filter(row => row.status === "pending").length;
+      $("verifiedCount").textContent = queue.filter(row => row.status === "verified").length;
+      $("invalidCount").textContent = queue.filter(row => row.status === "invalid").length;
+      $("cloudCount").textContent = cloudRows.length;
+      $("duplicateCount").textContent = duplicates;
+    }
+
+    function renderSelections() {
+      document.querySelectorAll(".language").forEach(button => {
+        button.classList.toggle("active", button.dataset.language === language);
+      });
+      document.querySelectorAll(".product").forEach(button => {
+        button.classList.toggle("active", button.dataset.product === product);
+      });
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = language;
+      document.querySelectorAll("[data-t]").forEach(element => {
+        const value = t()[element.dataset.t];
+        if (typeof value === "string") element.textContent = value;
+      });
+      document.querySelectorAll("[data-placeholder]").forEach(element => {
+        element.placeholder = t()[element.dataset.placeholder] || "";
+      });
+      scanInput.placeholder = t().scanTitle;
+      renderAll();
+      setConnection(connection.classList.contains("online") ? "online" : connection.classList.contains("offline") ? "offline" : "connecting");
+    }
+
+    function renderAll() {
+      renderSelections();
+      renderQueue();
+      renderCloud();
+      renderCounts();
+    }
+
+    async function loadCloudRows(silent = false) {
+      const { data, error } = await client
+        .from(TABLE_NAME)
+        .select("id,created_at,updated_at,product,scanner_code,upper_number,lower_number,status,source,device_id,raw_data,verified_at")
+        .order("created_at", { ascending: false })
+        .limit(1000);
+      if (error) {
+        setConnection("offline");
+        if (!silent) showMessage(`${t().loadError}\n${error.message}`, "bad");
+        return false;
+      }
+      cloudRows = data || [];
+      setConnection("online");
+      renderAll();
+      return true;
+    }
+
+    async function saveChecked() {
+      const checked = queue.filter(row => row.status !== "pending");
+      if (!checked.length) {
+        showMessage(t().nothing, "warn");
+        return;
+      }
+      $("saveButton").disabled = true;
+      const payload = checked.map(row => ({
+        product: row.product,
+        scanner_code: normalizeRaw(row.scannerCode),
+        upper_number: normalizeRaw(row.upperNumber).replace(/\D/g, "").slice(0, 6),
+        lower_number: normalizeRaw(row.lowerNumber).replace(/[^A-Z0-9]/g, "").slice(0, 6),
+        status: row.status,
+        source: "nordic_id",
+        device_id: deviceId,
+        raw_data: normalizeRaw(row.scannerCode),
+        verified_at: row.status === "verified" ? new Date().toISOString() : null
+      }));
+
+      const { error } = await client
+        .from(TABLE_NAME)
+        .upsert(payload, {
+          onConflict: "scanner_code,upper_number,lower_number",
+          ignoreDuplicates: true
+        });
+
+      $("saveButton").disabled = false;
+      if (error) {
+        setConnection("offline");
+        showMessage(`${t().saveError}\n${error.message}`, "bad");
+        return;
+      }
+
+      const savedIds = new Set(checked.map(row => row.id));
+      queue = queue.filter(row => !savedIds.has(row.id));
+      saveQueue();
+      showMessage(t().savedMessage(checked.length), "ok");
+      await loadCloudRows(true);
+      scanInput.focus();
+    }
+
+    function subscribeRealtime() {
+      if (channel) client.removeChannel(channel);
+      channel = client
+        .channel("mottak-live-scans")
+        .on("postgres_changes", {
+          event: "*",
+          schema: "public",
+          table: TABLE_NAME
+        }, () => loadCloudRows(true))
+        .subscribe(status => {
+          if (status === "SUBSCRIBED") setConnection("online");
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") setConnection("offline");
+        });
+    }
+
+    scanInput.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault();
+        addScan();
+      }
+    });
+
+    scanInput.addEventListener("input", () => {
+      clearTimeout(scanTimer);
+      if (scanInput.value.trim()) scanTimer = setTimeout(addScan, 420);
+    });
+
+    $("addButton").addEventListener("click", addScan);
+    $("clearInputButton").addEventListener("click", () => { scanInput.value = ""; scanInput.focus(); });
+    $("focusButton").addEventListener("click", () => scanInput.focus());
+    $("verifyButton").addEventListener("click", () => {
+      let count = 0;
+      queue.forEach(row => {
+        if (row.scannerCode && /^\d{6}$/.test(row.upperNumber) && /^[A-Z0-9]{6}$/.test(row.lowerNumber)) {
+          if (row.status !== "verified") count += 1;
+          row.status = "verified";
+        }
+      });
+      saveQueue();
+      showMessage(t().verifiedMessage(count), "ok");
+      renderAll();
+    });
+
+    $("saveButton").addEventListener("click", saveChecked);
+    $("clearQueueButton").addEventListener("click", () => {
+      if (queue.length && confirm(t().confirmClear)) {
+        queue = [];
+        saveQueue();
+        renderAll();
+      }
+    });
+    $("refreshButton").addEventListener("click", () => loadCloudRows());
+    $("clearFiltersButton").addEventListener("click", () => {
+      $("searchInput").value = "";
+      $("productFilter").value = "";
+      $("statusFilter").value = "";
+      renderCloud();
+    });
+    $("searchInput").addEventListener("input", renderCloud);
+    $("productFilter").addEventListener("change", renderCloud);
+    $("statusFilter").addEventListener("change", renderCloud);
+
+    $("languages").addEventListener("click", event => {
+      const button = event.target.closest("[data-language]");
+      if (!button) return;
+      language = button.dataset.language;
+      localStorage.setItem(LANGUAGE_KEY, language);
+      applyLanguage();
+    });
+
+    $("products").addEventListener("click", event => {
+      const button = event.target.closest("[data-product]");
+      if (!button) return;
+      product = button.dataset.product;
+      localStorage.setItem(PRODUCT_KEY, product);
+      renderSelections();
+      scanInput.focus();
+    });
+
+    queueBody.addEventListener("input", event => {
+      const rowElement = event.target.closest("tr[data-id]");
+      const field = event.target.dataset.field;
+      if (!rowElement || !field) return;
+      const row = queue.find(item => item.id === rowElement.dataset.id);
+      if (!row) return;
+      let value = event.target.value;
+      if (field === "upperNumber") value = value.replace(/\D/g, "").slice(0, 6);
+      if (field === "lowerNumber") value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+      if (field === "scannerCode") value = normalizeRaw(value);
+      row[field] = value;
+      event.target.value = value;
+      saveQueue();
+      renderCounts();
+    });
+
+    queueBody.addEventListener("click", event => {
+      const button = event.target.closest("[data-remove]");
+      if (!button) return;
+      queue = queue.filter(row => row.id !== button.dataset.remove);
+      saveQueue();
+      renderAll();
+    });
+
+    window.addEventListener("online", () => { loadCloudRows(true); subscribeRealtime(); });
+    window.addEventListener("offline", () => setConnection("offline"));
+
+    applyLanguage();
+    setConnection("connecting");
+    loadCloudRows().then(subscribeRealtime);
+    scanInput.focus();
+  </script>
+</body>
+</html>

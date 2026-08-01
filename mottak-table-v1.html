@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Mottak Table v1</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #151c30;
+      --card-dark: #0d1426;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --warn: #f6b94b;
+      --bad: #ff6b6b;
+      --line: #303b59;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #0b1020 0%, #11182a 100%);
+    }
+
+    button, input, select { font: inherit; }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 18px 14px 42px;
+    }
+
+    h1 { margin: 0 0 6px; font-size: clamp(26px, 5vw, 42px); }
+    h2 { margin: 0 0 14px; font-size: 20px; }
+    .subtitle { margin: 0 0 16px; color: var(--muted); line-height: 1.45; }
+
+    .version {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(13, 20, 38, 0.75);
+      font-size: 12px;
+    }
+
+    .card {
+      margin: 12px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 28, 48, 0.96);
+      box-shadow: 0 12px 28px rgba(0,0,0,.22);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field { min-width: 0; }
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card-dark);
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus, select:focus { border-color: var(--accent); }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      min-height: 48px;
+      padding: 11px 15px;
+      border: 0;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:active { transform: scale(.985); }
+    .primary { background: var(--accent); color: #17130a; }
+    .secondary { background: #2c395c; color: var(--text); }
+    .danger { background: rgba(255,107,107,.16); color: #ffc0c0; border: 1px solid rgba(255,107,107,.35); }
+
+    .message {
+      min-height: 24px;
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .message.ok { color: var(--ok); }
+    .message.bad { color: var(--bad); }
+
+    .totals {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .total-box {
+      min-width: 0;
+      padding: 12px 7px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card-dark);
+      text-align: center;
+    }
+
+    .total-label { display: block; min-height: 30px; color: var(--muted); font-size: 12px; line-height: 1.25; }
+    .total-value { display: block; margin-top: 5px; font-size: clamp(24px, 5vw, 38px); font-weight: 900; }
+
+    .table-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .toolbar-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .toolbar-buttons button { min-height: 42px; padding: 9px 12px; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+      background: var(--card-dark);
+    }
+
+    th, td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #111a31;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-weight: 800; }
+    .empty { padding: 26px; text-align: center; color: var(--muted); }
+
+    .status-select {
+      min-width: 175px;
+      min-height: 40px;
+      padding: 7px 9px;
+      font-weight: 800;
+    }
+    .status-pending { color: #ffd78a; }
+    .status-verified { color: var(--ok); }
+    .status-invalid { color: #ff9c9c; }
+
+    .row-delete {
+      min-height: 38px;
+      padding: 7px 11px;
+      background: rgba(255,107,107,.14);
+      color: #ffb2b2;
+      border: 1px solid rgba(255,107,107,.3);
+    }
+
+    .note {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 900px) {
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .totals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .form-grid, .actions { grid-template-columns: 1fr; }
+      .totals { grid-template-columns: 1fr 1fr; }
+      .card { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Mottak Table</h1>
+    <p class="subtitle">Перша мінімальна таблиця для трьох продуктів і трьох частин бірки.</p>
+    <div class="version">Mottak Table v1 · updated 01.08.2026 19:05 Europe/Oslo</div>
+
+    <section class="card">
+      <h2>Додати запис</h2>
+      <form id="entryForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="product">Продукт</label>
+            <select id="product" required>
+              <option value="bunner">Bunner</option>
+              <option value="hyller30">Hyller x30</option>
+              <option value="hyller60">Hyller x60</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="scannerCode">Перша частина бірки / код сканера</label>
+            <input id="scannerCode" type="text" autocomplete="off" placeholder="Напр. E280... або інший код" required />
+          </div>
+
+          <div class="field">
+            <label for="upperNumber">Верхній номер — 6 цифр</label>
+            <input id="upperNumber" type="text" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="123456" required />
+          </div>
+
+          <div class="field">
+            <label for="lowerNumber">Нижній номер — 6 символів</label>
+            <input id="lowerNumber" type="text" maxlength="6" autocomplete="off" placeholder="AB12CD" required />
+          </div>
+
+          <div class="field">
+            <label for="status">Статус бірки</label>
+            <select id="status">
+              <option value="pending">Очікує перевірки</option>
+              <option value="verified">Підтверджена</option>
+              <option value="invalid">Невірна / пошкоджена</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit">Додати в таблицю</button>
+          <button class="secondary" type="button" id="resetForm">Очистити поля</button>
+        </div>
+        <div id="message" class="message"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Лічильники</h2>
+      <div class="totals">
+        <div class="total-box"><span class="total-label">Bunner</span><strong id="countBunner" class="total-value">0</strong></div>
+        <div class="total-box"><span class="total-label">Hyller x30</span><strong id="countHyller30" class="total-value">0</strong></div>
+        <div class="total-box"><span class="total-label">Hyller x60</span><strong id="countHyller60" class="total-value">0</strong></div>
+        <div class="total-box"><span class="total-label">Усього</span><strong id="countAll" class="total-value">0</strong></div>
+        <div class="total-box"><span class="total-label">Підтверджені</span><strong id="countVerified" class="total-value">0</strong></div>
+        <div class="total-box"><span class="total-label">Очікують</span><strong id="countPending" class="total-value">0</strong></div>
+        <div class="total-box"><span class="total-label">Проблемні</span><strong id="countInvalid" class="total-value">0</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="table-toolbar">
+        <h2 style="margin:0">Таблиця бірок</h2>
+        <div class="toolbar-buttons">
+          <button class="secondary" id="exportCsv" type="button">Експорт CSV</button>
+          <button class="danger" id="clearAll" type="button">Очистити все</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Дата й час</th>
+              <th>Продукт</th>
+              <th>Перша частина / код сканера</th>
+              <th>Верхній номер</th>
+              <th>Нижній номер</th>
+              <th>Статус</th>
+              <th>Дія</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <p class="note">Дані автоматично зберігаються тільки в цьому браузері через localStorage. Однакова комбінація трьох частин бірки повторно не додається.</p>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "mottak_table_v1_entries";
+    const PRODUCTS = {
+      bunner: "Bunner",
+      hyller30: "Hyller x30",
+      hyller60: "Hyller x60"
+    };
+    const STATUSES = {
+      pending: "Очікує перевірки",
+      verified: "Підтверджена",
+      invalid: "Невірна / пошкоджена"
+    };
+
+    const form = document.getElementById("entryForm");
+    const productEl = document.getElementById("product");
+    const scannerCodeEl = document.getElementById("scannerCode");
+    const upperNumberEl = document.getElementById("upperNumber");
+    const lowerNumberEl = document.getElementById("lowerNumber");
+    const statusEl = document.getElementById("status");
+    const messageEl = document.getElementById("message");
+    const tableBody = document.getElementById("tableBody");
+
+    let entries = loadEntries();
+
+    function loadEntries() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function makeId() {
+      return self.crypto && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function normalizeScannerCode(value) {
+      return value.trim().toUpperCase();
+    }
+
+    function normalizeUpper(value) {
+      return value.replace(/\D/g, "").slice(0, 6);
+    }
+
+    function normalizeLower(value) {
+      return value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    }
+
+    function setMessage(text, type = "") {
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`.trim();
+    }
+
+    function formatDate(iso) {
+      return new Intl.DateTimeFormat("uk-UA", {
+        dateStyle: "short",
+        timeStyle: "medium"
+      }).format(new Date(iso));
+    }
+
+    function duplicateKey(entry) {
+      return `${entry.scannerCode}|${entry.upperNumber}|${entry.lowerNumber}`;
+    }
+
+    function render() {
+      if (!entries.length) {
+        tableBody.innerHTML = '<tr><td class="empty" colspan="8">Записів ще немає</td></tr>';
+      } else {
+        tableBody.innerHTML = entries.map((entry, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${formatDate(entry.createdAt)}</td>
+            <td><strong>${PRODUCTS[entry.product] || entry.product}</strong></td>
+            <td class="mono">${escapeHtml(entry.scannerCode)}</td>
+            <td class="mono">${escapeHtml(entry.upperNumber)}</td>
+            <td class="mono">${escapeHtml(entry.lowerNumber)}</td>
+            <td>
+              <select class="status-select status-${entry.status}" data-status-id="${entry.id}">
+                ${Object.entries(STATUSES).map(([value, label]) =>
+                  `<option value="${value}" ${entry.status === value ? "selected" : ""}>${label}</option>`
+                ).join("")}
+              </select>
+            </td>
+            <td><button class="row-delete" type="button" data-delete-id="${entry.id}">Видалити</button></td>
+          </tr>
+        `).join("");
+      }
+
+      document.getElementById("countBunner").textContent = entries.filter(e => e.product === "bunner").length;
+      document.getElementById("countHyller30").textContent = entries.filter(e => e.product === "hyller30").length;
+      document.getElementById("countHyller60").textContent = entries.filter(e => e.product === "hyller60").length;
+      document.getElementById("countAll").textContent = entries.length;
+      document.getElementById("countVerified").textContent = entries.filter(e => e.status === "verified").length;
+      document.getElementById("countPending").textContent = entries.filter(e => e.status === "pending").length;
+      document.getElementById("countInvalid").textContent = entries.filter(e => e.status === "invalid").length;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    upperNumberEl.addEventListener("input", () => {
+      upperNumberEl.value = normalizeUpper(upperNumberEl.value);
+    });
+
+    lowerNumberEl.addEventListener("input", () => {
+      lowerNumberEl.value = normalizeLower(lowerNumberEl.value);
+    });
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const entry = {
+        id: makeId(),
+        createdAt: new Date().toISOString(),
+        product: productEl.value,
+        scannerCode: normalizeScannerCode(scannerCodeEl.value),
+        upperNumber: normalizeUpper(upperNumberEl.value),
+        lowerNumber: normalizeLower(lowerNumberEl.value),
+        status: statusEl.value
+      };
+
+      if (!entry.scannerCode) {
+        setMessage("Введи першу частину бірки або код сканера.", "bad");
+        scannerCodeEl.focus();
+        return;
+      }
+      if (!/^\d{6}$/.test(entry.upperNumber)) {
+        setMessage("Верхній номер повинен містити рівно 6 цифр.", "bad");
+        upperNumberEl.focus();
+        return;
+      }
+      if (!/^[A-Z0-9]{6}$/.test(entry.lowerNumber)) {
+        setMessage("Нижній номер повинен містити рівно 6 букв або цифр.", "bad");
+        lowerNumberEl.focus();
+        return;
+      }
+      if (entries.some(existing => duplicateKey(existing) === duplicateKey(entry))) {
+        setMessage("Така комбінація трьох частин бірки вже є в таблиці.", "bad");
+        return;
+      }
+
+      entries.unshift(entry);
+      saveEntries();
+      render();
+      setMessage("Запис додано й збережено в цьому браузері.", "ok");
+
+      scannerCodeEl.value = "";
+      upperNumberEl.value = "";
+      lowerNumberEl.value = "";
+      statusEl.value = "pending";
+      scannerCodeEl.focus();
+    });
+
+    document.getElementById("resetForm").addEventListener("click", () => {
+      form.reset();
+      productEl.value = "bunner";
+      statusEl.value = "pending";
+      setMessage("");
+      scannerCodeEl.focus();
+    });
+
+    tableBody.addEventListener("click", event => {
+      const button = event.target.closest("[data-delete-id]");
+      if (!button) return;
+
+      const id = button.dataset.deleteId;
+      if (!confirm("Видалити цей запис?")) return;
+
+      entries = entries.filter(entry => entry.id !== id);
+      saveEntries();
+      render();
+      setMessage("Запис видалено.", "ok");
+    });
+
+    tableBody.addEventListener("change", event => {
+      const select = event.target.closest("[data-status-id]");
+      if (!select) return;
+
+      const entry = entries.find(item => item.id === select.dataset.statusId);
+      if (!entry) return;
+
+      entry.status = select.value;
+      saveEntries();
+      render();
+      setMessage("Статус оновлено.", "ok");
+    });
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      if (!entries.length) return;
+      if (!confirm("Видалити всі записи з цієї таблиці?")) return;
+
+      entries = [];
+      saveEntries();
+      render();
+      setMessage("Усі записи видалено.", "ok");
+    });
+
+    document.getElementById("exportCsv").addEventListener("click", () => {
+      if (!entries.length) {
+        setMessage("Немає записів для експорту.", "bad");
+        return;
+      }
+
+      const rows = [
+        ["created_at", "product", "scanner_code", "upper_number", "lower_number", "status"],
+        ...entries.map(entry => [
+          entry.createdAt,
+          PRODUCTS[entry.product] || entry.product,
+          entry.scannerCode,
+          entry.upperNumber,
+          entry.lowerNumber,
+          STATUSES[entry.status] || entry.status
+        ])
+      ];
+
+      const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mottak-table-${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setMessage("CSV-файл створено.", "ok");
+    });
+
+    render();
+    scannerCodeEl.focus();
+  </script>
+</body>
+</html>
