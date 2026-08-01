@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>Bunner Cloud Draft Test</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#69a7ff;--warn:#ffcb66;--bad:#ff6b6b;--line:#303b59}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#11182a);color:var(--text)}
+    main{width:min(780px,100%);margin:auto;padding:16px 12px 48px}h1{margin:4px 0 4px;font-size:clamp(26px,7vw,38px)}.sub,.tiny{color:var(--muted);line-height:1.45}.sub{margin:0 0 5px}.tiny{font-size:12px}.version{font-size:12px;color:var(--muted);margin-bottom:16px}
+    .card{margin:12px 0;padding:15px;border:1px solid var(--line);border-radius:17px;background:rgba(21,28,48,.97);box-shadow:0 12px 28px rgba(0,0,0,.2)}h2{font-size:18px;margin:0 0 12px}.hidden{display:none!important}
+    input,textarea,button{font:inherit}input,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);outline:none}input{min-height:48px}textarea{min-height:130px;resize:vertical;font:13px ui-monospace,monospace}input:focus,textarea:focus{border-color:var(--accent)}
+    button,.file-btn{width:100%;min-height:49px;padding:10px 13px;border:0;border-radius:13px;font-weight:800;text-align:center;cursor:pointer}button:disabled{opacity:.42;cursor:not-allowed}.primary{background:var(--accent);color:#17130a}.secondary{background:#2c395c;color:var(--text)}.success{background:var(--ok);color:#062418}.info{background:var(--info);color:#071427}.danger{background:rgba(255,107,107,.16);color:#ffb0b0;border:1px solid rgba(255,107,107,.38)}.outline{background:var(--dark);color:var(--text);border:2px solid var(--line)}.outline.active{background:var(--accent);color:#17130a;border-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr;gap:9px}.row.two{grid-template-columns:1fr 1fr}.row.three{grid-template-columns:1fr 1fr 1.3fr}@media(max-width:540px){.row.two,.row.three{grid-template-columns:1fr}}
+    .state{margin-top:10px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--dark);line-height:1.45;white-space:pre-wrap}.ok{border-color:rgba(72,213,151,.5);color:var(--ok)}.warn{border-color:rgba(255,203,102,.5);color:var(--warn)}.bad{border-color:rgba(255,107,107,.5);color:var(--bad)}
+    .code{font:900 clamp(31px,10vw,52px) ui-monospace,monospace;letter-spacing:.14em;text-align:center;color:var(--accent);margin:6px 0;word-break:break-all}.bar{height:13px;border:1px solid var(--line);background:#070a11;border-radius:99px;overflow:hidden;margin:10px 0}.fill{height:100%;width:0;background:var(--ok);transition:width .2s}
+    .scanner{font:800 20px ui-monospace,monospace;letter-spacing:.04em}.list{display:grid;gap:6px;margin-top:10px;max-height:220px;overflow:auto}.list div{padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:var(--dark);font:14px ui-monospace,monospace;word-break:break-all}
+    .slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}@media(max-width:620px){.slots{grid-template-columns:repeat(2,minmax(0,1fr))}}.slot{min-height:82px;padding:8px;text-align:left;background:var(--dark);color:var(--muted);border:2px solid var(--line);overflow:hidden;font-size:12px}.slot b{display:block;font-size:18px;margin-bottom:6px}.slot.selected{box-shadow:0 0 0 3px rgba(244,196,48,.22);border-color:var(--accent)}.slot.confirmed{border-color:var(--ok);color:var(--ok)}.slot.photo{border-color:var(--info);color:#a9cfff}.slot.needs-photo{border-color:var(--warn);color:var(--warn)}
+    input[type=file]{display:none}.preview{display:none;margin-top:10px;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#070a11}.preview img{display:block;width:100%;max-height:52vh;object-fit:contain}.result{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.result>div{padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--dark)}.result span{display:block;color:var(--muted);font-size:12px}.result strong{display:block;margin-top:5px;font:900 clamp(24px,7vw,36px) ui-monospace,monospace;letter-spacing:.06em;word-break:break-all}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Bunner Cloud Draft</h1>
+  <p class="sub">Тимчасова стопка доступна CC-сканеру й телефону ще до остаточного збереження.</p>
+  <div class="version">Тест v4 · 01.08.2026 23:34 CEST</div>
+
+  <section class="card">
+    <h2>0. Підключення Firebase</h2>
+    <div id="cloudState" class="state warn">Хмара не налаштована.</div>
+    <details style="margin-top:10px">
+      <summary>Firebase web config</summary>
+      <textarea id="firebaseConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
+      <div class="row two" style="margin-top:8px">
+        <button id="saveConfig" class="primary">Зберегти й перезавантажити</button>
+        <button id="clearConfig" class="danger">Видалити конфігурацію</button>
+      </div>
+      <p class="tiny">Та сама конфігурація має бути один раз вставлена на CC-сканері та телефоні. Анонімний вхід у Firebase має бути увімкнений.</p>
+    </details>
+  </section>
+
+  <section id="startCard" class="card">
+    <h2>1. Створити або відкрити стопку</h2>
+    <div class="row three">
+      <button class="count outline" data-count="1">1 брік</button>
+      <button class="count outline active" data-count="10">10 бріків</button>
+      <input id="customCount" type="number" min="1" max="60" inputmode="numeric" placeholder="Інша кількість" />
+    </div>
+    <button id="createBtn" class="primary" style="margin-top:9px">Створити хмарну чернетку</button>
+    <hr style="border:0;border-top:1px solid var(--line);margin:15px 0">
+    <div class="row two">
+      <input id="joinCode" maxlength="10" autocomplete="off" placeholder="Код сесії" />
+      <button id="joinBtn" class="info">Приєднатися з телефона</button>
+    </div>
+  </section>
+
+  <section id="sessionCard" class="card hidden">
+    <h2>2. Активна чернетка</h2>
+    <div id="sessionCode" class="code">--------</div>
+    <div id="summary" class="state"></div>
+    <div class="bar"><div id="fill" class="fill"></div></div>
+    <div class="row two">
+      <button id="copyBtn" class="secondary">Копіювати посилання для телефона</button>
+      <button id="leaveBtn" class="danger">Вийти з сесії</button>
+    </div>
+  </section>
+
+  <section id="scannerCard" class="card hidden">
+    <h2>3. CC-сканування</h2>
+    <input id="scannerInput" class="scanner" autocomplete="off" placeholder="Сканер вводить код сюди й надсилає Enter" />
+    <div class="row two" style="margin-top:8px">
+      <button id="addCodeBtn" class="primary">Додати код</button>
+      <button id="undoBtn" class="secondary">Скасувати останню дію</button>
+    </div>
+    <div id="scanControls" class="row two" style="margin-top:8px">
+      <button id="reviewBtn" class="info">Перевірити зверху вниз</button>
+      <button id="orderBtn" class="success">Використати порядок сканування</button>
+    </div>
+    <div id="reviewControls" class="row two hidden" style="margin-top:8px">
+      <button id="unreadableBtn" class="outline">Цей брік не пікнув</button>
+      <button id="nextBtn" class="secondary">Наступна порожня позиція</button>
+    </div>
+    <div id="scannerState" class="state"></div>
+    <div id="scanList" class="list"></div>
+  </section>
+
+  <section id="slotsCard" class="card hidden">
+    <h2>4. Стопка: позиції зверху вниз</h2>
+    <p class="tiny">Натисніть потрібну комірку на телефоні. Жовта комірка очікує фото.</p>
+    <div id="slots" class="slots"></div>
+  </section>
+
+  <section id="photoCard" class="card hidden">
+    <h2>5. Досканування фотографією</h2>
+    <input id="geminiKey" type="password" autocomplete="off" placeholder="Gemini API Key" />
+    <label class="file-btn primary" for="photoInput" style="display:block;margin-top:8px">📷 Зробити фото бірки</label>
+    <input id="photoInput" type="file" accept="image/*" capture="environment" />
+    <div id="preview" class="preview"><img id="previewImg" alt="Фото бірки"></div>
+    <div class="row two" style="margin-top:8px">
+      <button id="recognizeBtn" class="primary" disabled>Розпізнати номер</button>
+      <button id="clearPhotoBtn" class="secondary" disabled>Нове фото</button>
+    </div>
+    <div class="result">
+      <div><span>Перший рядок</span><strong id="line1">------</strong></div>
+      <div><span>Другий рядок</span><strong id="line2">------</strong></div>
+    </div>
+    <div id="photoState" class="state">Виберіть порожню або жовту комірку.</div>
+    <button id="savePhotoBtn" class="success" style="margin-top:8px" disabled>Додати фото у вибрану комірку</button>
+  </section>
+
+  <section id="finishCard" class="card hidden">
+    <h2>6. Остаточне збереження</h2>
+    <div id="finishState" class="state"></div>
+    <button id="finishBtn" class="success" style="margin-top:8px" disabled>Зберегти готову стопку Bunner</button>
+  </section>
+</main>
+<canvas id="canvas" hidden></canvas>
+
+<script type="module">
+import {initializeApp,getApps,deleteApp} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import {getAuth,signInAnonymously} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,onSnapshot,runTransaction} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const $=id=>document.getElementById(id);
+const CONFIG_KEY="mottak_cloud_test_firebase";
+const LAST_KEY="mottak_cloud_test_session";
+const COLLECTION="mottakDrafts";
+const API_URL="https://generativelanguage.googleapis.com/v1beta/interactions";
+const MODEL="gemini-3.6-flash";
+const PROMPT=`Знайди на фото жовту складську бірку та сіру наклейку. Прочитай два рядки безпосередньо над QR-кодом. Перший рядок — рівно 6 цифр. Другий — рівно 6 великих латинських літер A-Z або цифр 0-9. QR-код і всі інші написи ігноруй. Не домислюй. Поверни тільки JSON за схемою.`;
+
+let app=null,auth=null,db=null,user=null,ready=false,sessionId=null,session=null,unsubscribe=null;
+let expected=10,selectedPosition=null,currentImage=null,currentResult=null,scannerTimer=null;
+
+function clone(v){return typeof structuredClone==="function"?structuredClone(v):JSON.parse(JSON.stringify(v))}
+function code(v){return String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8)}
+function normalized(v){return String(v||"").trim().toUpperCase().replace(/[\s-]+/g,"")}
+function randomCode(){const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",b=new Uint8Array(8);crypto.getRandomValues(b);return Array.from(b,x=>a[x%a.length]).join("")}
+function setState(el,text,type=""){el.textContent=text;el.className=`state${type?` ${type}`:""}`}
+function confirmed(){return(session?.slots||[]).filter(x=>x.status==="confirmed").length}
+function needsPhoto(){return(session?.slots||[]).filter(x=>x.status==="needs-photo").length}
+function nextOpen(s=session,after=0){if(!s)return null;const slots=[...s.slots].sort((a,b)=>a.position-b.position);return(slots.find(x=>x.position>after&&x.status!=="confirmed")||slots.find(x=>x.status!=="confirmed"))?.position||null}
+function canFinish(s=session){if(!s||s.status==="finalized")return false;if(s.phase==="scan")return s.initialScans.length===s.expectedCount;return s.slots.length===s.expectedCount&&s.slots.every(x=>x.status==="confirmed")&&new Set(s.slots.map(x=>x.normalized)).size===s.expectedCount}
+function cloudMessage(text,type="warn"){setState($("cloudState"),text,type)}
+
+async function initFirebase(){const raw=localStorage.getItem(CONFIG_KEY);$("firebaseConfig").value=raw||"";if(!raw){cloudMessage("Хмара не налаштована. Вставте Firebase web config.");return}try{app=initializeApp(JSON.parse(raw));auth=getAuth(app);db=getFirestore(app);cloudMessage("Підключення до Firebase…");user=(await signInAnonymously(auth)).user;ready=true;cloudMessage(`Хмара підключена. Пристрій: ${user.uid.slice(0,10)}`,"ok");const urlCode=code(new URL(location.href).searchParams.get("session"));const remembered=code(localStorage.getItem(LAST_KEY));if(urlCode)await join(urlCode,false);else if(remembered)await join(remembered,false).catch(()=>{})}catch(e){cloudMessage(`Помилка Firebase: ${e.message}`,"bad")}}
+
+$("saveConfig").onclick=()=>{try{const c=JSON.parse($("firebaseConfig").value.trim());if(!c.apiKey||!c.authDomain||!c.projectId||!c.appId)throw 0;localStorage.setItem(CONFIG_KEY,JSON.stringify(c));location.reload()}catch{alert("Некоректний Firebase JSON")}};
+$("clearConfig").onclick=async()=>{localStorage.removeItem(CONFIG_KEY);localStorage.removeItem(LAST_KEY);if(app&&getApps().includes(app))await deleteApp(app).catch(()=>{});location.reload()};
+
+document.querySelectorAll(".count").forEach(btn=>btn.onclick=()=>{expected=Number(btn.dataset.count);$("customCount").value="";document.querySelectorAll(".count").forEach(x=>x.classList.toggle("active",x===btn))});
+$("customCount").oninput=e=>{expected=Math.max(1,Math.min(60,Number(e.target.value)||1));document.querySelectorAll(".count").forEach(x=>x.classList.remove("active"))};
+
+async function createSession(){if(!ready)return alert("Спочатку налаштуйте Firebase");const id=randomCode(),now=new Date().toISOString();const data={sessionId:id,product:"bunner",expectedCount:expected,status:"draft",phase:"scan",activePosition:1,initialScans:[],slots:Array.from({length:expected},(_,i)=>({position:i+1,status:"empty",normalized:"",rawCode:"",line1:"",line2:"",source:"",confidence:0,addedAt:"",addedBy:""})),lastAction:null,createdAt:now,updatedAt:now,createdBy:user.uid};await setDoc(doc(db,COLLECTION,id),data);await join(id,true)}
+async function join(id,announce=true){if(!ready){if(announce)alert("Спочатку налаштуйте Firebase");return}id=code(id);if(!id)return;const ref=doc(db,COLLECTION,id),snap=await getDoc(ref);if(!snap.exists()){if(announce)alert(`Сесію ${id} не знайдено`);throw Error("NOT_FOUND")}if(unsubscribe)unsubscribe();sessionId=id;localStorage.setItem(LAST_KEY,id);const url=new URL(location.href);url.searchParams.set("session",id);history.replaceState({},"",url);unsubscribe=onSnapshot(ref,s=>{if(s.exists()){session=s.data();if(selectedPosition&&!session.slots.some(x=>x.position===selectedPosition&&x.status!=="confirmed"))selectedPosition=null;render()}});if(announce)setState($("scannerState"),`Приєднано до ${id}`,"ok")}
+async function mutate(fn){const ref=doc(db,COLLECTION,sessionId);await runTransaction(db,async tx=>{const snap=await tx.get(ref);if(!snap.exists())throw Error("NOT_FOUND");const data=fn(clone(snap.data()));data.updatedAt=new Date().toISOString();tx.set(ref,data)})}
+
+$("createBtn").onclick=()=>createSession().catch(e=>alert(e.message));
+$("joinBtn").onclick=()=>join($("joinCode").value,true).catch(()=>{});
+$("joinCode").onkeydown=e=>{if(e.key==="Enter")$("joinBtn").click()};
+$("leaveBtn").onclick=()=>{if(unsubscribe)unsubscribe();unsubscribe=null;sessionId=null;session=null;selectedPosition=null;localStorage.removeItem(LAST_KEY);const url=new URL(location.href);url.searchParams.delete("session");history.replaceState({},"",url);render()};
+$("copyBtn").onclick=async()=>{const url=new URL(location.href);url.searchParams.set("session",sessionId);try{await navigator.clipboard.writeText(url);setState($("scannerState"),"Посилання скопійовано","ok")}catch{setState($("scannerState"),"Не вдалося скопіювати. Введіть код вручну.","warn")}};
+
+async function addScanner(){if(!session||session.status==="finalized")return;const raw=$("scannerInput").value,n=normalized(raw);if(!n)return setState($("scannerState"),"Проскануйте або введіть код.","bad");$("scannerInput").value="";const positionBefore=session.activePosition;try{await mutate(s=>{const initial=s.initialScans.map(x=>x.normalized),assigned=s.slots.filter(x=>x.status==="confirmed").map(x=>x.normalized),now=new Date().toISOString();if(s.phase==="scan"){if(initial.includes(n))throw Error("DUPLICATE");if(s.initialScans.length>=s.expectedCount)throw Error("FULL");s.lastAction={type:"initial"};s.initialScans.push({id:crypto.randomUUID?.()||String(Date.now()),rawCode:raw.trim(),normalized:n,source:"cc-scanner",addedAt:now,addedBy:user.uid});return s}if(assigned.includes(n))throw Error("DUPLICATE");const pos=s.activePosition||nextOpen(s,0),i=s.slots.findIndex(x=>x.position===pos);if(i<0)throw Error("NO_SLOT");s.lastAction={type:"slot",position:pos,previous:clone(s.slots[i])};s.slots[i]={position:pos,status:"confirmed",normalized:n,rawCode:raw.trim(),line1:"",line2:"",source:"cc-scanner",confidence:1,addedAt:now,addedBy:user.uid};if(!initial.includes(n))s.initialScans.push({id:String(Date.now()),rawCode:raw.trim(),normalized:n,source:"review-extra",addedAt:now,addedBy:user.uid});s.activePosition=nextOpen(s,pos)||pos;return s});setState($("scannerState"),session.phase==="review"?`Позицію ${positionBefore} підтверджено: ${n}`:`Код додано: ${n}`,"ok")}catch(e){setState($("scannerState"),e.message==="DUPLICATE"?`Дубль: ${n}`:e.message==="FULL"?"Кількість уже набрано":`Помилка: ${e.message}`,"bad")}$("scannerInput").focus()}
+$("addCodeBtn").onclick=addScanner;
+$("scannerInput").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();clearTimeout(scannerTimer);addScanner()}};
+$("scannerInput").oninput=()=>{clearTimeout(scannerTimer);const v=$("scannerInput").value;if(v.length>=6)scannerTimer=setTimeout(()=>{if($("scannerInput").value===v)addScanner()},180)};
+
+$("reviewBtn").onclick=()=>mutate(s=>{s.lastAction={type:"phase",phase:s.phase,active:s.activePosition,slots:clone(s.slots)};s.phase="review";s.activePosition=nextOpen(s,0)||1;return s});
+$("orderBtn").onclick=()=>{if(session.initialScans.length!==session.expectedCount)return;mutate(s=>{s.lastAction={type:"phase",phase:s.phase,active:s.activePosition,slots:clone(s.slots)};s.slots=s.initialScans.map((x,i)=>({position:i+1,status:"confirmed",normalized:x.normalized,rawCode:x.rawCode,line1:"",line2:"",source:x.source,confidence:1,addedAt:x.addedAt,addedBy:x.addedBy}));s.phase="review";s.activePosition=s.expectedCount;return s})};
+$("unreadableBtn").onclick=async()=>{const pos=session?.activePosition||nextOpen(session,0);if(!pos)return;await mutate(s=>{const i=s.slots.findIndex(x=>x.position===pos);s.lastAction={type:"slot",position:pos,previous:clone(s.slots[i])};s.slots[i]={position:pos,status:"needs-photo",normalized:"",rawCode:"",line1:"",line2:"",source:"",confidence:0,addedAt:"",addedBy:""};s.activePosition=nextOpen(s,pos)||pos;return s});selectedPosition=pos;setState($("photoState"),`Позиція ${pos} очікує фото.`,"warn")};
+$("nextBtn").onclick=()=>{const pos=nextOpen(session,session.activePosition||0);if(pos)mutate(s=>{s.activePosition=pos;return s})};
+$("undoBtn").onclick=()=>{if(!session?.lastAction)return setState($("scannerState"),"Немає дії для скасування.","warn");mutate(s=>{const a=s.lastAction;if(a.type==="initial")s.initialScans.pop();if(a.type==="slot"){const i=s.slots.findIndex(x=>x.position===a.position);s.slots[i]=a.previous;s.activePosition=a.position}if(a.type==="phase"){s.phase=a.phase;s.activePosition=a.active;s.slots=a.slots}s.lastAction=null;return s})};
+
+$("slots").onclick=e=>{const btn=e.target.closest("[data-position]");if(!btn||!session)return;selectedPosition=Number(btn.dataset.position);const slot=session.slots.find(x=>x.position===selectedPosition);if(session.phase==="review"&&slot.status!=="confirmed")mutate(s=>{s.activePosition=selectedPosition;return s});render();setState($("photoState"),`Вибрана позиція: ${selectedPosition}`,"ok")};
+
+function loadImage(file){return new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);res(img)};img.onerror=()=>{URL.revokeObjectURL(url);rej(Error("Не вдалося відкрити фото"))};img.src=url})}
+function compress(img){const max=1800;let w=img.naturalWidth,h=img.naturalHeight;if(Math.max(w,h)>max){const s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}const c=$("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{alpha:false});x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);const dataUrl=c.toDataURL("image/jpeg",.9);return{dataUrl,base64:dataUrl.split(",")[1]}}
+$("geminiKey").value=sessionStorage.getItem("gemini_api_key")||"";$("geminiKey").oninput=()=>sessionStorage.setItem("gemini_api_key",$("geminiKey").value.trim());
+$("photoInput").onchange=async()=>{const f=$("photoInput").files?.[0];if(!f)return;try{setState($("photoState"),"Обробляю фото…","warn");currentImage=compress(await loadImage(f));$("previewImg").src=currentImage.dataUrl;$("preview").style.display="block";$("recognizeBtn").disabled=false;$("clearPhotoBtn").disabled=false;currentResult=null;$("savePhotoBtn").disabled=true;$("line1").textContent=$("line2").textContent="------";setState($("photoState"),selectedPosition?`Фото готове для позиції ${selectedPosition}.`:"Виберіть комірку.","ok")}catch(e){setState($("photoState"),e.message,"bad")}};
+$("clearPhotoBtn").onclick=()=>{$("photoInput").value="";currentImage=currentResult=null;$("preview").style.display="none";$("recognizeBtn").disabled=$("clearPhotoBtn").disabled=$("savePhotoBtn").disabled=true;$("line1").textContent=$("line2").textContent="------"};
+function outputText(r){if(typeof r.output_text==="string")return r.output_text.trim();const a=[];for(const s of r.steps||[])if(s.type==="model_output")for(const c of s.content||[])if(c.type==="text")a.push(c.text);return a.join("").trim()}
+$("recognizeBtn").onclick=async()=>{const key=$("geminiKey").value.trim();if(!key)return setState($("photoState"),"Вставте Gemini API Key.","bad");if(!currentImage)return;$("recognizeBtn").disabled=$("clearPhotoBtn").disabled=true;setState($("photoState"),"Gemini аналізує бірку…","warn");try{const body={model:MODEL,store:false,input:[{type:"text",text:PROMPT},{type:"image",data:currentImage.base64,mime_type:"image/jpeg"}],response_format:{type:"text",mime_type:"application/json",schema:{type:"object",properties:{line1:{type:"string"},line2:{type:"string"},confidence:{type:"number",minimum:0,maximum:1}},required:["line1","line2","confidence"],additionalProperties:false}},generation_config:{max_output_tokens:120,thinking_level:"minimal"}};const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify(body)}),d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d?.error?.message||`HTTP ${r.status}`);const p=JSON.parse(outputText(d)),l1=String(p.line1||"").trim(),l2=String(p.line2||"").trim().toUpperCase();currentResult={line1:l1,line2:l2,normalized:l1+l2,confidence:Number(p.confidence)||0,valid:/^\d{6}$/.test(l1)&&/^[A-Z0-9]{6}$/.test(l2)};$("line1").textContent=l1||"------";$("line2").textContent=l2||"------";if(!currentResult.valid)throw Error("Потрібно 6 цифр + 6 символів A-Z/0-9");$("savePhotoBtn").disabled=false;setState($("photoState"),`Розпізнано: ${l1} ${l2}`,"ok")}catch(e){currentResult=null;setState($("photoState"),`Помилка: ${e.message}`,"bad")}finally{$("recognizeBtn").disabled=!currentImage;$("clearPhotoBtn").disabled=!currentImage}};
+$("savePhotoBtn").onclick=async()=>{if(!currentResult?.valid||!session||session.phase!=="review")return setState($("photoState"),"Спочатку виберіть комірку в режимі перевірки.","bad");const pos=selectedPosition||session.activePosition,slot=session.slots.find(x=>x.position===pos);if(!slot||slot.status==="confirmed")return setState($("photoState"),"Виберіть порожню або жовту комірку.","bad");try{await mutate(s=>{if(s.slots.some(x=>x.status==="confirmed"&&x.normalized===currentResult.normalized))throw Error("DUPLICATE");const i=s.slots.findIndex(x=>x.position===pos);s.lastAction={type:"slot",position:pos,previous:clone(s.slots[i])};s.slots[i]={position:pos,status:"confirmed",normalized:currentResult.normalized,rawCode:currentResult.normalized,line1:currentResult.line1,line2:currentResult.line2,source:"phone-photo",confidence:currentResult.confidence,addedAt:new Date().toISOString(),addedBy:user.uid};s.activePosition=nextOpen(s,pos)||pos;return s});selectedPosition=null;$("savePhotoBtn").disabled=true;setState($("photoState"),`Фото додано у позицію ${pos}.`,"ok")}catch(e){setState($("photoState"),e.message==="DUPLICATE"?"Такий код уже є в іншій позиції.":e.message,"bad")}};
+
+$("finishBtn").onclick=()=>mutate(s=>{if(s.phase==="scan"){s.slots=s.initialScans.map((x,i)=>({position:i+1,status:"confirmed",normalized:x.normalized,rawCode:x.rawCode,line1:"",line2:"",source:x.source,confidence:1,addedAt:x.addedAt,addedBy:x.addedBy}))}if(s.slots.length!==s.expectedCount||s.slots.some(x=>x.status!=="confirmed")||new Set(s.slots.map(x=>x.normalized)).size!==s.expectedCount)throw Error("NOT_READY");s.status="finalized";s.phase="finalized";s.finalizedAt=new Date().toISOString();s.finalizedBy=user.uid;s.lastAction=null;return s}).catch(e=>setState($("finishState"),`Помилка: ${e.message}`,"bad"));
+
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function render(){const active=!!session;["sessionCard","scannerCard","slotsCard","photoCard","finishCard"].forEach(id=>$(id).classList.toggle("hidden",!active));$("startCard").classList.toggle("hidden",active);if(!active)return;$("sessionCode").textContent=sessionId;const c=confirmed(),n=needsPhoto(),phase=session.status==="finalized"?"остаточно збережено":canFinish()?"готово до збереження":session.phase==="review"?"перевірка зверху вниз":"первинне сканування";$("summary").textContent=`Статус: ${phase}\nОчікується: ${session.expectedCount}\nПервинно проскановано: ${session.initialScans.length}\nПідтверджено позицій: ${c}/${session.expectedCount}\nОчікує фото: ${n}`;const progress=session.phase==="scan"?session.initialScans.length:c;$("fill").style.width=`${Math.min(100,Math.round(progress/session.expectedCount*100))}%`;$("scanControls").classList.toggle("hidden",session.phase!=="scan"||session.status==="finalized");$("reviewControls").classList.toggle("hidden",session.phase!=="review"||session.status==="finalized");$("orderBtn").disabled=session.initialScans.length!==session.expectedCount||session.status==="finalized";$("scannerInput").disabled=session.status==="finalized";$("addCodeBtn").disabled=session.status==="finalized";if(session.status==="finalized")setState($("scannerState"),"Стопку збережено. Зміни заблоковані.","ok");else if(canFinish())setState($("scannerState"),"Усі позиції готові.","ok");else if(session.phase==="review")setState($("scannerState"),`Активна позиція: ${session.activePosition||nextOpen(session,0)||"—"}. Скануйте зверху вниз або позначте, що брік не пікнув.`,"warn");else setState($("scannerState"),`Автоматично скануйте всі бріки: ${session.initialScans.length}/${session.expectedCount}.`);$("scanList").innerHTML=session.initialScans.map((x,i)=>`<div>${i+1}. ${esc(x.normalized)}</div>`).join("");$("slots").innerHTML=session.slots.map(x=>{const cls=x.source==="phone-photo"?"photo":x.status,label=x.status==="confirmed"?x.normalized:x.status==="needs-photo"?"📷":"—";return`<button class="slot ${cls}${selectedPosition===x.position?" selected":""}" data-position="${x.position}"><b>${x.position}</b>${esc(label)}</button>`}).join("");const finish=canFinish();$("finishBtn").disabled=!finish||session.status==="finalized";if(session.status==="finalized")setState($("finishState"),`Стопку ${sessionId} остаточно збережено як 1 Bunner із ${session.expectedCount} бріками.`,"ok");else if(finish)setState($("finishState"),`Усі ${session.expectedCount} позицій унікальні й підтверджені.`,"ok");else setState($("finishState"),`Ще не готово: підтверджено ${c}/${session.expectedCount}.`,"warn")}
+
+render();initFirebase();
+</script>
+</body>
+</html>
