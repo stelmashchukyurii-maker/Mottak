@@ -1,1 +1,579 @@
-<!doctype html><html lang='nb'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><meta name='theme-color' content='#0b1020'><title>Nordic ID Bulk Scanner v2</title><style>:root{color-scheme:dark;--b:#0b1020;--c:#151c30;--d:#0d1426;--t:#f5f7ff;--m:#aab4ce;--a:#f4c430;--o:#48d597;--w:#f6b94b;--x:#ff6b6b;--l:#303b59}*{box-sizing:border-box}body{margin:0;background:linear-gradient(#0b1020,#11182a);color:var(--t);font-family:Arial,sans-serif}.app{max-width:1200px;margin:auto;padding:14px}h1{margin:4px 0}h2{font-size:19px}.sub,.note{color:var(--m)}.v{display:inline-block;padding:6px 9px;border:1px solid var(--l);border-radius:99px;color:var(--m);font-size:12px}.card{margin:12px 0;padding:14px;background:var(--c);border:1px solid var(--l);border-radius:17px}.g3,.stats,.actions{display:grid;gap:8px}.g3{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(6,1fr)}.actions{grid-template-columns:repeat(3,1fr)}button,input,select,textarea{font:inherit}button{min-height:46px;border:0;border-radius:11px;font-weight:800;cursor:pointer}.pick,.lang{background:var(--d);color:var(--t);border:2px solid var(--l)}.pick.on,.lang.on{background:var(--a);color:#17130a;border-color:var(--a)}.pri{background:var(--a);color:#17130a}.ok{background:var(--o);color:#062418}.sec{background:#2c395c;color:var(--t)}.bad{background:#3d1d2a;color:#ffc0c0;border:1px solid #713547}textarea{width:100%;min-height:100px;padding:14px;border:3px solid var(--a);border-radius:14px;background:#070b14;color:var(--t);font:900 26px Consolas,monospace;outline:0}.msg{min-height:24px;margin-top:8px;color:var(--m)}.msg.o{color:var(--o)}.msg.x{color:var(--x)}.msg.w{color:var(--w)}.st{padding:10px 5px;background:var(--d);border:1px solid var(--l);border-radius:12px;text-align:center}.st span{display:block;min-height:27px;color:var(--m);font-size:11px}.st b{font-size:30px}.bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}.bar div{display:flex;gap:7px;flex-wrap:wrap}.bar a{padding:12px;border-radius:10px;text-decoration:none}.tw{overflow:auto;border:1px solid var(--l);border-radius:12px}table{width:100%;min-width:1030px;border-collapse:collapse;background:var(--d)}th,td{padding:8px;border-bottom:1px solid var(--l);text-align:left}th{background:#111a31;color:var(--m);font-size:11px;text-transform:uppercase}td input,td select{width:100%;min-height:38px;padding:6px;border:1px solid var(--l);border-radius:8px;background:#070b14;color:var(--t)}.mono{font-family:Consolas,monospace;font-weight:800}.empty{text-align:center;color:var(--m);padding:24px}@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.actions{grid-template-columns:1fr}}@media(max-width:560px){.g3{grid-template-columns:1fr}.bar div{display:grid;width:100%}.bar button,.bar a{width:100%}}</style></head><body><main class='app'><h1 data-k='title'></h1><p class='sub' data-k='sub'></p><div class='v'>Nordic ID Bulk Scanner v2 · 01.08.2026 19:29 Europe/Oslo</div><section class='card'><div class='g3' id='langs'><button class='lang' data-l='nb'>Norsk</button><button class='lang' data-l='pl'>Polski</button><button class='lang' data-l='uk'>Українська</button></div></section><section class='card'><h2 data-k='productTitle'></h2><div class='g3' id='products'><button class='pick' data-p='bunner'>Bunner</button><button class='pick' data-p='hyller30'>Hyller x30</button><button class='pick' data-p='hyller60'>Hyller x60</button></div></section><section class='card'><h2 data-k='scanTitle'></h2><textarea id='scan' autocomplete='off' autocapitalize='off' spellcheck='false' inputmode='none'></textarea><p class='note' data-k='help'></p><div class='actions'><button class='pri' id='add' data-k='add'></button><button class='sec' id='clear' data-k='clear'></button><button class='sec' id='focus' data-k='focus'></button></div><div class='msg' id='msg'></div></section><section class='card'><h2 data-k='counts'></h2><div class='stats'><div class='st'><span data-k='q'></span><b id='nq'>0</b></div><div class='st'><span data-k='pend'></span><b id='np'>0</b></div><div class='st'><span data-k='ver'></span><b id='nv'>0</b></div><div class='st'><span data-k='inv'></span><b id='ni'>0</b></div><div class='st'><span data-k='saved'></span><b id='ns'>0</b></div><div class='st'><span data-k='dups'></span><b id='nd'>0</b></div></div></section><section class='card'><div class='bar'><h2 data-k='review'></h2><div><button class='sec' id='verify' data-k='verify'></button><button class='ok' id='save' data-k='save'></button><button class='bad' id='wipe' data-k='wipe'></button><a class='sec' href='mottak-table-v1.html' data-k='table'></a></div></div><div class='tw'><table><thead><tr><th>#</th><th data-k='time'></th><th data-k='product'></th><th data-k='code'></th><th data-k='upper'></th><th data-k='lower'></th><th data-k='status'></th><th data-k='act'></th></tr></thead><tbody id='body'></tbody></table></div><p class='note' data-k='note'></p></section></main><script>'use strict';const Q='nordic_bulk_queue_v2',T='mottak_table_v1_entries',L='nordic_bulk_language',P='nordic_bulk_product',PN={bunner:'Bunner',hyller30:'Hyller x30',hyller60:'Hyller x60'},D={nb:{title:'Nordic ID – masseskanner',sub:'Skann mange etiketter, kontroller resultatene og lagre dem i Mottak-tabellen.',productTitle:'1. Velg produkt',scanTitle:'2. Skann etiketter',help:'Enter, Tab eller en kort pause avslutter skanningen. Rådata beholdes for kontroll.',add:'Legg i kø',clear:'Tøm felt',focus:'Aktiver skannerfelt',counts:'Telling',q:'I kø',pend:'Venter',ver:'Godkjent',inv:'Feil / skadet',saved:'Lagret i tabellen',dups:'Duplikater stoppet',review:'3. Kontroll og lagring',verify:'Godkjenn komplette',save:'Lagre kontrollerte',wipe:'Tøm kø',table:'Åpne tabellen',time:'Tid',product:'Produkt',code:'Scannerkode / første del',upper:'Øvre nummer',lower:'Nedre nummer',status:'Status',act:'Handling',note:'Poster som venter lagres ikke. Godkjente og feilmerkede poster lagres når du trykker Lagre kontrollerte.',empty:'Køen er tom.',remove:'Fjern',sP:'Venter på kontroll',sV:'Godkjent',sI:'Feil / skadet',mA:'Skanningen ble lagt i kø.',mD:'Duplikat ble stoppet.',mN:'Skann eller skriv inn en kode først.',m0:'Ingen kontrollerte poster å lagre.',mS:n=>n+' poster ble lagret.',conf:'Vil du tømme hele køen?'},pl:{title:'Nordic ID – skaner masowy',sub:'Skanuj wiele etykiet, sprawdź wyniki i zapisz je w tabeli Mottak.',productTitle:'1. Wybierz produkt',scanTitle:'2. Skanuj etykiety',help:'Enter, Tab lub krótka przerwa kończy skan. Surowe dane są zachowane do kontroli.',add:'Dodaj do kolejki',clear:'Wyczyść pole',focus:'Aktywuj pole skanera',counts:'Liczniki',q:'W kolejce',pend:'Oczekuje',ver:'Potwierdzone',inv:'Błędne / uszkodzone',saved:'Zapisane w tabeli',dups:'Zablokowane duplikaty',review:'3. Kontrola i zapis',verify:'Potwierdź kompletne',save:'Zapisz sprawdzone',wipe:'Wyczyść kolejkę',table:'Otwórz tabelę',time:'Czas',product:'Produkt',code:'Kod skanera / pierwsza część',upper:'Górny numer',lower:'Dolny numer',status:'Status',act:'Działanie',note:'Wpisy oczekujące nie są zapisywane. Potwierdzone i błędne wpisy zapisują się po naciśnięciu Zapisz sprawdzone.',empty:'Kolejka jest pusta.',remove:'Usuń',sP:'Oczekuje na kontrolę',sV:'Potwierdzona',sI:'Błędna / uszkodzona',mA:'Skan dodano do kolejki.',mD:'Duplikat został zablokowany.',mN:'Najpierw zeskanuj lub wpisz kod.',m0:'Brak sprawdzonych wpisów do zapisania.',mS:n=>'Zapisano: '+n+'.',conf:'Wyczyścić całą kolejkę?'},uk:{title:'Nordic ID — масовий сканер',sub:'Скануйте багато бірок, перевіряйте результати та зберігайте їх у таблицю Mottak.',productTitle:'1. Виберіть продукт',scanTitle:'2. Скануйте бірки',help:'Enter, Tab або коротка пауза завершують скан. Сирі дані зберігаються для перевірки.',add:'Додати в чергу',clear:'Очистити поле',focus:'Активувати поле сканера',counts:'Лічильники',q:'У черзі',pend:'Очікує',ver:'Підтверджено',inv:'Невірні / пошкоджені',saved:'Збережено в таблиці',dups:'Дублі заблоковано',review:'3. Перевірка та збереження',verify:'Підтвердити повні',save:'Зберегти перевірені',wipe:'Очистити чергу',table:'Відкрити таблицю',time:'Час',product:'Продукт',code:'Код сканера / перша частина',upper:'Верхній номер',lower:'Нижній номер',status:'Статус',act:'Дія',note:'Записи зі статусом Очікує не зберігаються. Підтверджені та проблемні записи зберігаються після натискання Зберегти перевірені.',empty:'Черга порожня.',remove:'Видалити',sP:'Очікує перевірки',sV:'Підтверджена',sI:'Невірна / пошкоджена',mA:'Скан додано в чергу.',mD:'Дублікат заблоковано.',mN:'Спочатку відскануйте або введіть код.',m0:'Немає перевірених записів для збереження.',mS:n=>'Збережено: '+n+'.',conf:'Очистити всю чергу?'}};let lang=D[localStorage.getItem(L)]?localStorage.getItem(L):'nb',prod=PN[localStorage.getItem(P)]?localStorage.getItem(P):'bunner',q=load(Q),dups=0,timer;const $=x=>document.getElementById(x),scan=$('scan'),body=$('body'),msg=$('msg'),tr=()=>D[lang];function load(k){try{let v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[]}catch{return[]}}function sq(){localStorage.setItem(Q,JSON.stringify(q))}function id(){return crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random()}function raw(v){return v.replace(/[\r\n\t]+/g,' ').trim().toUpperCase()}function parse(v){let c=raw(v),a=c.split(/[\s|;,/:]+/).filter(Boolean),u=a.find(x=>/^\d{6}$/.test(x))||(c.match(/\d{6}/)||[''])[0],l=a.find(x=>/^[A-Z0-9]{6}$/.test(x)&&x!==u)||((c.match(/[A-Z0-9]{6}/g)||[]).find(x=>x!==u)||'');return{scannerCode:c,upperNumber:u,lowerNumber:l}}function key(x){return x.scannerCode+'|'+x.upperNumber+'|'+x.lowerNumber}function say(s,c=''){msg.textContent=s;msg.className='msg '+c}function add(){clearTimeout(timer);let p=parse(scan.value);if(!p.scannerCode){say(tr().mN,'x');return}let x={id:id(),createdAt:new Date().toISOString(),product:prod,...p,status:'pending'},k=key(x),s=load(T);if(q.some(y=>key(y)===k)||s.some(y=>key(y)===k)){dups++;say(tr().mD,'x');render();return}q.unshift(x);sq();scan.value='';say(tr().mA,'o');render();scan.focus()}function esc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}function opts(v){return[['pending',tr().sP],['verified',tr().sV],['invalid',tr().sI]].map(x=>`<option value='${x[0]}' ${v===x[0]?'selected':''}>${x[1]}</option>`).join('')}function render(){document.querySelectorAll('.lang').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));document.querySelectorAll('.pick').forEach(b=>b.classList.toggle('on',b.dataset.p===prod));let s=load(T);$('nq').textContent=q.length;$('np').textContent=q.filter(x=>x.status==='pending').length;$('nv').textContent=q.filter(x=>x.status==='verified').length;$('ni').textContent=q.filter(x=>x.status==='invalid').length;$('ns').textContent=s.length;$('nd').textContent=dups;if(!q.length){body.innerHTML=`<tr><td class='empty' colspan='8'>${tr().empty}</td></tr>`;return}body.innerHTML=q.map((x,i)=>`<tr data-id='${x.id}'><td>${q.length-i}</td><td>${new Date(x.createdAt).toLocaleString(lang==='uk'?'uk-UA':lang==='pl'?'pl-PL':'nb-NO')}</td><td><select data-f='product'><option value='bunner' ${x.product==='bunner'?'selected':''}>Bunner</option><option value='hyller30' ${x.product==='hyller30'?'selected':''}>Hyller x30</option><option value='hyller60' ${x.product==='hyller60'?'selected':''}>Hyller x60</option></select></td><td><input class='mono' data-f='scannerCode' value='${esc(x.scannerCode)}'></td><td><input class='mono' data-f='upperNumber' maxlength='6' value='${esc(x.upperNumber)}'></td><td><input class='mono' data-f='lowerNumber' maxlength='6' value='${esc(x.lowerNumber)}'></td><td><select data-f='status'>${opts(x.status)}</select></td><td><button class='bad' data-r='${x.id}'>${tr().remove}</button></td></tr>`).join('')}function apply(){document.documentElement.lang=lang;document.querySelectorAll('[data-k]').forEach(e=>e.textContent=tr()[e.dataset.k]);scan.placeholder=tr().scanTitle;render()}scan.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();add()}});scan.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(add,350)});$('add').onclick=add;$('clear').onclick=()=>{scan.value='';scan.focus()};$('focus').onclick=()=>scan.focus();$('langs').onclick=e=>{let b=e.target.closest('[data-l]');if(b){lang=b.dataset.l;localStorage.setItem(L,lang);apply()}};$('products').onclick=e=>{let b=e.target.closest('[data-p]');if(b){prod=b.dataset.p;localStorage.setItem(P,prod);render();scan.focus()}};body.addEventListener('input',e=>{let r=e.target.closest('tr[data-id]');if(!r||!e.target.dataset.f)return;let x=q.find(z=>z.id===r.dataset.id),f=e.target.dataset.f,v=e.target.value;if(f==='upperNumber')v=v.replace(/\D/g,'').slice(0,6);if(f==='lowerNumber')v=v.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(f==='scannerCode')v=raw(v);x[f]=v;e.target.value=v;sq()});body.onclick=e=>{let b=e.target.closest('[data-r]');if(b){q=q.filter(x=>x.id!==b.dataset.r);sq();render()}};$('verify').onclick=()=>{q.forEach(x=>{if(x.scannerCode&&/^\d{6}$/.test(x.upperNumber)&&/^[A-Z0-9]{6}$/.test(x.lowerNumber))x.status='verified'});sq();render()};$('save').onclick=()=>{let r=q.filter(x=>x.status!=='pending');if(!r.length){say(tr().m0,'w');return}let s=load(T),ks=new Set(s.map(key)),n=0;r.forEach(x=>{if(!ks.has(key(x))){s.unshift({...x});ks.add(key(x));n++}else dups++});localStorage.setItem(T,JSON.stringify(s));q=q.filter(x=>x.status==='pending');sq();say(tr().mS(n),'o');render()};$('wipe').onclick=()=>{if(q.length&&confirm(tr().conf)){q=[];sq();render()}};apply();scan.focus();</script></body></html>
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <title>Nordic ID Bulk Scanner v2</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #151c30;
+      --dark: #0d1426;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --bad: #ff6b6b;
+      --line: #303b59;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg), #11182a);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    .app { width: min(1200px, 100%); margin: auto; padding: 16px 12px 44px; }
+    h1 { margin: 0 0 6px; font-size: clamp(28px, 5vw, 42px); }
+    h2 { margin: 0 0 12px; font-size: 20px; }
+    .subtitle, .note { color: var(--muted); line-height: 1.45; }
+    .version { display: inline-block; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+
+    .card {
+      margin: 12px 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+    }
+
+    .grid-3, .stats, .actions { display: grid; gap: 9px; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .stats { grid-template-columns: repeat(6, 1fr); }
+    .actions { grid-template-columns: repeat(3, 1fr); margin-top: 10px; }
+
+    button, .table-link {
+      min-height: 48px;
+      padding: 10px 13px;
+      border: 0;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .language, .product { color: var(--text); background: var(--dark); border: 2px solid var(--line); }
+    .language.active, .product.active { color: #17130a; background: var(--accent); border-color: var(--accent); }
+    .product { min-height: 64px; }
+    .primary { color: #17130a; background: var(--accent); }
+    .success { color: #062418; background: var(--ok); }
+    .secondary, .table-link { color: var(--text); background: #2c395c; }
+    .danger { color: #ffc0c0; background: rgba(255,107,107,.16); border: 1px solid rgba(255,107,107,.35); }
+
+    textarea {
+      width: 100%;
+      min-height: 108px;
+      padding: 15px;
+      border: 3px solid var(--accent);
+      border-radius: 16px;
+      outline: none;
+      resize: vertical;
+      background: #070b14;
+      color: var(--text);
+      font: 900 clamp(20px, 5vw, 32px) Consolas, monospace;
+    }
+
+    .message { min-height: 24px; margin-top: 10px; color: var(--muted); white-space: pre-wrap; }
+    .message.ok { color: var(--ok); }
+    .message.bad { color: var(--bad); }
+    .stat { padding: 10px 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--dark); text-align: center; }
+    .stat span { display: block; min-height: 28px; color: var(--muted); font-size: 11px; }
+    .stat strong { font-size: 30px; }
+    .toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 9px; margin-bottom: 10px; }
+    .toolbar-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .table-link { display: inline-flex; align-items: center; text-decoration: none; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; min-width: 1040px; border-collapse: collapse; background: var(--dark); }
+    th, td { padding: 8px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); background: #111a31; font-size: 11px; text-transform: uppercase; }
+    td input, td select { width: 100%; min-height: 38px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: #070b14; color: var(--text); }
+    .mono { font-family: Consolas, monospace; font-weight: 800; }
+    .empty { padding: 24px; color: var(--muted); text-align: center; }
+
+    @media (max-width: 800px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .actions { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .toolbar-buttons { display: grid; width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <h1 data-t="title"></h1>
+    <p class="subtitle" data-t="subtitle"></p>
+    <div class="version">Nordic ID Bulk Scanner v2 · updated 01.08.2026 19:44 Europe/Oslo</div>
+
+    <section class="card">
+      <div class="grid-3" id="languages">
+        <button class="language" data-language="nb">Norsk</button>
+        <button class="language" data-language="pl">Polski</button>
+        <button class="language" data-language="uk">Українська</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-t="chooseProduct"></h2>
+      <div class="grid-3" id="products">
+        <button class="product" data-product="bunner">Bunner</button>
+        <button class="product" data-product="hyller30">Hyller x30</button>
+        <button class="product" data-product="hyller60">Hyller x60</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-t="scanTitle"></h2>
+      <textarea id="scanInput" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none"></textarea>
+      <p class="note" data-t="scanHelp"></p>
+      <div class="actions">
+        <button class="primary" id="addButton" data-t="add"></button>
+        <button class="secondary" id="clearButton" data-t="clear"></button>
+        <button class="secondary" id="focusButton" data-t="focus"></button>
+      </div>
+      <div class="message" id="message"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-t="counts"></h2>
+      <div class="stats">
+        <div class="stat"><span data-t="queue"></span><strong id="queueCount">0</strong></div>
+        <div class="stat"><span data-t="pending"></span><strong id="pendingCount">0</strong></div>
+        <div class="stat"><span data-t="verified"></span><strong id="verifiedCount">0</strong></div>
+        <div class="stat"><span data-t="invalid"></span><strong id="invalidCount">0</strong></div>
+        <div class="stat"><span data-t="saved"></span><strong id="savedCount">0</strong></div>
+        <div class="stat"><span data-t="duplicates"></span><strong id="duplicateCount">0</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <h2 data-t="review"></h2>
+        <div class="toolbar-buttons">
+          <button class="secondary" id="verifyButton" data-t="verify"></button>
+          <button class="success" id="saveButton" data-t="save"></button>
+          <button class="danger" id="clearQueueButton" data-t="clearQueue"></button>
+          <a class="table-link" href="mottak-table-v1.html" data-t="openTable"></a>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th data-t="time"></th>
+              <th data-t="product"></th>
+              <th data-t="scannerCode"></th>
+              <th data-t="upper"></th>
+              <th data-t="lower"></th>
+              <th data-t="status"></th>
+              <th data-t="action"></th>
+            </tr>
+          </thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+      </div>
+      <p class="note" data-t="storageNote"></p>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const QUEUE_KEY = "nordic_bulk_queue_v2";
+    const TABLE_KEY = "mottak_table_v1_entries";
+    const LANGUAGE_KEY = "nordic_bulk_language";
+    const PRODUCT_KEY = "nordic_bulk_product";
+
+    const PRODUCTS = {
+      bunner: "Bunner",
+      hyller30: "Hyller x30",
+      hyller60: "Hyller x60"
+    };
+
+    const TEXT = {
+      nb: {
+        title: "Nordic ID – masseskanner",
+        subtitle: "Skann mange etiketter, kontroller resultatene og lagre dem i Mottak-tabellen.",
+        chooseProduct: "1. Velg produkt",
+        scanTitle: "2. Skann etiketter",
+        scanHelp: "Enter, Tab eller en kort pause avslutter skanningen. Rådata beholdes for kontroll.",
+        add: "Legg i kø", clear: "Tøm felt", focus: "Aktiver skannerfelt",
+        counts: "Telling", queue: "I kø", pending: "Venter", verified: "Godkjent",
+        invalid: "Feil / skadet", saved: "Lagret i tabellen", duplicates: "Duplikater stoppet",
+        review: "3. Kontroll og lagring", verify: "Godkjenn komplette", save: "Lagre kontrollerte",
+        clearQueue: "Tøm kø", openTable: "Åpne tabellen", time: "Tid", product: "Produkt",
+        scannerCode: "Scannerkode / første del", upper: "Øvre nummer", lower: "Nedre nummer",
+        status: "Status", action: "Handling",
+        storageNote: "Poster som venter lagres ikke. Godkjente og feilmerkede poster lagres først etter kontroll.",
+        empty: "Køen er tom.", remove: "Fjern", pendingStatus: "Venter på kontroll",
+        verifiedStatus: "Godkjent", invalidStatus: "Feil / skadet", placeholder: "Venter på skanning…",
+        added: "Skanningen ble lagt i kø.", duplicate: "Duplikatet ble stoppet.",
+        noCode: "Skann eller skriv inn en kode først.", nothing: "Ingen kontrollerte poster å lagre.",
+        confirmClear: "Vil du tømme hele køen?",
+        savedMessage: n => `${n} poster ble lagret.`,
+        verifiedMessage: n => `${n} komplette poster ble godkjent.`
+      },
+      pl: {
+        title: "Nordic ID – skaner masowy",
+        subtitle: "Skanuj wiele etykiet, sprawdź wyniki i zapisz je w tabeli Mottak.",
+        chooseProduct: "1. Wybierz produkt",
+        scanTitle: "2. Skanuj etykiety",
+        scanHelp: "Enter, Tab lub krótka przerwa kończy skan. Surowe dane są zachowane do kontroli.",
+        add: "Dodaj do kolejki", clear: "Wyczyść pole", focus: "Aktywuj pole skanera",
+        counts: "Liczniki", queue: "W kolejce", pending: "Oczekuje", verified: "Potwierdzone",
+        invalid: "Błędne / uszkodzone", saved: "Zapisane w tabeli", duplicates: "Zablokowane duplikaty",
+        review: "3. Kontrola i zapis", verify: "Potwierdź kompletne", save: "Zapisz sprawdzone",
+        clearQueue: "Wyczyść kolejkę", openTable: "Otwórz tabelę", time: "Czas", product: "Produkt",
+        scannerCode: "Kod skanera / pierwsza część", upper: "Górny numer", lower: "Dolny numer",
+        status: "Status", action: "Działanie",
+        storageNote: "Wpisy oczekujące nie są zapisywane. Potwierdzone i błędne wpisy są zapisywane dopiero po kontroli.",
+        empty: "Kolejka jest pusta.", remove: "Usuń", pendingStatus: "Oczekuje na kontrolę",
+        verifiedStatus: "Potwierdzona", invalidStatus: "Błędna / uszkodzona", placeholder: "Oczekiwanie na skan…",
+        added: "Skan dodano do kolejki.", duplicate: "Duplikat został zablokowany.",
+        noCode: "Najpierw zeskanuj lub wpisz kod.", nothing: "Brak sprawdzonych wpisów do zapisania.",
+        confirmClear: "Wyczyścić całą kolejkę?",
+        savedMessage: n => `Zapisano wpisów: ${n}.`,
+        verifiedMessage: n => `Potwierdzono kompletne wpisy: ${n}.`
+      },
+      uk: {
+        title: "Nordic ID — масовий сканер",
+        subtitle: "Скануйте багато бірок, перевіряйте результати та зберігайте їх у таблицю Mottak.",
+        chooseProduct: "1. Виберіть продукт",
+        scanTitle: "2. Скануйте бірки",
+        scanHelp: "Enter, Tab або коротка пауза завершують скан. Сирі дані зберігаються для перевірки.",
+        add: "Додати в чергу", clear: "Очистити поле", focus: "Активувати поле сканера",
+        counts: "Лічильники", queue: "У черзі", pending: "Очікує", verified: "Підтверджено",
+        invalid: "Невірні / пошкоджені", saved: "Збережено в таблиці", duplicates: "Дублі заблоковано",
+        review: "3. Перевірка та збереження", verify: "Підтвердити повні", save: "Зберегти перевірені",
+        clearQueue: "Очистити чергу", openTable: "Відкрити таблицю", time: "Час", product: "Продукт",
+        scannerCode: "Код сканера / перша частина", upper: "Верхній номер", lower: "Нижній номер",
+        status: "Статус", action: "Дія",
+        storageNote: "Записи зі статусом «Очікує» не зберігаються. Підтверджені та проблемні записи зберігаються лише після перевірки.",
+        empty: "Черга порожня.", remove: "Видалити", pendingStatus: "Очікує перевірки",
+        verifiedStatus: "Підтверджена", invalidStatus: "Невірна / пошкоджена", placeholder: "Очікування сканування…",
+        added: "Скан додано в чергу.", duplicate: "Дублікат заблоковано.",
+        noCode: "Спочатку відскануйте або введіть код.", nothing: "Немає перевірених записів для збереження.",
+        confirmClear: "Очистити всю чергу?",
+        savedMessage: n => `Збережено записів: ${n}.`,
+        verifiedMessage: n => `Підтверджено повних записів: ${n}.`
+      }
+    };
+
+    let language = TEXT[localStorage.getItem(LANGUAGE_KEY)]
+      ? localStorage.getItem(LANGUAGE_KEY)
+      : "nb";
+
+    let product = PRODUCTS[localStorage.getItem(PRODUCT_KEY)]
+      ? localStorage.getItem(PRODUCT_KEY)
+      : "bunner";
+
+    let queue = load(QUEUE_KEY);
+    let duplicateCount = 0;
+    let timer;
+
+    const scanInput = document.getElementById("scanInput");
+    const queueBody = document.getElementById("queueBody");
+    const message = document.getElementById("message");
+    const t = () => TEXT[language];
+
+    function load(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveQueue() {
+      localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+    }
+
+    function makeId() {
+      return crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`;
+    }
+
+    function normalize(value) {
+      return value
+        .replace(/[\r\n\t]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toUpperCase();
+    }
+
+    function parseScan(value) {
+      const scannerCode = normalize(value);
+      const parts = scannerCode.split(/[\s|;,/:]+/).filter(Boolean);
+      const upperNumber =
+        parts.find(part => /^\d{6}$/.test(part)) ||
+        (scannerCode.match(/\d{6}/) || [""])[0];
+      const lowerNumber =
+        parts.find(part => /^[A-Z0-9]{6}$/.test(part) && part !== upperNumber) ||
+        (scannerCode.match(/[A-Z0-9]{6}/g) || []).find(part => part !== upperNumber) ||
+        "";
+
+      return { scannerCode, upperNumber, lowerNumber };
+    }
+
+    function entryKey(entry) {
+      return `${entry.scannerCode}|${entry.upperNumber}|${entry.lowerNumber}`;
+    }
+
+    function setMessage(text, type = "") {
+      message.textContent = text;
+      message.className = `message ${type}`;
+    }
+
+    function addScan() {
+      clearTimeout(timer);
+      const parsed = parseScan(scanInput.value);
+
+      if (!parsed.scannerCode) {
+        setMessage(t().noCode, "bad");
+        return;
+      }
+
+      const entry = {
+        id: makeId(),
+        createdAt: new Date().toISOString(),
+        product,
+        ...parsed,
+        status: "pending"
+      };
+
+      const saved = load(TABLE_KEY);
+      const duplicateInQueue = queue.some(item => entryKey(item) === entryKey(entry));
+      const duplicateInTable = saved.some(item => entryKey(item) === entryKey(entry));
+
+      if (duplicateInQueue || duplicateInTable) {
+        duplicateCount += 1;
+        setMessage(t().duplicate, "bad");
+        render();
+        return;
+      }
+
+      queue.unshift(entry);
+      saveQueue();
+      scanInput.value = "";
+      setMessage(t().added, "ok");
+      render();
+      scanInput.focus();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function statusOptions(selected) {
+      return [
+        ["pending", t().pendingStatus],
+        ["verified", t().verifiedStatus],
+        ["invalid", t().invalidStatus]
+      ].map(([value, label]) =>
+        `<option value="${value}" ${value === selected ? "selected" : ""}>${label}</option>`
+      ).join("");
+    }
+
+    function productOptions(selected) {
+      return Object.entries(PRODUCTS).map(([value, label]) =>
+        `<option value="${value}" ${value === selected ? "selected" : ""}>${label}</option>`
+      ).join("");
+    }
+
+    function render() {
+      document.documentElement.lang = language;
+
+      document.querySelectorAll("[data-t]").forEach(element => {
+        const value = t()[element.dataset.t];
+        if (typeof value === "string") element.textContent = value;
+      });
+
+      scanInput.placeholder = t().placeholder;
+
+      document.querySelectorAll("[data-language]").forEach(button => {
+        button.classList.toggle("active", button.dataset.language === language);
+      });
+
+      document.querySelectorAll("[data-product]").forEach(button => {
+        button.classList.toggle("active", button.dataset.product === product);
+      });
+
+      const saved = load(TABLE_KEY);
+      document.getElementById("queueCount").textContent = queue.length;
+      document.getElementById("pendingCount").textContent = queue.filter(item => item.status === "pending").length;
+      document.getElementById("verifiedCount").textContent = queue.filter(item => item.status === "verified").length;
+      document.getElementById("invalidCount").textContent = queue.filter(item => item.status === "invalid").length;
+      document.getElementById("savedCount").textContent = saved.length;
+      document.getElementById("duplicateCount").textContent = duplicateCount;
+
+      if (!queue.length) {
+        queueBody.innerHTML = `<tr><td class="empty" colspan="8">${t().empty}</td></tr>`;
+        return;
+      }
+
+      const locale = language === "nb" ? "nb-NO" : language === "pl" ? "pl-PL" : "uk-UA";
+
+      queueBody.innerHTML = queue.map((entry, index) => `
+        <tr data-id="${entry.id}">
+          <td>${queue.length - index}</td>
+          <td>${new Date(entry.createdAt).toLocaleString(locale)}</td>
+          <td><select data-field="product">${productOptions(entry.product)}</select></td>
+          <td><input class="mono" data-field="scannerCode" value="${escapeHtml(entry.scannerCode)}"></td>
+          <td><input class="mono" data-field="upperNumber" maxlength="6" value="${escapeHtml(entry.upperNumber)}"></td>
+          <td><input class="mono" data-field="lowerNumber" maxlength="6" value="${escapeHtml(entry.lowerNumber)}"></td>
+          <td><select data-field="status">${statusOptions(entry.status)}</select></td>
+          <td><button class="danger" data-remove="${entry.id}">${t().remove}</button></td>
+        </tr>
+      `).join("");
+    }
+
+    function verifyComplete() {
+      let count = 0;
+
+      queue.forEach(entry => {
+        const complete =
+          entry.scannerCode &&
+          /^\d{6}$/.test(entry.upperNumber) &&
+          /^[A-Z0-9]{6}$/.test(entry.lowerNumber);
+
+        if (entry.status === "pending" && complete) {
+          entry.status = "verified";
+          count += 1;
+        }
+      });
+
+      saveQueue();
+      setMessage(t().verifiedMessage(count), "ok");
+      render();
+    }
+
+    function saveChecked() {
+      const checked = queue.filter(entry => entry.status !== "pending");
+
+      if (!checked.length) {
+        setMessage(t().nothing, "bad");
+        return;
+      }
+
+      const saved = load(TABLE_KEY);
+      const savedKeys = new Set(saved.map(entryKey));
+      const newEntries = checked.filter(entry => {
+        const key = entryKey(entry);
+        if (savedKeys.has(key)) return false;
+        savedKeys.add(key);
+        return true;
+      });
+
+      localStorage.setItem(TABLE_KEY, JSON.stringify([...newEntries, ...saved]));
+
+      const checkedIds = new Set(checked.map(entry => entry.id));
+      queue = queue.filter(entry => !checkedIds.has(entry.id));
+      saveQueue();
+      setMessage(t().savedMessage(newEntries.length), "ok");
+      render();
+    }
+
+    document.getElementById("languages").addEventListener("click", event => {
+      const button = event.target.closest("[data-language]");
+      if (!button) return;
+
+      language = button.dataset.language;
+      localStorage.setItem(LANGUAGE_KEY, language);
+      render();
+    });
+
+    document.getElementById("products").addEventListener("click", event => {
+      const button = event.target.closest("[data-product]");
+      if (!button) return;
+
+      product = button.dataset.product;
+      localStorage.setItem(PRODUCT_KEY, product);
+      render();
+      scanInput.focus();
+    });
+
+    scanInput.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault();
+        addScan();
+      }
+    });
+
+    scanInput.addEventListener("input", () => {
+      clearTimeout(timer);
+      if (scanInput.value.trim()) timer = setTimeout(addScan, 450);
+    });
+
+    queueBody.addEventListener("change", event => {
+      const row = event.target.closest("tr[data-id]");
+      const field = event.target.dataset.field;
+      if (!row || !field) return;
+
+      const entry = queue.find(item => item.id === row.dataset.id);
+      if (!entry) return;
+
+      if (field === "upperNumber") {
+        entry[field] = event.target.value.replace(/\D/g, "").slice(0, 6);
+      } else if (field === "lowerNumber") {
+        entry[field] = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+      } else if (field === "scannerCode") {
+        entry[field] = normalize(event.target.value);
+      } else {
+        entry[field] = event.target.value;
+      }
+
+      saveQueue();
+      render();
+    });
+
+    queueBody.addEventListener("click", event => {
+      const button = event.target.closest("[data-remove]");
+      if (!button) return;
+
+      queue = queue.filter(entry => entry.id !== button.dataset.remove);
+      saveQueue();
+      render();
+    });
+
+    document.getElementById("addButton").addEventListener("click", addScan);
+    document.getElementById("clearButton").addEventListener("click", () => {
+      scanInput.value = "";
+      scanInput.focus();
+    });
+    document.getElementById("focusButton").addEventListener("click", () => scanInput.focus());
+    document.getElementById("verifyButton").addEventListener("click", verifyComplete);
+    document.getElementById("saveButton").addEventListener("click", saveChecked);
+    document.getElementById("clearQueueButton").addEventListener("click", () => {
+      if (!queue.length || !confirm(t().confirmClear)) return;
+      queue = [];
+      saveQueue();
+      render();
+    });
+
+    window.addEventListener("load", () => {
+      render();
+      scanInput.focus();
+    });
+  </script>
+</body>
+</html>
