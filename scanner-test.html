@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>CC Scanner Wedge Test</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #151c30;
+      --card-dark: #0d1426;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --bad: #ff6b6b;
+      --info: #75b7ff;
+      --line: #303b59;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #11182a 100%);
+      color: var(--text);
+    }
+
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      touch-action: manipulation;
+    }
+
+    .app {
+      width: min(760px, 100%);
+      margin: 0 auto;
+      padding: 14px 12px 40px;
+    }
+
+    h1 {
+      margin: 4px 0 6px;
+      font-size: clamp(25px, 7vw, 38px);
+      line-height: 1.08;
+    }
+
+    .subtitle {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .build {
+      margin: 8px 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .card {
+      margin: 12px 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 28, 48, 0.96);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .language-grid,
+    .button-grid,
+    .stats-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .language-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .button-grid {
+      grid-template-columns: 1fr 1fr;
+      margin-top: 10px;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 10px;
+    }
+
+    @media (min-width: 560px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    button {
+      width: 100%;
+      min-height: 50px;
+      padding: 11px 12px;
+      border: 0;
+      border-radius: 13px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.2s ease, border-color 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.985);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.42;
+    }
+
+    .language-button {
+      min-height: 46px;
+      padding: 8px 5px;
+      background: var(--card-dark);
+      color: var(--text);
+      border: 2px solid var(--line);
+      font-size: clamp(13px, 3.7vw, 16px);
+    }
+
+    .language-button.active {
+      background: var(--accent);
+      color: #17130a;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.18);
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #17130a;
+    }
+
+    .secondary {
+      background: #2c395c;
+      color: var(--text);
+    }
+
+    .danger {
+      background: rgba(255, 107, 107, 0.16);
+      color: #ffb0b0;
+      border: 1px solid rgba(255, 107, 107, 0.38);
+    }
+
+    .focus-banner {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card-dark);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .focus-dot {
+      width: 12px;
+      height: 12px;
+      flex: 0 0 12px;
+      border-radius: 50%;
+      background: var(--bad);
+      box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.12);
+    }
+
+    .focus-banner.active {
+      color: var(--ok);
+      border-color: rgba(72, 213, 151, 0.45);
+    }
+
+    .focus-banner.active .focus-dot {
+      background: var(--ok);
+      box-shadow: 0 0 0 4px rgba(72, 213, 151, 0.13);
+    }
+
+    #scanInput {
+      display: block;
+      width: 100%;
+      min-height: 116px;
+      resize: none;
+      padding: 15px;
+      border: 3px solid var(--accent);
+      border-radius: 16px;
+      outline: none;
+      background: #070b14;
+      color: var(--text);
+      caret-color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: clamp(21px, 6vw, 34px);
+      font-weight: 900;
+      letter-spacing: 0.055em;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+      box-shadow: 0 0 0 4px rgba(244, 196, 48, 0.10);
+    }
+
+    #scanInput::placeholder {
+      color: #8792ac;
+      opacity: 1;
+      letter-spacing: normal;
+      font-weight: 700;
+    }
+
+    #scanInput:focus {
+      box-shadow: 0 0 0 5px rgba(244, 196, 48, 0.22);
+    }
+
+    .status {
+      min-height: 24px;
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.bad {
+      color: var(--bad);
+    }
+
+    .status.info {
+      color: var(--info);
+    }
+
+    .live-label,
+    .small-label {
+      display: block;
+      margin: 12px 0 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .char-stream,
+    .char-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 40px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card-dark);
+    }
+
+    .char-chip {
+      min-width: 34px;
+      padding: 7px 6px;
+      border: 1px solid #405071;
+      border-radius: 9px;
+      background: #111a2e;
+      text-align: center;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .char-chip small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .empty {
+      width: 100%;
+      padding: 5px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .raw-code {
+      min-height: 65px;
+      margin: 0;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #070b14;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: clamp(20px, 5.7vw, 31px);
+      font-weight: 900;
+      letter-spacing: 0.055em;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      user-select: text;
+    }
+
+    .escaped-code {
+      margin-top: 7px;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .stat-box {
+      min-width: 0;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card-dark);
+    }
+
+    .stat-name {
+      display: block;
+      min-height: 29px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      display: block;
+      margin-top: 4px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 17px;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .scan-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .scan-item {
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--card-dark);
+    }
+
+    .scan-code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 18px;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .scan-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .duplicate-badge {
+      display: inline-block;
+      margin-left: 5px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(255, 107, 107, 0.16);
+      color: #ffb0b0;
+      font-size: 10px;
+      font-weight: 800;
+      vertical-align: middle;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--card-dark);
+    }
+
+    summary {
+      padding: 13px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .event-wrap {
+      padding: 0 10px 10px;
+    }
+
+    #eventLog {
+      max-height: 360px;
+      margin: 0;
+      overflow: auto;
+      padding: 10px;
+      border-radius: 10px;
+      background: #050811;
+      color: #c8d5ee;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .note {
+      padding: 11px 12px;
+      border: 1px solid rgba(244, 196, 48, 0.34);
+      border-radius: 12px;
+      background: rgba(244, 196, 48, 0.10);
+      color: #f7df8b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>AI Scanner Mottak v3</h1>
+    <p class="subtitle" data-i18n="subtitle"></p>
+    <div class="build">
+      <strong>CC Wedge Test v1</strong><br />
+      <span data-i18n="updated"></span>: 01.08.2026 13:01 (Europe/Oslo)
+    </div>
+
+    <section class="card" aria-label="Language">
+      <div class="language-grid" id="languageGrid">
+        <button class="language-button" type="button" data-language="nb">Norsk</button>
+        <button class="language-button" type="button" data-language="pl">Polski</button>
+        <button class="language-button" type="button" data-language="uk">Українська</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title" data-i18n="scanTitle"></h2>
+
+      <div id="focusBanner" class="focus-banner" role="status">
+        <span class="focus-dot" aria-hidden="true"></span>
+        <span id="focusText"></span>
+      </div>
+
+      <label class="visually-hidden" for="scanInput" data-i18n="scanFieldLabel"></label>
+      <textarea
+        id="scanInput"
+        rows="3"
+        autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        inputmode="none"
+        enterkeyhint="done"
+        data-i18n-placeholder="waiting"
+        aria-describedby="scanHelp"
+      ></textarea>
+
+      <div id="scanHelp" class="status info" data-i18n="scanHelp"></div>
+
+      <span class="live-label" data-i18n="liveCharacters"></span>
+      <div id="liveCharacters" class="char-stream"></div>
+
+      <div class="button-grid">
+        <button id="copyCodeBtn" class="primary" type="button" disabled data-i18n="copyCode"></button>
+        <button id="clearInputBtn" class="secondary" type="button" data-i18n="clear"></button>
+      </div>
+
+      <div id="mainStatus" class="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title" data-i18n="lastResult"></h2>
+
+      <span class="small-label" data-i18n="rawCode"></span>
+      <pre id="rawCode" class="raw-code">—</pre>
+      <div id="escapedCode" class="escaped-code">—</div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <span class="stat-name" data-i18n="length"></span>
+          <strong id="lengthValue" class="stat-value">0</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-name" data-i18n="codePoints"></span>
+          <strong id="codePointValue" class="stat-value">0</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-name" data-i18n="terminator"></span>
+          <strong id="terminatorValue" class="stat-value">—</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-name" data-i18n="dateTime"></span>
+          <strong id="timeValue" class="stat-value">—</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-name" data-i18n="captureMethod"></span>
+          <strong id="methodValue" class="stat-value">—</strong>
+        </div>
+        <div class="stat-box">
+          <span class="stat-name" data-i18n="duration"></span>
+          <strong id="durationValue" class="stat-value">—</strong>
+        </div>
+      </div>
+
+      <span class="small-label" data-i18n="characterBreakdown"></span>
+      <div id="lastCharacters" class="char-list"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title"><span data-i18n="recentScans"></span> (<span id="scanCount">0</span>)</h2>
+      <div id="scanList" class="scan-list"></div>
+      <button id="clearHistoryBtn" class="danger" type="button" style="margin-top: 10px;" data-i18n="clearHistory"></button>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title" data-i18n="diagnostics"></h2>
+      <details>
+        <summary data-i18n="showEvents"></summary>
+        <div class="event-wrap">
+          <pre id="eventLog"></pre>
+          <button id="clearEventsBtn" class="secondary" type="button" style="margin-top: 9px;" data-i18n="clearEvents"></button>
+        </div>
+      </details>
+    </section>
+
+    <div class="note" data-i18n="safetyNote"></div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "mottak_cc_scanner_test_v1_scans";
+    const LANGUAGE_KEY = "mottak_cc_scanner_test_v1_language";
+    const DUPLICATE_WINDOW_MS = 2500;
+    const IDLE_FINALIZE_MS = 700;
+    const MAX_SCANS = 50;
+    const MAX_EVENTS = 240;
+
+    const LANGUAGES = {
+      nb: { html: "nb", locale: "nb-NO" },
+      pl: { html: "pl", locale: "pl-PL" },
+      uk: { html: "uk", locale: "uk-UA" }
+    };
+
+    const I18N = {
+      nb: {
+        subtitle: "Sikker separat testside for Nordic ID RFID/2D Wedge Service.",
+        updated: "Kode oppdatert",
+        scanTitle: "1. Vent på skanning",
+        scanFieldLabel: "Felt for rå skannerkode",
+        waiting: "Venter på skanning…",
+        scanHelp: "Feltet holdes i fokus. Trykk på den fysiske utløseren. Enter/Tab avslutter skanningen; ellers avsluttes den etter 700 ms uten nye tegn.",
+        liveCharacters: "Mottatte tegn nå",
+        copyCode: "Kopier kode",
+        clear: "Tøm felt",
+        lastResult: "2. Siste resultat",
+        rawCode: "Full råkode",
+        length: "Lengde (UTF-16)",
+        codePoints: "Antall tegn",
+        terminator: "Avslutning",
+        dateTime: "Dato og klokkeslett",
+        captureMethod: "Registrert via",
+        duration: "Varighet",
+        characterBreakdown: "Hvert tegn",
+        recentScans: "Siste skanninger",
+        clearHistory: "Tøm testjournal",
+        diagnostics: "Diagnostikk",
+        showEvents: "Vis keydown / beforeinput / input / paste-hendelser",
+        clearEvents: "Tøm hendelseslogg",
+        safetyNote: "Denne siden endrer ikke index.html og legger ingenting til i produksjonsregistreringen. Bare testjournalen lagres lokalt i denne nettleseren.",
+        focusReady: "Skannerfeltet har fokus — klart for utløseren.",
+        focusLost: "Skannerfeltet mangler fokus — trykk her eller vent på automatisk fokus.",
+        noLiveChars: "Ingen tegn mottatt ennå.",
+        noResultChars: "Ingen ferdig skanning ennå.",
+        noScans: "Ingen testskanninger ennå.",
+        received: "Kode mottatt",
+        duplicateBlocked: "Lik kode blokkert som mulig dobbel utløsning",
+        copied: "Koden er kopiert.",
+        copyFailed: "Kunne ikke kopiere automatisk.",
+        cleared: "Feltet er tømt. Klar for ny skanning.",
+        historyCleared: "Testjournalen er tømt.",
+        confirmClearHistory: "Tømme hele den lokale testjournalen?",
+        storageWarning: "Nettleseren tillot ikke lokal lagring. Testen fortsetter uten lagret journal.",
+        terminatorEnter: "Enter",
+        terminatorTab: "Tab",
+        terminatorCR: "CR (\\r)",
+        terminatorLF: "LF (\\n)",
+        terminatorTimeout: "Ingen — timeout",
+        methodKeydown: "keydown",
+        methodInputControl: "input + kontrolltegn",
+        methodTimeout: "input / timeout",
+        duplicate: "DUPLIKAT",
+        milliseconds: "ms"
+      },
+      pl: {
+        subtitle: "Bezpieczna, oddzielna strona testowa dla Nordic ID RFID/2D Wedge Service.",
+        updated: "Aktualizacja kodu",
+        scanTitle: "1. Oczekiwanie na skanowanie",
+        scanFieldLabel: "Pole surowego kodu skanera",
+        waiting: "Oczekiwanie na skanowanie…",
+        scanHelp: "Pole pozostaje aktywne. Naciśnij fizyczny spust. Enter/Tab kończy skan; bez nich skan kończy się po 700 ms bez nowych znaków.",
+        liveCharacters: "Odbierane znaki",
+        copyCode: "Kopiuj kod",
+        clear: "Wyczyść pole",
+        lastResult: "2. Ostatni wynik",
+        rawCode: "Pełny surowy kod",
+        length: "Długość (UTF-16)",
+        codePoints: "Liczba znaków",
+        terminator: "Zakończenie",
+        dateTime: "Data i czas",
+        captureMethod: "Zarejestrowano przez",
+        duration: "Czas trwania",
+        characterBreakdown: "Każdy znak",
+        recentScans: "Ostatnie skanowania",
+        clearHistory: "Wyczyść dziennik testowy",
+        diagnostics: "Diagnostyka",
+        showEvents: "Pokaż zdarzenia keydown / beforeinput / input / paste",
+        clearEvents: "Wyczyść dziennik zdarzeń",
+        safetyNote: "Ta strona nie zmienia index.html i niczego nie dodaje do ewidencji produkcyjnej. Tylko dziennik testowy jest zapisywany lokalnie w tej przeglądarce.",
+        focusReady: "Pole skanera ma fokus — gotowe do użycia spustu.",
+        focusLost: "Pole skanera nie ma fokusu — dotknij go lub poczekaj na automatyczny fokus.",
+        noLiveChars: "Nie odebrano jeszcze znaków.",
+        noResultChars: "Brak zakończonego skanowania.",
+        noScans: "Brak skanów testowych.",
+        received: "Odebrano kod",
+        duplicateBlocked: "Taki sam kod zablokowano jako możliwe podwójne wyzwolenie",
+        copied: "Kod skopiowany.",
+        copyFailed: "Nie udało się automatycznie skopiować.",
+        cleared: "Pole wyczyszczone. Gotowe do nowego skanu.",
+        historyCleared: "Dziennik testowy wyczyszczony.",
+        confirmClearHistory: "Wyczyścić cały lokalny dziennik testowy?",
+        storageWarning: "Przeglądarka nie zezwoliła na zapis lokalny. Test działa bez zapisywania dziennika.",
+        terminatorEnter: "Enter",
+        terminatorTab: "Tab",
+        terminatorCR: "CR (\\r)",
+        terminatorLF: "LF (\\n)",
+        terminatorTimeout: "Brak — timeout",
+        methodKeydown: "keydown",
+        methodInputControl: "input + znak sterujący",
+        methodTimeout: "input / timeout",
+        duplicate: "DUPLIKAT",
+        milliseconds: "ms"
+      },
+      uk: {
+        subtitle: "Безпечна окрема тестова сторінка для Nordic ID RFID/2D Wedge Service.",
+        updated: "Код оновлено",
+        scanTitle: "1. Очікування сканування",
+        scanFieldLabel: "Поле сирого коду сканера",
+        waiting: "Очікування сканування…",
+        scanHelp: "Поле постійно тримається у фокусі. Натисніть фізичний курок. Enter/Tab завершує сканування; без них воно завершиться через 700 мс без нових символів.",
+        liveCharacters: "Отримані зараз символи",
+        copyCode: "Копіювати код",
+        clear: "Очистити поле",
+        lastResult: "2. Останній результат",
+        rawCode: "Повний сирий код",
+        length: "Довжина (UTF-16)",
+        codePoints: "Кількість символів",
+        terminator: "Завершення",
+        dateTime: "Дата й час",
+        captureMethod: "Зареєстровано через",
+        duration: "Тривалість",
+        characterBreakdown: "Кожен символ",
+        recentScans: "Останні сканування",
+        clearHistory: "Очистити тестовий журнал",
+        diagnostics: "Діагностика",
+        showEvents: "Показати події keydown / beforeinput / input / paste",
+        clearEvents: "Очистити журнал подій",
+        safetyNote: "Ця сторінка не змінює index.html і нічого не додає до виробничого обліку. Лише тестовий журнал зберігається локально в цьому браузері.",
+        focusReady: "Поле сканера у фокусі — готове до натискання курка.",
+        focusLost: "Поле сканера не у фокусі — торкніться його або зачекайте автоматичного фокуса.",
+        noLiveChars: "Символів ще не отримано.",
+        noResultChars: "Завершеного сканування ще немає.",
+        noScans: "Тестових сканувань ще немає.",
+        received: "Код отримано",
+        duplicateBlocked: "Такий самий код заблоковано як можливе подвійне спрацювання",
+        copied: "Код скопійовано.",
+        copyFailed: "Не вдалося автоматично скопіювати.",
+        cleared: "Поле очищено. Готово до нового сканування.",
+        historyCleared: "Тестовий журнал очищено.",
+        confirmClearHistory: "Очистити весь локальний тестовий журнал?",
+        storageWarning: "Браузер не дозволив локальне збереження. Тест продовжується без збереженого журналу.",
+        terminatorEnter: "Enter",
+        terminatorTab: "Tab",
+        terminatorCR: "CR (\\r)",
+        terminatorLF: "LF (\\n)",
+        terminatorTimeout: "Немає — тайм-аут",
+        methodKeydown: "keydown",
+        methodInputControl: "input + керуючий символ",
+        methodTimeout: "input / тайм-аут",
+        duplicate: "ДУБЛЬ",
+        milliseconds: "мс"
+      }
+    };
+
+    const scanInput = document.getElementById("scanInput");
+    const focusBanner = document.getElementById("focusBanner");
+    const focusText = document.getElementById("focusText");
+    const liveCharacters = document.getElementById("liveCharacters");
+    const mainStatus = document.getElementById("mainStatus");
+    const copyCodeBtn = document.getElementById("copyCodeBtn");
+    const clearInputBtn = document.getElementById("clearInputBtn");
+    const rawCode = document.getElementById("rawCode");
+    const escapedCode = document.getElementById("escapedCode");
+    const lengthValue = document.getElementById("lengthValue");
+    const codePointValue = document.getElementById("codePointValue");
+    const terminatorValue = document.getElementById("terminatorValue");
+    const timeValue = document.getElementById("timeValue");
+    const methodValue = document.getElementById("methodValue");
+    const durationValue = document.getElementById("durationValue");
+    const lastCharacters = document.getElementById("lastCharacters");
+    const scanCount = document.getElementById("scanCount");
+    const scanList = document.getElementById("scanList");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+    const eventLog = document.getElementById("eventLog");
+    const clearEventsBtn = document.getElementById("clearEventsBtn");
+
+    let currentLanguage = loadLanguage();
+    let scans = loadScans();
+    let currentResult = null;
+    let idleTimer = null;
+    let captureStartedAt = null;
+    let lastAccepted = { raw: "", time: 0 };
+    let events = [];
+    let storageAvailable = true;
+
+    function t(key) {
+      return I18N[currentLanguage][key] || I18N.nb[key] || key;
+    }
+
+    function loadLanguage() {
+      try {
+        const value = localStorage.getItem(LANGUAGE_KEY);
+        return LANGUAGES[value] ? value : "nb";
+      } catch (error) {
+        return "nb";
+      }
+    }
+
+    function loadScans() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed.slice(0, MAX_SCANS) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveScans() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(scans.slice(0, MAX_SCANS)));
+        storageAvailable = true;
+      } catch (error) {
+        storageAvailable = false;
+        setStatus(t("storageWarning"), "bad");
+      }
+    }
+
+    function saveLanguage() {
+      try {
+        localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+      } catch (error) {
+        // Language persistence is optional for the diagnostic test.
+      }
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = LANGUAGES[currentLanguage].html;
+
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        const key = element.dataset.i18n;
+        if (I18N[currentLanguage][key]) {
+          element.textContent = I18N[currentLanguage][key];
+        }
+      });
+
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+        const key = element.dataset.i18nPlaceholder;
+        if (I18N[currentLanguage][key]) {
+          element.placeholder = I18N[currentLanguage][key];
+        }
+      });
+
+      document.querySelectorAll(".language-button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.language === currentLanguage);
+      });
+
+      updateFocusBanner();
+      renderLiveCharacters(scanInput.value);
+      renderCurrentResult();
+      renderScans();
+    }
+
+    function formatDateTime(value) {
+      const date = value instanceof Date ? value : new Date(value);
+      return new Intl.DateTimeFormat(LANGUAGES[currentLanguage].locale, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).format(date);
+    }
+
+    function eventTime() {
+      const now = new Date();
+      return now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        fractionalSecondDigits: 3,
+        hour12: false
+      });
+    }
+
+    function visibleCharacter(character) {
+      if (character === " ") return "␠";
+      if (character === "\t") return "⇥";
+      if (character === "\r") return "␍";
+      if (character === "\n") return "␊";
+      if (character === "\u00a0") return "⍽";
+      if (character === "") return "∅";
+      return character;
+    }
+
+    function escapedText(value) {
+      if (!value) return "—";
+      return Array.from(value).map((character) => {
+        if (character === "\\") return "\\\\";
+        if (character === "\r") return "\\r";
+        if (character === "\n") return "\\n";
+        if (character === "\t") return "\\t";
+        if (character === " ") return "␠";
+        const codePoint = character.codePointAt(0);
+        if (codePoint < 32 || codePoint === 127) {
+          return `\\u${codePoint.toString(16).toUpperCase().padStart(4, "0")}`;
+        }
+        return character;
+      }).join("");
+    }
+
+    function createCharacterChip(character, index) {
+      const chip = document.createElement("span");
+      chip.className = "char-chip";
+      chip.textContent = visibleCharacter(character);
+
+      const codePoint = character.codePointAt(0);
+      const meta = document.createElement("small");
+      meta.textContent = `${index + 1} · U+${codePoint.toString(16).toUpperCase().padStart(4, "0")}`;
+      chip.appendChild(meta);
+      return chip;
+    }
+
+    function renderCharacterContainer(container, value, emptyText) {
+      container.textContent = "";
+      const characters = Array.from(value || "");
+
+      if (characters.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = emptyText;
+        container.appendChild(empty);
+        return;
+      }
+
+      characters.forEach((character, index) => {
+        container.appendChild(createCharacterChip(character, index));
+      });
+    }
+
+    function renderLiveCharacters(value) {
+      renderCharacterContainer(liveCharacters, value, t("noLiveChars"));
+    }
+
+    function renderCurrentResult() {
+      if (!currentResult) {
+        rawCode.textContent = "—";
+        escapedCode.textContent = "—";
+        lengthValue.textContent = "0";
+        codePointValue.textContent = "0";
+        terminatorValue.textContent = "—";
+        timeValue.textContent = "—";
+        methodValue.textContent = "—";
+        durationValue.textContent = "—";
+        copyCodeBtn.disabled = true;
+        renderCharacterContainer(lastCharacters, "", t("noResultChars"));
+        return;
+      }
+
+      rawCode.textContent = currentResult.raw;
+      escapedCode.textContent = `escaped: ${escapedText(currentResult.raw)}`;
+      lengthValue.textContent = String(currentResult.lengthUtf16);
+      codePointValue.textContent = String(currentResult.lengthCodePoints);
+      terminatorValue.textContent = translatedTerminator(currentResult.terminator);
+      timeValue.textContent = formatDateTime(currentResult.time);
+      methodValue.textContent = translatedMethod(currentResult.method);
+      durationValue.textContent = `${currentResult.durationMs} ${t("milliseconds")}`;
+      copyCodeBtn.disabled = false;
+      renderCharacterContainer(lastCharacters, currentResult.raw, t("noResultChars"));
+    }
+
+    function translatedTerminator(value) {
+      const map = {
+        Enter: "terminatorEnter",
+        Tab: "terminatorTab",
+        CR: "terminatorCR",
+        LF: "terminatorLF",
+        Timeout: "terminatorTimeout"
+      };
+      return t(map[value] || "terminatorTimeout");
+    }
+
+    function translatedMethod(value) {
+      const map = {
+        keydown: "methodKeydown",
+        inputControl: "methodInputControl",
+        timeout: "methodTimeout"
+      };
+      return t(map[value] || "methodTimeout");
+    }
+
+    function renderScans() {
+      scanCount.textContent = String(scans.length);
+      scanList.textContent = "";
+      clearHistoryBtn.disabled = scans.length === 0;
+
+      if (scans.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = t("noScans");
+        scanList.appendChild(empty);
+        return;
+      }
+
+      scans.forEach((scan, index) => {
+        const item = document.createElement("article");
+        item.className = "scan-item";
+
+        const code = document.createElement("div");
+        code.className = "scan-code";
+        code.textContent = `${index + 1}. ${scan.raw}`;
+
+        const meta = document.createElement("div");
+        meta.className = "scan-meta";
+        meta.textContent = `${formatDateTime(scan.time)} · len ${scan.lengthUtf16} · ${translatedTerminator(scan.terminator)} · ${scan.durationMs} ${t("milliseconds")}`;
+
+        item.append(code, meta);
+        scanList.appendChild(item);
+      });
+    }
+
+    function setStatus(message, type = "") {
+      mainStatus.textContent = message;
+      mainStatus.className = `status${type ? ` ${type}` : ""}`;
+    }
+
+    function updateFocusBanner() {
+      const focused = document.activeElement === scanInput;
+      focusBanner.classList.toggle("active", focused);
+      focusText.textContent = focused ? t("focusReady") : t("focusLost");
+    }
+
+    function focusScannerField() {
+      try {
+        scanInput.focus({ preventScroll: true });
+        const end = scanInput.value.length;
+        scanInput.setSelectionRange(end, end);
+      } catch (error) {
+        scanInput.focus();
+      }
+      updateFocusBanner();
+    }
+
+    function scheduleFocus(delay = 70) {
+      window.setTimeout(focusScannerField, delay);
+    }
+
+    function logEvent(type, details = "") {
+      events.unshift(`${eventTime()}  ${type}${details ? `  ${details}` : ""}`);
+      events = events.slice(0, MAX_EVENTS);
+      eventLog.textContent = events.join("\n");
+    }
+
+    function startCaptureIfNeeded() {
+      if (captureStartedAt === null) {
+        captureStartedAt = performance.now();
+        logEvent("CAPTURE_START");
+      }
+    }
+
+    function cancelIdleTimer() {
+      if (idleTimer !== null) {
+        window.clearTimeout(idleTimer);
+        idleTimer = null;
+      }
+    }
+
+    function scheduleIdleFinalize() {
+      cancelIdleTimer();
+      if (!scanInput.value) return;
+
+      idleTimer = window.setTimeout(() => {
+        finalizeScan("Timeout", "timeout");
+      }, IDLE_FINALIZE_MS);
+    }
+
+    function clearInputOnly(showMessage = true) {
+      cancelIdleTimer();
+      scanInput.value = "";
+      captureStartedAt = null;
+      renderLiveCharacters("");
+      if (showMessage) {
+        setStatus(t("cleared"), "info");
+      }
+      scheduleFocus();
+    }
+
+    function detectEmbeddedTerminator(value) {
+      const candidates = [
+        { character: "\r", name: "CR" },
+        { character: "\n", name: "LF" },
+        { character: "\t", name: "Tab" }
+      ];
+
+      let found = null;
+      candidates.forEach((candidate) => {
+        const index = value.indexOf(candidate.character);
+        if (index !== -1 && (!found || index < found.index)) {
+          found = { ...candidate, index };
+        }
+      });
+      return found;
+    }
+
+    function finalizeScan(terminator, method) {
+      cancelIdleTimer();
+
+      const raw = scanInput.value;
+      if (raw.length === 0) {
+        captureStartedAt = null;
+        scheduleFocus();
+        return;
+      }
+
+      const nowPerformance = performance.now();
+      const durationMs = captureStartedAt === null
+        ? 0
+        : Math.max(0, Math.round(nowPerformance - captureStartedAt));
+      const now = Date.now();
+      const isDuplicate = raw === lastAccepted.raw && (now - lastAccepted.time) <= DUPLICATE_WINDOW_MS;
+
+      currentResult = {
+        raw,
+        lengthUtf16: raw.length,
+        lengthCodePoints: Array.from(raw).length,
+        terminator,
+        method,
+        durationMs,
+        time: new Date(now).toISOString(),
+        duplicate: isDuplicate
+      };
+
+      logEvent(
+        isDuplicate ? "SCAN_DUPLICATE_BLOCKED" : "SCAN_ACCEPTED",
+        `raw=${JSON.stringify(raw)} len=${raw.length} terminator=${terminator} method=${method} duration=${durationMs}ms`
+      );
+
+      if (isDuplicate) {
+        setStatus(`${t("duplicateBlocked")}: ${raw}`, "bad");
+      } else {
+        lastAccepted = { raw, time: now };
+        scans.unshift({
+          id: makeId(),
+          raw,
+          lengthUtf16: raw.length,
+          lengthCodePoints: Array.from(raw).length,
+          terminator,
+          method,
+          durationMs,
+          time: currentResult.time
+        });
+        scans = scans.slice(0, MAX_SCANS);
+        saveScans();
+        setStatus(`${t("received")}: ${raw}`, "ok");
+      }
+
+      renderCurrentResult();
+      renderScans();
+
+      scanInput.value = "";
+      captureStartedAt = null;
+      renderLiveCharacters("");
+      scheduleFocus(30);
+    }
+
+    function makeId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    async function copyText(value) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+        return;
+      }
+
+      const fallback = document.createElement("textarea");
+      fallback.value = value;
+      fallback.setAttribute("readonly", "");
+      fallback.style.position = "fixed";
+      fallback.style.opacity = "0";
+      document.body.appendChild(fallback);
+      fallback.select();
+      const success = document.execCommand("copy");
+      fallback.remove();
+      if (!success) throw new Error("copy failed");
+    }
+
+    document.getElementById("languageGrid").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-language]");
+      if (!button || !LANGUAGES[button.dataset.language]) return;
+      currentLanguage = button.dataset.language;
+      saveLanguage();
+      applyLanguage();
+      scheduleFocus();
+    });
+
+    scanInput.addEventListener("focus", () => {
+      updateFocusBanner();
+      logEvent("focus", "target=scanInput");
+    });
+
+    scanInput.addEventListener("blur", () => {
+      updateFocusBanner();
+      logEvent("blur", "target=scanInput");
+      scheduleFocus(180);
+    });
+
+    scanInput.addEventListener("beforeinput", (event) => {
+      logEvent(
+        "beforeinput",
+        `inputType=${JSON.stringify(event.inputType)} data=${JSON.stringify(event.data)} valueBefore=${JSON.stringify(scanInput.value)}`
+      );
+    });
+
+    scanInput.addEventListener("input", (event) => {
+      startCaptureIfNeeded();
+      logEvent(
+        "input",
+        `inputType=${JSON.stringify(event.inputType)} data=${JSON.stringify(event.data)} value=${JSON.stringify(scanInput.value)}`
+      );
+
+      const embedded = detectEmbeddedTerminator(scanInput.value);
+      if (embedded) {
+        const rawBeforeTerminator = scanInput.value.slice(0, embedded.index);
+        scanInput.value = rawBeforeTerminator;
+        renderLiveCharacters(rawBeforeTerminator);
+        finalizeScan(embedded.name, "inputControl");
+        return;
+      }
+
+      renderLiveCharacters(scanInput.value);
+      scheduleIdleFinalize();
+    });
+
+    scanInput.addEventListener("paste", (event) => {
+      startCaptureIfNeeded();
+      const text = event.clipboardData ? event.clipboardData.getData("text") : "";
+      logEvent("paste", `text=${JSON.stringify(text)}`);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const targetName = event.target && event.target.id
+        ? `#${event.target.id}`
+        : event.target && event.target.tagName
+          ? event.target.tagName.toLowerCase()
+          : "unknown";
+
+      logEvent(
+        "keydown",
+        `key=${JSON.stringify(event.key)} code=${JSON.stringify(event.code)} keyCode=${event.keyCode} repeat=${event.repeat} target=${targetName} value=${JSON.stringify(scanInput.value)}`
+      );
+
+      const scanIsActive = scanInput.value.length > 0 || captureStartedAt !== null;
+
+      if ((event.key === "Enter" || event.code === "NumpadEnter") && scanIsActive) {
+        event.preventDefault();
+        startCaptureIfNeeded();
+        window.setTimeout(() => finalizeScan("Enter", "keydown"), 0);
+        return;
+      }
+
+      if (event.key === "Tab" && scanIsActive) {
+        event.preventDefault();
+        startCaptureIfNeeded();
+        window.setTimeout(() => finalizeScan("Tab", "keydown"), 0);
+        return;
+      }
+
+      const isPrintable = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+      const fieldFocused = document.activeElement === scanInput;
+
+      if (isPrintable && !fieldFocused) {
+        event.preventDefault();
+        focusScannerField();
+        startCaptureIfNeeded();
+        scanInput.value += event.key;
+        renderLiveCharacters(scanInput.value);
+        logEvent("redirected-key", `key=${JSON.stringify(event.key)} value=${JSON.stringify(scanInput.value)}`);
+        scheduleIdleFinalize();
+      }
+    }, true);
+
+    copyCodeBtn.addEventListener("click", async () => {
+      if (!currentResult) return;
+      try {
+        await copyText(currentResult.raw);
+        setStatus(t("copied"), "ok");
+      } catch (error) {
+        setStatus(t("copyFailed"), "bad");
+      }
+      scheduleFocus();
+    });
+
+    clearInputBtn.addEventListener("click", () => {
+      clearInputOnly(true);
+    });
+
+    clearHistoryBtn.addEventListener("click", () => {
+      if (!window.confirm(t("confirmClearHistory"))) {
+        scheduleFocus();
+        return;
+      }
+      scans = [];
+      saveScans();
+      renderScans();
+      setStatus(t("historyCleared"), "info");
+      scheduleFocus();
+    });
+
+    clearEventsBtn.addEventListener("click", () => {
+      events = [];
+      eventLog.textContent = "";
+      scheduleFocus();
+    });
+
+    window.addEventListener("pageshow", () => scheduleFocus(120));
+    window.addEventListener("focus", () => scheduleFocus(100));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) scheduleFocus(100);
+    });
+
+    applyLanguage();
+    renderCurrentResult();
+    renderScans();
+    renderLiveCharacters("");
+    setStatus("", "");
+    logEvent("PAGE_READY", `storage=${storageAvailable} userAgent=${JSON.stringify(navigator.userAgent)}`);
+    scheduleFocus(120);
+  </script>
+</body>
+</html>
