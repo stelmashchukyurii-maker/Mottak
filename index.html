@@ -166,36 +166,37 @@
 
 <body>
   <main class="app">
-    <span class="version">Hovedmeny v2 · Oppdatert 02.08.2026 kl. 08:18</span>
+    <span class="version">Hovedmeny v3 · Oppdatert 02.08.2026 kl. 09:26</span>
     <h1>BaMavaremottak</h1>
     <p class="subtitle">Velg arbeidsområde.</p>
 
     <nav class="menu" aria-label="Hovedmeny">
-      <a class="menu-card primary" href="mottak.html">
+      <a class="menu-card primary" href="inn.html">
         <div class="card-top">
           <div>
-            <h2 class="card-title">Mottak</h2>
-            <p class="card-description">Skann eller fotografer etiketter og registrer Bunner, Hyller x30 og Hyller x60.</p>
+            <h2 class="card-title">INN — Varemottak</h2>
+            <p class="card-description">Motta varer med telefon eller Nordic ID, kontroller registreringer og åpne historikken.</p>
           </div>
-          <span class="icon" aria-hidden="true">📷</span>
+          <span class="icon" aria-hidden="true">↓</span>
         </div>
         <div class="details">
-          <span class="tag accent">Åpne AI Scanner</span>
+          <span class="tag accent">Åpne INN</span>
           <span class="tag">Kamera</span>
           <span class="tag">Nordic ID</span>
+          <span class="tag">Kontroll</span>
         </div>
       </a>
 
       <a class="menu-card" href="bestilling.html">
         <div class="card-top">
           <div>
-            <h2 class="card-title">Varebestilling</h2>
+            <h2 class="card-title">UT — Varebestilling</h2>
             <p class="card-description">Kontoret velger rampe, vare og antall. Én stabel Bunner er alltid 10 Bunner.</p>
           </div>
-          <span class="icon" aria-hidden="true">📋</span>
+          <span class="icon" aria-hidden="true">↑</span>
         </div>
         <div class="details">
-          <span class="tag accent">Åpne bestilling</span>
+          <span class="tag accent">Åpne UT-bestilling</span>
           <span class="tag" id="orderCountTag">0 lagrede</span>
         </div>
       </a>
@@ -203,7 +204,7 @@
       <section class="menu-card disabled" aria-disabled="true">
         <div class="card-top">
           <div>
-            <h2 class="card-title">Lager og utsending</h2>
+            <h2 class="card-title">UT — Lager og utsending</h2>
             <p class="card-description">Siden for lagerarbeideren, gjennomføring og bekreftelse opprettes i neste trinn.</p>
           </div>
           <span class="icon" aria-hidden="true">🚚</span>
@@ -215,7 +216,7 @@
     </nav>
 
     <div class="footer-note">
-      Bestillingene lagres foreløpig lokalt under nøkkelen <strong>mottak_office_orders_v1</strong>. Samme datastruktur kan senere brukes av lagersiden og flyttes til felles skylagring.
+      Systemet er delt i <strong>INN</strong> for varemottak og <strong>UT</strong> for bestilling, lagerarbeid og utsending.
     </div>
   </main>
 
