@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Nordic ID — тест 20 сканувань</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{overscroll-behavior-y:none}
+    body{margin:0;min-height:100vh;padding:14px;background:#0b1020;color:#f5f7ff;font-family:Arial,sans-serif}
+    main{max-width:720px;margin:auto}
+    h1{margin:0 0 6px;font-size:29px}
+    h2{margin:20px 0 10px;font-size:23px}
+    .version,.help{color:#aab4ce;line-height:1.45}
+    .version{margin:0 0 12px;font-size:13px}
+    .card{margin:11px 0;padding:13px;border:1px solid #303b59;border-radius:16px;background:#151c30}
+    .title{display:block;margin-bottom:7px;font-size:18px;font-weight:900}
+    input,textarea{width:100%;padding:15px;border:4px solid #f4c430;border-radius:16px;outline:none;background:#050811;color:#fff;font:900 21px/1.35 Consolas,monospace}
+    textarea{min-height:105px;resize:none;overflow-wrap:anywhere}
+    input:focus,textarea:focus{border-color:#48d597;box-shadow:0 0 0 4px rgba(72,213,151,.18)}
+    .scan-grid{display:grid;gap:10px}
+    .scan-card{padding:11px;border:1px solid #303b59;border-radius:14px;background:#10172a}
+    .scan-card.active{border-color:#48d597;background:rgba(72,213,151,.08)}
+    #status{margin:11px 0;padding:13px;border-radius:12px;background:#151c30;color:#75b7ff;font-weight:800;white-space:pre-wrap}
+    #status.ok{color:#48d597}
+    #status.bad{color:#ff8d8d}
+    .buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+    button{min-height:52px;padding:11px;border:0;border-radius:13px;font-size:15px;font-weight:900}
+    .primary{background:#f4c430;color:#17130a}
+    .secondary{background:#2c395c;color:#fff}
+    .counter{margin:12px 0;text-align:center;color:#aab4ce;font-weight:800}
+    .table-wrap{overflow:hidden;border:1px solid #303b59;border-radius:14px;background:#151c30}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    th,td{padding:9px 6px;border-bottom:1px solid #303b59;text-align:left;vertical-align:top}
+    th{background:#0d1426;color:#aab4ce;font-size:10px;text-transform:uppercase}
+    td{font:800 12px/1.4 Consolas,monospace;overflow-wrap:anywhere}
+    th:nth-child(1),td:nth-child(1){width:34px;text-align:center}
+    th:nth-child(2),td:nth-child(2){width:34px;text-align:center}
+    th:nth-child(4),td:nth-child(4){width:78px}
+    tr:last-child td{border-bottom:0}
+    .good{background:rgba(72,213,151,.10)}
+    .bad-row{background:rgba(255,107,107,.11)}
+    .empty{text-align:center!important;color:#aab4ce;font-family:Arial,sans-serif}
+    .small{color:#aab4ce;font-size:10px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Nordic ID — 20 сканувань</h1>
+  <p class="version">Minimal v6 · 02.08.2026 20:05</p>
+  <p class="help">Після відкриття натисніть поле «Активація», потім поле A. Далі сторінка сама чергує A ↔ B після кожного отриманого коду.</p>
+
+  <section class="card">
+    <span class="title">1. Активація</span>
+    <input id="activateInput" type="text" inputmode="none" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Натисніть сюди один раз" />
+  </section>
+
+  <section class="card">
+    <span class="title">2. Поля сканування A / B</span>
+    <div class="scan-grid">
+      <div class="scan-card" id="cardA"><strong>Поле A</strong><textarea id="scanA" inputmode="none" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Після активації натисніть сюди"></textarea></div>
+      <div class="scan-card" id="cardB"><strong>Поле B</strong><textarea id="scanB" inputmode="none" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Сторінка перейде сюди автоматично"></textarea></div>
+    </div>
+  </section>
+
+  <div id="status">Очікування активації.</div>
+
+  <div class="buttons">
+    <button class="primary" id="restartFields" type="button">Перезапустити поля</button>
+    <button class="secondary" id="reloadPage" type="button">Оновити сторінку</button>
+  </div>
+
+  <div class="counter">Успішних: <strong id="goodCount">0</strong> · Спроб: <strong id="allCount">0</strong> · Активне: <strong id="activeName">—</strong></div>
+
+  <h2>Таблиця сканувань</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>№</th><th>Поле</th><th>Отримані номери</th><th>Результат</th></tr></thead>
+      <tbody id="attemptTable"><tr id="emptyRow"><td class="empty" colspan="4">Сканувань ще немає</td></tr></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+"use strict";
+
+const activateInput=document.getElementById("activateInput");
+const scanA=document.getElementById("scanA");
+const scanB=document.getElementById("scanB");
+const cardA=document.getElementById("cardA");
+const cardB=document.getElementById("cardB");
+const status=document.getElementById("status");
+const attemptTable=document.getElementById("attemptTable");
+const goodCount=document.getElementById("goodCount");
+const allCount=document.getElementById("allCount");
+const activeName=document.getElementById("activeName");
+let good=0;
+let all=0;
+let pullStartY=null;
+let switching=false;
+
+function setStatus(text,type=""){
+  status.textContent=text;
+  status.className=type;
+}
+
+function clean(value){
+  return String(value||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+}
+
+function setActive(name){
+  cardA.classList.toggle("active",name==="A");
+  cardB.classList.toggle("active",name==="B");
+  activeName.textContent=name||"—";
+}
+
+function focusField(field,name,delay=0){
+  setTimeout(()=>{
+    field.value="";
+    try{field.focus({preventScroll:true});}catch{field.focus();}
+    try{field.setSelectionRange(0,0);}catch{}
+    setActive(name);
+    setStatus(`Активне поле ${name}. Натисніть курок.`,"");
+    switching=false;
+  },delay);
+}
+
+function addRow(fieldName,code,ok,message){
+  const empty=document.getElementById("emptyRow");
+  if(empty)empty.remove();
+  all+=1;
+  allCount.textContent=all;
+  const row=document.createElement("tr");
+  row.className=ok?"good":"bad-row";
+  const numbers=ok
+    ? `${code.slice(0,12)}<br>${code.slice(12,18)} · ${code.slice(18,24)}`
+    : `${code||"—"}<br><span class="small">довжина: ${code.length}</span>`;
+  row.innerHTML=`<td>${all}</td><td>${fieldName}</td><td>${numbers}</td><td>${message}<br><span class="small">${new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</span></td>`;
+  attemptTable.prepend(row);
+}
+
+function processScan(fieldName,field,otherName,otherField){
+  if(switching)return;
+  const value=field.value;
+  const end=value.search(/[\r\n\t]/);
+  if(end===-1)return;
+
+  switching=true;
+  const code=clean(value.slice(0,end));
+  let ok=false;
+  let message="";
+
+  if(code.length!==24){
+    message=code.length===48?"2 коди / 48":"Помилка";
+    setStatus(`Поле ${fieldName}: отримано ${code.length} символів.`,"bad");
+  }else if(!/^[A-Z0-9]{12}[0-9]{6}[A-Z0-9]{6}$/.test(code)){
+    message="Формат";
+    setStatus(`Поле ${fieldName}: неправильний формат.`,"bad");
+  }else{
+    ok=true;
+    good+=1;
+    goodCount.textContent=good;
+    message="Прийнято";
+    setStatus(`Прийнято через поле ${fieldName}: ${code}`,"ok");
+  }
+
+  addRow(fieldName,code,ok,message);
+
+  // Спочатку переносимо активність на інше справжнє поле.
+  // Лише після переходу очищаємо попереднє поле.
+  focusField(otherField,otherName,70);
+  setTimeout(()=>{field.value="";},160);
+}
+
+scanA.addEventListener("input",()=>processScan("A",scanA,"B",scanB));
+scanB.addEventListener("input",()=>processScan("B",scanB,"A",scanA));
+
+activateInput.addEventListener("focus",()=>{
+  activateInput.value="";
+  setActive("");
+  setStatus("Поле активації активне. Тепер натисніть поле A.");
+});
+
+scanA.addEventListener("focus",()=>setActive("A"));
+scanB.addEventListener("focus",()=>setActive("B"));
+
+function restartFields(){
+  switching=false;
+  scanA.value="";
+  scanB.value="";
+  activateInput.value="";
+  try{activateInput.focus({preventScroll:true});}catch{activateInput.focus();}
+  setActive("");
+  setStatus("Перезапуск: тепер натисніть поле A.");
+}
+
+document.getElementById("restartFields").addEventListener("click",restartFields);
+document.getElementById("reloadPage").addEventListener("click",()=>location.reload());
+
+document.addEventListener("touchstart",event=>{
+  pullStartY=window.scrollY===0&&event.touches.length?event.touches[0].clientY:null;
+},{passive:true});
+
+document.addEventListener("touchmove",event=>{
+  if(pullStartY===null||!event.touches.length)return;
+  if(window.scrollY===0&&event.touches[0].clientY>pullStartY+8)event.preventDefault();
+},{passive:false});
+</script>
+</body>
+</html>
