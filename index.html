@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
-  <title>BaMavaremottak</title>
+  <meta name="theme-color" content="#0b1020" />
+  <title>BaMavaremottak — Hovedmeny</title>
 
   <style>
     :root {
       color-scheme: dark;
       --bg: #0b1020;
-      --card: #151c30;
-      --card-dark: #0d1426;
+      --panel: #151c30;
+      --panel-dark: #0d1426;
       --text: #f5f7ff;
       --muted: #aab4ce;
-      --accent: #f4c430;
-      --ok: #48d597;
       --line: #303b59;
+      --ok: #48d597;
+      --ok-dark: #0f3427;
+      --test: #ff7373;
+      --test-dark: #3b1720;
+      --info: #75b7ff;
+      --info-dark: #142b49;
+      --planned: #f4c430;
+      --planned-dark: #332b12;
     }
 
     * { box-sizing: border-box; }
@@ -25,37 +31,44 @@
       margin: 0;
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, var(--bg) 0%, #11182a 100%);
+      background: linear-gradient(180deg, var(--bg), #11182a);
       color: var(--text);
     }
 
     .app {
-      width: min(760px, 100%);
+      width: min(820px, 100%);
       margin: 0 auto;
-      padding: 18px 14px 44px;
+      padding: 16px 14px 52px;
     }
 
     .version {
       display: inline-block;
-      margin-bottom: 10px;
-      padding: 6px 9px;
+      padding: 6px 10px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      background: var(--card-dark);
+      background: var(--panel-dark);
       color: var(--muted);
       font-size: 12px;
     }
 
     h1 {
-      margin: 4px 0 6px;
-      font-size: clamp(29px, 8vw, 44px);
+      margin: 12px 0 6px;
+      font-size: clamp(31px, 8vw, 48px);
       line-height: 1.05;
     }
 
     .subtitle {
       margin: 0 0 20px;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.5;
+    }
+
+    .section-title {
+      margin: 24px 0 10px;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
     }
 
     .menu {
@@ -65,31 +78,40 @@
 
     .menu-card {
       display: block;
-      position: relative;
       padding: 18px;
       border: 2px solid var(--line);
       border-radius: 19px;
-      background: rgba(21, 28, 48, 0.96);
+      background: var(--panel);
       color: var(--text);
       text-decoration: none;
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
-      transition: transform 0.08s ease, border-color 0.2s ease;
+      transition: transform 0.08s ease, filter 0.2s ease;
     }
 
     .menu-card:active { transform: scale(0.985); }
-    .menu-card:hover { border-color: var(--accent); }
+    .menu-card:hover { filter: brightness(1.08); }
 
-    .menu-card.primary {
-      border-color: rgba(244, 196, 48, 0.58);
-      background: linear-gradient(145deg, rgba(244, 196, 48, 0.11), rgba(21, 28, 48, 0.98));
+    .menu-card.approved {
+      border-color: var(--ok);
+      background: linear-gradient(145deg, var(--ok-dark), var(--panel));
     }
 
-    .menu-card.disabled {
+    .menu-card.test {
+      border-color: var(--test);
+      background: linear-gradient(145deg, var(--test-dark), var(--panel));
+    }
+
+    .menu-card.info {
+      border-color: var(--info);
+      background: linear-gradient(145deg, var(--info-dark), var(--panel));
+    }
+
+    .menu-card.planned {
+      border-color: var(--planned);
+      background: linear-gradient(145deg, var(--planned-dark), var(--panel));
+      opacity: 0.82;
       cursor: default;
-      opacity: 0.58;
     }
-
-    .menu-card.disabled:hover { border-color: var(--line); }
 
     .card-top {
       display: flex;
@@ -100,29 +122,29 @@
 
     .card-title {
       margin: 0;
-      font-size: clamp(22px, 6vw, 31px);
-      line-height: 1.1;
+      font-size: clamp(22px, 5.8vw, 31px);
+      line-height: 1.12;
     }
 
     .card-description {
       margin: 9px 0 0;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.48;
     }
 
     .icon {
       flex: 0 0 auto;
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       display: grid;
       place-items: center;
       border: 1px solid var(--line);
-      border-radius: 14px;
-      background: var(--card-dark);
-      font-size: 24px;
+      border-radius: 15px;
+      background: var(--panel-dark);
+      font-size: 25px;
     }
 
-    .details {
+    .tags {
       display: flex;
       flex-wrap: wrap;
       gap: 7px;
@@ -133,22 +155,79 @@
       padding: 6px 9px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      background: var(--card-dark);
+      background: var(--panel-dark);
       color: var(--muted);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .tag.accent {
-      color: #17130a;
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-
-    .tag.ok {
+    .tag.approved {
       color: #062418;
       background: var(--ok);
       border-color: var(--ok);
+    }
+
+    .tag.test {
+      color: #2b080d;
+      background: var(--test);
+      border-color: var(--test);
+    }
+
+    .tag.info {
+      color: #071a2e;
+      background: var(--info);
+      border-color: var(--info);
+    }
+
+    .tag.planned {
+      color: #17130a;
+      background: var(--planned);
+      border-color: var(--planned);
+    }
+
+    .comment-box {
+      margin-top: 24px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 28, 48, 0.96);
+    }
+
+    .comment-box h2 {
+      margin: 0 0 6px;
+      font-size: 21px;
+    }
+
+    .comment-box p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel-dark);
+      color: var(--text);
+      font: inherit;
+      line-height: 1.45;
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--planned);
+      box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.12);
+    }
+
+    .save-note {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .footer-note {
@@ -156,82 +235,152 @@
       padding: 12px 14px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: rgba(13, 20, 38, 0.76);
+      background: var(--panel-dark);
       color: var(--muted);
       font-size: 13px;
-      line-height: 1.45;
+      line-height: 1.5;
     }
   </style>
 </head>
 
 <body>
   <main class="app">
-    <span class="version">Hovedmeny v3 · Oppdatert 02.08.2026 kl. 09:26</span>
+    <span class="version">Hovedmeny v4 · Oppdatert 02.08.2026 kl. 12:34</span>
     <h1>BaMavaremottak</h1>
-    <p class="subtitle">Velg arbeidsområde.</p>
+    <p class="subtitle">Velg nøyaktig hvordan du skal arbeide. Grønne knapper er godkjent. Røde knapper er fortsatt TEST.</p>
 
-    <nav class="menu" aria-label="Hovedmeny">
-      <a class="menu-card primary" href="inn.html">
+    <h2 class="section-title">INN — Varemottak</h2>
+    <nav class="menu" aria-label="INN varemottak">
+      <a class="menu-card approved" href="mottak.html">
         <div class="card-top">
           <div>
-            <h2 class="card-title">INN — Varemottak</h2>
-            <p class="card-description">Motta varer med telefon eller Nordic ID, kontroller registreringer og åpne historikken.</p>
+            <h3 class="card-title">INN — KAMERA / TELEFON</h3>
+            <p class="card-description">Fotografer etiketten med telefonen, les numrene med Gemini og opprett eller kompletter en INN-registrering.</p>
           </div>
-          <span class="icon" aria-hidden="true">↓</span>
+          <span class="icon" aria-hidden="true">📷</span>
         </div>
-        <div class="details">
-          <span class="tag accent">Åpne INN</span>
-          <span class="tag">Kamera</span>
-          <span class="tag">Nordic ID</span>
-          <span class="tag">Kontroll</span>
+        <div class="tags">
+          <span class="tag approved">GODKJENT</span>
+          <span class="tag">mottak.html</span>
         </div>
       </a>
 
-      <a class="menu-card" href="bestilling.html">
+      <a class="menu-card test" href="mottak-live-v2.html">
         <div class="card-top">
           <div>
-            <h2 class="card-title">UT — Varebestilling</h2>
-            <p class="card-description">Kontoret velger rampe, vare og antall. Én stabel Bunner er alltid 10 Bunner.</p>
+            <h3 class="card-title">INN — NORDIC ID-SKANNER</h3>
+            <p class="card-description">Siden som er ment for den firmaskanneren Nordic ID og kobling mot telefon, foto og midlertidig skyregistrering.</p>
           </div>
-          <span class="icon" aria-hidden="true">↑</span>
+          <span class="icon" aria-hidden="true">▥</span>
         </div>
-        <div class="details">
-          <span class="tag accent">Åpne UT-bestilling</span>
+        <div class="tags">
+          <span class="tag test">TEST — FELLES BASE MÅ KONTROLLERES</span>
+          <span class="tag">mottak-live-v2.html</span>
+        </div>
+      </a>
+
+      <a class="menu-card approved" href="inn.html">
+        <div class="card-top">
+          <div>
+            <h3 class="card-title">INN — MENY / KONTROLL</h3>
+            <p class="card-description">Åpne INN-menyen for kamera, Nordic ID, kontroll av registreringer og historikk. Kontrollfunksjonen skal fortsatt ferdigstilles.</p>
+          </div>
+          <span class="icon" aria-hidden="true">✓</span>
+        </div>
+        <div class="tags">
+          <span class="tag approved">GODKJENT</span>
+          <span class="tag planned">KONTROLL SKAL FERDIGSTILLES</span>
+          <span class="tag">inn.html</span>
+        </div>
+      </a>
+    </nav>
+
+    <h2 class="section-title">UT — Bestilling og utsending</h2>
+    <nav class="menu" aria-label="UT bestilling og utsending">
+      <a class="menu-card approved" href="bestilling.html">
+        <div class="card-top">
+          <div>
+            <h3 class="card-title">UT — VAREBESTILLING</h3>
+            <p class="card-description">FOR KONTOR. Kontoret velger rampe, produkt og antall og sender et oppdrag til lageret.</p>
+          </div>
+          <span class="icon" aria-hidden="true">📋</span>
+        </div>
+        <div class="tags">
+          <span class="tag approved">GODKJENT</span>
+          <span class="tag info">FOR KONTOR</span>
+          <span class="tag">bestilling.html</span>
           <span class="tag" id="orderCountTag">0 lagrede</span>
         </div>
       </a>
 
-      <section class="menu-card disabled" aria-disabled="true">
+      <section class="menu-card planned" aria-disabled="true">
         <div class="card-top">
           <div>
-            <h2 class="card-title">UT — Lager og utsending</h2>
-            <p class="card-description">Siden for lagerarbeideren, gjennomføring og bekreftelse opprettes i neste trinn.</p>
+            <h3 class="card-title">UT — LAGER OG UTSENDING</h3>
+            <p class="card-description">For lagerarbeideren: motta kontoroppdrag, se rampe og mengde, markere Mottatt, Pågår, Ferdig eller Problem og bekrefte utsending.</p>
           </div>
           <span class="icon" aria-hidden="true">🚚</span>
         </div>
-        <div class="details">
-          <span class="tag">Kommer senere</span>
+        <div class="tags">
+          <span class="tag planned">PLANLAGT — IKKE OPPRETTET ENNÅ</span>
         </div>
       </section>
     </nav>
 
+    <h2 class="section-title">Tester og utført arbeid</h2>
+    <nav class="menu" aria-label="Tester og oversikt">
+      <a class="menu-card info" href="review-pages.html">
+        <div class="card-top">
+          <div>
+            <h3 class="card-title">TESTER — ALLE SIDER OG KOMMENTARER</h3>
+            <p class="card-description">Oversikt over de 11 tidligere sidene, status, forklaringer, kommentarer og antall kodelinjer.</p>
+          </div>
+          <span class="icon" aria-hidden="true">🧪</span>
+        </div>
+        <div class="tags">
+          <span class="tag info">ÅPNE TESTOVERSIKT</span>
+          <span class="tag">review-pages.html</span>
+        </div>
+      </a>
+    </nav>
+
+    <section class="comment-box">
+      <h2>Kommentarer / endringer / forslag</h2>
+      <p>Skriv her hva som skal endres på hovedsiden. Teksten lagres automatisk bare i denne nettleseren.</p>
+      <textarea id="mainComment" placeholder="Skriv kommentar, endring eller forslag..."></textarea>
+      <div class="save-note" id="saveNote" aria-live="polite"></div>
+    </section>
+
     <div class="footer-note">
-      Systemet er delt i <strong>INN</strong> for varemottak og <strong>UT</strong> for bestilling, lagerarbeid og utsending.
+      Hovedsiden viser nå direkte hvilken side som brukes med telefon, hvilken som er ment for Nordic ID-skanneren, og hvilke UT-sider som er godkjent eller planlagt.
     </div>
   </main>
 
   <script>
-    const STORAGE_KEY = "mottak_office_orders_v1";
+    const ORDER_STORAGE_KEY = "mottak_office_orders_v1";
+    const COMMENT_STORAGE_KEY = "bamavaremottak_main_comment_v1";
     const orderCountTag = document.getElementById("orderCountTag");
+    const mainComment = document.getElementById("mainComment");
+    const saveNote = document.getElementById("saveNote");
 
     try {
-      const orders = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const orders = JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY) || "[]");
       const count = Array.isArray(orders) ? orders.length : 0;
       orderCountTag.textContent = `${count} ${count === 1 ? "lagret" : "lagrede"}`;
-      if (count > 0) orderCountTag.classList.add("ok");
     } catch {
       orderCountTag.textContent = "0 lagrede";
     }
+
+    mainComment.value = localStorage.getItem(COMMENT_STORAGE_KEY) || "";
+
+    mainComment.addEventListener("input", () => {
+      localStorage.setItem(COMMENT_STORAGE_KEY, mainComment.value);
+      saveNote.textContent = "Lagret automatisk.";
+      clearTimeout(mainComment.saveTimer);
+      mainComment.saveTimer = setTimeout(() => {
+        saveNote.textContent = "";
+      }, 1600);
+    });
   </script>
 </body>
 </html>
