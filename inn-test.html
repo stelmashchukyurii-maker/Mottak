@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>INN — Mottak</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --bg-2: #11182a;
+      --card: #151c30;
+      --card-dark: #0d1426;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --warn: #ffbd59;
+      --bad: #ff6b6b;
+      --line: #303b59;
+      --blue: #6aa7ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      color: var(--text);
+    }
+
+    button,
+    a { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      width: min(800px, 100%);
+      margin: 0 auto;
+      padding: 14px 14px 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--card-dark);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .language-switcher {
+      display: flex;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--card-dark);
+    }
+
+    .language-button {
+      min-width: 42px;
+      min-height: 34px;
+      padding: 6px 9px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .language-button.active {
+      background: var(--accent);
+      color: #17130a;
+    }
+
+    .version {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 10px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card-dark);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .version-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warn);
+      box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.12);
+    }
+
+    h1 {
+      margin: 4px 0 6px;
+      font-size: clamp(31px, 9vw, 48px);
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 17px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 16px;
+    }
+
+    .test-banner {
+      margin-bottom: 15px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 189, 89, 0.5);
+      border-radius: 14px;
+      background: rgba(255, 189, 89, 0.09);
+      color: #ffe4b6;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .products {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 18px;
+    }
+
+    .product-chip {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card-dark);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .section-title {
+      margin: 24px 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .menu-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 210px;
+      padding: 17px;
+      border: 2px solid var(--line);
+      border-radius: 19px;
+      background: rgba(21, 28, 48, 0.97);
+      color: var(--text);
+      text-decoration: none;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+      transition: transform 0.08s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .menu-card:active { transform: scale(0.985); }
+    .menu-card:hover { border-color: var(--accent); }
+
+    .menu-card.primary {
+      border-color: rgba(244, 196, 48, 0.62);
+      background: linear-gradient(145deg, rgba(244, 196, 48, 0.12), rgba(21, 28, 48, 0.98));
+    }
+
+    .menu-card.cloud {
+      border-color: rgba(106, 167, 255, 0.48);
+      background: linear-gradient(145deg, rgba(106, 167, 255, 0.1), rgba(21, 28, 48, 0.98));
+    }
+
+    .menu-card.disabled {
+      cursor: default;
+      opacity: 0.58;
+    }
+
+    .menu-card.disabled:hover { border-color: var(--line); }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .icon {
+      flex: 0 0 auto;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card-dark);
+      font-size: 24px;
+    }
+
+    .card-number {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .card-title {
+      margin: 12px 0 7px;
+      font-size: clamp(22px, 6vw, 30px);
+      line-height: 1.08;
+    }
+
+    .card-description {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.43;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card-dark);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status.ready {
+      border-color: var(--ok);
+      background: var(--ok);
+      color: #062418;
+    }
+
+    .status.test {
+      border-color: var(--warn);
+      background: var(--warn);
+      color: #2c1a00;
+    }
+
+    .arrow {
+      color: var(--accent);
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(13, 20, 38, 0.82);
+    }
+
+    .flow-step {
+      position: relative;
+      min-width: 0;
+      padding: 10px 6px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(13, 20, 38, 0.82);
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 15px;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .test-links {
+      display: grid;
+      gap: 8px;
+      padding: 0 12px 12px;
+    }
+
+    .test-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .test-link small {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(13, 20, 38, 0.76);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.48;
+    }
+
+    @media (max-width: 620px) {
+      .menu { grid-template-columns: 1fr; }
+      .menu-card { min-height: 0; }
+      .flow {
+        grid-template-columns: 1fr;
+      }
+      .flow-step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+      }
+      .flow-step strong {
+        min-width: 27px;
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .app { padding-inline: 10px; }
+      .back-link span { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <div class="topbar">
+      <a class="back-link" href="index.html" aria-label="Tilbake til hovedmenyen">
+        ← <span data-i18n="back">Hovedmeny</span>
+      </a>
+
+      <div class="language-switcher" aria-label="Språk">
+        <button class="language-button" type="button" data-language="nb">NO</button>
+        <button class="language-button" type="button" data-language="pl">PL</button>
+        <button class="language-button" type="button" data-language="uk">UA</button>
+      </div>
+    </div>
+
+    <span class="version">
+      <span class="version-dot" aria-hidden="true"></span>
+      INN test v1 · Oppdatert 02.08.2026 kl. 09:08
+    </span>
+
+    <h1>INN — Mottak</h1>
+    <p class="subtitle" data-i18n="subtitle">Registrering og kontroll av varer som kommer inn på lageret.</p>
+
+    <div class="test-banner" data-i18n="testBanner">
+      Testside: meny og lenker kan prøves. Denne siden lagrer ingen mottaksdata.
+    </div>
+
+    <div class="products" aria-label="Produkter">
+      <span class="product-chip">Bunner</span>
+      <span class="product-chip">Hyller x30</span>
+      <span class="product-chip">Hyller x60</span>
+    </div>
+
+    <h2 class="section-title" data-i18n="workArea">Velg arbeidsområde</h2>
+
+    <nav class="menu" aria-label="INN-meny">
+      <a class="menu-card primary" href="mottak.html">
+        <div class="card-head">
+          <span class="card-number">01</span>
+          <span class="icon" aria-hidden="true">📷</span>
+        </div>
+        <h2 class="card-title" data-i18n="cameraTitle">Kamera</h2>
+        <p class="card-description" data-i18n="cameraDescription">Ta bilde av etiketten, les øvre og nedre nummer med Gemini og bekreft mottaket.</p>
+        <div class="card-footer">
+          <span class="status ready" data-i18n="available">Tilgjengelig</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <a class="menu-card" href="nordic-id-bulk-scanner-v2.html">
+        <div class="card-head">
+          <span class="card-number">02</span>
+          <span class="icon" aria-hidden="true">▣</span>
+        </div>
+        <h2 class="card-title">Nordic ID</h2>
+        <p class="card-description" data-i18n="nordicDescription">Skann mange etiketter, velg produkt og legg postene i en midlertidig kø.</p>
+        <div class="card-footer">
+          <span class="status test" data-i18n="testVersion">Testversjon</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <a class="menu-card cloud" href="mottak-live-v2.html">
+        <div class="card-head">
+          <span class="card-number">03</span>
+          <span class="icon" aria-hidden="true">✓</span>
+        </div>
+        <h2 class="card-title" data-i18n="controlTitle">Kontroll</h2>
+        <p class="card-description" data-i18n="controlDescription">Koble skanner og foto, kontroller numre og test den delte Supabase-køen.</p>
+        <div class="card-footer">
+          <span class="status test" data-i18n="cloudTest">Skytest</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </div>
+      </a>
+
+      <section class="menu-card disabled" aria-disabled="true">
+        <div class="card-head">
+          <span class="card-number">04</span>
+          <span class="icon" aria-hidden="true">◷</span>
+        </div>
+        <h2 class="card-title" data-i18n="historyTitle">Historikk</h2>
+        <p class="card-description" data-i18n="historyDescription">Godkjente mottak, søk, filtre, bilder, statistikk og eksport.</p>
+        <div class="card-footer">
+          <span class="status" data-i18n="later">Kommer senere</span>
+        </div>
+      </section>
+    </nav>
+
+    <h2 class="section-title" data-i18n="flowTitle">Felles INN-prosess</h2>
+
+    <section class="flow" aria-label="Felles INN-prosess">
+      <div class="flow-step"><strong>1</strong><span data-i18n="flow1">Velg produkt</span></div>
+      <div class="flow-step"><strong>2</strong><span data-i18n="flow2">Skann eller ta foto</span></div>
+      <div class="flow-step"><strong>3</strong><span data-i18n="flow3">Midlertidig kø</span></div>
+      <div class="flow-step"><strong>4</strong><span data-i18n="flow4">Kontroll og kobling</span></div>
+      <div class="flow-step"><strong>5</strong><span data-i18n="flow5">Godkjent mottak</span></div>
+    </section>
+
+    <h2 class="section-title" data-i18n="developmentTitle">Tester og utvikling</h2>
+
+    <details>
+      <summary data-i18n="openTestPages">Åpne eksisterende testsider</summary>
+      <div class="test-links">
+        <a class="test-link" href="nordic-id.html">
+          <span>Nordic ID minimal</span>
+          <small data-i18n="scannerInputTest">Test av inndata</small>
+        </a>
+        <a class="test-link" href="scanner-test.html">
+          <span>Scanner Test</span>
+          <small data-i18n="rawCodeTest">Rå kode og taster</small>
+        </a>
+        <a class="test-link" href="camera-live.html">
+          <span>Camera Live</span>
+          <small data-i18n="cameraCloudTest">Kamera og Supabase</small>
+        </a>
+        <a class="test-link" href="mottak-live-v2.html">
+          <span>Mottak Live v2</span>
+          <small data-i18n="sharedQueueTest">Felles kø og kobling</small>
+        </a>
+      </div>
+    </details>
+
+    <div class="footer-note" data-i18n="footer">
+      Telefon og Nordic ID skal senere bruke samme midlertidige kø og samme INN-post. Endelig lagring skjer først etter kontroll eller godkjenning.
+    </div>
+  </main>
+
+  <script>
+    const LANGUAGE_KEY = "bamava_language_v1";
+
+    const translations = {
+      nb: {
+        back: "Hovedmeny",
+        subtitle: "Registrering og kontroll av varer som kommer inn på lageret.",
+        testBanner: "Testside: meny og lenker kan prøves. Denne siden lagrer ingen mottaksdata.",
+        workArea: "Velg arbeidsområde",
+        cameraTitle: "Kamera",
+        cameraDescription: "Ta bilde av etiketten, les øvre og nedre nummer med Gemini og bekreft mottaket.",
+        available: "Tilgjengelig",
+        nordicDescription: "Skann mange etiketter, velg produkt og legg postene i en midlertidig kø.",
+        testVersion: "Testversjon",
+        controlTitle: "Kontroll",
+        controlDescription: "Koble skanner og foto, kontroller numre og test den delte Supabase-køen.",
+        cloudTest: "Skytest",
+        historyTitle: "Historikk",
+        historyDescription: "Godkjente mottak, søk, filtre, bilder, statistikk og eksport.",
+        later: "Kommer senere",
+        flowTitle: "Felles INN-prosess",
+        flow1: "Velg produkt",
+        flow2: "Skann eller ta foto",
+        flow3: "Midlertidig kø",
+        flow4: "Kontroll og kobling",
+        flow5: "Godkjent mottak",
+        developmentTitle: "Tester og utvikling",
+        openTestPages: "Åpne eksisterende testsider",
+        scannerInputTest: "Test av inndata",
+        rawCodeTest: "Rå kode og taster",
+        cameraCloudTest: "Kamera og Supabase",
+        sharedQueueTest: "Felles kø og kobling",
+        footer: "Telefon og Nordic ID skal senere bruke samme midlertidige kø og samme INN-post. Endelig lagring skjer først etter kontroll eller godkjenning."
+      },
+      pl: {
+        back: "Menu główne",
+        subtitle: "Rejestracja i kontrola towarów przychodzących do magazynu.",
+        testBanner: "Strona testowa: można sprawdzić menu i linki. Ta strona nie zapisuje danych przyjęcia.",
+        workArea: "Wybierz obszar pracy",
+        cameraTitle: "Kamera",
+        cameraDescription: "Zrób zdjęcie etykiety, odczytaj górny i dolny numer przez Gemini i potwierdź przyjęcie.",
+        available: "Dostępne",
+        nordicDescription: "Skanuj wiele etykiet, wybierz produkt i dodaj wpisy do kolejki tymczasowej.",
+        testVersion: "Wersja testowa",
+        controlTitle: "Kontrola",
+        controlDescription: "Połącz skaner ze zdjęciem, sprawdź numery i przetestuj wspólną kolejkę Supabase.",
+        cloudTest: "Test chmury",
+        historyTitle: "Historia",
+        historyDescription: "Zatwierdzone przyjęcia, wyszukiwanie, filtry, zdjęcia, statystyka i eksport.",
+        later: "Później",
+        flowTitle: "Wspólny proces INN",
+        flow1: "Wybierz produkt",
+        flow2: "Skan lub zdjęcie",
+        flow3: "Kolejka tymczasowa",
+        flow4: "Kontrola i łączenie",
+        flow5: "Zatwierdzone przyjęcie",
+        developmentTitle: "Testy i rozwój",
+        openTestPages: "Otwórz istniejące strony testowe",
+        scannerInputTest: "Test wprowadzania danych",
+        rawCodeTest: "Surowy kod i klawisze",
+        cameraCloudTest: "Kamera i Supabase",
+        sharedQueueTest: "Wspólna kolejka i łączenie",
+        footer: "Telefon i Nordic ID mają później używać tej samej kolejki tymczasowej i tego samego wpisu INN. Ostateczny zapis następuje dopiero po kontroli lub zatwierdzeniu."
+      },
+      uk: {
+        back: "Головне меню",
+        subtitle: "Реєстрація та контроль товарів, які прибувають на склад.",
+        testBanner: "Тестова сторінка: можна перевірити меню та посилання. Ця сторінка не зберігає дані приймання.",
+        workArea: "Виберіть робочий розділ",
+        cameraTitle: "Камера",
+        cameraDescription: "Зробіть фото бірки, прочитайте верхній і нижній номери через Gemini та підтвердьте приймання.",
+        available: "Доступно",
+        nordicDescription: "Скануйте багато бірок, виберіть продукт і додайте записи до тимчасової черги.",
+        testVersion: "Тестова версія",
+        controlTitle: "Контроль",
+        controlDescription: "Об’єднайте сканер із фото, перевірте номери та протестуйте спільну чергу Supabase.",
+        cloudTest: "Хмарний тест",
+        historyTitle: "Історія",
+        historyDescription: "Підтверджені приймання, пошук, фільтри, фотографії, статистика та експорт.",
+        later: "Буде пізніше",
+        flowTitle: "Спільний процес INN",
+        flow1: "Вибір продукту",
+        flow2: "Скан або фото",
+        flow3: "Тимчасова черга",
+        flow4: "Контроль та об’єднання",
+        flow5: "Підтверджене приймання",
+        developmentTitle: "Тести та розробка",
+        openTestPages: "Відкрити наявні тестові сторінки",
+        scannerInputTest: "Тест введення даних",
+        rawCodeTest: "Сирий код і клавіші",
+        cameraCloudTest: "Камера та Supabase",
+        sharedQueueTest: "Спільна черга й об’єднання",
+        footer: "Телефон і Nordic ID надалі повинні використовувати одну тимчасову чергу й один запис INN. Остаточне збереження відбувається лише після контролю або підтвердження."
+      }
+    };
+
+    function setLanguage(language) {
+      const selected = translations[language] ? language : "nb";
+      document.documentElement.lang = selected;
+
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        const key = element.dataset.i18n;
+        if (translations[selected][key]) {
+          element.textContent = translations[selected][key];
+        }
+      });
+
+      document.querySelectorAll(".language-button").forEach((button) => {
+        const isActive = button.dataset.language === selected;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
+
+      localStorage.setItem(LANGUAGE_KEY, selected);
+    }
+
+    document.querySelectorAll(".language-button").forEach((button) => {
+      button.addEventListener("click", () => setLanguage(button.dataset.language));
+    });
+
+    setLanguage(localStorage.getItem(LANGUAGE_KEY) || "nb");
+  </script>
+</body>
+</html>
