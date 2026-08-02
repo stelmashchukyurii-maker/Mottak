@@ -108,8 +108,8 @@
     .menu-card:hover { border-color: var(--accent); }
 
     .menu-card.primary {
-      border-color: rgba(244, 196, 48, 0.58);
-      background: linear-gradient(145deg, rgba(244, 196, 48, 0.11), rgba(21, 28, 48, 0.98));
+      border-color: rgba(72, 213, 151, 0.7);
+      background: linear-gradient(145deg, rgba(72, 213, 151, 0.11), rgba(21, 28, 48, 0.98));
     }
 
     .card-top {
@@ -161,9 +161,9 @@
     }
 
     .tag.accent {
-      color: #17130a;
-      background: var(--accent);
-      border-color: var(--accent);
+      color: #062418;
+      background: var(--ok);
+      border-color: var(--ok);
     }
 
     .tag.ok {
@@ -195,7 +195,7 @@
   <main class="app">
     <div class="topbar">
       <a class="home-link" href="index.html">← Hovedmeny</a>
-      <span class="version">INN-meny v1<br />Oppdatert 02.08.2026 kl. 09:26</span>
+      <span class="version">INN-meny v2<br />Oppdatert 02.08.2026 kl. 12:59</span>
     </div>
 
     <h1>INN — Varemottak</h1>
@@ -206,18 +206,18 @@
     </div>
 
     <nav class="menu" aria-label="INN-meny">
-      <a class="menu-card primary" href="mottak.html">
+      <a class="menu-card primary" href="camera-live.html">
         <div class="card-top">
           <div>
-            <h2 class="card-title">Kamera</h2>
-            <p class="card-description">Ta bilde av etiketten med telefonen, les numrene og registrer produktet.</p>
+            <h2 class="card-title">Kamera / telefon</h2>
+            <p class="card-description">Ta bilde, les numrene med Gemini og lagre bilde og registrering i den felles Mottak-tabellen.</p>
           </div>
           <span class="icon" aria-hidden="true">📷</span>
         </div>
         <div class="details">
           <span class="tag accent">Åpne telefonskanner</span>
-          <span class="tag">Gemini</span>
-          <span class="tag">Bilde</span>
+          <span class="tag ok">Felles sky</span>
+          <span class="tag">camera-live.html</span>
         </div>
       </a>
 
@@ -230,7 +230,7 @@
           <span class="icon" aria-hidden="true">▥</span>
         </div>
         <div class="details">
-          <span class="tag accent">Åpne Nordic ID</span>
+          <span class="tag">Åpne Nordic ID</span>
           <span class="tag test">Testversjon</span>
         </div>
       </a>
@@ -238,8 +238,8 @@
       <a class="menu-card" href="camera-live.html">
         <div class="card-top">
           <div>
-            <h2 class="card-title">Kontroll</h2>
-            <p class="card-description">Se bilder og poster, kontroller koblinger og slett feilregistrerte testposter.</p>
+            <h2 class="card-title">Kontroll / bilder</h2>
+            <p class="card-description">Se skyregistreringer og bilder, kontroller koblinger og slett feilregistrerte testposter.</p>
           </div>
           <span class="icon" aria-hidden="true">✓</span>
         </div>
@@ -266,7 +266,7 @@
     </nav>
 
     <div class="footer-note">
-      Produkter i INN: <strong>Bunner</strong>, <strong>Hyller x30</strong> og <strong>Hyller x60</strong>.
+      Produkter i INN: <strong>Bunner</strong>, <strong>Hyller x30</strong> og <strong>Hyller x60</strong>. Den gamle lokale telefonsiden <strong>mottak.html</strong> er beholdt som reserve/test.
     </div>
   </main>
 </body>
