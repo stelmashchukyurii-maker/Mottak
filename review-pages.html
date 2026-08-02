@@ -16,6 +16,8 @@
       --line: #303b59;
       --accent: #f4c430;
       --ok: #48d597;
+      --danger: #ff7373;
+      --warning: #ffb84d;
       --info: #75b7ff;
     }
 
@@ -30,7 +32,7 @@
     }
 
     .app {
-      width: min(860px, 100%);
+      width: min(920px, 100%);
       margin: 0 auto;
       padding: 16px 14px 56px;
     }
@@ -63,7 +65,44 @@
       border: 1px solid rgba(244, 196, 48, 0.55);
       border-radius: 14px;
       background: rgba(244, 196, 48, 0.08);
-      line-height: 1.45;
+      line-height: 1.5;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 16px;
+    }
+
+    .legend span,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.03em;
+    }
+
+    .approved-label {
+      border: 1px solid var(--ok);
+      background: rgba(72, 213, 151, 0.13);
+      color: var(--ok);
+    }
+
+    .test-label {
+      border: 1px solid var(--danger);
+      background: rgba(255, 115, 115, 0.13);
+      color: var(--danger);
+    }
+
+    .todo-label {
+      border: 1px solid var(--warning);
+      background: rgba(255, 184, 77, 0.13);
+      color: var(--warning);
     }
 
     .toolbar {
@@ -85,7 +124,7 @@
       border: 0;
       border-radius: 13px;
       font: inherit;
-      font-weight: 800;
+      font-weight: 900;
       cursor: pointer;
     }
 
@@ -100,7 +139,7 @@
       color: var(--text);
     }
 
-    .status {
+    .status-message {
       grid-column: 1 / -1;
       min-height: 18px;
       color: var(--muted);
@@ -110,28 +149,40 @@
 
     .list {
       display: grid;
-      gap: 15px;
+      gap: 16px;
     }
 
     .card {
       padding: 16px;
       border: 2px solid var(--line);
-      border-radius: 18px;
+      border-radius: 19px;
       background: rgba(21, 28, 48, 0.97);
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
     }
 
+    .card.approved { border-color: rgba(72, 213, 151, 0.75); }
+    .card.test { border-color: rgba(255, 115, 115, 0.85); }
+    .card.todo { border-color: rgba(255, 184, 77, 0.8); }
+
     .card-head {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .head-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      min-width: 0;
     }
 
     .number {
       flex: 0 0 auto;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       display: grid;
       place-items: center;
       border-radius: 13px;
@@ -141,31 +192,65 @@
       font-weight: 900;
     }
 
+    .card.test .number {
+      background: var(--danger);
+      color: #2a0909;
+    }
+
+    .card-title {
+      margin: 1px 0 5px;
+      font-size: clamp(20px, 5vw, 28px);
+      line-height: 1.15;
+    }
+
     .path {
-      min-width: 0;
       color: var(--muted);
       font-size: 12px;
       overflow-wrap: anywhere;
     }
 
-    .suggestion {
-      margin: 10px 0 0;
-      padding: 11px 12px;
-      border: 1px solid rgba(117, 183, 255, 0.42);
-      border-radius: 12px;
-      background: rgba(117, 183, 255, 0.08);
-      color: var(--text);
-      line-height: 1.4;
+    .code-lines {
+      margin-top: 7px;
+      color: var(--info);
+      font-size: 12px;
+      font-weight: 800;
     }
 
-    .suggestion strong { color: var(--info); }
+    .section-box {
+      margin-top: 11px;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-dark);
+      line-height: 1.5;
+    }
+
+    .section-box strong {
+      color: var(--accent);
+    }
+
+    .section-box.decision strong {
+      color: var(--ok);
+    }
+
+    .card.test .section-box.decision strong {
+      color: var(--danger);
+    }
+
+    .plan-list {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    .plan-list li { margin: 5px 0; }
 
     label {
       display: block;
-      margin: 12px 0 7px;
+      margin: 13px 0 7px;
       color: var(--muted);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     input,
@@ -183,11 +268,11 @@
       min-height: 52px;
       padding: 12px 13px;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     textarea {
-      min-height: 100px;
+      min-height: 104px;
       padding: 12px 13px;
       line-height: 1.45;
       resize: vertical;
@@ -203,18 +288,22 @@
       display: grid;
       place-items: center;
       width: 100%;
-      margin-top: 12px;
+      margin-top: 13px;
       padding: 14px;
       background: var(--accent);
       color: #17130a;
       text-decoration: none;
       text-align: center;
-      font-size: 18px;
-      line-height: 1.25;
+      font-size: 17px;
+    }
+
+    .card.test .open-button {
+      background: var(--danger);
+      color: #2a0909;
     }
 
     .saved-note {
-      margin-top: 10px;
+      margin-top: 9px;
       color: var(--muted);
       font-size: 12px;
     }
@@ -230,32 +319,39 @@
       line-height: 1.5;
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 620px) {
       .toolbar { grid-template-columns: 1fr; }
-      .status { grid-column: 1; }
+      .status-message { grid-column: 1; }
+      .card-head { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <main class="app">
-    <span class="version">Тестова сторінка v2 · Оновлено 02.08.2026 о 11:43</span>
+    <span class="version">Тестова сторінка v3 · Оновлено 02.08.2026 о 12:08</span>
     <h1>Перевірка 11 сторінок</h1>
-    <p class="intro">Відкривай кожну сторінку, повертайся сюди, вписуй свою назву та коментар.</p>
+    <p class="intro">Тут зафіксовані твої рішення: що погоджено, що залишається тестом і що треба перевірити.</p>
 
     <div class="notice">
-      На кожній картці я написав своє бачення, для чого сторінка створювалася. Ти можеш дати їй іншу назву й залишити коментар. Усе автоматично зберігається в цьому браузері.
+      Жодна зі старих сторінок зараз не видаляється. Червоний статус означає <strong>TEST</strong>: сторінку залишаємо як результат виконаної роботи, але не вважаємо готовою частиною основної системи.
+    </div>
+
+    <div class="legend">
+      <span class="approved-label">ПОГОДЖЕНО</span>
+      <span class="test-label">TEST — ПЕРЕВІРИТИ</span>
+      <span class="todo-label">Є ЗАВДАННЯ НА ДОРОБКУ</span>
     </div>
 
     <div class="toolbar">
       <button class="copy-button" id="copyAll" type="button">Скопіювати для ChatGPT</button>
-      <button class="clear-button" id="clearAll" type="button">Очистити всі записи</button>
-      <div class="status" id="status" aria-live="polite"></div>
+      <button class="clear-button" id="clearAll" type="button">Очистити тільки мої поля</button>
+      <div class="status-message" id="statusMessage" aria-live="polite"></div>
     </div>
 
     <section class="list" id="pageList"></section>
 
     <div class="footer">
-      Це окрема тестова сторінка. Вона поки не додана до Головної й нічого не змінює в інших модулях проєкту.
+      Кількість рядків визначається автоматично з поточної опублікованої HTML-сторінки. Вона може змінюватися після кожного оновлення коду.
     </div>
   </main>
 
@@ -267,84 +363,160 @@
         id: 1,
         path: "index.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/",
-        suggestedTitle: "Головне меню — INN і UT",
-        description: "Мала бути головною точкою входу до всієї системи: приймання INN та відправлення UT."
+        title: "Головне меню — INN і UT",
+        openLabel: "ГОЛОВНЕ МЕНЮ — INN І UT",
+        status: "approved",
+        badge: "ПОГОДЖЕНО",
+        vision: "Головна точка входу до всієї системи: приймання INN та відправлення UT.",
+        decision: "Чудово, погоджено і прийнято як головну сторінку.",
+        planTitle: "Що заплановано для кнопки UT — Lager og utsending",
+        plan: [
+          "Працівник складу бачить розпорядження, створені офісом на сторінці UT — Varebestilling.",
+          "У завданні показуються рампа, продукт, кількість, час створення та коментар офісу.",
+          "Статуси: Ny, Mottatt, Pågår, Ferdig або Problem.",
+          "Працівник підтверджує фактичну кількість і завершення відправлення.",
+          "Виконані завдання переходять до історії UT."
+        ]
       },
       {
         id: 2,
         path: "start.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/start.html",
-        suggestedTitle: "Стара версія головного меню",
-        description: "Попередня окрема головна сторінка. Ймовірно, це дублікат, який після перевірки можна буде прибрати або залишити як резерв."
+        title: "TEST — стара версія головного меню",
+        openLabel: "TEST — СТАРА ГОЛОВНА",
+        status: "test",
+        badge: "TEST — ВІДХИЛЕНО ЯК ОСНОВНУ",
+        vision: "Попередня окрема головна сторінка, створена до остаточного поділу системи на INN і UT.",
+        decision: "Не використовувати як основну. Не видаляти: залишити червоною тестовою сторінкою, щоб було видно обсяг уже виконаної роботи."
       },
       {
         id: 3,
         path: "inn.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/inn.html",
-        suggestedTitle: "INN — меню приймання товару",
-        description: "Внутрішнє меню напрямку INN: телефон, Nordic ID, контроль та історія приймання."
+        title: "INN — меню приймання товару",
+        openLabel: "INN — VAREMOTTAK",
+        status: "approved",
+        badge: "ПОГОДЖЕНО • ДОРОБИТИ KONTROLL",
+        vision: "Внутрішнє меню напрямку INN: телефон, Nordic ID, контроль та історія приймання.",
+        decision: "Погоджено. Розділ Kontroll потрібно доробити.",
+        planTitle: "Що має робити INN Kontroll",
+        plan: [
+          "Показувати тимчасові та непідтверджені записи.",
+          "Дозволяти перегляд фото, редагування номерів і продукту.",
+          "Знаходити дублікати та об'єднувати скан Nordic ID із фотографією телефона.",
+          "Підтверджувати, позначати помилкою або видаляти запис.",
+          "Після підтвердження переносити запис до INN Historikk."
+        ]
       },
       {
         id: 4,
         path: "mottak.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/mottak.html",
-        suggestedTitle: "INN — сканування телефоном",
-        description: "Основна сторінка фотографування бірки телефоном і розпізнавання номерів через Gemini."
+        title: "INN — сканування телефоном",
+        openLabel: "INN — KAMERA / TELEFON",
+        status: "approved",
+        badge: "ПОГОДЖЕНО • ПЕРЕВІРИТИ ХМАРУ",
+        vision: "Основна сторінка фотографування бірки телефоном і розпізнавання номерів через Gemini.",
+        decision: "Погоджено. Треба перевірити роботу зі спільною тимчасовою хмарою Nordic ID.",
+        planTitle: "Що саме потрібно перевірити",
+        plan: [
+          "Чи бачить телефон скани Nordic ID, які ще не прийняті й не затверджені.",
+          "Чи можна відкрити такий тимчасовий запис на телефоні.",
+          "Чи можна додати до нього фотографію та розпізнані номери.",
+          "Чи об'єднуються скан і фото в один запис перед підтвердженням."
+        ]
       },
       {
         id: 5,
         path: "bestilling.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/bestilling.html",
-        suggestedTitle: "UT — розпорядження для офісу",
-        description: "Офіс вибирає рампу, товар і кількість та створює розпорядження для працівника складу."
+        title: "UT — розпорядження для офісу",
+        openLabel: "UT — VAREBESTILLING • FOR KONTOR",
+        status: "approved",
+        badge: "ПОГОДЖЕНО • FOR KONTOR",
+        vision: "Офіс вибирає рампу, товар і кількість та створює розпорядження для працівника складу.",
+        decision: "Прийнято. На кнопці чітко позначено норвезькою: FOR KONTOR."
       },
       {
         id: 6,
         path: "mottak-live-v2.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/mottak-live-v2.html",
-        suggestedTitle: "INN — Nordic ID плюс фотографії, тест v2",
-        description: "Експериментальна сторінка для спільної роботи промислового сканера, телефону та хмарних фотографій."
+        title: "TEST — INN Nordic ID плюс фотографії v2",
+        openLabel: "TEST — NORDIC ID + FOTO v2",
+        status: "test",
+        badge: "TEST — ПЕРЕВІРИТИ",
+        vision: "Технічний міст між промисловим сканером і телефоном: Nordic ID створює тимчасовий запис, а телефон знаходить його, додає фото та доповнює номерами.",
+        decision: "Поки незрозуміло для користувача, тому це червоний TEST, а не готова робоча сторінка.",
+        planTitle: "Що ця сторінка мала перевірити",
+        plan: [
+          "Запис коду Nordic ID у спільну базу Supabase.",
+          "Появу непідтвердженого скану на іншому пристрої — телефоні.",
+          "Пошук відповідної фотографії або додавання нового фото.",
+          "Зв'язування службового коду, верхнього номера, нижнього номера і продукту.",
+          "Перехід одного спільного запису зі статусу тимчасового до підтвердженого."
+        ]
       },
       {
         id: 7,
         path: "mottak-live.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/mottak-live.html",
-        suggestedTitle: "Старий тест спільного приймання v1",
-        description: "Перша експериментальна версія хмарного INN. Імовірно, її замінила сторінка Mottak Live v2."
+        title: "TEST — старе спільне приймання v1",
+        openLabel: "TEST — MOTTAK LIVE v1",
+        status: "test",
+        badge: "TEST — ПЕРЕВІРИТИ",
+        vision: "Перша експериментальна версія спільного хмарного INN, створена перед версією v2.",
+        decision: "Залишити як TEST і перевірити. Не використовувати як основну без окремого рішення."
       },
       {
         id: 8,
         path: "nordic-id-bulk-scanner-v2.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/nordic-id-bulk-scanner-v2.html",
-        suggestedTitle: "Nordic ID — масове сканування v2",
-        description: "Тест послідовного сканування багатьох товарів, тимчасової черги та перевірки перед збереженням."
+        title: "TEST — масове сканування Nordic ID v2",
+        openLabel: "TEST — BULK SCANNER v2",
+        status: "test",
+        badge: "TEST — НЕ ВИДНО СПІЛЬНОЇ БАЗИ",
+        vision: "Послідовне сканування багатьох товарів, створення тимчасової черги та перевірка перед збереженням.",
+        decision: "Не видно спільної бази. Залишити як TEST і перевірити, де саме зберігаються записи та чи доступні вони телефону."
       },
       {
         id: 9,
         path: "nordic-id-bulk-scanner.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/nordic-id-bulk-scanner.html",
-        suggestedTitle: "Старе масове сканування Nordic ID v1",
-        description: "Перша версія масового сканера. Ймовірно, її замінила версія v2."
+        title: "TEST — старе масове сканування Nordic ID v1",
+        openLabel: "TEST — BULK SCANNER v1",
+        status: "test",
+        badge: "TEST — НЕ ВИДНО СПІЛЬНОЇ БАЗИ",
+        vision: "Перша версія масового сканера Nordic ID, створена до версії v2.",
+        decision: "Не видно спільної бази. Залишити як TEST і перевірити; імовірно, після перевірки достатньо буде лише однієї bulk-версії."
       },
       {
         id: 10,
         path: "nordic-id.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/nordic-id.html",
-        suggestedTitle: "Простий тест Nordic ID",
-        description: "Мінімальна сторінка для перевірки, чи сканер вводить код у браузер як клавіатура."
+        title: "TEST — простий тест Nordic ID",
+        openLabel: "TEST — NORDIC ID INPUT",
+        status: "test",
+        badge: "TEST",
+        vision: "Мінімальна сторінка для перевірки, чи Nordic ID вводить код у браузер як клавіатура.",
+        decision: "Залишити як простий технічний TEST. Вона не є сторінкою приймання і не повинна зберігати товар у головну базу."
       },
       {
         id: 11,
         path: "scanner-test.html",
         url: "https://stelmashchukyurii-maker.github.io/Mottak/scanner-test.html",
-        suggestedTitle: "Детальна діагностика CC-сканера",
-        description: "Технічний тест символів, довжини коду, Enter, Tab, дублів та поведінки промислового сканера."
+        title: "TEST — детальна діагностика CC-сканера",
+        openLabel: "TEST — CC SCANNER DIAGNOSTIKK",
+        status: "test",
+        badge: "TEST — ПЕРЕВІРКА",
+        vision: "Технічна діагностика символів, довжини коду, Enter, Tab, дублів та поведінки промислового сканера.",
+        decision: "Залишити як тестову сторінку перевірки обладнання. Не включати до звичайного робочого маршруту працівника."
       }
     ];
 
     const pageList = document.getElementById("pageList");
-    const status = document.getElementById("status");
+    const statusMessage = document.getElementById("statusMessage");
     let saved = loadSaved();
+    const measuredLines = {};
 
     function loadSaved() {
       try {
@@ -357,77 +529,11 @@
 
     function saveAll(message = "Збережено автоматично") {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-      status.textContent = message;
+      statusMessage.textContent = message;
       clearTimeout(saveAll.timer);
       saveAll.timer = setTimeout(() => {
-        status.textContent = "";
+        statusMessage.textContent = "";
       }, 1800);
-    }
-
-    function buttonText(page, name) {
-      const chosenName = name.trim() || page.suggestedTitle;
-      return `${page.id}. ${chosenName} — відкрити`;
-    }
-
-    function render() {
-      pageList.innerHTML = "";
-
-      for (const page of pages) {
-        const data = saved[page.id] || { name: "", comment: "" };
-        const card = document.createElement("article");
-        card.className = "card";
-
-        card.innerHTML = `
-          <div class="card-head">
-            <div class="number">${page.id}</div>
-            <div class="path">${page.path}<br>${page.url}</div>
-          </div>
-
-          <div class="suggestion">
-            <strong>Моє бачення:</strong> ${escapeHtml(page.description)}
-          </div>
-
-          <label for="name-${page.id}">Твоя назва цієї сторінки</label>
-          <input
-            id="name-${page.id}"
-            type="text"
-            autocomplete="off"
-            placeholder="Моя пропозиція: ${escapeHtml(page.suggestedTitle)}"
-            value="${escapeHtml(data.name || "")}" />
-
-          <a class="open-button" id="open-${page.id}" href="${page.url}" target="_blank" rel="noopener noreferrer">
-            ${escapeHtml(buttonText(page, data.name || ""))}
-          </a>
-
-          <label for="comment-${page.id}">Твій коментар</label>
-          <textarea
-            id="comment-${page.id}"
-            placeholder="Наприклад: залишити, видалити, це головна, це тест, не працює камера...">${escapeHtml(data.comment || "")}</textarea>
-
-          <div class="saved-note">Поля зберігаються автоматично.</div>
-        `;
-
-        const nameInput = card.querySelector(`#name-${page.id}`);
-        const commentInput = card.querySelector(`#comment-${page.id}`);
-        const openButton = card.querySelector(`#open-${page.id}`);
-
-        nameInput.addEventListener("input", () => {
-          saved[page.id] = saved[page.id] || {};
-          saved[page.id].name = nameInput.value;
-          saved[page.id].comment = commentInput.value;
-          openButton.textContent = buttonText(page, nameInput.value);
-          saveAll();
-        });
-
-        commentInput.addEventListener("input", () => {
-          saved[page.id] = saved[page.id] || {};
-          saved[page.id].name = nameInput.value;
-          saved[page.id].comment = commentInput.value;
-          saveAll();
-        });
-
-        pageList.appendChild(card);
-      }
     }
 
     function escapeHtml(value) {
@@ -439,15 +545,123 @@
         .replaceAll("'", "&#039;");
     }
 
+    function renderPlan(page) {
+      if (!page.plan?.length) return "";
+      return `
+        <div class="section-box">
+          <strong>${escapeHtml(page.planTitle || "План")}</strong>
+          <ul class="plan-list">
+            ${page.plan.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </div>`;
+    }
+
+    function render() {
+      pageList.innerHTML = "";
+
+      for (const page of pages) {
+        const data = saved[page.id] || { name: "", comment: "" };
+        const card = document.createElement("article");
+        card.className = `card ${page.status}`;
+
+        card.innerHTML = `
+          <div class="card-head">
+            <div class="head-left">
+              <div class="number">${page.id}</div>
+              <div>
+                <h2 class="card-title">${escapeHtml(page.title)}</h2>
+                <div class="path">${escapeHtml(page.path)}<br>${escapeHtml(page.url)}</div>
+                <div class="code-lines" id="lines-${page.id}">Рядків у файлі: підрахунок…</div>
+              </div>
+            </div>
+            <span class="badge ${page.status === "test" ? "test-label" : "approved-label"}">${escapeHtml(page.badge)}</span>
+          </div>
+
+          <div class="section-box">
+            <strong>Моє початкове бачення:</strong><br>${escapeHtml(page.vision)}
+          </div>
+
+          <div class="section-box decision">
+            <strong>Зафіксоване рішення:</strong><br>${escapeHtml(page.decision)}
+          </div>
+
+          ${renderPlan(page)}
+
+          <label for="name-${page.id}">Моя власна назва цієї сторінки</label>
+          <input
+            id="name-${page.id}"
+            type="text"
+            autocomplete="off"
+            placeholder="Напиши свою назву"
+            value="${escapeHtml(data.name || "")}" />
+
+          <a class="open-button" href="${page.url}" target="_blank" rel="noopener noreferrer">
+            ВІДКРИТИ: ${escapeHtml(page.openLabel)}
+          </a>
+
+          <label for="comment-${page.id}">Мій коментар</label>
+          <textarea
+            id="comment-${page.id}"
+            placeholder="Наприклад: погоджено, доробити, перевірити базу, не використовувати...">${escapeHtml(data.comment || "")}</textarea>
+
+          <div class="saved-note">Твої поля зберігаються автоматично у цьому браузері.</div>
+        `;
+
+        const nameInput = card.querySelector(`#name-${page.id}`);
+        const commentInput = card.querySelector(`#comment-${page.id}`);
+
+        nameInput.addEventListener("input", () => {
+          saved[page.id] = saved[page.id] || {};
+          saved[page.id].name = nameInput.value;
+          saved[page.id].comment = commentInput.value;
+          saveAll();
+        });
+
+        commentInput.addEventListener("input", () => {
+          saved[page.id] = saved[page.id] || {};
+          saved[page.id].name = nameInput.value;
+          saved[page.id].comment = commentInput.value;
+          saveAll();
+        });
+
+        pageList.appendChild(card);
+        countLines(page);
+      }
+    }
+
+    async function countLines(page) {
+      const element = document.getElementById(`lines-${page.id}`);
+      try {
+        const separator = page.url.includes("?") ? "&" : "?";
+        const response = await fetch(`${page.url}${separator}linecheck=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        const count = text.length ? text.split(/\r\n|\r|\n/).length : 0;
+        measuredLines[page.id] = count;
+        element.textContent = `Рядків у файлі: ${count}`;
+      } catch {
+        measuredLines[page.id] = null;
+        element.textContent = "Рядків у файлі: не вдалося підрахувати";
+      }
+    }
+
     function buildCopyText() {
       const lines = ["ПЕРЕВІРКА СТОРІНОК BaMavaremottak", ""];
 
       for (const page of pages) {
         const data = saved[page.id] || {};
-        lines.push(`${page.id}. ${data.name?.trim() || page.suggestedTitle}`);
-        lines.push(`Моє початкове бачення: ${page.description}`);
+        lines.push(`${page.id}. ${page.title}`);
+        lines.push(`Статус: ${page.badge}`);
+        lines.push(`Моє початкове бачення: ${page.vision}`);
+        lines.push(`Зафіксоване рішення: ${page.decision}`);
+        if (page.plan?.length) {
+          lines.push(`${page.planTitle}:`);
+          page.plan.forEach(item => lines.push(`- ${item}`));
+        }
         lines.push(`Файл: ${page.path}`);
+        lines.push(`Рядків у файлі: ${measuredLines[page.id] ?? "не підраховано"}`);
         lines.push(`Посилання: ${page.url}`);
+        lines.push(`Моя назва: ${data.name?.trim() || "Без власної назви"}`);
         lines.push(`Коментар користувача: ${data.comment?.trim() || "Немає коментаря"}`);
         lines.push("");
       }
@@ -473,16 +687,16 @@
 
     document.getElementById("copyAll").addEventListener("click", async () => {
       await copyText(buildCopyText());
-      status.textContent = "Скопійовано. Тепер встав цей текст у розмову з ChatGPT.";
+      statusMessage.textContent = "Скопійовано. Встав цей текст у розмову з ChatGPT.";
     });
 
     document.getElementById("clearAll").addEventListener("click", () => {
-      const confirmed = confirm("Очистити всі твої назви та коментарі на цій сторінці?");
+      const confirmed = confirm("Очистити тільки твої власні назви та коментарі?");
       if (!confirmed) return;
       saved = {};
       localStorage.removeItem(STORAGE_KEY);
       render();
-      status.textContent = "Усі поля очищено.";
+      statusMessage.textContent = "Твої поля очищено. Статуси та рішення залишилися.";
     });
 
     render();
