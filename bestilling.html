@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>Varebestilling til rampe</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #151c30;
+      --card-dark: #0d1426;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --bad: #ff6b6b;
+      --line: #303b59;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #11182a 100%);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(760px, 100%);
+      margin: 0 auto;
+      padding: 18px 14px 44px;
+    }
+
+    h1 {
+      margin: 4px 0 6px;
+      font-size: clamp(27px, 7vw, 40px);
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .version {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card-dark);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .card {
+      margin: 12px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 28, 48, 0.96);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 19px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 800;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 14px;
+      border: 2px solid var(--line);
+      border-radius: 13px;
+      background: var(--card-dark);
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 800;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.14);
+    }
+
+    button {
+      min-height: 50px;
+      padding: 11px 14px;
+      border: 0;
+      border-radius: 13px;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.2s ease, border-color 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.985);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .primary {
+      width: 100%;
+      min-height: 58px;
+      background: var(--accent);
+      color: #17130a;
+      font-size: 18px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .product-button {
+      min-height: 70px;
+      background: var(--card-dark);
+      color: var(--text);
+      border: 2px solid var(--line);
+      font-size: 17px;
+    }
+
+    .product-button.active {
+      background: var(--accent);
+      color: #17130a;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.16);
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mode-button {
+      background: var(--card-dark);
+      color: var(--text);
+      border: 2px solid var(--line);
+      font-size: 15px;
+    }
+
+    .mode-button.active {
+      background: #2c395c;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .quantity-row {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) 58px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .step-button {
+      min-height: 58px;
+      padding: 0;
+      background: #2c395c;
+      color: var(--text);
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .quantity-row input {
+      min-height: 58px;
+      text-align: center;
+      font-size: 27px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .quick-button {
+      min-height: 44px;
+      padding: 8px 4px;
+      background: var(--card-dark);
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .calculation {
+      margin-top: 14px;
+      padding: 16px 12px;
+      border: 2px solid rgba(244, 196, 48, 0.42);
+      border-radius: 15px;
+      background: rgba(244, 196, 48, 0.08);
+      text-align: center;
+    }
+
+    .calculation-main {
+      display: block;
+      color: var(--accent);
+      font-size: clamp(25px, 7vw, 38px);
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .calculation-note {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .summary {
+      display: grid;
+      gap: 9px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: minmax(100px, 0.65fr) minmax(0, 1fr);
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .summary-row:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-label {
+      color: var(--muted);
+    }
+
+    .summary-value {
+      text-align: right;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .status {
+      min-height: 24px;
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.bad {
+      color: var(--bad);
+    }
+
+    .notice {
+      margin-top: 11px;
+      padding: 11px 12px;
+      border: 1px solid rgba(244, 196, 48, 0.3);
+      border-radius: 12px;
+      background: rgba(244, 196, 48, 0.08);
+      color: #f7df8b;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .history-empty {
+      padding: 14px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .history-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--card-dark);
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .history-ramp {
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .history-time {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .history-product {
+      margin-top: 6px;
+      font-weight: 800;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <span class="version">Kontorbestilling v1 · Oppdatert 02.08.2026 kl. 07:54</span>
+    <h1>Varebestilling til rampe</h1>
+    <p class="subtitle">Velg rampe, vare og ønsket antall. Denne siden brukes på kontoret og har ingen skanning.</p>
+
+    <section class="card">
+      <h2 class="section-title">1. Velg rampe</h2>
+      <label class="field-label" for="rampInput">Rampenummer</label>
+      <input id="rampInput" type="text" inputmode="numeric" autocomplete="off" placeholder="For eksempel 31" maxlength="8" />
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">2. Velg vare</h2>
+      <div class="product-grid" id="productGrid">
+        <button class="product-button active" type="button" data-product="bunner">Bunner</button>
+        <button class="product-button" type="button" data-product="hyller30">Hyller x30</button>
+        <button class="product-button" type="button" data-product="hyller60">Hyller x60</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">3. Velg antall</h2>
+
+      <div id="bunnerPanel">
+        <div class="mode-grid">
+          <button class="mode-button active" type="button" data-mode="stacks">Antall stabler</button>
+          <button class="mode-button" type="button" data-mode="total">Totalt antall Bunner</button>
+        </div>
+
+        <label class="field-label" id="quantityLabel" for="quantityInput">Antall stabler</label>
+
+        <div class="quantity-row">
+          <button class="step-button" id="minusButton" type="button" aria-label="Reduser antall">−</button>
+          <input id="quantityInput" type="number" inputmode="numeric" min="1" step="1" value="1" />
+          <button class="step-button" id="plusButton" type="button" aria-label="Øk antall">+</button>
+        </div>
+
+        <div class="quick-grid" id="quickGrid"></div>
+
+        <div class="calculation">
+          <strong class="calculation-main" id="calculationMain">1 × 10 = 10 Bunner</strong>
+          <span class="calculation-note">Én stabel inneholder alltid 10 Bunner.</span>
+        </div>
+      </div>
+
+      <div id="directPanel" class="hidden">
+        <label class="field-label" id="directLabel" for="directQuantityInput">Antall</label>
+
+        <div class="quantity-row">
+          <button class="step-button" id="directMinusButton" type="button" aria-label="Reduser antall">−</button>
+          <input id="directQuantityInput" type="number" inputmode="numeric" min="1" step="1" value="1" />
+          <button class="step-button" id="directPlusButton" type="button" aria-label="Øk antall">+</button>
+        </div>
+
+        <div class="quick-grid">
+          <button class="quick-button direct-quick" type="button" data-value="1">1</button>
+          <button class="quick-button direct-quick" type="button" data-value="5">5</button>
+          <button class="quick-button direct-quick" type="button" data-value="10">10</button>
+          <button class="quick-button direct-quick" type="button" data-value="20">20</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">Bestilling</h2>
+      <div class="summary">
+        <div class="summary-row">
+          <span class="summary-label">Rampe</span>
+          <strong class="summary-value" id="summaryRamp">Ikke valgt</strong>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Vare</span>
+          <strong class="summary-value" id="summaryProduct">Bunner</strong>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Antall</span>
+          <strong class="summary-value" id="summaryQuantity">1 stabel × 10 = 10 Bunner</strong>
+        </div>
+      </div>
+
+      <button class="primary" id="submitButton" type="button">Send bestilling</button>
+      <div class="status" id="statusMessage" role="status" aria-live="polite"></div>
+      <div class="notice">Testversjon: Bestillingen lagres foreløpig bare på denne enheten. Felles skylagring og siden for lagerarbeideren legges til senere.</div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">Siste bestillinger på denne enheten</h2>
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "mottak_office_orders_v1";
+
+    const productNames = {
+      bunner: "Bunner",
+      hyller30: "Hyller x30",
+      hyller60: "Hyller x60"
+    };
+
+    const state = {
+      product: "bunner",
+      mode: "stacks",
+      stacks: 1,
+      bunnerTotal: 10,
+      directQuantity: 1
+    };
+
+    const rampInput = document.getElementById("rampInput");
+    const productButtons = [...document.querySelectorAll(".product-button")];
+    const modeButtons = [...document.querySelectorAll(".mode-button")];
+    const bunnerPanel = document.getElementById("bunnerPanel");
+    const directPanel = document.getElementById("directPanel");
+    const quantityLabel = document.getElementById("quantityLabel");
+    const quantityInput = document.getElementById("quantityInput");
+    const directQuantityInput = document.getElementById("directQuantityInput");
+    const directLabel = document.getElementById("directLabel");
+    const quickGrid = document.getElementById("quickGrid");
+    const calculationMain = document.getElementById("calculationMain");
+    const summaryRamp = document.getElementById("summaryRamp");
+    const summaryProduct = document.getElementById("summaryProduct");
+    const summaryQuantity = document.getElementById("summaryQuantity");
+    const statusMessage = document.getElementById("statusMessage");
+    const historyList = document.getElementById("historyList");
+
+    function positiveInteger(value, fallback = 1) {
+      const number = Number.parseInt(value, 10);
+      return Number.isFinite(number) && number > 0 ? number : fallback;
+    }
+
+    function setStatus(message, type = "") {
+      statusMessage.textContent = message;
+      statusMessage.className = `status ${type}`.trim();
+    }
+
+    function setBunnerMode(mode) {
+      state.mode = mode;
+
+      modeButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.mode === mode);
+      });
+
+      if (mode === "stacks") {
+        state.stacks = Math.max(1, Math.round(state.bunnerTotal / 10));
+        state.bunnerTotal = state.stacks * 10;
+        quantityLabel.textContent = "Antall stabler";
+        quantityInput.min = "1";
+        quantityInput.step = "1";
+        quantityInput.value = String(state.stacks);
+      } else {
+        state.bunnerTotal = Math.max(10, state.stacks * 10);
+        quantityLabel.textContent = "Totalt antall Bunner";
+        quantityInput.min = "10";
+        quantityInput.step = "10";
+        quantityInput.value = String(state.bunnerTotal);
+      }
+
+      renderQuickButtons();
+      render();
+    }
+
+    function setProduct(product) {
+      state.product = product;
+
+      productButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.product === product);
+      });
+
+      const isBunner = product === "bunner";
+      bunnerPanel.classList.toggle("hidden", !isBunner);
+      directPanel.classList.toggle("hidden", isBunner);
+
+      if (!isBunner) {
+        directLabel.textContent = `Antall ${productNames[product]}`;
+      }
+
+      setStatus("");
+      render();
+    }
+
+    function updateBunnerFromInput() {
+      if (state.mode === "stacks") {
+        state.stacks = positiveInteger(quantityInput.value, 1);
+        state.bunnerTotal = state.stacks * 10;
+        quantityInput.value = String(state.stacks);
+      } else {
+        state.bunnerTotal = positiveInteger(quantityInput.value, 10);
+        quantityInput.value = String(state.bunnerTotal);
+        state.stacks = state.bunnerTotal / 10;
+      }
+
+      render();
+    }
+
+    function changeBunner(direction) {
+      if (state.mode === "stacks") {
+        state.stacks = Math.max(1, state.stacks + direction);
+        state.bunnerTotal = state.stacks * 10;
+        quantityInput.value = String(state.stacks);
+      } else {
+        state.bunnerTotal = Math.max(10, state.bunnerTotal + direction * 10);
+        state.stacks = state.bunnerTotal / 10;
+        quantityInput.value = String(state.bunnerTotal);
+      }
+
+      render();
+    }
+
+    function changeDirect(direction) {
+      state.directQuantity = Math.max(1, state.directQuantity + direction);
+      directQuantityInput.value = String(state.directQuantity);
+      render();
+    }
+
+    function renderQuickButtons() {
+      const values = state.mode === "stacks" ? [1, 3, 6, 10] : [10, 30, 60, 100];
+      quickGrid.innerHTML = values.map((value) => (
+        `<button class="quick-button bunner-quick" type="button" data-value="${value}">${value}</button>`
+      )).join("");
+
+      document.querySelectorAll(".bunner-quick").forEach((button) => {
+        button.addEventListener("click", () => {
+          const value = positiveInteger(button.dataset.value, 1);
+
+          if (state.mode === "stacks") {
+            state.stacks = value;
+            state.bunnerTotal = value * 10;
+          } else {
+            state.bunnerTotal = value;
+            state.stacks = value / 10;
+          }
+
+          quantityInput.value = String(value);
+          render();
+        });
+      });
+    }
+
+    function bunnerSummary() {
+      const total = state.bunnerTotal;
+
+      if (total % 10 !== 0) {
+        const fullStacks = Math.floor(total / 10);
+        const loose = total % 10;
+        return `${fullStacks} hele stabler + ${loose} Bunner = ${total} Bunner`;
+      }
+
+      const stacks = total / 10;
+      const stackWord = stacks === 1 ? "stabel" : "stabler";
+      return `${stacks} ${stackWord} × 10 = ${total} Bunner`;
+    }
+
+    function render() {
+      const ramp = rampInput.value.trim();
+      summaryRamp.textContent = ramp || "Ikke valgt";
+      summaryProduct.textContent = productNames[state.product];
+
+      if (state.product === "bunner") {
+        const stacks = state.bunnerTotal / 10;
+        calculationMain.textContent = Number.isInteger(stacks)
+          ? `${stacks} × 10 = ${state.bunnerTotal} Bunner`
+          : bunnerSummary();
+        summaryQuantity.textContent = bunnerSummary();
+      } else {
+        summaryQuantity.textContent = `${state.directQuantity} stk. ${productNames[state.product]}`;
+      }
+    }
+
+    function readOrders() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveOrders(orders) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+    }
+
+    function formatDate(timestamp) {
+      return new Intl.DateTimeFormat("nb-NO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(timestamp));
+    }
+
+    function renderHistory() {
+      const orders = readOrders().slice().reverse().slice(0, 10);
+
+      if (!orders.length) {
+        historyList.innerHTML = '<div class="history-empty">Ingen bestillinger er lagret ennå.</div>';
+        return;
+      }
+
+      historyList.innerHTML = orders.map((order) => {
+        const amount = order.product === "bunner"
+          ? `${order.stacks} ${order.stacks === 1 ? "stabel" : "stabler"} × 10 = ${order.totalUnits} Bunner`
+          : `${order.quantity} stk. ${productNames[order.product]}`;
+
+        return `
+          <article class="history-item">
+            <div class="history-top">
+              <span class="history-ramp">Rampe ${escapeHtml(order.ramp)}</span>
+              <span class="history-time">${formatDate(order.createdAt)}</span>
+            </div>
+            <div class="history-product">${escapeHtml(amount)}</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function submitOrder() {
+      const ramp = rampInput.value.trim();
+
+      if (!ramp) {
+        setStatus("Skriv inn rampenummer.", "bad");
+        rampInput.focus();
+        return;
+      }
+
+      const order = {
+        id: `order-${Date.now()}`,
+        ramp,
+        product: state.product,
+        createdAt: Date.now(),
+        status: "new"
+      };
+
+      if (state.product === "bunner") {
+        if (state.bunnerTotal % 10 !== 0) {
+          setStatus("Totalt antall Bunner må være delelig med 10, fordi én stabel inneholder 10.", "bad");
+          quantityInput.focus();
+          return;
+        }
+
+        order.stacks = state.bunnerTotal / 10;
+        order.unitsPerStack = 10;
+        order.totalUnits = state.bunnerTotal;
+      } else {
+        order.quantity = state.directQuantity;
+      }
+
+      const orders = readOrders();
+      orders.push(order);
+      saveOrders(orders);
+      renderHistory();
+      setStatus(`Bestilling til rampe ${ramp} er lagret.`, "ok");
+    }
+
+    rampInput.addEventListener("input", () => {
+      rampInput.value = rampInput.value.replace(/[^0-9A-Za-z-]/g, "");
+      setStatus("");
+      render();
+    });
+
+    productButtons.forEach((button) => {
+      button.addEventListener("click", () => setProduct(button.dataset.product));
+    });
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => setBunnerMode(button.dataset.mode));
+    });
+
+    quantityInput.addEventListener("input", updateBunnerFromInput);
+    quantityInput.addEventListener("change", updateBunnerFromInput);
+    directQuantityInput.addEventListener("input", () => {
+      state.directQuantity = positiveInteger(directQuantityInput.value, 1);
+      directQuantityInput.value = String(state.directQuantity);
+      render();
+    });
+
+    document.getElementById("minusButton").addEventListener("click", () => changeBunner(-1));
+    document.getElementById("plusButton").addEventListener("click", () => changeBunner(1));
+    document.getElementById("directMinusButton").addEventListener("click", () => changeDirect(-1));
+    document.getElementById("directPlusButton").addEventListener("click", () => changeDirect(1));
+    document.getElementById("submitButton").addEventListener("click", submitOrder);
+
+    document.querySelectorAll(".direct-quick").forEach((button) => {
+      button.addEventListener("click", () => {
+        state.directQuantity = positiveInteger(button.dataset.value, 1);
+        directQuantityInput.value = String(state.directQuantity);
+        render();
+      });
+    });
+
+    renderQuickButtons();
+    render();
+    renderHistory();
+  </script>
+</body>
+</html>
