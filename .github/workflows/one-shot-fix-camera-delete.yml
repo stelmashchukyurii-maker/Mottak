@@ -1,3 +1,4 @@
+# retrigger after workflow exists on main
 name: One-shot fix camera delete
 
 on:
