@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>INN Nordic ID — v4.6 kandidat</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="mottak-live-v4.css?v=46" />
+  <link rel="stylesheet" href="mottak-live-v44-help.css?v=46" />
+  <style>
+    html,body{overscroll-behavior-y:none}
+    .candidate-banner{padding:12px 14px;border:1px solid rgba(246,185,75,.55);border-radius:14px;background:rgba(246,185,75,.12);color:#ffd58b;font-weight:800;line-height:1.45}
+    .mode-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+    .choice.locked{opacity:.55;cursor:not-allowed}
+    .scan-console{position:relative;min-height:210px;padding:18px;border:3px solid var(--accent);border-radius:18px;background:#070b14;overflow:hidden}
+    .scan-console.ready{border-color:var(--ok);box-shadow:0 0 0 4px rgba(72,213,151,.15)}
+    .scan-status{position:relative;z-index:2;display:flex;min-height:118px;align-items:center;justify-content:center;padding:12px;text-align:center;font-size:clamp(22px,6vw,38px);font-weight:900;line-height:1.2}
+    .scan-summary{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+    .scan-summary>div{padding:9px;border:1px solid var(--line);border-radius:11px;background:#101728;text-align:center}
+    .scan-summary span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}
+    .scan-summary strong{display:block;margin-top:3px;font-size:21px}
+    .wedge-layer{position:absolute;inset:0;z-index:1;pointer-events:none}
+    .wedge-input{position:absolute;left:8px;bottom:8px;width:4px;min-height:4px;height:4px;padding:0;border:0;opacity:.01;pointer-events:auto;resize:none;color:transparent;background:transparent;caret-color:transparent}
+    .wedge-input:nth-child(2){left:16px}
+    .scan-actions{display:grid;grid-template-columns:2fr 1fr;gap:9px;margin-top:10px}
+    .operation-table{min-width:620px}
+    .operation-table th:nth-child(1),.operation-table td:nth-child(1){width:48px;text-align:center}
+    .operation-table th:nth-child(2),.operation-table td:nth-child(2){width:165px}
+    .operation-table th:nth-child(3),.operation-table td:nth-child(3){width:95px}
+    .operation-table th:nth-child(4),.operation-table td:nth-child(4){width:95px}
+    .operation-table th:nth-child(5),.operation-table td:nth-child(5){width:120px}
+    .tech-log{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:12px;background:#090e1a;color:var(--muted);font:700 12px/1.5 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .big-message{margin:10px 0;padding:13px;border-radius:13px;background:#0d1426;font-size:17px;font-weight:850;line-height:1.45;white-space:pre-wrap}
+    .big-message.ok{color:var(--ok)}.big-message.warn{color:var(--warn)}.big-message.bad{color:var(--bad)}
+    .single-only{display:inline-block;padding:5px 9px;border-radius:999px;background:rgba(72,213,151,.14);color:var(--ok);font-size:12px;font-weight:900}
+    @media(max-width:760px){.mode-grid,.scan-summary,.scan-actions{grid-template-columns:1fr}.scan-console{min-height:245px}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="topbar">
+    <a class="back" href="index.html">← Hovedmeny</a>
+    <div class="version">Nordic ID Cloud v4.6 kandidat<br />Oppdatert 02.08.2026 kl. 21:03</div>
+  </div>
+
+  <h1 data-t="title">INN — Nordic ID</h1>
+  <p class="subtitle" data-v46="subtitle"></p>
+  <div class="candidate-banner" data-v46="candidateWarning"></div>
+
+  <section class="card">
+    <div class="grid3" id="languages">
+      <button class="choice" data-language="nb" type="button">Norsk</button>
+      <button class="choice" data-language="pl" type="button">Polski</button>
+      <button class="choice" data-language="uk" type="button">Українська</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 data-t="chooseProduct"></h2>
+    <div class="grid3" id="products">
+      <button class="choice active" data-product="bunner" type="button">Bunner</button>
+      <button class="choice locked" type="button" disabled>Hyller x30 — senere</button>
+      <button class="choice locked" type="button" disabled>Hyller x60 — senere</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 data-v46="chooseMode"></h2>
+    <div class="mode-grid">
+      <button class="choice active" type="button" data-mode="single" data-v46="singleBunner"></button>
+      <button class="choice locked" type="button" disabled data-v46="stackLater"></button>
+    </div>
+  </section>
+
+  <section class="card scan-anchor" id="scanCard">
+    <div class="toolbar">
+      <div>
+        <h2 data-v46="scanHeading"></h2>
+        <span class="single-only" data-v46="singleOnly"></span>
+      </div>
+      <button class="primary" id="activateScanButton" type="button" data-v46="activate"></button>
+    </div>
+
+    <p class="note" data-v46="scanHelp"></p>
+
+    <div class="scan-console" id="scanConsole" tabindex="-1">
+      <div class="scan-status" id="scanStatus"></div>
+      <div class="scan-summary">
+        <div><span data-v46="activeChannel"></span><strong id="activeChannel">A</strong></div>
+        <div><span data-v46="uniqueFound"></span><strong id="uniqueCount">0</strong></div>
+        <div><span data-v46="lastLength"></span><strong id="lastLength">0</strong></div>
+      </div>
+      <div class="wedge-layer" aria-hidden="false">
+        <textarea id="scanA" class="wedge-input" inputmode="none" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Nordic ID channel A"></textarea>
+        <textarea id="scanB" class="wedge-input" inputmode="none" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Nordic ID channel B"></textarea>
+      </div>
+    </div>
+
+    <div class="scan-actions">
+      <button class="secondary" id="restartFieldsButton" type="button" data-v46="restartFields"></button>
+      <button class="secondary" id="clearOperationButton" type="button" data-v46="clearOperation"></button>
+    </div>
+
+    <div class="big-message" id="operationMessage" aria-live="polite"></div>
+
+    <h2 data-v46="foundTags"></h2>
+    <div class="table-wrap">
+      <table class="operation-table">
+        <thead><tr><th>№</th><th data-v46="service"></th><th data-v46="upper"></th><th data-v46="lower"></th><th data-v46="tagStatus"></th></tr></thead>
+        <tbody id="operationBody"></tbody>
+      </table>
+    </div>
+
+    <details>
+      <summary data-v46="technicalDetails"></summary>
+      <div class="tech-log" id="technicalLog"></div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2 data-v46="checkHeading"></h2>
+    <div class="parts">
+      <div class="part"><label for="serviceCode" data-t="serviceCode"></label><input id="serviceCode" maxlength="12" /><small data-v46="serviceRule"></small></div>
+      <div class="part"><label for="upperNumber" data-t="upper"></label><input id="upperNumber" maxlength="6" inputmode="numeric" /><small data-t="upperHint"></small></div>
+      <div class="part"><label for="lowerNumber" data-t="lower"></label><input id="lowerNumber" maxlength="6" /><small data-t="lowerHint"></small></div>
+    </div>
+    <p class="note" data-v46="manualHelp"></p>
+    <button class="success" id="saveScanButton" type="button" data-v46="saveConfirm" disabled></button>
+    <div class="message" id="message" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <h2 data-t="counts"></h2>
+    <div class="stats">
+      <div class="stat"><span data-t="all"></span><strong id="allCount">0</strong></div>
+      <div class="stat"><span data-t="pending"></span><strong id="pendingCount">0</strong></div>
+      <div class="stat"><span data-t="verified"></span><strong id="verifiedCount">0</strong></div>
+      <div class="stat"><span data-t="photos"></span><strong id="photoCount">0</strong></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <h2 data-t="cloudTitle"></h2>
+      <div>
+        <a class="link" href="camera-live.html" data-t="openCamera"></a>
+        <button class="secondary" id="refreshButton" type="button" data-t="refresh"></button>
+      </div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th data-t="photo"></th><th data-t="time"></th><th data-t="product"></th><th data-t="serviceCode"></th><th data-t="upper"></th><th data-t="lower"></th><th data-t="status"></th><th data-t="source"></th><th data-t="action"></th></tr></thead><tbody id="cloudBody"></tbody></table></div>
+    <p class="note" data-v46="cloudNote"></p>
+  </section>
+</main>
+<script src="mottak-live-v4-text.js?v=46"></script>
+<script src="mottak-live-v46.js?v=46-2103"></script>
+</body>
+</html>
