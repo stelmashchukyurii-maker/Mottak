@@ -1,0 +1,113 @@
+name: One-shot fix camera delete
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/one-shot-fix-camera-delete.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-camera-page:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch camera-live.html
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path("camera-live.html")
+          text = path.read_text(encoding="utf-8")
+
+          old_version = "Kamera Cloud v3<br />Oppdatert 02.08.2026 kl. 12:19"
+          new_version = "Kamera Cloud v3.1<br />Oppdatert 02.08.2026 kl. 12:49"
+          if old_version not in text:
+              raise SystemExit("Expected version marker was not found")
+          text = text.replace(old_version, new_version, 1)
+
+          old_constants = 'GEMINI_MODEL="gemini-3.6-flash";const client='
+          new_constants = 'GEMINI_MODEL="gemini-3.6-flash";const DELETED_PREFIX="__deleted__|";const client='
+          if old_constants not in text:
+              raise SystemExit("Constants marker was not found")
+          text = text.replace(old_constants, new_constants, 1)
+
+          old_validation = 'function validNumbers(upper,lower){return /^\\d{6}$/.test(upper)&&/^[A-Z0-9]{6}$/.test(lower)}function renderChoices'
+          new_validation = 'function validNumbers(upper,lower){return /^\\d{6}$/.test(upper)&&/^[A-Z0-9]{6}$/.test(lower)}function isDeletedRow(row){return String(row?.raw_data||"").startsWith(DELETED_PREFIX)}function renderChoices'
+          if old_validation not in text:
+              raise SystemExit("Validation marker was not found")
+          text = text.replace(old_validation, new_validation, 1)
+
+          old_rows = 'rows=response.data||[];'
+          new_rows = 'rows=(response.data||[]).filter(row=>!isDeletedRow(row));'
+          if old_rows not in text:
+              raise SystemExit("Table rows marker was not found")
+          text = text.replace(old_rows, new_rows, 1)
+
+          duplicate_pattern = re.compile(
+              r'async function duplicateExists\(id,upper,lower\)\{.*?\}\nasync function saveEdit',
+              re.S,
+          )
+          duplicate_replacement = '''async function duplicateExists(id,upper,lower){const query=await client.from(TABLE).select("id,raw_data").eq("upper_number",upper).eq("lower_number",lower).limit(50);if(query.error)throw query.error;return(query.data||[]).some(row=>row.id!==id&&!isDeletedRow(row))}
+async function saveEdit'''
+          text, count = duplicate_pattern.subn(duplicate_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f"Duplicate-check replacement count was {count}")
+
+          delete_pattern = re.compile(
+              r'async function deleteRow\(id,path\)\{.*?\}\n\$\("apiKey"\)',
+              re.S,
+          )
+          delete_replacement = '''function tombstoneNumbers(row){const compact=String(row.id||"").replace(/[^A-Za-z0-9]/g,"").toUpperCase();return{upper:String(Date.now()).slice(-6),lower:("D"+compact.slice(-5)).padEnd(6,"X").slice(0,6)}}
+async function softDeleteRow(row){const tombstone=tombstoneNumbers(row),response=await client.from(TABLE).update({status:"invalid",raw_data:`${DELETED_PREFIX}${new Date().toISOString()}|${row.id}`,scanner_code:"",upper_number:tombstone.upper,lower_number:tombstone.lower,photo_url:null,photo_path:null,confidence:null}).eq("id",row.id).select("id").maybeSingle();if(response.error)throw response.error;if(!response.data?.id)throw new Error(t().permissionBlocked)}
+async function deleteRow(id,path){if(busy||!confirm(t().confirmDelete))return;const row=rows.find(item=>item.id===id);if(!row)return;busy=true;show(t().deleting);try{const response=await client.from(TABLE).delete().eq("id",id).select("id").maybeSingle(),physicallyDeleted=!response.error&&response.data?.id===id;if(!physicallyDeleted)await softDeleteRow(row);editingId=null;let cleanupError=null;if(path){const removed=await client.storage.from(BUCKET).remove([path]);cleanupError=removed.error||null}await loadTable(false);show(cleanupError?`${t().deleted}\\n${t().photoCleanupWarning}`:t().deleted,cleanupError?"warn":"ok")}catch(error){show(`${t().deleteError}\\n${error.message||error}`,"bad")}finally{busy=false}}
+$("apiKey")'''
+          text, count = delete_pattern.subn(lambda _: delete_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f"Delete replacement count was {count}")
+
+          required = [
+              "Kamera Cloud v3.1",
+              "const DELETED_PREFIX",
+              "function isDeletedRow",
+              "function softDeleteRow",
+              "filter(row=>!isDeletedRow(row))",
+          ]
+          missing = [item for item in required if item not in text]
+          if missing:
+              raise SystemExit(f"Missing patched markers: {missing}")
+
+          path.write_text(text, encoding="utf-8")
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path("camera-live.html").read_text(encoding="utf-8")
+          match = re.search(r'<canvas id="canvas" hidden></canvas>\s*<script>(.*?)</script>', text, re.S)
+          if not match:
+              raise SystemExit("Inline JavaScript was not found")
+          Path("/tmp/camera-live.js").write_text(match.group(1), encoding="utf-8")
+          PY
+          node --check /tmp/camera-live.js
+
+      - name: Commit fix and remove one-shot workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add camera-live.html
+          git rm .github/workflows/one-shot-fix-camera-delete.yml
+          git commit -m "Fix camera delete fallback"
+          git push
