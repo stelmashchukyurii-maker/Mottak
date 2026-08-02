@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Перевірка сторінок BaMavaremottak</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #151c30;
+      --panel-dark: #0f1628;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --line: #303b59;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --danger: #ff7373;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #11182a);
+      color: var(--text);
+    }
+
+    .app {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      padding: 16px 14px 56px;
+    }
+
+    .version {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel-dark);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 12px 0 6px;
+      font-size: clamp(28px, 7vw, 43px);
+      line-height: 1.08;
+    }
+
+    .intro {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .notice {
+      margin: 14px 0 18px;
+      padding: 13px 14px;
+      border: 1px solid rgba(244, 196, 48, 0.55);
+      border-radius: 14px;
+      background: rgba(244, 196, 48, 0.08);
+      line-height: 1.45;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 10px 0;
+      background: rgba(11, 16, 32, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    button,
+    .open-button {
+      min-height: 48px;
+      border: 0;
+      border-radius: 13px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .copy-button {
+      background: var(--ok);
+      color: #082117;
+    }
+
+    .clear-button {
+      border: 1px solid var(--line);
+      background: var(--panel-dark);
+      color: var(--text);
+    }
+
+    .status {
+      grid-column: 1 / -1;
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .list {
+      display: grid;
+      gap: 15px;
+    }
+
+    .card {
+      padding: 16px;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 28, 48, 0.97);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .number {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--accent);
+      color: #17130a;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .path {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel-dark);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    input {
+      min-height: 52px;
+      padding: 12px 13px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    textarea {
+      min-height: 100px;
+      padding: 12px 13px;
+      line-height: 1.45;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.12);
+    }
+
+    .open-button {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      background: var(--accent);
+      color: #17130a;
+      text-decoration: none;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .saved-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer {
+      margin-top: 20px;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-dark);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 520px) {
+      .toolbar { grid-template-columns: 1fr; }
+      .status { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <span class="version">Тестова сторінка v1 · Оновлено 02.08.2026 о 10:09</span>
+    <h1>Перевірка 11 сторінок</h1>
+    <p class="intro">Відкривай кожну сторінку, повертайся сюди, вписуй свою назву та коментар.</p>
+
+    <div class="notice">
+      Назви й коментарі автоматично зберігаються тільки в цьому браузері на цьому пристрої. Щоб передати їх мені, натисни <strong>«Скопіювати для ChatGPT»</strong> і встав текст у розмову.
+    </div>
+
+    <div class="toolbar">
+      <button class="copy-button" id="copyAll" type="button">Скопіювати для ChatGPT</button>
+      <button class="clear-button" id="clearAll" type="button">Очистити всі записи</button>
+      <div class="status" id="status" aria-live="polite"></div>
+    </div>
+
+    <section class="list" id="pageList"></section>
+
+    <div class="footer">
+      Це окрема тестова сторінка. Вона поки не додана до Головної і нічого не змінює в інших модулях проєкту.
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "bamavaremottak_review_pages_v1";
+
+    const pages = [
+      { id: 1, path: "index.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/" },
+      { id: 2, path: "start.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/start.html" },
+      { id: 3, path: "inn.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/inn.html" },
+      { id: 4, path: "mottak.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/mottak.html" },
+      { id: 5, path: "bestilling.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/bestilling.html" },
+      { id: 6, path: "mottak-live-v2.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/mottak-live-v2.html" },
+      { id: 7, path: "mottak-live.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/mottak-live.html" },
+      { id: 8, path: "nordic-id-bulk-scanner-v2.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/nordic-id-bulk-scanner-v2.html" },
+      { id: 9, path: "nordic-id-bulk-scanner.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/nordic-id-bulk-scanner.html" },
+      { id: 10, path: "nordic-id.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/nordic-id.html" },
+      { id: 11, path: "scanner-test.html", url: "https://stelmashchukyurii-maker.github.io/Mottak/scanner-test.html" }
+    ];
+
+    const pageList = document.getElementById("pageList");
+    const status = document.getElementById("status");
+    let saved = loadSaved();
+
+    function loadSaved() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        return value && typeof value === "object" ? value : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveAll(message = "Збережено автоматично") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      status.textContent = message;
+      clearTimeout(saveAll.timer);
+      saveAll.timer = setTimeout(() => {
+        status.textContent = "";
+      }, 1800);
+    }
+
+    function buttonText(page, name) {
+      return name.trim() ? `${page.id}. ${name.trim()} — відкрити` : `Відкрити сторінку ${page.id}`;
+    }
+
+    function render() {
+      pageList.innerHTML = "";
+
+      for (const page of pages) {
+        const data = saved[page.id] || { name: "", comment: "" };
+        const card = document.createElement("article");
+        card.className = "card";
+
+        card.innerHTML = `
+          <div class="card-head">
+            <div class="number">${page.id}</div>
+            <div class="path">${page.path}<br>${page.url}</div>
+          </div>
+
+          <label for="name-${page.id}">Моя назва цієї сторінки</label>
+          <input
+            id="name-${page.id}"
+            type="text"
+            autocomplete="off"
+            placeholder="Напиши, що це за сторінка"
+            value="${escapeHtml(data.name || "")}" />
+
+          <a class="open-button" id="open-${page.id}" href="${page.url}" target="_blank" rel="noopener noreferrer">
+            ${escapeHtml(buttonText(page, data.name || ""))}
+          </a>
+
+          <label for="comment-${page.id}">Мій коментар</label>
+          <textarea
+            id="comment-${page.id}"
+            placeholder="Наприклад: залишити, видалити, це головна, це тест, не працює камера...">${escapeHtml(data.comment || "")}</textarea>
+
+          <div class="saved-note">Поля зберігаються автоматично.</div>
+        `;
+
+        const nameInput = card.querySelector(`#name-${page.id}`);
+        const commentInput = card.querySelector(`#comment-${page.id}`);
+        const openButton = card.querySelector(`#open-${page.id}`);
+
+        nameInput.addEventListener("input", () => {
+          saved[page.id] = saved[page.id] || {};
+          saved[page.id].name = nameInput.value;
+          saved[page.id].comment = commentInput.value;
+          openButton.textContent = buttonText(page, nameInput.value);
+          saveAll();
+        });
+
+        commentInput.addEventListener("input", () => {
+          saved[page.id] = saved[page.id] || {};
+          saved[page.id].name = nameInput.value;
+          saved[page.id].comment = commentInput.value;
+          saveAll();
+        });
+
+        pageList.appendChild(card);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function buildCopyText() {
+      const lines = ["ПЕРЕВІРКА СТОРІНОК BaMavaremottak", ""];
+
+      for (const page of pages) {
+        const data = saved[page.id] || {};
+        lines.push(`${page.id}. ${data.name?.trim() || "Без назви"}`);
+        lines.push(`Файл: ${page.path}`);
+        lines.push(`Посилання: ${page.url}`);
+        lines.push(`Коментар: ${data.comment?.trim() || "Немає коментаря"}`);
+        lines.push("");
+      }
+
+      return lines.join("\n");
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        helper.style.position = "fixed";
+        helper.style.opacity = "0";
+        document.body.appendChild(helper);
+        helper.focus();
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+      }
+    }
+
+    document.getElementById("copyAll").addEventListener("click", async () => {
+      await copyText(buildCopyText());
+      status.textContent = "Скопійовано. Тепер встав цей текст у розмову з ChatGPT.";
+    });
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      const confirmed = confirm("Очистити всі назви та коментарі на цій сторінці?");
+      if (!confirmed) return;
+      saved = {};
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+      status.textContent = "Усі поля очищено.";
+    });
+
+    render();
+  </script>
+</body>
+</html>
