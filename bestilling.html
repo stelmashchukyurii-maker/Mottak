@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
   <title>Varebestilling til rampe</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -16,7 +17,9 @@
       --muted: #aab4ce;
       --accent: #f4c430;
       --ok: #48d597;
-      --bad: #ff6b6b;
+      --warn: #f6b94b;
+      --bad: #ff7373;
+      --info: #75b7ff;
       --line: #303b59;
     }
 
@@ -31,12 +34,13 @@
     }
 
     button,
-    input { font: inherit; }
+    input,
+    select { font: inherit; }
 
     .app {
-      width: min(760px, 100%);
+      width: min(980px, 100%);
       margin: 0 auto;
-      padding: 14px 14px 44px;
+      padding: 14px 14px 48px;
     }
 
     .topbar {
@@ -47,10 +51,11 @@
       margin-bottom: 12px;
     }
 
-    .home-link {
+    .home-link,
+    .database-link {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      justify-content: center;
       min-height: 44px;
       padding: 9px 12px;
       border: 1px solid var(--line);
@@ -89,8 +94,17 @@
     }
 
     .section-title {
-      margin: 0 0 12px;
+      margin: 0;
       font-size: 19px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
     .field-label {
@@ -100,7 +114,8 @@
     }
 
     input[type="text"],
-    input[type="number"] {
+    input[type="number"],
+    select {
       width: 100%;
       min-height: 54px;
       padding: 12px 14px;
@@ -108,12 +123,13 @@
       border-radius: 13px;
       background: var(--card-dark);
       color: var(--text);
-      font-size: 21px;
-      font-weight: 850;
+      font-size: 19px;
+      font-weight: 800;
       outline: none;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.14);
     }
@@ -125,11 +141,24 @@
       border-radius: 13px;
       font-weight: 850;
       cursor: pointer;
-      transition: transform 0.08s ease, opacity 0.2s ease, border-color 0.2s ease;
+      transition: transform 0.08s ease, opacity 0.2s ease;
     }
 
     button:active { transform: scale(0.985); }
     button:disabled { cursor: not-allowed; opacity: 0.45; }
+
+    .primary {
+      min-height: 58px;
+      background: var(--accent);
+      color: #17130a;
+      font-size: 18px;
+    }
+
+    .secondary {
+      min-height: 50px;
+      background: #2c395c;
+      color: var(--text);
+    }
 
     .product-grid {
       display: grid;
@@ -263,28 +292,17 @@
       .action-grid { grid-template-columns: 1fr 0.48fr; }
     }
 
-    .primary {
-      min-height: 58px;
-      background: var(--accent);
-      color: #17130a;
-      font-size: 18px;
-    }
-
-    .secondary {
-      min-height: 58px;
-      background: #2c395c;
-      color: var(--text);
-    }
-
     .status {
       min-height: 24px;
       margin-top: 12px;
       color: var(--muted);
       line-height: 1.4;
       text-align: center;
+      white-space: pre-wrap;
     }
 
     .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
     .status.bad { color: var(--bad); }
 
     .notice {
@@ -297,6 +315,232 @@
       font-size: 13px;
       line-height: 1.4;
     }
+
+    .cloud-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .connection-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--warn);
+      box-shadow: 0 0 0 4px rgba(246, 185, 75, 0.12);
+    }
+
+    .connection-dot.ok {
+      background: var(--ok);
+      box-shadow: 0 0 0 4px rgba(72, 213, 151, 0.12);
+    }
+
+    .connection-dot.bad {
+      background: var(--bad);
+      box-shadow: 0 0 0 4px rgba(255, 115, 115, 0.12);
+    }
+
+    .database-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .database-actions button,
+    .database-actions a {
+      min-height: 44px;
+      width: auto;
+    }
+
+    .database-link { background: #2c395c; }
+
+    .database-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    @media (min-width: 700px) {
+      .database-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    .db-stat {
+      padding: 12px 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card-dark);
+      text-align: center;
+    }
+
+    .db-stat span {
+      display: block;
+      min-height: 31px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .db-stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: clamp(27px, 7vw, 39px);
+      line-height: 1;
+    }
+
+    .db-stat small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .status-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 9px;
+    }
+
+    @media (min-width: 700px) {
+      .status-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    .status-box {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(13, 20, 38, 0.78);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .status-box span { color: var(--muted); font-size: 12px; }
+    .status-box strong { font-size: 20px; }
+
+    .database-note {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .database-filters {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin: 13px 0 9px;
+    }
+
+    @media (min-width: 620px) {
+      .database-filters { grid-template-columns: 1fr 1fr; }
+    }
+
+    .database-filters select {
+      min-height: 46px;
+      padding: 9px 11px;
+      border-width: 1px;
+      font-size: 15px;
+    }
+
+    .database-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .database-empty {
+      padding: 17px;
+      border: 1px dashed var(--line);
+      border-radius: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .database-item {
+      display: grid;
+      grid-template-columns: 70px minmax(0, 1fr);
+      gap: 11px;
+      align-items: center;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card-dark);
+    }
+
+    .database-photo,
+    .database-no-photo {
+      width: 70px;
+      height: 58px;
+      border-radius: 10px;
+      background: #070b14;
+    }
+
+    .database-photo { object-fit: cover; display: block; }
+
+    .database-no-photo {
+      display: grid;
+      place-items: center;
+      border: 1px dashed var(--line);
+      color: var(--warn);
+      font-size: 10px;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .database-item-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .database-product { color: var(--accent); font-weight: 900; }
+    .database-time { color: var(--muted); font-size: 11px; }
+
+    .database-codes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 6px;
+      font-family: Consolas, monospace;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .code-chip {
+      padding: 4px 7px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #070b14;
+    }
+
+    .database-meta {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 4px 7px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .status-pending { color: #2a1a00; background: var(--warn); }
+    .status-verified { color: #062418; background: var(--ok); }
+    .status-invalid { color: #2b080d; background: var(--bad); }
 
     .history-list {
       display: grid;
@@ -352,12 +596,84 @@
 <body>
   <main class="app">
     <div class="topbar">
-      <a class="home-link" href="start.html">← Hovedmeny</a>
-      <span class="version">Kontorbestilling v2<br />Oppdatert 02.08.2026 kl. 08:07</span>
+      <a class="home-link" href="index.html">← Hovedmeny</a>
+      <span class="version">Kontorbestilling v3<br />Oppdatert 03.08.2026 kl. 11:16</span>
     </div>
 
     <h1>Varebestilling til rampe</h1>
-    <p class="subtitle">Velg rampe, vare og ønsket antall. Denne siden brukes på kontoret og har ingen skanning.</p>
+    <p class="subtitle">Kontoret kan se den felles INN-databasen og opprette en varebestilling uten skanning.</p>
+
+    <section class="card" id="databaseOverview">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Felles database — INN</h2>
+          <div class="cloud-head">
+            <span class="connection-dot" id="connectionDot"></span>
+            <span id="connectionText">Kobler til databasen…</span>
+          </div>
+        </div>
+
+        <div class="database-actions">
+          <button class="secondary" id="refreshDatabaseButton" type="button">Oppdater</button>
+          <a class="database-link" href="camera-live.html">Åpne full tabell</a>
+        </div>
+      </div>
+
+      <div class="database-stats">
+        <div class="db-stat">
+          <span>Alle registreringer</span>
+          <strong id="databaseAllCount">0</strong>
+          <small>pending + godkjent + problem</small>
+        </div>
+        <div class="db-stat">
+          <span>Bunner godkjent</span>
+          <strong id="databaseBunnerCount">0</strong>
+          <small>registrerte enheter</small>
+        </div>
+        <div class="db-stat">
+          <span>Hyller x30 godkjent</span>
+          <strong id="databaseHyller30Count">0</strong>
+          <small>registrerte enheter</small>
+        </div>
+        <div class="db-stat">
+          <span>Hyller x60 godkjent</span>
+          <strong id="databaseHyller60Count">0</strong>
+          <small>registrerte enheter</small>
+        </div>
+      </div>
+
+      <div class="status-stats">
+        <div class="status-box"><span>Pending</span><strong id="databasePendingCount">0</strong></div>
+        <div class="status-box"><span>Godkjent</span><strong id="databaseVerifiedCount">0</strong></div>
+        <div class="status-box"><span>Problem</span><strong id="databaseInvalidCount">0</strong></div>
+        <div class="status-box"><span>Venter på foto</span><strong id="databaseNoPhotoCount">0</strong></div>
+      </div>
+
+      <p class="database-note">
+        Tallene viser registreringer i <strong>mottak_scans</strong>. Kontorbestillinger trekkes foreløpig ikke fra databasen.
+      </p>
+
+      <div class="database-filters">
+        <select id="databaseProductFilter" aria-label="Filtrer produkt">
+          <option value="all">Alle produkter</option>
+          <option value="bunner">Bunner</option>
+          <option value="hyller30">Hyller x30</option>
+          <option value="hyller60">Hyller x60</option>
+        </select>
+
+        <select id="databaseStatusFilter" aria-label="Filtrer status">
+          <option value="all">Alle statuser</option>
+          <option value="pending">Pending</option>
+          <option value="verified">Godkjent</option>
+          <option value="invalid">Problem</option>
+          <option value="no-photo">Venter på foto</option>
+        </select>
+      </div>
+
+      <div class="database-list" id="databaseList">
+        <div class="database-empty">Laster registreringer…</div>
+      </div>
+    </section>
 
     <section class="card">
       <h2 class="section-title">1. Velg rampe</h2>
@@ -438,7 +754,9 @@
       </div>
 
       <div class="status" id="statusMessage" role="status" aria-live="polite"></div>
-      <div class="notice">Bestillingen lagres foreløpig på denne enheten. Den lagres med status <strong>Ny</strong> og er klar for senere tilkobling til lagersiden og felles skylagring.</div>
+      <div class="notice">
+        Bestillingen lagres foreløpig på denne enheten med status <strong>Ny</strong>. Den felles databasen over er bare en lesevisning.
+      </div>
     </section>
 
     <section class="card">
@@ -448,8 +766,22 @@
   </main>
 
   <script>
+    "use strict";
+
     const STORAGE_KEY = "mottak_office_orders_v1";
     const UNITS_PER_BUNNER_STACK = 10;
+
+    const SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+    const DATABASE_TABLE = "mottak_scans";
+
+    const databaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
 
     const productNames = {
       bunner: "Bunner",
@@ -464,6 +796,9 @@
       bunnerTotal: 10,
       directQuantity: 1
     };
+
+    let databaseRows = [];
+    let databaseBusy = false;
 
     const rampInput = document.getElementById("rampInput");
     const productButtons = [...document.querySelectorAll(".product-button")];
@@ -482,14 +817,35 @@
     const statusMessage = document.getElementById("statusMessage");
     const historyList = document.getElementById("historyList");
 
+    const connectionDot = document.getElementById("connectionDot");
+    const connectionText = document.getElementById("connectionText");
+    const databaseList = document.getElementById("databaseList");
+    const databaseProductFilter = document.getElementById("databaseProductFilter");
+    const databaseStatusFilter = document.getElementById("databaseStatusFilter");
+    const refreshDatabaseButton = document.getElementById("refreshDatabaseButton");
+
     function positiveInteger(value, fallback = 1) {
       const number = Number.parseInt(value, 10);
       return Number.isFinite(number) && number > 0 ? number : fallback;
     }
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
     function setStatus(message, type = "") {
       statusMessage.textContent = message;
       statusMessage.className = `status ${type}`.trim();
+    }
+
+    function setConnection(message, type = "") {
+      connectionText.textContent = message;
+      connectionDot.className = `connection-dot ${type}`.trim();
     }
 
     function setBunnerMode(mode) {
@@ -512,18 +868,20 @@
       }
 
       renderQuickButtons();
-      render();
+      renderOrder();
     }
 
     function setProduct(product) {
       state.product = product;
       productButtons.forEach((button) => button.classList.toggle("active", button.dataset.product === product));
+
       const isBunner = product === "bunner";
       bunnerPanel.classList.toggle("hidden", !isBunner);
       directPanel.classList.toggle("hidden", isBunner);
+
       if (!isBunner) directLabel.textContent = `Antall ${productNames[product]}`;
       setStatus("");
-      render();
+      renderOrder();
     }
 
     function updateBunnerFromInput() {
@@ -536,7 +894,7 @@
         quantityInput.value = String(state.bunnerTotal);
         state.stacks = state.bunnerTotal / UNITS_PER_BUNNER_STACK;
       }
-      render();
+      renderOrder();
     }
 
     function changeBunner(direction) {
@@ -549,22 +907,25 @@
         state.stacks = state.bunnerTotal / UNITS_PER_BUNNER_STACK;
         quantityInput.value = String(state.bunnerTotal);
       }
-      render();
+      renderOrder();
     }
 
     function changeDirect(direction) {
       state.directQuantity = Math.max(1, state.directQuantity + direction);
       directQuantityInput.value = String(state.directQuantity);
-      render();
+      renderOrder();
     }
 
     function renderQuickButtons() {
       const values = state.mode === "stacks" ? [1, 3, 6, 10] : [10, 30, 60, 100];
-      quickGrid.innerHTML = values.map((value) => `<button class="quick-button bunner-quick" type="button" data-value="${value}">${value}</button>`).join("");
+      quickGrid.innerHTML = values.map((value) => (
+        `<button class="quick-button bunner-quick" type="button" data-value="${value}">${value}</button>`
+      )).join("");
 
       document.querySelectorAll(".bunner-quick").forEach((button) => {
         button.addEventListener("click", () => {
           const value = positiveInteger(button.dataset.value, 1);
+
           if (state.mode === "stacks") {
             state.stacks = value;
             state.bunnerTotal = value * UNITS_PER_BUNNER_STACK;
@@ -572,8 +933,9 @@
             state.bunnerTotal = value;
             state.stacks = value / UNITS_PER_BUNNER_STACK;
           }
+
           quantityInput.value = String(value);
-          render();
+          renderOrder();
         });
       });
     }
@@ -584,7 +946,7 @@
       return `${stacks} ${stackWord} × ${UNITS_PER_BUNNER_STACK} = ${state.bunnerTotal} Bunner`;
     }
 
-    function render() {
+    function renderOrder() {
       const ramp = rampInput.value.trim();
       summaryRamp.textContent = ramp || "Ikke valgt";
       summaryProduct.textContent = productNames[state.product];
@@ -618,15 +980,6 @@
         hour: "2-digit",
         minute: "2-digit"
       }).format(new Date(timestamp));
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
     }
 
     function renderHistory() {
@@ -725,10 +1078,111 @@
       setStatus(`Bestilling til rampe ${ramp} er lagret og har status Ny.`, "ok");
     }
 
+    function statusLabel(status) {
+      if (status === "verified") return "Godkjent";
+      if (status === "invalid") return "Problem";
+      return "Pending";
+    }
+
+    function statusPill(status) {
+      const safeStatus = ["pending", "verified", "invalid"].includes(status) ? status : "pending";
+      return `<span class="status-pill status-${safeStatus}">${statusLabel(safeStatus)}</span>`;
+    }
+
+    function databaseFilteredRows() {
+      const productFilter = databaseProductFilter.value;
+      const statusFilter = databaseStatusFilter.value;
+
+      return databaseRows.filter((row) => {
+        const productMatches = productFilter === "all" || row.product === productFilter;
+        const statusMatches = statusFilter === "all"
+          || (statusFilter === "no-photo" ? !row.photo_url : row.status === statusFilter);
+        return productMatches && statusMatches;
+      });
+    }
+
+    function renderDatabaseStats() {
+      const verifiedRows = databaseRows.filter((row) => row.status === "verified");
+
+      document.getElementById("databaseAllCount").textContent = databaseRows.length;
+      document.getElementById("databaseBunnerCount").textContent = verifiedRows.filter((row) => row.product === "bunner").length;
+      document.getElementById("databaseHyller30Count").textContent = verifiedRows.filter((row) => row.product === "hyller30").length;
+      document.getElementById("databaseHyller60Count").textContent = verifiedRows.filter((row) => row.product === "hyller60").length;
+      document.getElementById("databasePendingCount").textContent = databaseRows.filter((row) => row.status === "pending").length;
+      document.getElementById("databaseVerifiedCount").textContent = verifiedRows.length;
+      document.getElementById("databaseInvalidCount").textContent = databaseRows.filter((row) => row.status === "invalid").length;
+      document.getElementById("databaseNoPhotoCount").textContent = databaseRows.filter((row) => !row.photo_url).length;
+    }
+
+    function renderDatabaseList() {
+      renderDatabaseStats();
+      const rows = databaseFilteredRows().slice(0, 30);
+
+      if (!rows.length) {
+        databaseList.innerHTML = '<div class="database-empty">Ingen registreringer passer til filteret.</div>';
+        return;
+      }
+
+      databaseList.innerHTML = rows.map((row) => {
+        const photo = row.photo_url
+          ? `<a href="${escapeHtml(row.photo_url)}" target="_blank" rel="noopener"><img class="database-photo" src="${escapeHtml(row.photo_url)}" loading="lazy" alt="Etikett"></a>`
+          : '<div class="database-no-photo">Venter på foto</div>';
+
+        return `
+          <article class="database-item">
+            ${photo}
+            <div>
+              <div class="database-item-top">
+                <span class="database-product">${escapeHtml(productNames[row.product] || row.product || "Ukjent produkt")}</span>
+                <span class="database-time">${formatDate(row.created_at)}</span>
+              </div>
+              <div class="database-codes">
+                <span class="code-chip">${escapeHtml(row.upper_number || "------")}</span>
+                <span class="code-chip">${escapeHtml(row.lower_number || "------")}</span>
+              </div>
+              <div class="database-meta">
+                ${statusPill(row.status)}
+                <span>Kilde: ${escapeHtml(row.source || "—")}</span>
+                ${row.scanner_code ? `<span>Service: ${escapeHtml(row.scanner_code)}</span>` : ""}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function loadDatabase(showError = true) {
+      if (databaseBusy) return;
+      databaseBusy = true;
+      refreshDatabaseButton.disabled = true;
+      setConnection("Oppdaterer databasen…");
+
+      try {
+        const response = await databaseClient
+          .from(DATABASE_TABLE)
+          .select("id,created_at,product,scanner_code,upper_number,lower_number,status,source,photo_url")
+          .order("created_at", { ascending: false })
+          .limit(500);
+
+        if (response.error) throw response.error;
+
+        databaseRows = response.data || [];
+        renderDatabaseList();
+        setConnection(`Tilkoblet · ${databaseRows.length} registreringer`, "ok");
+      } catch (error) {
+        setConnection("Kunne ikke lese databasen", "bad");
+        databaseList.innerHTML = '<div class="database-empty">Databasen kunne ikke lastes. Prøv «Oppdater».</div>';
+        if (showError) setStatus(`Kunne ikke laste felles database.\n${error.message || error}`, "bad");
+      } finally {
+        databaseBusy = false;
+        refreshDatabaseButton.disabled = false;
+      }
+    }
+
     rampInput.addEventListener("input", () => {
       rampInput.value = rampInput.value.replace(/[^0-9A-Za-z-]/g, "");
       setStatus("");
-      render();
+      renderOrder();
     });
 
     productButtons.forEach((button) => button.addEventListener("click", () => setProduct(button.dataset.product)));
@@ -740,7 +1194,7 @@
     directQuantityInput.addEventListener("input", () => {
       state.directQuantity = positiveInteger(directQuantityInput.value, 1);
       directQuantityInput.value = String(state.directQuantity);
-      render();
+      renderOrder();
     });
 
     document.getElementById("minusButton").addEventListener("click", () => changeBunner(-1));
@@ -754,13 +1208,28 @@
       button.addEventListener("click", () => {
         state.directQuantity = positiveInteger(button.dataset.value, 1);
         directQuantityInput.value = String(state.directQuantity);
-        render();
+        renderOrder();
       });
     });
 
+    databaseProductFilter.addEventListener("change", renderDatabaseList);
+    databaseStatusFilter.addEventListener("change", renderDatabaseList);
+    refreshDatabaseButton.addEventListener("click", () => loadDatabase(true));
+
+    databaseClient
+      .channel("office-database-overview-v1")
+      .on("postgres_changes", { event: "*", schema: "public", table: DATABASE_TABLE }, () => {
+        if (!databaseBusy) loadDatabase(false);
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setConnection("Tilkoblet · sanntidsoppdatering aktiv", "ok");
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setConnection("Sanntidsoppdatering er avbrutt", "bad");
+      });
+
     renderQuickButtons();
-    render();
+    renderOrder();
     renderHistory();
+    loadDatabase(true);
   </script>
 </body>
 </html>
