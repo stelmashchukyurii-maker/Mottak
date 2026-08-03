@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>UT — liten test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--ok:#48d597;--bad:#ff7373}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text)}
+    main{width:min(680px,100%);margin:0 auto;padding:18px 14px 48px}.card{padding:18px;border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:0 12px 28px rgba(0,0,0,.24)}
+    h1{margin:0 0 8px;font-size:clamp(30px,8vw,46px)}p{color:var(--muted);line-height:1.5}.summary{margin:16px 0;padding:15px;border:2px solid var(--accent);border-radius:16px;background:rgba(244,196,48,.08)}
+    .summary strong{display:block;font-size:25px;color:var(--accent)}button,a{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;margin-top:10px;padding:12px;border:0;border-radius:14px;font:inherit;font-weight:900;text-decoration:none}
+    button{background:var(--accent);color:#17130a;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}a{background:#2c395c;color:var(--text)}.status{min-height:25px;margin-top:13px;text-align:center;white-space:pre-wrap}.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+  </style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <h1>Liten UT-test</h1>
+    <p>Denne siden oppretter ett lite testoppdrag i den felles Supabase-databasen.</p>
+    <div class="summary">
+      <strong>RAMPE 99</strong>
+      1 stabel Bunner × 10 = 10 Bunner<br>
+      CMR ref.: TEST-LITEN
+    </div>
+    <button id="createButton" type="button">Opprett testoppdrag</button>
+    <div class="status" id="status"></div>
+    <a href="utsending.html">Åpne UT — Lager og utsending</a>
+  </section>
+</main>
+<script>
+"use strict";
+const client=window.supabase.createClient(
+  "https://hzjsatehehhpgpskckfi.supabase.co",
+  "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya",
+  {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
+);
+const button=document.getElementById("createButton");
+const statusEl=document.getElementById("status");
+function setStatus(text,type=""){statusEl.textContent=text;statusEl.className=`status ${type}`.trim()}
+button.addEventListener("click",async()=>{
+  button.disabled=true;
+  setStatus("Oppretter testoppdrag…");
+  const now=new Date();
+  const stamp=now.toISOString().replace(/[-:TZ.]/g,"").slice(0,14);
+  const order={
+    order_number:`UT-TEST-${stamp}`,
+    ramp:"99",
+    cmr_ref:"TEST-LITEN",
+    status:"new",
+    bunner_stacks:1,
+    hyller30_sets:0,
+    hyller60_sets:0,
+    office_note:"LITEN TEST: 1 stabel Bunner. Skal avbrytes etter kontroll."
+  };
+  try{
+    const response=await client.from("ut_orders").insert(order).select().single();
+    if(response.error)throw response.error;
+    setStatus(`Opprettet: ${response.data.order_number}\nRampe 99 · 1 stabel Bunner`,"ok");
+    button.textContent="Testoppdrag opprettet";
+  }catch(error){
+    setStatus(error.message||String(error),"bad");
+    button.disabled=false;
+  }
+});
+</script>
+</body>
+</html>
