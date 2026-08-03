@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Знайти доступну Bunner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--line:#303b59;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff7373}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text);display:grid;place-items:center;padding:18px}.card{width:min(680px,100%);padding:20px;border:1px solid var(--line);border-radius:20px;background:var(--card)}h1{margin:0 0 8px;font-size:32px}.muted{color:var(--muted);line-height:1.45}.result{margin-top:16px;padding:16px;border:2px solid var(--accent);border-radius:16px;background:#0d1426}.label{color:var(--muted);font-size:12px}.code{margin:5px 0 14px;font:700 22px Consolas,monospace;word-break:break-all}.btn{width:100%;min-height:50px;border:0;border-radius:12px;font-weight:900;cursor:pointer}.primary{background:var(--accent);color:#17130a}.secondary{margin-top:10px;background:#2c395c;color:var(--text)}.msg{margin-top:12px;text-align:center;color:var(--muted)}.ok{color:var(--ok)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<main class="card">
+<h1>Доступна Bunner</h1>
+<p class="muted">Сторінка бере з Supabase першу підтверджену Bunner зі статусом <strong>in_stock</strong>.</p>
+<button class="btn primary" id="load">Знайти номер</button>
+<section class="result" id="result" hidden>
+<div class="label">SCANNER CODE / EPC</div><div class="code" id="scanner">—</div>
+<div class="label">ВЕРХНІЙ НОМЕР</div><div class="code" id="upper">—</div>
+<div class="label">НИЖНІЙ НОМЕР</div><div class="code" id="lower">—</div>
+<button class="btn secondary" id="copy">Скопіювати scanner code</button>
+</section>
+<div class="msg" id="msg"></div>
+</main>
+<script>
+const URL='https://hzjsatehehhpgpskckfi.supabase.co';
+const KEY='sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya';
+const client=supabase.createClient(URL,KEY,{auth:{persistSession:false}});
+const $=id=>document.getElementById(id);
+let current='';
+async function load(){
+ $('msg').className='msg';$('msg').textContent='Шукаю доступну Bunner…';$('result').hidden=true;
+ const r=await client.from('mottak_scans').select('scanner_code,upper_number,lower_number,created_at').eq('product','bunner').eq('status','verified').eq('stock_status','in_stock').order('created_at',{ascending:false}).limit(1);
+ if(r.error){$('msg').className='msg bad';$('msg').textContent=r.error.message;return}
+ if(!r.data?.length){$('msg').className='msg bad';$('msg').textContent='Немає доступної Bunner зі статусом in_stock.';return}
+ const row=r.data[0];current=row.scanner_code||row.upper_number||row.lower_number||'';
+ $('scanner').textContent=row.scanner_code||'—';$('upper').textContent=row.upper_number||'—';$('lower').textContent=row.lower_number||'—';$('result').hidden=false;$('msg').className='msg ok';$('msg').textContent='Номер знайдено. Для тесту краще використовувати scanner code / EPC.';
+}
+$('load').addEventListener('click',load);
+$('copy').addEventListener('click',async()=>{if(!current)return;await navigator.clipboard.writeText(current);$('msg').className='msg ok';$('msg').textContent='Scanner code скопійовано.'});
+load();
+</script>
+</body>
+</html>
