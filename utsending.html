@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>UT — Lager og utsending</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      color-scheme:dark;
+      --bg:#0b1020;--panel:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;
+      --line:#303b59;--accent:#f4c430;--ok:#48d597;--warn:#f6b94b;--bad:#ff7373;--info:#75b7ff
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text)}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.45}
+    .app{width:min(1040px,100%);margin:0 auto;padding:14px 14px 54px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .home-link,.small-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);text-decoration:none;font-weight:850}
+    .version{color:var(--muted);font-size:11px;text-align:right;line-height:1.4}
+    h1{margin:5px 0 7px;font-size:clamp(29px,7vw,45px);line-height:1.04}
+    .subtitle{margin:0 0 14px;color:var(--muted);line-height:1.45}
+    .card{margin:12px 0;padding:15px;border:1px solid var(--line);border-radius:19px;background:rgba(21,28,48,.97);box-shadow:0 12px 28px rgba(0,0,0,.22)}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+    .section-title{margin:0;font-size:20px}
+    .connection{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:800}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 4px rgba(246,185,75,.12)}
+    .dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(72,213,151,.12)}
+    .dot.bad{background:var(--bad);box-shadow:0 0 0 4px rgba(255,115,115,.12)}
+    .mode-note{padding:11px 12px;border:1px solid rgba(246,185,75,.32);border-radius:13px;background:rgba(246,185,75,.08);color:#f8dc8b;font-size:13px;line-height:1.45}
+    .toolbar{display:grid;grid-template-columns:1fr;gap:8px;margin-top:11px}
+    @media(min-width:700px){.toolbar{grid-template-columns:1fr 1fr auto auto}}
+    input,select,textarea{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(244,196,48,.12)}
+    textarea{min-height:96px;resize:vertical}
+    .btn{min-height:48px;padding:10px 13px;border:0;border-radius:12px;font-weight:900}
+    .primary{background:var(--accent);color:#17130a}
+    .secondary{background:#2c395c;color:var(--text)}
+    .success{background:var(--ok);color:#062418}
+    .danger{background:rgba(255,115,115,.16);color:#ffb4b4;border:1px solid rgba(255,115,115,.38)}
+    .info{background:rgba(117,183,255,.17);color:#cfe6ff;border:1px solid rgba(117,183,255,.36)}
+    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    @media(min-width:760px){.stats{grid-template-columns:repeat(6,minmax(0,1fr))}}
+    .stat{padding:11px 8px;border:1px solid var(--line);border-radius:13px;background:var(--dark);text-align:center}
+    .stat span{display:block;color:var(--muted);font-size:11px;line-height:1.2}.stat strong{display:block;margin-top:5px;font-size:25px}
+    .orders{display:grid;gap:10px}
+    .empty{padding:18px;border:1px dashed var(--line);border-radius:13px;color:var(--muted);text-align:center}
+    .order{padding:14px;border:2px solid var(--line);border-radius:16px;background:var(--dark)}
+    .order.new{border-color:var(--accent)}.order.received{border-color:var(--info)}.order.in_progress{border-color:var(--warn)}.order.staged{border-color:var(--ok)}.order.problem{border-color:var(--bad)}
+    .order-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .order-number{color:var(--muted);font-size:12px;font-weight:850}.ramp{margin-top:3px;color:var(--accent);font-size:clamp(29px,8vw,44px);font-weight:950;line-height:1}
+    .pill{display:inline-block;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:950;background:#2c395c;color:var(--text)}
+    .pill.new{background:var(--accent);color:#17130a}.pill.received{background:var(--info);color:#071a2e}.pill.in_progress{background:var(--warn);color:#2a1a00}.pill.staged,.pill.completed{background:var(--ok);color:#062418}.pill.problem,.pill.cancelled{background:var(--bad);color:#2b080d}
+    .meta{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.5}
+    .products{display:grid;gap:7px;margin-top:11px}
+    .product-row{display:grid;grid-template-columns:minmax(110px,.7fr) minmax(0,1fr);gap:10px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:#070b14}
+    .product-name{font-weight:900}.product-value{text-align:right;font-weight:900}.product-value.done{color:var(--ok)}
+    .order-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.order-actions .btn{flex:1 1 145px}
+    .detail-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:820px){.detail-grid{grid-template-columns:.9fr 1.1fr}}
+    .hero{padding:15px;border:2px solid var(--accent);border-radius:17px;background:rgba(244,196,48,.07);text-align:center}
+    .hero .ramp{font-size:clamp(44px,12vw,74px)}
+    .cmr{margin-top:7px;color:var(--muted);font-weight:850}
+    .total-box{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+    .total-cell{padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--dark);text-align:center}
+    .total-cell span{display:block;color:var(--muted);font-size:12px}.total-cell strong{display:block;margin-top:5px;font-size:27px}
+    .scan-box{padding:14px;border:2px solid var(--info);border-radius:16px;background:rgba(117,183,255,.07)}
+    .scan-title{margin:0 0 5px;font-size:21px}.scan-note{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.4}
+    .scan-row{display:grid;grid-template-columns:1fr auto;gap:8px}.scan-row .btn{min-width:110px}
+    .message{min-height:23px;margin-top:9px;text-align:center;color:var(--muted);white-space:pre-wrap;line-height:1.4}.message.ok{color:var(--ok)}.message.bad{color:var(--bad)}.message.warn{color:var(--warn)}
+    .scan-list{display:grid;gap:7px;max-height:390px;overflow:auto;margin-top:10px}
+    .scan-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:var(--dark)}
+    .scan-product{color:var(--accent);font-weight:900}.scan-codes{margin-top:4px;font-family:Consolas,monospace;font-size:12px;word-break:break-all}.scan-time{margin-top:4px;color:var(--muted);font-size:10px}.remove{width:42px;min-height:42px;padding:0;border:1px solid rgba(255,115,115,.35);border-radius:10px;background:rgba(255,115,115,.12);color:#ffb2b2;font-size:20px}
+    .steps{display:grid;gap:8px;margin-top:12px}.step{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--dark)}
+    .step-mark{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#2c395c;font-weight:950}.step.done .step-mark{background:var(--ok);color:#062418}.step strong{display:block}.step small{display:block;margin-top:2px;color:var(--muted)}
+    .confirm-box{margin-top:12px;padding:13px;border:1px solid rgba(72,213,151,.35);border-radius:14px;background:rgba(72,213,151,.07)}
+    .confirm-check{display:flex;align-items:flex-start;gap:10px}.confirm-check input{width:22px;min-height:22px;margin-top:1px;box-shadow:none}
+    .confirm-box .btn{width:100%;margin-top:10px;min-height:58px;font-size:18px}
+    .modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;padding:14px;background:rgba(0,0,0,.72);z-index:20}.modal.open{display:flex}
+    .modal-card{width:min(620px,100%);max-height:92vh;overflow:auto;padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:0 22px 60px rgba(0,0,0,.5)}
+    .modal-actions{display:flex;gap:8px;margin-top:11px}.modal-actions .btn{flex:1}
+    .hidden{display:none!important}
+    @media print{
+      body{background:#fff;color:#000}.topbar,.subtitle,.toolbar,.stats,.orders,.scan-box,.order-actions,.confirm-box,.steps,.mode-note,.no-print{display:none!important}
+      .app{width:100%;padding:0}.card{border:0;box-shadow:none;background:#fff;color:#000}.hero,.total-cell,.product-row{background:#fff;color:#000;border-color:#555}.meta,.cmr{color:#333}
+    }
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="topbar">
+    <a class="home-link" href="index.html">← Hovedmeny</a>
+    <div class="version">UT Lager v1 TEST<br>Oppdatert 03.08.2026 kl. 15:10</div>
+  </div>
+
+  <h1>UT — Lager og utsending</h1>
+  <p class="subtitle">Motta kontoroppdrag, skann konkrete registreringer, flytt varene til rampen, kontroller CMR-tallene og bekreft utsending.</p>
+
+  <section class="card">
+    <div class="section-head">
+      <h2 class="section-title">Tilkobling og oppdrag</h2>
+      <div class="connection"><span class="dot" id="cloudDot"></span><span id="cloudText">Kobler til UT-databasen…</span></div>
+    </div>
+    <div class="mode-note" id="modeNote">Siden prøver først den felles Supabase-tabellen <strong>ut_orders</strong>. Hvis tabellen ikke er opprettet ennå, går siden automatisk i lokal TEST-modus.</div>
+    <div class="toolbar">
+      <select id="statusFilter" aria-label="Statusfilter">
+        <option value="active">Aktive oppdrag</option><option value="all">Alle statuser</option><option value="new">Ny</option><option value="received">Mottatt</option><option value="in_progress">Pågår</option><option value="staged">På rampe</option><option value="problem">Problem</option><option value="completed">Ferdig</option><option value="cancelled">Avbrutt</option>
+      </select>
+      <input id="searchInput" type="search" placeholder="Søk rampe, UT-nummer eller CMR-ref." />
+      <button class="btn secondary" id="refreshButton" type="button">Oppdater</button>
+      <button class="btn info" id="demoButton" type="button">Legg inn CMR-test</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="stats">
+      <div class="stat"><span>Ny</span><strong id="statNew">0</strong></div>
+      <div class="stat"><span>Mottatt</span><strong id="statReceived">0</strong></div>
+      <div class="stat"><span>Pågår</span><strong id="statProgress">0</strong></div>
+      <div class="stat"><span>På rampe</span><strong id="statStaged">0</strong></div>
+      <div class="stat"><span>Problem</span><strong id="statProblem">0</strong></div>
+      <div class="stat"><span>Ferdig</span><strong id="statCompleted">0</strong></div>
+    </div>
+  </section>
+
+  <section class="card" id="orderListSection">
+    <div class="section-head"><h2 class="section-title">Oppdrag fra kontoret</h2><span class="version" id="orderCount">0 oppdrag</span></div>
+    <div class="orders" id="orders"><div class="empty">Laster oppdrag…</div></div>
+  </section>
+
+  <section class="card hidden" id="detailSection">
+    <div class="section-head">
+      <h2 class="section-title">Aktivt oppdrag</h2>
+      <button class="btn secondary no-print" id="closeDetailButton" type="button">Lukk</button>
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <div class="hero">
+          <div class="order-number" id="detailOrderNumber">UT-…</div>
+          <div class="ramp" id="detailRamp">RAMPE —</div>
+          <div class="cmr" id="detailCmr">CMR ref.: —</div>
+          <div style="margin-top:10px"><span class="pill new" id="detailStatus">Ny</span></div>
+        </div>
+
+        <div class="products" id="detailProducts"></div>
+        <div class="total-box">
+          <div class="total-cell"><span>Totalt Bunner</span><strong id="detailTotalBunner">0 / 0</strong></div>
+          <div class="total-cell"><span>Totalt hyller</span><strong id="detailTotalHyller">0 / 0</strong></div>
+        </div>
+        <div class="meta" id="detailMeta"></div>
+
+        <div class="steps no-print" id="steps"></div>
+        <div class="order-actions no-print" id="detailActions"></div>
+      </div>
+
+      <div>
+        <div class="scan-box no-print">
+          <h3 class="scan-title">Skann vare</h3>
+          <p class="scan-note">Nordic ID kan skrive EPC/servicekode i feltet som et tastatur. Trykk Enter eller «Registrer». Du kan også skrive øvre eller nedre etikett-nummer.</p>
+          <div class="scan-row">
+            <input id="scanInput" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="EPC / servicekode / etikett-nummer" />
+            <button class="btn primary" id="scanButton" type="button">Registrer</button>
+          </div>
+          <div class="message" id="scanMessage"></div>
+          <div class="scan-list" id="scanList"><div class="empty">Ingen varer er skannet til dette oppdraget.</div></div>
+        </div>
+
+        <div class="confirm-box no-print">
+          <label class="confirm-check"><input id="confirmCheck" type="checkbox"><span>Jeg bekrefter at alle varer er kontrollert, plassert på riktig rampe og at tallene stemmer med CMR-dokumentet.</span></label>
+          <button class="btn success" id="confirmDispatchButton" type="button" disabled>Bekreft utsending</button>
+          <div class="message" id="confirmMessage"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="textModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2 id="modalTitle">Kommentar</h2>
+    <label for="modalText" style="display:block;margin:10px 0 6px;font-weight:850" id="modalLabel">Skriv kommentar</label>
+    <textarea id="modalText"></textarea>
+    <div class="modal-actions"><button class="btn secondary" id="modalCancel" type="button">Avbryt</button><button class="btn primary" id="modalSave" type="button">Lagre</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const SUPABASE_URL="https://hzjsatehehhpgpskckfi.supabase.co";
+const SUPABASE_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+const ORDERS_TABLE="ut_orders";
+const SCANS_TABLE="ut_order_scans";
+const MOTTAK_TABLE="mottak_scans";
+const LOCAL_ORDERS_KEY="bamavaremottak_ut_orders_v1";
+const LOCAL_SCANS_KEY="bamavaremottak_ut_scans_v1";
+const OFFICE_LOCAL_KEY="mottak_office_orders_v1";
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+
+const productNames={bunner:"Bunner",hyller30:"Hyller x30",hyller60:"Hyller x60"};
+const statusNames={new:"Ny",received:"Mottatt",in_progress:"Pågår",staged:"På rampe",problem:"Problem",completed:"Ferdig",cancelled:"Avbrutt"};
+let cloudMode=false,orders=[],selectedOrderId=null,selectedScans=[],modalAction=null,busy=false;
+
+const $=id=>document.getElementById(id);
+const cloudDot=$("cloudDot"),cloudText=$("cloudText"),modeNote=$("modeNote"),ordersEl=$("orders"),detailSection=$("detailSection"),scanInput=$("scanInput"),scanMessage=$("scanMessage"),confirmMessage=$("confirmMessage");
+
+function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function nowIso(){return new Date().toISOString()}
+function formatDate(value){if(!value)return"—";return new Intl.DateTimeFormat("nb-NO",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(value))}
+function uid(prefix="id"){return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`}
+function setCloud(text,type=""){cloudText.textContent=text;cloudDot.className=`dot ${type}`.trim()}
+function setMessage(el,text,type=""){el.textContent=text;el.className=`message ${type}`.trim()}
+function readLocal(key){try{const value=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(value)?value:[]}catch{return[]}}
+function saveLocal(key,value){localStorage.setItem(key,JSON.stringify(value))}
+function normalizeStatus(value){return statusNames[value]?value:"new"}
+function statusPill(status){const safe=normalizeStatus(status);return `<span class="pill ${safe}">${statusNames[safe]}</span>`}
+function requested(order){
+  const bunnerStacks=Number(order.bunner_stacks??order.stacks??0)||0;
+  const h30=Number(order.hyller30_sets??(order.product==="hyller30"?order.quantity:0)??0)||0;
+  const h60=Number(order.hyller60_sets??(order.product==="hyller60"?order.quantity:0)??0)||0;
+  const directBunner=order.product==="bunner"&&!order.bunner_stacks?Math.round((Number(order.totalUnits)||0)/10):0;
+  const bs=bunnerStacks||directBunner;
+  return {bunnerStacks:bs,h30,h60,totalBunner:bs*10+h30+h60,totalHyller:h30*30+h60*60};
+}
+function scannedCounts(scans){
+  const bunner=scans.filter(x=>x.product==="bunner"&&!x.released_at).length;
+  const h30=scans.filter(x=>x.product==="hyller30"&&!x.released_at).length;
+  const h60=scans.filter(x=>x.product==="hyller60"&&!x.released_at).length;
+  return {bunner,h30,h60,totalBunner:bunner*10+h30+h60,totalHyller:h30*30+h60*60};
+}
+function isComplete(order,scans){const r=requested(order),s=scannedCounts(scans);return s.bunner===r.bunnerStacks&&s.h30===r.h30&&s.h60===r.h60}
+function findOrder(){return orders.find(o=>String(o.id)===String(selectedOrderId))||null}
+
+function importOfficeLocalOrders(){
+  const existing=readLocal(LOCAL_ORDERS_KEY),existingIds=new Set(existing.map(x=>x.source_order_id||x.id));
+  const office=readLocal(OFFICE_LOCAL_KEY);
+  let changed=false;
+  office.forEach(item=>{
+    if(existingIds.has(item.id))return;
+    const order={id:uid("local-ut"),source_order_id:item.id,order_number:`LOCAL-${String(existing.length+1).padStart(4,"0")}`,ramp:item.ramp||"—",cmr_ref:"",status:item.status==="new"?"new":normalizeStatus(item.status),bunner_stacks:item.product==="bunner"?Number(item.stacks||0):0,hyller30_sets:item.product==="hyller30"?Number(item.quantity||item.totalUnits||0):0,hyller60_sets:item.product==="hyller60"?Number(item.quantity||item.totalUnits||0):0,office_note:"Importert fra kontorbestilling på denne enheten.",created_at:new Date(item.createdAt||Date.now()).toISOString(),updated_at:nowIso(),local_only:true};
+    existing.push(order);changed=true;
+  });
+  if(changed)saveLocal(LOCAL_ORDERS_KEY,existing);
+}
+
+async function loadOrders(){
+  if(busy)return;busy=true;$("refreshButton").disabled=true;setCloud("Oppdaterer UT-databasen…");
+  try{
+    const response=await client.from(ORDERS_TABLE).select("*").order("created_at",{ascending:false}).limit(500);
+    if(response.error)throw response.error;
+    cloudMode=true;orders=response.data||[];setCloud(`Felles UT-database · ${orders.length} oppdrag`,"ok");
+    modeNote.innerHTML="<strong>Felles modus:</strong> Oppdrag og status lagres i Supabase og er tilgjengelige fra kontor og lager. Skanning reserverer konkrete INN-registreringer.";
+  }catch(error){
+    cloudMode=false;importOfficeLocalOrders();orders=readLocal(LOCAL_ORDERS_KEY).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    setCloud("Lokal TEST-modus — UT-tabellen er ikke aktiv",orders.length?"":"bad");
+    modeNote.innerHTML="<strong>Lokal TEST-modus:</strong> siden fungerer på denne enheten, men andre telefoner ser ikke oppdragene ennå. Kjør <strong>supabase-ut-setup.sql</strong> for felles drift.";
+    console.warn(error);
+  }finally{busy=false;$("refreshButton").disabled=false;renderOrders();if(selectedOrderId&&findOrder())await openOrder(selectedOrderId,false)}
+}
+
+function filteredOrders(){
+  const filter=$("statusFilter").value,q=$("searchInput").value.trim().toLowerCase();
+  return orders.filter(order=>{
+    const status=normalizeStatus(order.status),active=!['completed','cancelled'].includes(status);
+    const statusOk=filter==="all"||(filter==="active"?active:status===filter);
+    const text=[order.order_number,order.ramp,order.cmr_ref,order.office_note].join(" ").toLowerCase();
+    return statusOk&&(!q||text.includes(q));
+  });
+}
+function renderStats(){
+  const count=s=>orders.filter(o=>normalizeStatus(o.status)===s).length;
+  $("statNew").textContent=count("new");$("statReceived").textContent=count("received");$("statProgress").textContent=count("in_progress");$("statStaged").textContent=count("staged");$("statProblem").textContent=count("problem");$("statCompleted").textContent=count("completed");
+}
+function productRows(order,counts=null){
+  const r=requested(order),s=counts||{bunner:0,h30:0,h60:0};
+  const rows=[];
+  if(r.bunnerStacks>0)rows.push(["Bunner",`${s.bunner} / ${r.bunnerStacks} stabler`,s.bunner===r.bunnerStacks]);
+  if(r.h30>0)rows.push(["Hyller x30",`${s.h30} / ${r.h30} sett`,s.h30===r.h30]);
+  if(r.h60>0)rows.push(["Hyller x60",`${s.h60} / ${r.h60} sett`,s.h60===r.h60]);
+  return rows.map(x=>`<div class="product-row"><span class="product-name">${x[0]}</span><span class="product-value ${x[2]?"done":""}">${x[1]}</span></div>`).join("");
+}
+function renderOrders(){
+  renderStats();const list=filteredOrders();$("orderCount").textContent=`${list.length} oppdrag`;
+  if(!list.length){ordersEl.innerHTML='<div class="empty">Ingen oppdrag passer til filteret.</div>';return}
+  ordersEl.innerHTML=list.map(order=>{
+    const r=requested(order),status=normalizeStatus(order.status);
+    return `<article class="order ${status}"><div class="order-top"><div><div class="order-number">${escapeHtml(order.order_number||order.id)}</div><div class="ramp">RAMPE ${escapeHtml(order.ramp||"—")}</div></div>${statusPill(status)}</div><div class="meta">CMR ref.: <strong>${escapeHtml(order.cmr_ref||"Ikke registrert")}</strong><br>Opprettet: ${formatDate(order.created_at)}</div><div class="products">${productRows(order)}</div><div class="meta"><strong>Totalt:</strong> ${r.totalBunner} Bunner · ${r.totalHyller} hyller${order.office_note?`<br>Kommentar: ${escapeHtml(order.office_note)}`:""}</div><div class="order-actions"><button class="btn primary" type="button" data-open="${escapeHtml(order.id)}">Åpne oppdrag</button></div></article>`;
+  }).join("");
+  document.querySelectorAll("[data-open]").forEach(btn=>btn.addEventListener("click",()=>openOrder(btn.dataset.open,true)));
+}
+
+async function loadScans(orderId){
+  if(cloudMode){const response=await client.from(SCANS_TABLE).select("*").eq("order_id",orderId).is("released_at",null).order("scanned_at",{ascending:false});if(response.error)throw response.error;return response.data||[]}
+  return readLocal(LOCAL_SCANS_KEY).filter(x=>String(x.order_id)===String(orderId)&&!x.released_at);
+}
+async function openOrder(id,scroll=true){
+  selectedOrderId=id;const order=findOrder();if(!order)return;
+  try{selectedScans=await loadScans(id)}catch(error){selectedScans=[];setMessage(scanMessage,`Kunne ikke laste skanninger.\n${error.message||error}`,"bad")}
+  detailSection.classList.remove("hidden");renderDetail();if(scroll)detailSection.scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>scanInput.focus(),280);
+}
+function renderSteps(order){
+  const status=normalizeStatus(order.status),rank={new:0,received:1,in_progress:2,problem:2,staged:3,completed:4,cancelled:0}[status]??0;
+  const items=[["Mottatt","Oppdraget er sett av lageret"],["Pågår","Varene skannes og samles"],["På rampe","Alt er plassert på riktig rampe"],["Ferdig","CMR kontrollert og utsending bekreftet"]];
+  $("steps").innerHTML=items.map((x,i)=>`<div class="step ${rank>i?"done":""}"><div class="step-mark">${rank>i?"✓":i+1}</div><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join("");
+}
+function renderActions(order){
+  const status=normalizeStatus(order.status),actions=[];
+  if(status==="new")actions.push(["Motta oppdrag","received","info"]);
+  if(status==="received"||status==="problem")actions.push(["Start arbeid","in_progress","primary"]);
+  if(status==="in_progress")actions.push(["Plassert på rampe","staged","success"]);
+  if(!['completed','cancelled'].includes(status)){actions.push(["Problem","problem","danger"]);actions.push(["Avbryt","cancelled","danger"])}
+  actions.push(["Skriv ut / CMR","print","secondary"]);
+  $("detailActions").innerHTML=actions.map(a=>`<button class="btn ${a[2]}" type="button" data-action="${a[1]}">${a[0]}</button>`).join("");
+  document.querySelectorAll("[data-action]").forEach(btn=>btn.addEventListener("click",()=>handleAction(btn.dataset.action)));
+}
+function renderDetail(){
+  const order=findOrder();if(!order)return;const r=requested(order),s=scannedCounts(selectedScans),status=normalizeStatus(order.status),complete=isComplete(order,selectedScans);
+  $("detailOrderNumber").textContent=order.order_number||order.id;$("detailRamp").textContent=`RAMPE ${order.ramp||"—"}`;$("detailCmr").textContent=`CMR ref.: ${order.cmr_ref||"Ikke registrert"}`;$("detailStatus").className=`pill ${status}`;$("detailStatus").textContent=statusNames[status];
+  $("detailProducts").innerHTML=productRows(order,s);$("detailTotalBunner").textContent=`${s.totalBunner} / ${r.totalBunner}`;$("detailTotalHyller").textContent=`${s.totalHyller} / ${r.totalHyller}`;
+  $("detailMeta").innerHTML=`Opprettet: ${formatDate(order.created_at)}${order.received_at?`<br>Mottatt: ${formatDate(order.received_at)}`:""}${order.started_at?`<br>Startet: ${formatDate(order.started_at)}`:""}${order.staged_at?`<br>På rampe: ${formatDate(order.staged_at)}`:""}${order.completed_at?`<br>Ferdig: ${formatDate(order.completed_at)}`:""}${order.office_note?`<br>Kontor: ${escapeHtml(order.office_note)}`:""}${order.warehouse_note?`<br>Lager: ${escapeHtml(order.warehouse_note)}`:""}`;
+  renderSteps(order);renderActions(order);renderScanList();
+  const scanAllowed=['received','in_progress','problem'].includes(status);scanInput.disabled=!scanAllowed;$("scanButton").disabled=!scanAllowed;
+  $("confirmCheck").disabled=status!=="staged"||!complete;$("confirmDispatchButton").disabled=status!=="staged"||!complete||!$("confirmCheck").checked;
+  if(status==="staged"&&!complete)setMessage(confirmMessage,"Antallet stemmer ikke. Gå tilbake til Pågår eller registrer problem.","bad");
+  else if(status==="staged"&&complete)setMessage(confirmMessage,"Alle tall stemmer. Kontroller CMR og bekreft utsending.","ok");
+  else if(status==="completed")setMessage(confirmMessage,"Utsendingen er ferdig og registrert.","ok");
+  else setMessage(confirmMessage,"");
+}
+function renderScanList(){
+  if(!selectedScans.length){$("scanList").innerHTML='<div class="empty">Ingen varer er skannet til dette oppdraget.</div>';return}
+  const order=findOrder(),locked=['staged','completed','cancelled'].includes(normalizeStatus(order.status));
+  $("scanList").innerHTML=selectedScans.map(scan=>`<div class="scan-item"><div><div class="scan-product">${escapeHtml(productNames[scan.product]||scan.product)}</div><div class="scan-codes">${escapeHtml(scan.scanner_code||"—")} · ${escapeHtml(scan.upper_number||"------")} · ${escapeHtml(scan.lower_number||"------")}</div><div class="scan-time">${formatDate(scan.scanned_at)}</div></div><button class="remove" type="button" data-remove="${escapeHtml(scan.id||scan.mottak_scan_id)}" ${locked?"disabled":""}>×</button></div>`).join("");
+  document.querySelectorAll("[data-remove]").forEach(btn=>btn.addEventListener("click",()=>removeScan(btn.dataset.remove)));
+}
+
+async function updateOrder(patch){
+  const order=findOrder();if(!order)return;
+  patch.updated_at=nowIso();
+  if(cloudMode){const response=await client.from(ORDERS_TABLE).update(patch).eq("id",order.id).select().single();if(response.error)throw response.error;Object.assign(order,response.data)}
+  else{Object.assign(order,patch);saveLocal(LOCAL_ORDERS_KEY,orders)}
+  renderOrders();renderDetail();
+}
+async function handleAction(action){
+  const order=findOrder();if(!order)return;
+  if(action==="print"){window.print();return}
+  if(action==="problem"){openTextModal("Registrer problem","Beskriv problemet. Oppdraget blir markert rødt.",async text=>{await updateOrder({status:"problem",problem_reason:text,warehouse_note:text})});return}
+  if(action==="cancelled"){openTextModal("Avbryt oppdrag","Skriv årsaken. Reserverte varer blir frigitt i felles modus.",async text=>{if(cloudMode){const rpc=await client.rpc("cancel_ut_order",{p_order_id:order.id,p_reason:text});if(rpc.error)throw rpc.error;await loadOrders()}else{await updateOrder({status:"cancelled",cancelled_at:nowIso(),cancel_reason:text})}});return}
+  if(action==="staged"&&!isComplete(order,selectedScans)){setMessage(scanMessage,"Du kan ikke flytte oppdraget til rampen før riktig antall er skannet.","bad");return}
+  const patch={status:action};if(action==="received")patch.received_at=nowIso();if(action==="in_progress")patch.started_at=nowIso();if(action==="staged")patch.staged_at=nowIso();
+  try{
+    if(action==="staged"&&cloudMode){const rpc=await client.rpc("stage_ut_order",{p_order_id:order.id});if(rpc.error)throw rpc.error;await loadOrders()}else await updateOrder(patch);
+    setMessage(scanMessage,`Status endret til ${statusNames[action]}.`,"ok")
+  }catch(error){setMessage(scanMessage,error.message||String(error),"bad")}
+}
+
+async function registerScan(){
+  const order=findOrder(),value=scanInput.value.trim().toUpperCase();if(!order||!value)return;
+  if(!['received','in_progress','problem'].includes(normalizeStatus(order.status))){setMessage(scanMessage,"Start eller motta oppdraget før skanning.","bad");return}
+  $("scanButton").disabled=true;setMessage(scanMessage,"Kontrollerer nummeret…");
+  try{
+    let record;
+    if(cloudMode){
+      const rpc=await client.rpc("reserve_ut_scan",{p_order_id:order.id,p_scan_value:value});if(rpc.error)throw rpc.error;record=Array.isArray(rpc.data)?rpc.data[0]:rpc.data;
+      selectedScans=await loadScans(order.id);
+    }else{
+      const response=await client.from(MOTTAK_TABLE).select("id,product,scanner_code,upper_number,lower_number,status,photo_url").or(`scanner_code.eq.${value},upper_number.eq.${value},lower_number.eq.${value}`).limit(2);
+      if(response.error)throw response.error;if(!response.data?.length)throw new Error("Nummeret finnes ikke i INN-databasen.");if(response.data.length>1)throw new Error("Flere registreringer har samme nummer. Bruk servicekoden/EPC.");
+      const row=response.data[0];if(row.status!=="verified")throw new Error("Registreringen er ikke godkjent i INN.");
+      if(selectedScans.some(x=>String(x.mottak_scan_id)===String(row.id)))throw new Error("Denne varen er allerede skannet i oppdraget.");
+      const r=requested(order),s=scannedCounts(selectedScans),limit={bunner:r.bunnerStacks,hyller30:r.h30,hyller60:r.h60}[row.product]??0,current={bunner:s.bunner,hyller30:s.h30,hyller60:s.h60}[row.product]??0;
+      if(!limit)throw new Error(`${productNames[row.product]||row.product} er ikke bestilt i dette oppdraget.`);if(current>=limit)throw new Error(`Riktig antall ${productNames[row.product]} er allerede skannet.`);
+      record={id:uid("local-scan"),order_id:order.id,mottak_scan_id:row.id,product:row.product,scanner_code:row.scanner_code,upper_number:row.upper_number,lower_number:row.lower_number,scanned_at:nowIso(),local_only:true};
+      const all=readLocal(LOCAL_SCANS_KEY);all.push(record);saveLocal(LOCAL_SCANS_KEY,all);selectedScans.unshift(record);
+    }
+    scanInput.value="";setMessage(scanMessage,`${productNames[record?.product]||"Vare"} registrert.`,"ok");renderDetail();scanInput.focus();
+  }catch(error){setMessage(scanMessage,error.message||String(error),"bad");scanInput.select()}
+  finally{$("scanButton").disabled=false}
+}
+async function removeScan(id){
+  const order=findOrder();if(!order)return;
+  try{
+    if(cloudMode){const scan=selectedScans.find(x=>String(x.id)===String(id)||String(x.mottak_scan_id)===String(id));if(!scan)throw new Error("Skanningen ble ikke funnet.");const rpc=await client.rpc("remove_ut_scan",{p_order_id:order.id,p_mottak_scan_id:scan.mottak_scan_id});if(rpc.error)throw rpc.error;selectedScans=await loadScans(order.id)}
+    else{const all=readLocal(LOCAL_SCANS_KEY).filter(x=>String(x.id)!==String(id));saveLocal(LOCAL_SCANS_KEY,all);selectedScans=all.filter(x=>String(x.order_id)===String(order.id)&&!x.released_at)}
+    setMessage(scanMessage,"Skanningen er fjernet.","ok");renderDetail()
+  }catch(error){setMessage(scanMessage,error.message||String(error),"bad")}
+}
+async function confirmDispatch(){
+  const order=findOrder();if(!order||!isComplete(order,selectedScans)||normalizeStatus(order.status)!=="staged"||!$("confirmCheck").checked)return;
+  $("confirmDispatchButton").disabled=true;setMessage(confirmMessage,"Bekrefter og oppdaterer lagerstatus…");
+  try{
+    if(cloudMode){const rpc=await client.rpc("confirm_ut_dispatch",{p_order_id:order.id});if(rpc.error)throw rpc.error;await loadOrders()}
+    else{await updateOrder({status:"completed",completed_at:nowIso(),warehouse_note:[order.warehouse_note,"TEST: Ferdig lokalt. INN-beholdningen er ikke redusert fordi UT-tabellen ikke er aktiv."].filter(Boolean).join(" ")})}
+    setMessage(confirmMessage,cloudMode?"Utsending bekreftet. De skannede INN-postene er merket som dispatched.":"Utsending registrert lokalt. Kjør SQL-oppsettet før reell lageravgang.",cloudMode?"ok":"warn");$("confirmCheck").checked=false
+  }catch(error){setMessage(confirmMessage,error.message||String(error),"bad")}
+}
+
+function openTextModal(title,label,action){$("modalTitle").textContent=title;$("modalLabel").textContent=label;$("modalText").value="";modalAction=action;$("textModal").classList.add("open");setTimeout(()=>$("modalText").focus(),100)}
+function closeModal(){$("textModal").classList.remove("open");modalAction=null}
+async function createDemo(){
+  const demo={order_number:`UT-${new Date().toISOString().slice(0,10).replaceAll("-","")}-${String(orders.length+1).padStart(4,"0")}`,ramp:"32",cmr_ref:"462391099",status:"new",bunner_stacks:18,hyller30_sets:0,hyller60_sets:14,office_note:"CMR-test: 18 stabler Bunner + 14 Hyller x60.",created_at:nowIso(),updated_at:nowIso()};
+  try{
+    if(cloudMode){const response=await client.from(ORDERS_TABLE).insert(demo).select().single();if(response.error)throw response.error;orders.unshift(response.data)}
+    else{demo.id=uid("local-ut");demo.local_only=true;orders.unshift(demo);saveLocal(LOCAL_ORDERS_KEY,orders)}
+    renderOrders();await openOrder(orders[0].id,true)
+  }catch(error){alert(error.message||error)}
+}
+
+$("refreshButton").addEventListener("click",loadOrders);$("demoButton").addEventListener("click",createDemo);$("statusFilter").addEventListener("change",renderOrders);$("searchInput").addEventListener("input",renderOrders);$("closeDetailButton").addEventListener("click",()=>{detailSection.classList.add("hidden");selectedOrderId=null});$("scanButton").addEventListener("click",registerScan);scanInput.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();registerScan()}});$("confirmCheck").addEventListener("change",renderDetail);$("confirmDispatchButton").addEventListener("click",confirmDispatch);$("modalCancel").addEventListener("click",closeModal);$("modalSave").addEventListener("click",async()=>{const text=$("modalText").value.trim();if(!text){$("modalText").focus();return}const action=modalAction;closeModal();try{await action(text)}catch(error){setMessage(scanMessage,error.message||String(error),"bad")}});$("textModal").addEventListener("click",event=>{if(event.target===$("textModal"))closeModal()});
+
+client.channel("ut-orders-live-v1").on("postgres_changes",{event:"*",schema:"public",table:ORDERS_TABLE},()=>{if(cloudMode)loadOrders()}).subscribe();
+loadOrders();
+</script>
+</body>
+</html>
