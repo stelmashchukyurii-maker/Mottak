@@ -64,26 +64,27 @@
       text-align: right;
     }
 
-    .bunner-card {
+    .overview-card {
       margin: 0 0 14px;
       padding: 16px;
-      border: 2px solid rgba(244, 196, 48, 0.55);
-      border-radius: 18px;
-      background: linear-gradient(145deg, rgba(244, 196, 48, 0.12), rgba(21, 28, 48, 0.98));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(21, 28, 48, 0.98);
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
     }
 
-    .bunner-head {
+    .overview-head {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
+      margin-bottom: 14px;
     }
 
-    .bunner-title {
+    .overview-title {
       margin: 0;
-      font-size: clamp(25px, 7vw, 38px);
+      font-size: clamp(27px, 7vw, 42px);
       line-height: 1.05;
     }
 
@@ -114,56 +115,63 @@
       box-shadow: 0 0 0 4px rgba(255, 115, 115, 0.12);
     }
 
-    .bunner-formula {
-      margin-top: 14px;
-      padding: 16px 12px;
-      border: 1px solid rgba(244, 196, 48, 0.42);
-      border-radius: 15px;
-      background: rgba(13, 20, 38, 0.76);
-      text-align: center;
-    }
-
-    .formula-line {
-      display: block;
-      color: var(--accent);
-      font-size: clamp(23px, 7vw, 38px);
-      font-weight: 900;
-      line-height: 1.15;
-    }
-
-    .total-line {
-      display: block;
-      margin-top: 8px;
-      font-size: clamp(29px, 9vw, 48px);
-      font-weight: 950;
-      line-height: 1;
-    }
-
-    .bunner-meta {
+    .product-list {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 10px;
+      gap: 10px;
     }
 
-    .meta-box {
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
+    .product-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.55fr) minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      min-height: 96px;
+      padding: 16px 20px;
+      border: 2px solid var(--line);
+      border-radius: 18px;
       background: var(--dark);
+    }
+
+    .product-row.bunner {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.08);
+    }
+
+    .product-row.total {
+      border-color: var(--ok);
+      background: rgba(72, 213, 151, 0.08);
+      box-shadow: 0 0 0 3px rgba(72, 213, 151, 0.06);
+    }
+
+    .product-name {
+      font-size: clamp(21px, 5vw, 31px);
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .product-value {
+      text-align: right;
+      font-size: clamp(19px, 4.4vw, 29px);
+      font-weight: 900;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .total .product-value {
+      font-size: clamp(21px, 5vw, 32px);
+    }
+
+    .pending-line {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(246, 185, 75, 0.28);
+      border-radius: 12px;
+      background: rgba(246, 185, 75, 0.07);
+      color: var(--warn);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.4;
       text-align: center;
-    }
-
-    .meta-box span {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .meta-box strong {
-      display: block;
-      margin-top: 4px;
-      font-size: 24px;
     }
 
     .explanation {
@@ -172,6 +180,17 @@
       font-size: 12px;
       line-height: 1.45;
       text-align: center;
+    }
+
+    @media (max-width: 620px) {
+      .product-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        min-height: 0;
+        padding: 15px;
+      }
+
+      .product-value { text-align: left; }
     }
 
     iframe {
@@ -188,35 +207,42 @@
   <main class="page">
     <div class="topbar">
       <a class="home-link" href="index.html">← Hovedmeny</a>
-      <div class="version">Kontorbestilling v4<br />Oppdatert 03.08.2026 kl. 11:39</div>
+      <div class="version">Kontorbestilling v5<br />Oppdatert 03.08.2026 kl. 14:20</div>
     </div>
 
-    <section class="bunner-card" aria-labelledby="bunnerTitle">
-      <div class="bunner-head">
-        <h1 class="bunner-title" id="bunnerTitle">Bunner</h1>
+    <section class="overview-card" aria-labelledby="overviewTitle">
+      <div class="overview-head">
+        <h1 class="overview-title" id="overviewTitle">Produktoversikt</h1>
         <div class="connection">
           <span class="dot" id="databaseDot"></span>
           <span id="databaseStatus">Kobler til databasen…</span>
         </div>
       </div>
 
-      <div class="bunner-formula">
-        <strong class="formula-line" id="bunnerFormula">0 godkjente stabler × 10</strong>
-        <strong class="total-line" id="bunnerTotal">0 Bunner totalt</strong>
+      <div class="product-list">
+        <div class="product-row bunner">
+          <div class="product-name">Bunner</div>
+          <div class="product-value" id="bunnerValue">0 stabler × 10 = 0 stk.</div>
+        </div>
+
+        <div class="product-row">
+          <div class="product-name">Hyller x30</div>
+          <div class="product-value" id="hyller30Value">0 Bunner × 30 = 0 hyller</div>
+        </div>
+
+        <div class="product-row">
+          <div class="product-name">Hyller x60</div>
+          <div class="product-value" id="hyller60Value">0 Bunner × 60 = 0 hyller</div>
+        </div>
+
+        <div class="product-row total">
+          <div class="product-name">Totalt</div>
+          <div class="product-value" id="totalValue">0 Bunner · 0 hyller</div>
+        </div>
       </div>
 
-      <div class="bunner-meta">
-        <div class="meta-box">
-          <span>Godkjente skanninger / stabler</span>
-          <strong id="verifiedStacks">0</strong>
-        </div>
-        <div class="meta-box">
-          <span>Pending Bunner-stabler</span>
-          <strong id="pendingStacks">0</strong>
-        </div>
-      </div>
-
-      <p class="explanation">Én godkjent Bunner-skanning representerer én full stabel: 1 × 10 = 10 Bunner.</p>
+      <div class="pending-line" id="pendingLine">Pending: 0 Bunner · 0 Hyller x30 · 0 Hyller x60</div>
+      <p class="explanation">Oversikten bruker bare godkjente registreringer. Én Bunner-skanning er én stabel på 10. Hvert Hyller-sett inneholder også én Bunner.</p>
     </section>
 
     <iframe id="officeApp" src="bestilling-app.html" title="Varebestilling til rampe"></iframe>
@@ -228,7 +254,9 @@
     const SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co";
     const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
     const TABLE = "mottak_scans";
-    const UNITS_PER_STACK = 10;
+    const BUNNER_PER_STACK = 10;
+    const HYLLER_X30 = 30;
+    const HYLLER_X60 = 60;
 
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: {
@@ -240,14 +268,15 @@
 
     const databaseDot = document.getElementById("databaseDot");
     const databaseStatus = document.getElementById("databaseStatus");
-    const verifiedStacks = document.getElementById("verifiedStacks");
-    const pendingStacks = document.getElementById("pendingStacks");
-    const bunnerFormula = document.getElementById("bunnerFormula");
-    const bunnerTotal = document.getElementById("bunnerTotal");
+    const bunnerValue = document.getElementById("bunnerValue");
+    const hyller30Value = document.getElementById("hyller30Value");
+    const hyller60Value = document.getElementById("hyller60Value");
+    const totalValue = document.getElementById("totalValue");
+    const pendingLine = document.getElementById("pendingLine");
     const officeApp = document.getElementById("officeApp");
 
-    function stackWord(count) {
-      return count === 1 ? "stabel" : "stabler";
+    function plural(count, singular, pluralForm) {
+      return count === 1 ? singular : pluralForm;
     }
 
     function setDatabaseStatus(text, type = "") {
@@ -255,34 +284,48 @@
       databaseDot.className = `dot ${type}`.trim();
     }
 
-    function renderBunner(rows) {
-      const verified = rows.filter((row) => row.status === "verified").length;
-      const pending = rows.filter((row) => row.status === "pending").length;
-      const total = verified * UNITS_PER_STACK;
-
-      verifiedStacks.textContent = String(verified);
-      pendingStacks.textContent = String(pending);
-      bunnerFormula.textContent = `${verified} godkjente ${stackWord(verified)} × ${UNITS_PER_STACK}`;
-      bunnerTotal.textContent = `${total} Bunner totalt`;
+    function countRows(rows, product, status) {
+      return rows.filter((row) => row.product === product && row.status === status).length;
     }
 
-    async function loadBunner() {
-      setDatabaseStatus("Oppdaterer Bunner…");
+    function renderOverview(rows) {
+      const bunnerStacks = countRows(rows, "bunner", "verified");
+      const hyller30Sets = countRows(rows, "hyller30", "verified");
+      const hyller60Sets = countRows(rows, "hyller60", "verified");
+
+      const bunnerFromStacks = bunnerStacks * BUNNER_PER_STACK;
+      const hyller30Total = hyller30Sets * HYLLER_X30;
+      const hyller60Total = hyller60Sets * HYLLER_X60;
+      const totalBunner = bunnerFromStacks + hyller30Sets + hyller60Sets;
+      const totalHyller = hyller30Total + hyller60Total;
+
+      const pendingBunner = countRows(rows, "bunner", "pending");
+      const pending30 = countRows(rows, "hyller30", "pending");
+      const pending60 = countRows(rows, "hyller60", "pending");
+
+      bunnerValue.textContent = `${bunnerStacks} ${plural(bunnerStacks, "stabel", "stabler")} × ${BUNNER_PER_STACK} = ${bunnerFromStacks} stk.`;
+      hyller30Value.textContent = `${hyller30Sets} ${plural(hyller30Sets, "Bunner", "Bunner")} × ${HYLLER_X30} = ${hyller30Total} hyller`;
+      hyller60Value.textContent = `${hyller60Sets} ${plural(hyller60Sets, "Bunner", "Bunner")} × ${HYLLER_X60} = ${hyller60Total} hyller`;
+      totalValue.textContent = `${totalBunner} Bunner · ${totalHyller} hyller`;
+      pendingLine.textContent = `Pending: ${pendingBunner} Bunner · ${pending30} Hyller x30 · ${pending60} Hyller x60`;
+    }
+
+    async function loadOverview() {
+      setDatabaseStatus("Oppdaterer produktoversikten…");
 
       try {
         const response = await client
           .from(TABLE)
           .select("id,status,product")
-          .eq("product", "bunner")
           .limit(5000);
 
         if (response.error) throw response.error;
 
         const rows = response.data || [];
-        renderBunner(rows);
-        setDatabaseStatus(`Tilkoblet · ${rows.length} Bunner-poster`, "ok");
+        renderOverview(rows);
+        setDatabaseStatus(`Tilkoblet · ${rows.length} registreringer`, "ok");
       } catch (error) {
-        setDatabaseStatus("Kunne ikke laste Bunner", "bad");
+        setDatabaseStatus("Kunne ikke laste produktoversikten", "bad");
         console.error(error);
       }
     }
@@ -324,11 +367,11 @@
     officeApp.addEventListener("load", resizeOfficeApp);
 
     client
-      .channel("office-bunner-summary-v4")
-      .on("postgres_changes", { event: "*", schema: "public", table: TABLE }, () => loadBunner())
+      .channel("office-product-overview-v5")
+      .on("postgres_changes", { event: "*", schema: "public", table: TABLE }, () => loadOverview())
       .subscribe();
 
-    loadBunner();
+    loadOverview();
   </script>
 </body>
 </html>
