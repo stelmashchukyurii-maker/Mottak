@@ -41,7 +41,7 @@
 </head>
 <body>
 <main class="app">
-  <span class="version">Hovedmeny v7 · Oppdatert 02.08.2026 kl. 23:48</span>
+  <span class="version">Hovedmeny v8 · Oppdatert 03.08.2026 kl. 15:10</span>
   <h1>BaMavaremottak</h1>
   <p class="subtitle">Velg nøyaktig hvordan du skal arbeide. Grønne knapper er godkjent. Røde knapper er fortsatt TEST.</p>
 
@@ -75,10 +75,10 @@
       <div class="card-top"><div><h3 class="card-title">UT — VAREBESTILLING</h3><p class="card-description">FOR KONTOR. Kontoret velger rampe, produkt og antall og sender et oppdrag til lageret.</p></div><span class="icon">📋</span></div>
       <div class="tags"><span class="tag approved">GODKJENT</span><span class="tag info">FOR KONTOR</span><span class="tag">bestilling.html</span><span class="tag" id="orderCountTag">0 lagrede</span></div>
     </a>
-    <section class="menu-card planned" aria-disabled="true">
-      <div class="card-top"><div><h3 class="card-title">UT — LAGER OG UTSENDING</h3><p class="card-description">For lagerarbeideren: motta kontoroppdrag, se rampe og mengde, markere Mottatt, Pågår, Ferdig eller Problem og bekrefte utsending.</p></div><span class="icon">🚚</span></div>
-      <div class="tags"><span class="tag planned">PLANLAGT — IKKE OPPRETTET ENNÅ</span></div>
-    </section>
+    <a class="menu-card test" href="utsending.html">
+      <div class="card-top"><div><h3 class="card-title">UT — LAGER OG UTSENDING</h3><p class="card-description">For lagerarbeideren: motta kontoroppdrag, skanne konkrete INN-registreringer, kontrollere CMR, plassere varene på rampe og bekrefte utsending.</p></div><span class="icon">🚚</span></div>
+      <div class="tags"><span class="tag test">NY TESTSIDE</span><span class="tag info">NORDIC ID / CMR</span><span class="tag">utsending.html</span></div>
+    </a>
   </nav>
 
   <h2 class="section-title">Tester og utført arbeid</h2>
@@ -104,7 +104,7 @@
     <div class="save-note" id="saveNote" aria-live="polite"></div>
   </section>
 
-  <div class="footer-note">Telefonknappen åpner den skytilkoblede siden <strong>camera-live.html</strong>. Den siste korrigerte arbeidslenken ligger øverst som <strong>Camera Cloud v4.1</strong>.</div>
+  <div class="footer-note">UT-siden for lager er nå tilgjengelig som TEST. Den kan brukes lokalt med testoppdrag, og er klargjort for felles Supabase-tabeller via <strong>supabase-ut-setup.sql</strong>.</div>
 </main>
 <script>
   const ORDER_STORAGE_KEY="mottak_office_orders_v1";
