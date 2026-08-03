@@ -1,15 +1,16 @@
 "use strict";
 
-// Camera Cloud v4.2
+// Camera Cloud v4.3
 // 1) Keep the existing allowed source when attaching a photo to a Nordic ID row.
 // 2) Show persistent product totals below the product selector.
-(function applyCameraV42Enhancements() {
+// 3) Show one combined total for all Bunner and all hyller.
+(function applyCameraV43Enhancements() {
   const saveButton = document.getElementById("saveButton");
   const version = document.querySelector(".version");
   if (!saveButton) return;
 
   if (version) {
-    version.innerHTML = "Kamera Cloud v4.2<br />Oppdatert 03.08.2026 kl. 12:47";
+    version.innerHTML = "Kamera Cloud v4.3<br />Oppdatert 03.08.2026 kl. 13:31";
   }
 
   const totalsText = {
@@ -17,19 +18,25 @@
       title: "Produktoversikt",
       bunner: count => `${count} stabler × 10 = ${count * 10} stk.`,
       hyller30: count => `${count} Bunner × 30 = ${count * 30} hyller`,
-      hyller60: count => `${count} Bunner × 60 = ${count * 60} hyller`
+      hyller60: count => `${count} Bunner × 60 = ${count * 60} hyller`,
+      totalLabel: "Totalt",
+      total: (bunner, hyller) => `${bunner} Bunner · ${hyller} hyller`
     },
     pl: {
       title: "Podsumowanie produktów",
       bunner: count => `${count} stosów × 10 = ${count * 10} szt.`,
       hyller30: count => `${count} Bunner × 30 = ${count * 30} półek`,
-      hyller60: count => `${count} Bunner × 60 = ${count * 60} półek`
+      hyller60: count => `${count} Bunner × 60 = ${count * 60} półek`,
+      totalLabel: "Razem",
+      total: (bunner, hyller) => `${bunner} Bunner · ${hyller} półek`
     },
     uk: {
       title: "Поточна кількість",
       bunner: count => `${count} стопок × 10 = ${count * 10} шт.`,
       hyller30: count => `${count} Bunner × 30 = ${count * 30} hyller`,
-      hyller60: count => `${count} Bunner × 60 = ${count * 60} hyller`
+      hyller60: count => `${count} Bunner × 60 = ${count * 60} hyller`,
+      totalLabel: "Всього",
+      total: (bunner, hyller) => `${bunner} Bunner · ${hyller} hyller`
     }
   };
 
@@ -57,6 +64,16 @@
         border-color:var(--accent);
         box-shadow:0 0 0 1px rgba(244,196,48,.15);
       }
+      .product-total-row.grand-total {
+        margin-top:3px;
+        border-color:var(--ok);
+        background:rgba(72,213,151,.08);
+      }
+      .product-total-row.grand-total .product-total-name,
+      .product-total-row.grand-total .product-total-value {
+        font-size:clamp(15px,4vw,19px);
+        font-weight:900;
+      }
       .product-total-name { font-weight:900; }
       .product-total-value {
         font-size:clamp(14px,3.8vw,18px);
@@ -67,6 +84,8 @@
       @media(max-width:390px) {
         .product-total-row { grid-template-columns:100px minmax(0,1fr); padding:9px 10px; gap:7px; }
         .product-total-value { font-size:13px; }
+        .product-total-row.grand-total .product-total-name,
+        .product-total-row.grand-total .product-total-value { font-size:14px; }
       }
     `;
     document.head.appendChild(style);
@@ -89,6 +108,10 @@
           <span class="product-total-name">Hyller x60</span>
           <span class="product-total-value" id="hyller60Total"></span>
         </div>
+        <div class="product-total-row grand-total">
+          <span class="product-total-name" id="grandTotalLabel"></span>
+          <span class="product-total-value" id="grandTotalValue"></span>
+        </div>
       </div>
     `;
     productSection.insertAdjacentElement("afterend", section);
@@ -108,15 +131,22 @@
       hyller60: verifiedRows.filter(row => row.product === "hyller60").length
     };
 
+    const totalBunner = (counts.bunner * 10) + counts.hyller30 + counts.hyller60;
+    const totalHyller = (counts.hyller30 * 30) + (counts.hyller60 * 60);
+
     const title = document.getElementById("productTotalsTitle");
     const bunnerTotal = document.getElementById("bunnerTotal");
     const hyller30Total = document.getElementById("hyller30Total");
     const hyller60Total = document.getElementById("hyller60Total");
+    const grandTotalLabel = document.getElementById("grandTotalLabel");
+    const grandTotalValue = document.getElementById("grandTotalValue");
 
     if (title) title.textContent = copy.title;
     if (bunnerTotal) bunnerTotal.textContent = copy.bunner(counts.bunner);
     if (hyller30Total) hyller30Total.textContent = copy.hyller30(counts.hyller30);
     if (hyller60Total) hyller60Total.textContent = copy.hyller60(counts.hyller60);
+    if (grandTotalLabel) grandTotalLabel.textContent = copy.totalLabel;
+    if (grandTotalValue) grandTotalValue.textContent = copy.total(totalBunner, totalHyller);
 
     document.querySelectorAll("[data-total-product]").forEach(row => {
       row.classList.toggle("active", row.dataset.totalProduct === product);
@@ -241,5 +271,5 @@
     saveCloudWithAllowedSource();
   }, true);
 
-  console.info("Camera Cloud v4.2 product totals and source constraint fix are active.");
+  console.info("Camera Cloud v4.3 product totals, grand total and source constraint fix are active.");
 })();
