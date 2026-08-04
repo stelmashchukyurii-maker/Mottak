@@ -35,6 +35,8 @@
         await injectScript(doc, "camera-live-v4-source-fix.js?v=46-2315");
         await injectScript(doc, "camera-live-v4-server-ocr.js?v=46-2315");
         await injectScript(doc, "shared-stock-status.js?v=20260804-2315");
+        const version = doc.querySelector(".version");
+        if (version) version.innerHTML = "Kamera Cloud v4.6 FELLES LAGER<br>Oppdatert 04.08.2026 kl. 23:15";
         loader.style.display = "none";
       } catch (error) {
         loader.textContent = `Помилка запуску Camera Cloud v4.6: ${error.message || error}`;
