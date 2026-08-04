@@ -10,7 +10,7 @@
 </head>
 <body>
 <main class="app">
-  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v12 RAMPE<br>Oppdatert 04.08.2026 kl. 20:48</div></div>
+  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v13 SALDO<br>Oppdatert 04.08.2026 kl. 21:09</div></div>
   <h1>UT — Kontor</h1>
   <p class="subtitle">Én rampe = ett samlet oppdrag med alle varetyper.</p>
 
@@ -42,19 +42,19 @@
       <label>Varer på rampen</label>
       <div class="ramp-products">
         <article class="ramp-product bunner-row">
-          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Bunner</strong><small>Antall stabler · 1 stabel = 10 Bunner</small></div><output id="bunnerOutput">0 Bunner</output></div>
+          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Bunner</strong><small>Antall stabler · 1 stabel = 10 Bunner</small></div><output id="bunnerOutput">På lager: laster…</output></div>
           <div class="qty compact"><button class="step" type="button" data-minus="bunner">−</button><input id="bunnerQty" type="number" min="0" value="0"><button class="step" type="button" data-plus="bunner">+</button></div>
           <div class="quick"><button type="button" data-set="bunner:0">0</button><button type="button" data-set="bunner:1">1</button><button type="button" data-set="bunner:3">3</button><button type="button" data-set="bunner:10">10</button></div>
         </article>
 
         <article class="ramp-product">
-          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Hyller x30</strong><small>Antall komplette sett</small></div><output id="h30Output">0 Bunner · 0 hyller</output></div>
+          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Hyller x30</strong><small>Antall komplette sett</small></div><output id="h30Output">På lager: laster…</output></div>
           <div class="qty compact"><button class="step" type="button" data-minus="h30">−</button><input id="h30Qty" type="number" min="0" value="0"><button class="step" type="button" data-plus="h30">+</button></div>
           <div class="quick"><button type="button" data-set="h30:0">0</button><button type="button" data-set="h30:1">1</button><button type="button" data-set="h30:5">5</button><button type="button" data-set="h30:10">10</button></div>
         </article>
 
         <article class="ramp-product">
-          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Hyller x60</strong><small>Antall komplette sett</small></div><output id="h60Output">0 Bunner · 0 hyller</output></div>
+          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Hyller x60</strong><small>Antall komplette sett</small></div><output id="h60Output">På lager: laster…</output></div>
           <div class="qty compact"><button class="step" type="button" data-minus="h60">−</button><input id="h60Qty" type="number" min="0" value="0"><button class="step" type="button" data-plus="h60">+</button></div>
           <div class="quick"><button type="button" data-set="h60:0">0</button><button type="button" data-set="h60:1">1</button><button type="button" data-set="h60:5">5</button><button type="button" data-set="h60:10">10</button></div>
         </article>
@@ -102,5 +102,6 @@
   </details>
 </main>
 <script src="bestilling-v11.js?v=20260804-2048"></script>
+<script src="bestilling-stock-balance.js?v=20260804-2109"></script>
 </body>
 </html>
