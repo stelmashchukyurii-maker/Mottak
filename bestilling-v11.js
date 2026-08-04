@@ -109,7 +109,9 @@ function statusLabel(order) {
 }
 
 function active(order) {
-  return !["completed", "cancelled"].includes(order.status) && order.test_state !== "returned";
+  return order.test_state === "dispatched" || (
+    !["completed", "cancelled"].includes(order.status) && order.test_state !== "returned"
+  );
 }
 
 function amount(order) {
@@ -282,6 +284,14 @@ async function send() {
   $("send").disabled = true;
   $("receipt").classList.remove("show");
   try {
+    const collision = orders.find((order) =>
+      active(order) && normalizeRamp(order.ramp) === ramp && String(order.id) !== String(editingId || "")
+    );
+    if (collision) {
+      $("historyDetails").open = true;
+      throw new Error(`RAMPE ${ramp} har allerede et aktivt oppdrag (${collision.order_number || collision.id}). Rediger eller stornér den eksisterende rampen.`);
+    }
+
     if (editingId) {
       msg("Lagrer hele rampen…");
       const rows = await request(`ut_orders?id=eq.${encodeURIComponent(editingId)}&status=eq.new`, {
@@ -294,11 +304,6 @@ async function send() {
       msg("Rampen er oppdatert.", "ok");
       clearForm(false);
     } else {
-      const duplicate = orders.find((order) => active(order) && normalizeRamp(order.ramp) === ramp);
-      if (duplicate) {
-        $("historyDetails").open = true;
-        throw new Error(`RAMPE ${ramp} har allerede et aktivt oppdrag (${duplicate.order_number || duplicate.id}). Rediger eller stornér den eksisterende rampen.`);
-      }
       msg("Sender hele rampen til lageret…");
       const rows = await request("ut_orders", {
         method: "POST",
