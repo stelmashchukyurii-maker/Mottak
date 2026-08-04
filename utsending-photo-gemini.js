@@ -1,61 +1,75 @@
 "use strict";
 
 (() => {
-  const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
-  const GEMINI_MODEL = "gemini-3.6-flash";
-  const SESSION_KEY = "gemini_api_key";
+  const SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+  const GEMINI_FUNCTION = "gemini-ocr";
+  const OPENAI_FUNCTION = "clever-responder";
 
   const $ = (id) => document.getElementById(id);
   const photoPanel = $("photoPanel");
   const photoInput = $("photoInput");
+  const photoPreview = $("photoPreview");
   const upperInput = $("upperInput");
   const lowerInput = $("lowerInput");
 
   if (!photoPanel || !photoInput || !upperInput || !lowerInput) return;
+  if ($("utServerOcrBox")) return;
 
   const style = document.createElement("style");
   style.textContent = `
-    .ut-gemini-box{margin:0 0 10px;padding:11px;border:1px solid rgba(244,196,48,.45);border-radius:12px;background:rgba(244,196,48,.06)}
-    .ut-gemini-label{display:block;margin-bottom:6px;color:var(--muted);font-size:11px;font-weight:900}
-    .ut-gemini-key-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
-    .ut-gemini-key-row input{min-height:46px}
-    .ut-gemini-key-row button{min-height:46px}
-    .ut-gemini-note{margin-top:6px;color:var(--muted);font-size:10px;line-height:1.4}
-    .ut-gemini-status{min-height:18px;margin-top:7px;color:var(--muted);font-size:11px;white-space:pre-wrap}
-    .ut-gemini-status.ok{color:var(--ok)}
-    .ut-gemini-status.bad{color:var(--bad)}
-    .ut-gemini-status.warn{color:var(--warn)}
-    @media(max-width:670px){.ut-gemini-key-row{grid-template-columns:1fr}}
+    .ut-server-ocr{margin:0 0 10px;padding:11px;border:1px solid rgba(117,183,255,.48);border-radius:12px;background:rgba(117,183,255,.08)}
+    .ut-server-ocr strong{display:block;color:#d9edff;font-size:14px}
+    .ut-server-ocr p{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+    .ut-ocr-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+    .ut-ocr-actions button{min-height:48px}
+    .ut-openai{color:#eafff6;background:#163c32;border:2px solid #48d597}
+    .ut-ocr-status{min-height:20px;margin-top:8px;color:var(--muted);font-size:11px;line-height:1.45;white-space:pre-wrap;text-align:center}
+    .ut-ocr-status.ok{color:var(--ok)}
+    .ut-ocr-status.bad{color:var(--bad)}
+    .ut-ocr-status.warn{color:var(--warn)}
+    @media(max-width:670px){.ut-ocr-actions{grid-template-columns:1fr}}
   `;
   document.head.appendChild(style);
 
-  const box = document.createElement("div");
-  box.className = "ut-gemini-box";
-  box.innerHTML = `
-    <label class="ut-gemini-label" for="utGeminiKey">Gemini API-nøkkel</label>
-    <div class="ut-gemini-key-row">
-      <input id="utGeminiKey" type="password" autocomplete="off" placeholder="Lim inn Gemini API-nøkkelen">
-      <button class="btn primary" id="utRecognizeButton" type="button" disabled>Les av numrene</button>
-    </div>
-    <div class="ut-gemini-note">Samme nøkkel som i INN-kamera. Den lagres bare i denne nettleserfanen. De eksisterende feltene Øvre nummer og Nedre nummer fylles automatisk.</div>
-    <div class="ut-gemini-status" id="utGeminiStatus"></div>
+  const info = document.createElement("div");
+  info.id = "utServerOcrBox";
+  info.className = "ut-server-ocr";
+  info.innerHTML = `
+    <strong>AI-розпізнавання — захищений сервер</strong>
+    <p>Gemini — основний розпізнавач, OpenAI — резерв. Ключі захищені в Supabase, вводити їх на телефоні не потрібно.</p>
   `;
-  photoPanel.insertBefore(box, photoPanel.firstChild);
+  photoPanel.insertBefore(info, photoPanel.firstChild);
 
-  const keyInput = $("utGeminiKey");
-  const recognizeButton = $("utRecognizeButton");
-  const status = $("utGeminiStatus");
+  const controls = document.createElement("div");
+  controls.innerHTML = `
+    <div class="ut-ocr-actions">
+      <button class="btn primary" id="utGeminiOcrButton" type="button" disabled>Розпізнати через Gemini</button>
+      <button class="btn ut-openai" id="utOpenAiOcrButton" type="button" disabled>Резерв OpenAI</button>
+      <button class="btn secondary" id="utNewPhotoButton" type="button" disabled>Нове фото</button>
+    </div>
+    <div class="ut-ocr-status" id="utOcrStatus"></div>
+  `;
+  photoPanel.appendChild(controls);
+
+  const geminiButton = $("utGeminiOcrButton");
+  const openAiButton = $("utOpenAiOcrButton");
+  const newPhotoButton = $("utNewPhotoButton");
+  const status = $("utOcrStatus");
+
   let currentImage = null;
   let processing = false;
 
-  keyInput.value = sessionStorage.getItem(SESSION_KEY) || "";
-  keyInput.addEventListener("input", () => {
-    sessionStorage.setItem(SESSION_KEY, keyInput.value.trim());
-  });
-
   function setStatus(text, type = "") {
     status.textContent = text;
-    status.className = `ut-gemini-status ${type}`.trim();
+    status.className = `ut-ocr-status ${type}`.trim();
+  }
+
+  function syncButtons() {
+    const disabled = !currentImage || processing;
+    geminiButton.disabled = disabled;
+    openAiButton.disabled = disabled;
+    newPhotoButton.disabled = !currentImage || processing;
   }
 
   function loadImage(file) {
@@ -68,7 +82,7 @@
       };
       image.onerror = () => {
         URL.revokeObjectURL(url);
-        reject(new Error("Bildet kunne ikke åpnes."));
+        reject(new Error("Не вдалося відкрити фотографію."));
       };
       image.src = url;
     });
@@ -88,93 +102,43 @@
     context.fillRect(0, 0, width, height);
     context.drawImage(image, 0, 0, width, height);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-    return { base64: dataUrl.split(",")[1], mimeType: "image/jpeg" };
-  }
-
-  function extractText(data) {
-    if (typeof data.output_text === "string" && data.output_text.trim()) return data.output_text.trim();
-    const output = [];
-    for (const step of data.steps || []) {
-      for (const content of step.content || []) {
-        if (content.type === "text" && typeof content.text === "string") output.push(content.text);
-      }
-    }
-    return output.join("").trim();
+    return { dataUrl };
   }
 
   const cleanUpper = (value) => String(value || "").replace(/[^0-9]/g, "").slice(0, 6);
   const cleanLower = (value) => String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
 
-  photoInput.addEventListener("change", async () => {
-    const file = photoInput.files?.[0];
-    currentImage = null;
-    recognizeButton.disabled = true;
-    if (!file) return;
-    setStatus("Forbereder bildet…");
-    try {
-      currentImage = await compress(file);
-      recognizeButton.disabled = false;
-      setStatus("Bildet er klart. Trykk «Les av numrene».", "ok");
-    } catch (error) {
-      setStatus(error.message || String(error), "bad");
-    }
-  });
-
-  recognizeButton.addEventListener("click", async () => {
-    if (processing) return;
-    const key = keyInput.value.trim();
-    if (!key) {
-      setStatus("Lim inn Gemini API-nøkkelen først.", "bad");
-      keyInput.focus();
-      return;
-    }
-    if (!currentImage) {
-      setStatus("Ta et bilde av etiketten først.", "bad");
-      return;
-    }
-
-    processing = true;
-    recognizeButton.disabled = true;
-    setStatus("Gemini leser etiketten…");
-
-    const prompt = "Find the small warehouse label in the photo. Read exactly the two printed lines immediately above the QR code. line1 must be exactly 6 digits. line2 must be exactly 6 uppercase A-Z or 0-9 characters. Ignore logos, all other text, and do not decode the QR code. Do not invent characters. Return only JSON.";
-    const body = {
-      model: GEMINI_MODEL,
-      store: false,
-      input: [
-        { type: "text", text: prompt },
-        { type: "image", data: currentImage.base64, mime_type: currentImage.mimeType }
-      ],
-      response_format: {
-        type: "text",
-        mime_type: "application/json",
-        schema: {
-          type: "object",
-          properties: {
-            line1: { type: "string" },
-            line2: { type: "string" },
-            confidence: { type: "number", minimum: 0, maximum: 1 }
-          },
-          required: ["line1", "line2", "confidence"],
-          additionalProperties: false
-        }
+  async function invokeFunction(functionName, image) {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json"
       },
-      generation_config: { max_output_tokens: 120, thinking_level: "minimal" }
-    };
+      body: JSON.stringify({ image })
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data?.error || data?.message || `HTTP ${response.status}`);
+    if (data?.error) throw new Error(data.error);
+    return data;
+  }
+
+  async function recognize(provider) {
+    if (!currentImage || processing) return;
+
+    const isGemini = provider === "gemini";
+    const functionName = isGemini ? GEMINI_FUNCTION : OPENAI_FUNCTION;
+    processing = true;
+    syncButtons();
+    setStatus(isGemini ? "Gemini аналізує бірку…" : "OpenAI аналізує бірку…");
 
     try {
-      const response = await fetch(GEMINI_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-        body: JSON.stringify(body)
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.error?.message || `HTTP ${response.status}`);
-
-      const parsed = JSON.parse(extractText(data));
-      const upper = cleanUpper(parsed.line1);
-      const lower = cleanLower(parsed.line2);
-      const confidence = Number(parsed.confidence);
+      const data = await invokeFunction(functionName, currentImage.dataUrl);
+      const upper = cleanUpper(data?.upper_number);
+      const lower = cleanLower(data?.lower_number);
+      const confidence = Number(data?.confidence);
 
       upperInput.value = upper;
       lowerInput.value = lower;
@@ -182,16 +146,63 @@
       lowerInput.dispatchEvent(new Event("input", { bubbles: true }));
 
       if (/^\d{6}$/.test(upper) && /^[A-Z0-9]{6}$/.test(lower)) {
-        const percent = Number.isFinite(confidence) ? ` · sikkerhet ${Math.round(confidence * 100)} %` : "";
-        setStatus(`Numrene er fylt inn${percent}. Kontroller dem før reservasjon.`, "ok");
+        const confidenceText = Number.isFinite(confidence)
+          ? ` · впевненість ${Math.round(confidence * 100)} %`
+          : "";
+        setStatus(
+          `${isGemini ? "Gemini" : "OpenAI"} заповнив обидва номери${confidenceText}. Перевірте їх і натисніть «Знайти та зарезервувати».`,
+          "ok"
+        );
       } else {
-        setStatus("Gemini kunne ikke lese begge numrene sikkert. Korriger feltene manuelt.", "warn");
+        setStatus(
+          `${isGemini ? "Gemini" : "OpenAI"} не зміг надійно прочитати обидва номери. Виправте поля вручну або використайте інший розпізнавач.`,
+          "warn"
+        );
       }
     } catch (error) {
-      setStatus(`Kunne ikke lese etiketten.\n${error.message || error}`, "bad");
+      setStatus(
+        `${isGemini ? "Gemini" : "Резерв OpenAI"} не завершив розпізнавання. Фото та вже введені номери збережено.\n${error.message || error}`,
+        "bad"
+      );
     } finally {
       processing = false;
-      recognizeButton.disabled = !currentImage;
+      syncButtons();
+    }
+  }
+
+  function resetPhoto() {
+    currentImage = null;
+    photoInput.value = "";
+    if (photoPreview) {
+      photoPreview.removeAttribute("src");
+      photoPreview.classList.add("hidden");
+    }
+    upperInput.value = "";
+    lowerInput.value = "";
+    setStatus("Зробіть нову фотографію бірки.");
+    syncButtons();
+  }
+
+  photoInput.addEventListener("change", async () => {
+    const file = photoInput.files?.[0];
+    currentImage = null;
+    syncButtons();
+    if (!file) return;
+
+    setStatus("Готуємо фотографію…");
+    try {
+      currentImage = await compress(file);
+      syncButtons();
+      setStatus("Фотографія готова. Натисніть «Розпізнати через Gemini». Застосуйте OpenAI лише як резерв.", "ok");
+    } catch (error) {
+      setStatus(error.message || String(error), "bad");
     }
   });
+
+  geminiButton.addEventListener("click", () => recognize("gemini"));
+  openAiButton.addEventListener("click", () => recognize("openai"));
+  newPhotoButton.addEventListener("click", resetPhoto);
+
+  sessionStorage.removeItem("gemini_api_key");
+  syncButtons();
 })();
