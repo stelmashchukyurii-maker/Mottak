@@ -6,44 +6,618 @@
   <meta name="theme-color" content="#0b1020" />
   <title>BaMavaremottak — Hovedmeny</title>
   <style>
-    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel-dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--ok:#48d597;--ok-dark:#0f3427;--test:#ff7373;--test-dark:#3b1720;--info:#75b7ff;--info-dark:#142b49;--planned:#f4c430;--planned-dark:#332b12}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text)}.app{width:min(820px,100%);margin:0 auto;padding:16px 14px 52px}.version{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel-dark);color:var(--muted);font-size:12px}h1{margin:12px 0 6px;font-size:clamp(31px,8vw,48px);line-height:1.05}.subtitle{margin:0 0 20px;color:var(--muted);line-height:1.5}.section-title{margin:24px 0 10px;font-size:15px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}.menu{display:grid;gap:13px}.menu-card{display:block;padding:18px;border:2px solid var(--line);border-radius:19px;background:var(--panel);color:var(--text);text-decoration:none;box-shadow:0 12px 28px rgba(0,0,0,.22);transition:transform .08s ease,filter .2s ease}.menu-card:active{transform:scale(.985)}.menu-card:hover{filter:brightness(1.08)}.menu-card.approved{border-color:var(--ok);background:linear-gradient(145deg,var(--ok-dark),var(--panel))}.menu-card.test{border-color:var(--test);background:linear-gradient(145deg,var(--test-dark),var(--panel))}.menu-card.info{border-color:var(--info);background:linear-gradient(145deg,var(--info-dark),var(--panel))}.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.card-title{margin:0;font-size:clamp(22px,5.8vw,31px);line-height:1.12}.card-description{margin:9px 0 0;color:var(--muted);line-height:1.48}.icon{flex:0 0 auto;width:50px;height:50px;display:grid;place-items:center;border:1px solid var(--line);border-radius:15px;background:var(--panel-dark);font-size:25px}.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.tag{padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel-dark);color:var(--muted);font-size:12px;font-weight:800}.tag.approved{color:#062418;background:var(--ok);border-color:var(--ok)}.tag.test{color:#2b080d;background:var(--test);border-color:var(--test)}.tag.info{color:#071a2e;background:var(--info);border-color:var(--info)}.comment-box{margin-top:24px;padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(21,28,48,.96)}.comment-box h2{margin:0 0 6px;font-size:21px}.comment-box p{margin:0 0 10px;color:var(--muted);line-height:1.45}textarea{width:100%;min-height:120px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:var(--panel-dark);color:var(--text);font:inherit;line-height:1.45;resize:vertical;outline:none}.save-note{min-height:18px;margin-top:8px;color:var(--muted);font-size:12px}.footer-note{margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel-dark);color:var(--muted);font-size:13px;line-height:1.5}
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #151c30;
+      --panel-dark: #0d1426;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --line: #303b59;
+      --ok: #48d597;
+      --ok-dark: #0f3427;
+      --test: #ff7373;
+      --test-dark: #3b1720;
+      --info: #75b7ff;
+      --info-dark: #142b49;
+      --planned: #f4c430;
+      --planned-dark: #332b12;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #11182a);
+      color: var(--text);
+    }
+
+    button, textarea { font: inherit; }
+
+    .app {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 16px 14px 56px;
+    }
+
+    .version {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel-dark);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 12px 0 6px;
+      font-size: clamp(31px, 8vw, 48px);
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .help {
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border: 1px solid rgba(117, 183, 255, .42);
+      border-radius: 14px;
+      background: rgba(117, 183, 255, .08);
+      color: #dbeaff;
+      line-height: 1.48;
+      font-size: 13px;
+    }
+
+    .global-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-bottom: 15px;
+    }
+
+    .action-button {
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-dark);
+      color: var(--text);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .accordion-section {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(13, 20, 38, .78);
+      overflow: hidden;
+    }
+
+    .section-toggle {
+      width: 100%;
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .section-toggle strong {
+      display: block;
+      font-size: 17px;
+      letter-spacing: .04em;
+    }
+
+    .section-toggle small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .section-chevron,
+    .card-chevron {
+      flex: 0 0 auto;
+      font-size: 22px;
+      transition: transform .2s ease;
+    }
+
+    .section-toggle[aria-expanded="true"] .section-chevron,
+    .page-card.open .card-chevron {
+      transform: rotate(180deg);
+    }
+
+    .section-content {
+      display: grid;
+      gap: 11px;
+      padding: 0 12px 12px;
+    }
+
+    .section-content[hidden] { display: none; }
+
+    .page-card {
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      overflow: hidden;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+    }
+
+    .page-card.approved {
+      border-color: rgba(72, 213, 151, .75);
+      background: linear-gradient(145deg, var(--ok-dark), var(--panel));
+    }
+
+    .page-card.test {
+      border-color: rgba(255, 115, 115, .78);
+      background: linear-gradient(145deg, var(--test-dark), var(--panel));
+    }
+
+    .page-card.info {
+      border-color: rgba(117, 183, 255, .72);
+      background: linear-gradient(145deg, var(--info-dark), var(--panel));
+    }
+
+    .page-card.planned {
+      border-color: rgba(244, 196, 48, .72);
+      background: linear-gradient(145deg, var(--planned-dark), var(--panel));
+    }
+
+    .card-head {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      min-height: 68px;
+      padding: 8px 9px 8px 14px;
+    }
+
+    .card-toggle {
+      min-width: 0;
+      padding: 5px 0;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .card-title {
+      display: block;
+      font-size: clamp(17px, 4.8vw, 23px);
+      font-weight: 900;
+      line-height: 1.18;
+    }
+
+    .card-status {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .pin-button,
+    .chevron-button {
+      width: 45px;
+      height: 45px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel-dark);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .pin-button.active {
+      color: #17130a;
+      background: var(--planned);
+      border-color: var(--planned);
+    }
+
+    .card-body {
+      padding: 0 14px 14px;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .card-body[hidden] { display: none; }
+
+    .card-description {
+      margin: 12px 0;
+      color: var(--muted);
+      line-height: 1.48;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel-dark);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .tag.approved { color: #062418; background: var(--ok); border-color: var(--ok); }
+    .tag.test { color: #2b080d; background: var(--test); border-color: var(--test); }
+    .tag.info { color: #071a2e; background: var(--info); border-color: var(--info); }
+    .tag.planned { color: #17130a; background: var(--planned); border-color: var(--planned); }
+
+    .open-link {
+      min-height: 48px;
+      display: grid;
+      place-items: center;
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: var(--planned);
+      color: #17130a;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .pinned-section {
+      margin-top: 15px;
+      padding: 14px;
+      border: 2px solid rgba(244, 196, 48, .72);
+      border-radius: 18px;
+      background: rgba(244, 196, 48, .08);
+    }
+
+    .pinned-section[hidden] { display: none; }
+
+    .pinned-title {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .pinned-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .pinned-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pinned-link {
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-dark);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .unpin-button {
+      width: 46px;
+      height: 46px;
+      border: 1px solid var(--planned);
+      border-radius: 12px;
+      background: var(--planned);
+      color: #17130a;
+      cursor: pointer;
+    }
+
+    .comment-box {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    .comment-box h2 { margin: 0 0 6px; font-size: 20px; }
+    .comment-box p { margin: 0 0 10px; color: var(--muted); line-height: 1.45; }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel-dark);
+      color: var(--text);
+      line-height: 1.45;
+      resize: vertical;
+      outline: none;
+    }
+
+    .save-note { min-height: 18px; margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+    .footer-note {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-dark);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 560px) {
+      .global-actions { grid-template-columns: 1fr; }
+      .card-head { grid-template-columns: 1fr auto auto; }
+      .pin-button, .chevron-button { width: 42px; height: 42px; }
+    }
   </style>
 </head>
 <body>
-<main class="app">
-  <span class="version">Hovedmeny v9 · Oppdatert 04.08.2026 kl. 23:15</span>
-  <h1>BaMavaremottak</h1>
-  <p class="subtitle">Velg nøyaktig hvordan du skal arbeide. Grønne knapper er godkjent. Røde knapper er fortsatt TEST.</p>
+  <main class="app">
+    <span class="version">Hovedmeny v10 · Oppdatert 04.08.2026 kl. 23:31</span>
+    <h1>BaMavaremottak</h1>
+    <p class="subtitle">Trykk på en rad for å åpne eller lukke detaljene. Fest viktige sider med 📌.</p>
 
-  <h2 class="section-title">Siste arbeidslenke</h2>
-  <nav class="menu"><a class="menu-card approved" href="camera-live-v4.html"><div class="card-top"><div><h3 class="card-title">SISTE ARBEIDSLENKE — KAMERA CLOUD v4.6</h3><p class="card-description">Siste korrigerte kameraversjon. Foto kobles til eksisterende Nordic ID-post uten å opprette duplikat.</p></div><span class="icon">📷</span></div><div class="tags"><span class="tag approved">SISTE VERSJON</span><span class="tag info">FELLES SKY / TABELL</span><span class="tag">camera-live-v4.html</span></div></a></nav>
+    <div class="help">
+      Når en side er lukket, forsvinner den ikke — bare detaljene skjules. Festede sider vises øverst som raske snarveier. Alle valg lagres automatisk i denne nettleseren.
+    </div>
 
-  <h2 class="section-title">INN — Varemottak</h2>
-  <nav class="menu">
-    <a class="menu-card approved" href="camera-live-v4.html"><div class="card-top"><div><h3 class="card-title">INN — KAMERA / TELEFON</h3><p class="card-description">Fotografer etiketten, les numrene med Gemini og lagre bilde og registrering i den felles Mottak-tabellen.</p></div><span class="icon">📷</span></div><div class="tags"><span class="tag approved">GODKJENT</span><span class="tag info">FELLES SKY / TABELL</span><span class="tag">camera-live-v4.html</span></div></a>
-    <a class="menu-card test" href="mottak-live-v2.html"><div class="card-top"><div><h3 class="card-title">INN — NORDIC ID-SKANNER</h3><p class="card-description">Firmaskanner Nordic ID og kobling mot telefon og foto.</p></div><span class="icon">▥</span></div><div class="tags"><span class="tag test">TEST</span><span class="tag">mottak-live-v2.html</span></div></a>
-    <a class="menu-card approved" href="inn.html"><div class="card-top"><div><h3 class="card-title">INN — MENY / KONTROLL</h3><p class="card-description">Kamera, Nordic ID, kontroll og historikk.</p></div><span class="icon">✓</span></div><div class="tags"><span class="tag approved">GODKJENT</span><span class="tag">inn.html</span></div></a>
-  </nav>
+    <div class="global-actions">
+      <button class="action-button" id="openAll" type="button">Åpne alle seksjoner</button>
+      <button class="action-button" id="closeAll" type="button">Lukk alle seksjoner</button>
+    </div>
 
-  <h2 class="section-title">UT — Bestilling og utsending</h2>
-  <nav class="menu">
-    <a class="menu-card approved" href="bestilling.html"><div class="card-top"><div><h3 class="card-title">UT — VAREBESTILLING</h3><p class="card-description">FOR KONTOR. Én rampe med alle varetyper.</p></div><span class="icon">📋</span></div><div class="tags"><span class="tag approved">GODKJENT</span><span class="tag info">FOR KONTOR</span><span class="tag">bestilling.html</span><span class="tag" id="orderCountTag">0 lagrede</span></div></a>
-    <a class="menu-card test" href="utsending.html"><div class="card-top"><div><h3 class="card-title">UT — LAGER OG UTSENDING</h3><p class="card-description">Kompletter rampen, testfratrekk og returner varene.</p></div><span class="icon">🚚</span></div><div class="tags"><span class="tag test">TEST</span><span class="tag info">RAMPE / RETUR</span><span class="tag">utsending.html</span></div></a>
-  </nav>
+    <section class="pinned-section" id="pinnedSection" hidden>
+      <h2 class="pinned-title">📌 Festede sider</h2>
+      <div class="pinned-grid" id="pinnedGrid"></div>
+    </section>
 
-  <h2 class="section-title">Tester og utført arbeid</h2>
-  <nav class="menu"><a class="menu-card info" href="shared-page.html?src=review-pages.html"><div class="card-top"><div><h3 class="card-title">TESTER — ALLE SIDER OG KOMMENTARER</h3><p class="card-description">Oversikt over tidligere sider og status.</p></div><span class="icon">🧪</span></div><div class="tags"><span class="tag info">ÅPNE TESTOVERSIKT</span></div></a></nav>
+    <div id="sectionsRoot"></div>
 
-  <h2 class="section-title">Presentasjon</h2>
-  <nav class="menu"><a class="menu-card info" href="shared-page.html?src=presentasjon.html"><div class="card-top"><div><h3 class="card-title">PROSJEKTPRESENTASJON</h3><p class="card-description">Oversikt over publiserte sider.</p></div><span class="icon">📊</span></div><div class="tags"><span class="tag info">FOR PRESENTASJON</span></div></a></nav>
+    <section class="comment-box">
+      <h2>Kommentarer / endringer / forslag</h2>
+      <p>Skriv her hva som skal endres på hovedsiden.</p>
+      <textarea id="mainComment" placeholder="Skriv kommentar, endring eller forslag..."></textarea>
+      <div class="save-note" id="saveNote"></div>
+    </section>
 
-  <section class="comment-box"><h2>Kommentarer / endringer / forslag</h2><p>Skriv her hva som skal endres på hovedsiden.</p><textarea id="mainComment" placeholder="Skriv kommentar, endring eller forslag..."></textarea><div class="save-note" id="saveNote"></div></section>
-  <div class="footer-note">Det samme live lagerbildet vises nå på alle sider som åpnes fra hovedmenyen.</div>
-</main>
-<script src="shared-stock-status.js?v=20260804-2315"></script>
-<script>
-const ORDER_STORAGE_KEY="mottak_office_orders_v1",COMMENT_STORAGE_KEY="bamavaremottak_main_comment_v1",orderCountTag=document.getElementById("orderCountTag"),mainComment=document.getElementById("mainComment"),saveNote=document.getElementById("saveNote");try{const orders=JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY)||"[]");const count=Array.isArray(orders)?orders.length:0;orderCountTag.textContent=`${count} ${count===1?"lagret":"lagrede"}`}catch{orderCountTag.textContent="0 lagrede"}mainComment.value=localStorage.getItem(COMMENT_STORAGE_KEY)||"";mainComment.addEventListener("input",()=>{localStorage.setItem(COMMENT_STORAGE_KEY,mainComment.value);saveNote.textContent="Lagret automatisk.";clearTimeout(mainComment.saveTimer);mainComment.saveTimer=setTimeout(()=>saveNote.textContent="",1600)});
-</script>
+    <div class="footer-note">
+      Godkjente sider er grønne. Testsider er røde. Alle gamle sider ligger under <strong>TEST / ARKIV</strong> og kan holdes lukket uten å bli slettet.
+    </div>
+  </main>
+
+  <script src="shared-stock-status.js?v=20260804-2331"></script>
+  <script>
+    "use strict";
+
+    const SECTION_STATE_KEY = "bamavaremottak_home_sections_v10";
+    const CARD_STATE_KEY = "bamavaremottak_home_cards_v10";
+    const PIN_STATE_KEY = "bamavaremottak_home_pins_v10";
+    const COMMENT_STORAGE_KEY = "bamavaremottak_main_comment_v1";
+
+    const pages = [
+      { id: "camera-v4", section: "latest", title: "SISTE ARBEIDSLENKE — KAMERA CLOUD v4.6", description: "Siste korrigerte kameraversjon. Foto kobles til eksisterende Nordic ID-post uten å opprette duplikat.", href: "camera-live-v4.html", file: "camera-live-v4.html", icon: "📷", type: "approved", status: "SISTE VERSJON", tags: ["FELLES SKY / TABELL"] },
+
+      { id: "inn-camera", section: "inn", title: "INN — KAMERA / TELEFON", description: "Fotografer etiketten, les numrene med Gemini og arbeid mot den felles Mottak-tabellen.", href: "camera-live-v4.html", file: "camera-live-v4.html", icon: "📷", type: "approved", status: "GODKJENT", tags: ["TELEFON", "FELLES SKY"] },
+      { id: "inn-nordic", section: "inn", title: "INN — NORDIC ID-SKANNER", description: "Firmaskanner Nordic ID. Skanningen opprettes som pending og kan kompletteres med foto fra telefonen.", href: "mottak-live-v2.html", file: "mottak-live-v2.html", icon: "▥", type: "test", status: "TEST", tags: ["FIRMASKANNER", "PENDING"] },
+      { id: "inn-menu", section: "inn", title: "INN — MENY / KONTROLL", description: "Samlet INN-meny for kamera, Nordic ID, kontroll og historikk.", href: "inn.html", file: "inn.html", icon: "✓", type: "approved", status: "GODKJENT", tags: ["MENY", "KONTROLL"] },
+      { id: "inn-table", section: "inn", title: "INN — TABELL / HISTORIKK", description: "Tabellvisning av registrerte INN-poster.", href: "mottak-table-v1.html", file: "mottak-table-v1.html", icon: "☷", type: "test", status: "TEST — KONTROLLER", tags: ["TABELL", "HISTORIKK"] },
+
+      { id: "ut-office", section: "ut", title: "UT — VAREBESTILLING • FOR KONTOR", description: "Kontoret velger rampe, vare og antall og oppretter en bestilling til lageret.", href: "bestilling.html", file: "bestilling.html", icon: "📋", type: "approved", status: "GODKJENT", tags: ["FOR KONTOR", "BESTILLING"] },
+      { id: "ut-warehouse", section: "ut", title: "UT — LAGER OG UTSENDING", description: "Lagerarbeideren kompletterer rampen, gjennomfører utsending og håndterer retur.", href: "utsending.html", file: "utsending.html", icon: "🚚", type: "test", status: "TEST", tags: ["RAMPE", "RETUR"] },
+
+      { id: "review", section: "overview", title: "TESTER — ALLE SIDER OG KOMMENTARER", description: "Oversikt over tidligere sider, status, kommentarer og utført arbeid.", href: "shared-page.html?src=review-pages.html", file: "review-pages.html", icon: "🧪", type: "info", status: "OVERSIKT", tags: ["KOMMENTARER", "STATUS"] },
+      { id: "presentation", section: "overview", title: "PROSJEKTPRESENTASJON", description: "Presentasjon og oversikt over publiserte sider i prosjektet.", href: "shared-page.html?src=presentasjon.html", file: "presentasjon.html", icon: "📊", type: "info", status: "PRESENTASJON", tags: ["PROSJEKT"] },
+
+      { id: "old-start", section: "archive", title: "TEST — GAMMEL HOVEDMENY", description: "Tidligere versjon av hovedmenyen. Beholdes som dokumentasjon på utført arbeid.", href: "start.html", file: "start.html", icon: "🏠", type: "test", status: "TEST / ARKIV", tags: ["GAMMEL"] },
+      { id: "old-phone", section: "archive", title: "TEST — LOKAL TELEFONSKANNER", description: "Tidligere telefonside som lagrer data lokalt i nettleseren, uten felles Supabase-tabell.", href: "mottak.html", file: "mottak.html", icon: "📱", type: "test", status: "TEST / RESERVE", tags: ["LOCALSTORAGE"] },
+      { id: "camera-v2", section: "archive", title: "TEST — CAMERA LIVE v2", description: "Eldre skytilkoblet kameraversjon.", href: "camera-live.html", file: "camera-live.html", icon: "📷", type: "test", status: "TEST / ARKIV", tags: ["GAMMEL KAMERA"] },
+      { id: "mottak-live-v1", section: "archive", title: "TEST — MOTTAK LIVE v1", description: "Første eksperimentelle versjon av felles skybasert mottak.", href: "mottak-live.html", file: "mottak-live.html", icon: "☁️", type: "test", status: "TEST / ARKIV", tags: ["GAMMEL"] },
+      { id: "bulk-v2", section: "archive", title: "TEST — NORDIC ID BULK v2", description: "Tidligere test av masseskanning og lokal kø.", href: "nordic-id-bulk-scanner-v2.html", file: "nordic-id-bulk-scanner-v2.html", icon: "▥", type: "test", status: "TEST", tags: ["BULK"] },
+      { id: "bulk-v1", section: "archive", title: "TEST — NORDIC ID BULK v1", description: "Første versjon av masseskanneren.", href: "nordic-id-bulk-scanner.html", file: "nordic-id-bulk-scanner.html", icon: "▥", type: "test", status: "TEST / ARKIV", tags: ["BULK", "GAMMEL"] },
+      { id: "nordic-simple", section: "archive", title: "TEST — ENKEL NORDIC ID", description: "Minimalside for å kontrollere at skanneren skriver som et tastatur.", href: "nordic-id.html", file: "nordic-id.html", icon: "⌨️", type: "test", status: "TEST", tags: ["UTSTYR"] },
+      { id: "scanner-test", section: "archive", title: "TEST — DETALJERT CC-SKANNER", description: "Teknisk diagnose av tegn, lengde, Enter, Tab og duplikater.", href: "scanner-test.html", file: "scanner-test.html", icon: "🛠️", type: "test", status: "TEST", tags: ["DIAGNOSE"] }
+    ];
+
+    const sections = [
+      { id: "latest", title: "Siste arbeidslenke", note: "Siste versjon vi arbeider med", defaultOpen: true },
+      { id: "inn", title: "INN — Varemottak", note: "Telefon, Nordic ID, kontroll og historikk", defaultOpen: true },
+      { id: "ut", title: "UT — Bestilling og utsending", note: "Kontor, lager, rampe og retur", defaultOpen: true },
+      { id: "overview", title: "Oversikt og presentasjon", note: "Kommentarer, status og prosjektpresentasjon", defaultOpen: false },
+      { id: "archive", title: "TEST / ARKIV", note: "Gamle og tekniske sider — beholdes, men kan holdes lukket", defaultOpen: false }
+    ];
+
+    const sectionsRoot = document.getElementById("sectionsRoot");
+    const pinnedSection = document.getElementById("pinnedSection");
+    const pinnedGrid = document.getElementById("pinnedGrid");
+
+    let sectionState = loadObject(SECTION_STATE_KEY);
+    let cardState = loadObject(CARD_STATE_KEY);
+    let pins = loadArray(PIN_STATE_KEY);
+
+    function loadObject(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "{}");
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+      } catch { return {}; }
+    }
+
+    function loadArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch { return []; }
+    }
+
+    function saveState() {
+      localStorage.setItem(SECTION_STATE_KEY, JSON.stringify(sectionState));
+      localStorage.setItem(CARD_STATE_KEY, JSON.stringify(cardState));
+      localStorage.setItem(PIN_STATE_KEY, JSON.stringify(pins));
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+
+    function render() {
+      sectionsRoot.innerHTML = "";
+
+      sections.forEach(section => {
+        const isOpen = Object.prototype.hasOwnProperty.call(sectionState, section.id)
+          ? Boolean(sectionState[section.id])
+          : section.defaultOpen;
+
+        const wrapper = document.createElement("section");
+        wrapper.className = "accordion-section";
+        wrapper.innerHTML = `
+          <button class="section-toggle" type="button" aria-expanded="${isOpen}" data-section-toggle="${escapeHtml(section.id)}">
+            <span><strong>${escapeHtml(section.title)}</strong><small>${escapeHtml(section.note)}</small></span>
+            <span class="section-chevron">⌄</span>
+          </button>
+          <div class="section-content" data-section-content="${escapeHtml(section.id)}" ${isOpen ? "" : "hidden"}></div>
+        `;
+
+        const content = wrapper.querySelector(".section-content");
+        pages.filter(page => page.section === section.id).forEach(page => content.appendChild(createCard(page)));
+        sectionsRoot.appendChild(wrapper);
+      });
+
+      renderPinned();
+    }
+
+    function createCard(page) {
+      const isOpen = Boolean(cardState[page.id]);
+      const isPinned = pins.includes(page.id);
+      const card = document.createElement("article");
+      card.className = `page-card ${page.type}${isOpen ? " open" : ""}`;
+      card.dataset.pageId = page.id;
+
+      card.innerHTML = `
+        <div class="card-head">
+          <button class="card-toggle" type="button" data-card-toggle="${escapeHtml(page.id)}" aria-expanded="${isOpen}">
+            <span class="card-title">${escapeHtml(page.icon)} ${escapeHtml(page.title)}</span>
+            <span class="card-status">${escapeHtml(page.status)}</span>
+          </button>
+          <button class="pin-button${isPinned ? " active" : ""}" type="button" data-pin="${escapeHtml(page.id)}" title="${isPinned ? "Fjern festing" : "Fest siden øverst"}" aria-label="${isPinned ? "Fjern festing" : "Fest siden øverst"}">📌</button>
+          <button class="chevron-button" type="button" data-card-toggle="${escapeHtml(page.id)}" aria-label="Åpne eller lukk"><span class="card-chevron">⌄</span></button>
+        </div>
+        <div class="card-body" data-card-body="${escapeHtml(page.id)}" ${isOpen ? "" : "hidden"}>
+          <p class="card-description">${escapeHtml(page.description)}</p>
+          <div class="tags">
+            <span class="tag ${escapeHtml(page.type)}">${escapeHtml(page.status)}</span>
+            ${page.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+            <span class="tag">${escapeHtml(page.file)}</span>
+          </div>
+          <a class="open-link" href="${escapeHtml(page.href)}">ÅPNE SIDE</a>
+        </div>
+      `;
+
+      return card;
+    }
+
+    function renderPinned() {
+      const pinnedPages = pins.map(id => pages.find(page => page.id === id)).filter(Boolean);
+      pinnedSection.hidden = pinnedPages.length === 0;
+      pinnedGrid.innerHTML = pinnedPages.map(page => `
+        <div class="pinned-item">
+          <a class="pinned-link" href="${escapeHtml(page.href)}">${escapeHtml(page.icon)} ${escapeHtml(page.title)}</a>
+          <button class="unpin-button" type="button" data-unpin="${escapeHtml(page.id)}" title="Fjern festing">📌</button>
+        </div>
+      `).join("");
+    }
+
+    document.addEventListener("click", event => {
+      const sectionButton = event.target.closest("[data-section-toggle]");
+      if (sectionButton) {
+        const id = sectionButton.dataset.sectionToggle;
+        const content = document.querySelector(`[data-section-content="${CSS.escape(id)}"]`);
+        const nextOpen = sectionButton.getAttribute("aria-expanded") !== "true";
+        sectionButton.setAttribute("aria-expanded", String(nextOpen));
+        content.hidden = !nextOpen;
+        sectionState[id] = nextOpen;
+        saveState();
+        return;
+      }
+
+      const cardButton = event.target.closest("[data-card-toggle]");
+      if (cardButton) {
+        const id = cardButton.dataset.cardToggle;
+        const card = document.querySelector(`[data-page-id="${CSS.escape(id)}"]`);
+        const body = card.querySelector(`[data-card-body="${CSS.escape(id)}"]`);
+        const toggle = card.querySelector(".card-toggle");
+        const nextOpen = !card.classList.contains("open");
+        card.classList.toggle("open", nextOpen);
+        body.hidden = !nextOpen;
+        toggle.setAttribute("aria-expanded", String(nextOpen));
+        cardState[id] = nextOpen;
+        saveState();
+        return;
+      }
+
+      const pinButton = event.target.closest("[data-pin]");
+      if (pinButton) {
+        const id = pinButton.dataset.pin;
+        pins = pins.includes(id) ? pins.filter(value => value !== id) : [...pins, id];
+        saveState();
+        render();
+        return;
+      }
+
+      const unpinButton = event.target.closest("[data-unpin]");
+      if (unpinButton) {
+        pins = pins.filter(value => value !== unpinButton.dataset.unpin);
+        saveState();
+        render();
+      }
+    });
+
+    document.getElementById("openAll").addEventListener("click", () => {
+      sections.forEach(section => { sectionState[section.id] = true; });
+      saveState();
+      render();
+    });
+
+    document.getElementById("closeAll").addEventListener("click", () => {
+      sections.forEach(section => { sectionState[section.id] = false; });
+      saveState();
+      render();
+    });
+
+    const mainComment = document.getElementById("mainComment");
+    const saveNote = document.getElementById("saveNote");
+    mainComment.value = localStorage.getItem(COMMENT_STORAGE_KEY) || "";
+    mainComment.addEventListener("input", () => {
+      localStorage.setItem(COMMENT_STORAGE_KEY, mainComment.value);
+      saveNote.textContent = "Lagret automatisk.";
+      clearTimeout(mainComment.saveTimer);
+      mainComment.saveTimer = setTimeout(() => { saveNote.textContent = ""; }, 1600);
+    });
+
+    render();
+  </script>
 </body>
 </html>
