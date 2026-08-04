@@ -101,4 +101,5 @@
   }, true);
 
   renderStockBalance();
+  loadInn();
 })();
