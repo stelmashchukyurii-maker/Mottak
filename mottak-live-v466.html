@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Nordic ID v4.6.6 automatic scanner</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
+    iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
+    #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:5}
+  </style>
+</head>
+<body>
+  <div id="loader">Завантаження Nordic ID v4.6.6 AUTO…</div>
+  <iframe id="app" title="Nordic ID v4.6.6 AUTO" src="mottak-live-v46.html?base=466-0836"></iframe>
+  <script>
+    "use strict";
+    const frame = document.getElementById("app");
+    const loader = document.getElementById("loader");
+
+    frame.addEventListener("load", () => {
+      try {
+        const doc = frame.contentDocument;
+        const oldFix = doc.querySelector('script[src*="mottak-live-v46-wedge-fix.js"]');
+        if (oldFix) oldFix.remove();
+
+        const recovery = doc.createElement("script");
+        recovery.src = "mottak-live-v46-wedge-v462.js?v=466-0836";
+        recovery.onload = () => {
+          const selector = doc.createElement("script");
+          selector.src = "mottak-live-v46-candidate-select-v465.js?v=466-0836";
+          selector.onload = () => {
+            const autoStart = doc.createElement("script");
+            autoStart.src = "mottak-live-v46-autostart-v466.js?v=466-0836";
+            autoStart.onload = () => { loader.style.display = "none"; };
+            autoStart.onerror = () => { loader.textContent = "Не вдалося завантажити автоматичний старт v4.6.6."; };
+            doc.body.appendChild(autoStart);
+          };
+          selector.onerror = () => { loader.textContent = "Не вдалося завантажити вибір бірки v4.6.5."; };
+          doc.body.appendChild(selector);
+        };
+        recovery.onerror = () => { loader.textContent = "Не вдалося завантажити відновлення Wedge."; };
+        doc.body.appendChild(recovery);
+      } catch (error) {
+        loader.textContent = `Помилка запуску v4.6.6: ${error.message || error}`;
+      }
+    });
+  </script>
+</body>
+</html>
