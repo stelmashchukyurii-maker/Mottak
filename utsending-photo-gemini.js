@@ -15,7 +15,7 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    .ut-gemini-box{margin-top:10px;padding:11px;border:1px solid rgba(244,196,48,.45);border-radius:12px;background:rgba(244,196,48,.06)}
+    .ut-gemini-box{margin:0 0 10px;padding:11px;border:1px solid rgba(244,196,48,.45);border-radius:12px;background:rgba(244,196,48,.06)}
     .ut-gemini-label{display:block;margin-bottom:6px;color:var(--muted);font-size:11px;font-weight:900}
     .ut-gemini-key-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
     .ut-gemini-key-row input{min-height:46px}
@@ -37,10 +37,10 @@
       <input id="utGeminiKey" type="password" autocomplete="off" placeholder="Lim inn Gemini API-nøkkelen">
       <button class="btn primary" id="utRecognizeButton" type="button" disabled>Les av numrene</button>
     </div>
-    <div class="ut-gemini-note">Nøkkelen lagres bare i denne nettleserfanen. Bildet brukes kun til å finne en eksisterende INN-post.</div>
+    <div class="ut-gemini-note">Samme nøkkel som i INN-kamera. Den lagres bare i denne nettleserfanen. De eksisterende feltene Øvre nummer og Nedre nummer fylles automatisk.</div>
     <div class="ut-gemini-status" id="utGeminiStatus"></div>
   `;
-  photoPanel.appendChild(box);
+  photoPanel.insertBefore(box, photoPanel.firstChild);
 
   const keyInput = $("utGeminiKey");
   const recognizeButton = $("utRecognizeButton");
