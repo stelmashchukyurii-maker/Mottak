@@ -11,7 +11,7 @@
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260804-2225" title="UT — Bekreft rampe"></iframe>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260804-2240" title="UT — Bekreft rampe"></iframe>
 <script>
 "use strict";
 const frame=document.getElementById("utCore");
@@ -21,12 +21,12 @@ function enhance(){
   const doc=frame.contentDocument;
   if(!doc)return;
   const version=doc.querySelector(".version");
-  if(version)version.innerHTML="UT Bekreftelse v9 SERVER OCR<br>Oppdatert 04.08.2026 kl. 22:25";
+  if(version)version.innerHTML="UT Bekreftelse v10 NEDRE NUMMER<br>Oppdatert 04.08.2026 kl. 22:40";
   doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
   if(!doc.getElementById("utGeminiModule")){
     const script=doc.createElement("script");
     script.id="utGeminiModule";
-    script.src="utsending-photo-gemini.js?v=20260804-2225";
+    script.src="utsending-photo-gemini.js?v=20260804-2240";
     doc.body.appendChild(script);
   }
   observer?.disconnect();
