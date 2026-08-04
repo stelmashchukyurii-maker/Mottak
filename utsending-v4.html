@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>UT — Lager og utsending v4</title>
+  <style>
+    html,body{margin:0;min-height:100%;background:#0b1020}
+    #core{display:block;width:100%;min-height:100vh;border:0;background:#0b1020}
+  </style>
+</head>
+<body>
+  <iframe id="core" src="utsending.html?v=20260804-1427" title="UT — Lager og utsending"></iframe>
+<script>
+"use strict";
+const frame=document.getElementById("core");
+const SUPABASE_URL="https://hzjsatehehhpgpskckfi.supabase.co";
+const SUPABASE_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+let observer=null;
+
+function resizeFrame(){
+  try{
+    const doc=frame.contentDocument;
+    if(!doc)return;
+    frame.style.height=Math.max(window.innerHeight,doc.documentElement.scrollHeight,doc.body?.scrollHeight||0)+"px";
+  }catch{}
+}
+
+function addStyles(doc){
+  if(doc.getElementById("utMethodStyles"))return;
+  const style=doc.createElement("style");
+  style.id="utMethodStyles";
+  style.textContent=`
+    .ut-methods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 11px}
+    .ut-method{min-height:46px;padding:8px 5px;border:1px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);font-weight:900;font-size:13px;line-height:1.15}
+    .ut-method.active{border-color:var(--accent);background:rgba(244,196,48,.13);color:var(--accent);box-shadow:0 0 0 2px rgba(244,196,48,.08)}
+    .ut-method:disabled{opacity:.42;cursor:not-allowed}
+    .ut-method small{display:block;margin-top:3px;font-size:9px;color:var(--muted)}
+    .ut-panel{margin:8px 0 2px;padding:11px;border:1px solid var(--line);border-radius:13px;background:rgba(13,20,38,.72)}
+    .ut-pair{display:grid;grid-template-columns:1fr;gap:8px}
+    @media(min-width:600px){.ut-pair{grid-template-columns:1fr 1fr auto}}
+    .ut-pair input{min-height:48px;text-transform:uppercase;font-family:Consolas,monospace;font-weight:900}
+    .ut-pair .btn{min-width:145px}
+    .ut-photo-button{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;padding:10px;border:2px dashed var(--info);border-radius:13px;background:rgba(117,183,255,.08);color:#d8ebff;font-weight:950;cursor:pointer}
+    .ut-photo-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+    .ut-preview{display:block;width:100%;max-height:280px;margin-top:10px;border:1px solid var(--line);border-radius:12px;object-fit:contain;background:#070b14}
+    .ut-help{margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.4}
+    .ut-local-message{min-height:20px;margin-top:8px;text-align:center;color:var(--muted);font-size:12px;white-space:pre-wrap}
+    .ut-local-message.ok{color:var(--ok)}.ut-local-message.bad{color:var(--bad)}.ut-local-message.warn{color:var(--warn)}
+  `;
+  doc.head.appendChild(style);
+}
+
+function makePairPanel(doc,prefix,photoMode=false){
+  const panel=doc.createElement("div");
+  panel.className="ut-panel";
+  panel.dataset.utPanel=prefix;
+  panel.hidden=true;
+  if(photoMode){
+    const label=doc.createElement("label");
+    label.className="ut-photo-button";
+    label.htmlFor=prefix+"File";
+    label.textContent="📷 Ta bilde av etiketten";
+    const file=doc.createElement("input");
+    file.className="ut-photo-input";
+    file.id=prefix+"File";
+    file.type="file";
+    file.accept="image/*";
+    file.setAttribute("capture","environment");
+    const preview=doc.createElement("img");
+    preview.className="ut-preview";
+    preview.hidden=true;
+    preview.alt="Bilde av etiketten";
+    file.addEventListener("change",()=>{
+      const image=file.files&&file.files[0];
+      if(!image)return;
+      preview.src=URL.createObjectURL(image);
+      preview.hidden=false;
+      setLocalMessage(panel,"Bildet er klart. Skriv inn øvre og nedre nummer fra etiketten.","ok");
+      setTimeout(()=>panel.querySelector('[data-field="upper"]')?.focus(),100);
+      resizeFrame();
+    });
+    panel.append(label,file,preview);
+    const help=doc.createElement("p");
+    help.className="ut-help";
+    help.textContent="Automatisk nummergjenkjenning fra bildet kobles til senere. Nå brukes bildet som visuell kontroll før de to numrene registreres.";
+    panel.appendChild(help);
+  }
+  const pair=doc.createElement("div");
+  pair.className="ut-pair";
+  if(photoMode)pair.style.marginTop="10px";
+  pair.innerHTML=`
+    <input data-field="upper" type="text" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Øvre nummer · 6 siffer">
+    <input data-field="lower" type="text" maxlength="6" autocomplete="off" placeholder="Nedre nummer · 6 tegn">
+    <button class="btn primary" data-register-pair type="button">Finn og reserver</button>`;
+  panel.appendChild(pair);
+  const message=doc.createElement("div");
+  message.className="ut-local-message";
+  message.dataset.localMessage="";
+  panel.appendChild(message);
+  pair.querySelectorAll("input").forEach(input=>input.addEventListener("input",()=>{input.value=input.value.toUpperCase().replace(/[^A-Z0-9]/g,"")}));
+  pair.querySelector("[data-register-pair]").addEventListener("click",()=>registerPair(panel));
+  pair.querySelectorAll("input").forEach(input=>input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();registerPair(panel)}}));
+  return panel;
+}
+
+function setLocalMessage(panel,text,type=""){
+  const el=panel.querySelector("[data-local-message]");
+  if(!el)return;
+  el.textContent=text;
+  el.className="ut-local-message "+type;
+}
+
+async function requestRows(params){
+  const url=new URL(SUPABASE_URL+"/rest/v1/mottak_scans");
+  url.searchParams.set("select","id,product,scanner_code,upper_number,lower_number,stock_status,status,created_at");
+  Object.entries(params).forEach(([key,value])=>url.searchParams.append(key,value));
+  url.searchParams.set("limit","2");
+  const response=await fetch(url,{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json"}});
+  const text=await response.text();
+  if(!response.ok)throw new Error(text||("HTTP "+response.status));
+  return JSON.parse(text||"[]");
+}
+
+async function chooseSafeToken(row){
+  if(row.scanner_code)return row.scanner_code;
+  const lower=String(row.lower_number||"").toUpperCase();
+  const upper=String(row.upper_number||"").toUpperCase();
+  if(lower){
+    const rows=await requestRows({status:"eq.verified",stock_status:"eq.in_stock",lower_number:"eq."+lower});
+    if(rows.length===1)return lower;
+  }
+  if(upper){
+    const rows=await requestRows({status:"eq.verified",stock_status:"eq.in_stock",upper_number:"eq."+upper});
+    if(rows.length===1)return upper;
+  }
+  throw new Error("Paret er funnet, men ingen av numrene er unike. Nordic ID/EPC kreves for sikker reservasjon.");
+}
+
+async function registerPair(panel){
+  const upper=panel.querySelector('[data-field="upper"]').value.trim().toUpperCase();
+  const lower=panel.querySelector('[data-field="lower"]').value.trim().toUpperCase();
+  if(!/^\d{6}$/.test(upper))return setLocalMessage(panel,"Øvre nummer må være nøyaktig 6 siffer.","bad");
+  if(!/^[A-Z0-9]{6}$/.test(lower))return setLocalMessage(panel,"Nedre nummer må være nøyaktig 6 bokstaver/siffer.","bad");
+  const button=panel.querySelector("[data-register-pair]");
+  button.disabled=true;
+  setLocalMessage(panel,"Søker etter nøyaktig kombinasjon i INN-basen…");
+  try{
+    const rows=await requestRows({status:"eq.verified",stock_status:"eq.in_stock",upper_number:"eq."+upper,lower_number:"eq."+lower});
+    if(rows.length===0)throw new Error("Ingen ledig og godkjent vare ble funnet med begge numrene.");
+    if(rows.length>1)throw new Error("Flere poster har samme nummerpar. Bruk Nordic ID/EPC.");
+    const token=await chooseSafeToken(rows[0]);
+    const win=frame.contentWindow;
+    const doc=frame.contentDocument;
+    const scanInput=doc.getElementById("scanInput");
+    if(!scanInput||typeof win.registerScan!=="function")throw new Error("UT-skanningsfunksjonen er ikke klar. Oppdater siden.");
+    scanInput.value=token;
+    setLocalMessage(panel,`${rows[0].product}: riktig nummerpar funnet. Reserverer varen…`,"ok");
+    await win.registerScan();
+    panel.querySelectorAll("input").forEach(input=>input.value="");
+  }catch(error){
+    setLocalMessage(panel,error.message||String(error),"bad");
+  }finally{button.disabled=false;resizeFrame()}
+}
+
+function activateMode(doc,box,mode){
+  box.querySelectorAll("[data-ut-mode]").forEach(button=>button.classList.toggle("active",button.dataset.utMode===mode));
+  box.querySelectorAll("[data-ut-panel]").forEach(panel=>panel.hidden=panel.dataset.utPanel!==mode);
+  const originalNote=box.querySelector(":scope > .scan-note");
+  const originalRow=box.querySelector(":scope > .scan-row");
+  if(originalNote)originalNote.hidden=true;
+  if(originalRow)originalRow.hidden=true;
+  if(mode==="manual")setTimeout(()=>box.querySelector('[data-ut-panel="manual"] [data-field="upper"]')?.focus(),50);
+  resizeFrame();
+}
+
+function enhanceScanBox(){
+  const doc=frame.contentDocument;
+  if(!doc)return;
+  addStyles(doc);
+  const box=doc.querySelector(".scan-box");
+  if(!box||box.dataset.utModesReady)return;
+  box.dataset.utModesReady="1";
+  const methods=doc.createElement("div");
+  methods.className="ut-methods";
+  methods.innerHTML=`
+    <button class="ut-method" data-ut-mode="photo" type="button">📷 Foto</button>
+    <button class="ut-method active" data-ut-mode="manual" type="button">✍️ Manuelt</button>
+    <button class="ut-method" data-ut-mode="nordic" type="button" disabled>📡 Nordic ID<small>Senere</small></button>`;
+  const first=box.querySelector(".scan-note")||box.firstChild;
+  box.insertBefore(methods,first);
+  const photo=makePairPanel(doc,"photo",true);
+  const manual=makePairPanel(doc,"manual",false);
+  box.insertBefore(photo,first);
+  box.insertBefore(manual,first);
+  methods.querySelector('[data-ut-mode="photo"]').addEventListener("click",()=>activateMode(doc,box,"photo"));
+  methods.querySelector('[data-ut-mode="manual"]').addEventListener("click",()=>activateMode(doc,box,"manual"));
+  activateMode(doc,box,"manual");
+}
+
+frame.addEventListener("load",()=>{
+  try{
+    const doc=frame.contentDocument;
+    enhanceScanBox();
+    if(observer)observer.disconnect();
+    observer=new MutationObserver(()=>{enhanceScanBox();resizeFrame()});
+    observer.observe(doc.body,{childList:true,subtree:true});
+    if(window.ResizeObserver)new ResizeObserver(resizeFrame).observe(doc.body);
+    setTimeout(resizeFrame,100);
+    setTimeout(resizeFrame,700);
+  }catch(error){console.error("UT v4 enhancement",error)}
+});
+window.addEventListener("resize",resizeFrame);
+</script>
+</body>
+</html>
