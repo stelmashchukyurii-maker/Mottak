@@ -123,11 +123,16 @@
     }
 
     async execute() {
-      const url = new URL(`${this.client.url}/rest/v1/${encodeURIComponent(this.table)}`);
-      if (this.columns) url.searchParams.set("select", this.columns);
-      for (const [column, value] of this.filters) url.searchParams.append(column, value);
-      if (this.orderBy) url.searchParams.set("order", this.orderBy);
-      if (Number.isFinite(this.maxRows) && this.maxRows >= 0) url.searchParams.set("limit", String(this.maxRows));
+      const UrlConstructor = global.URL;
+      if (typeof UrlConstructor !== "function") {
+        return { data: null, error: makeError("Nettleseren mangler URL-støtte.", { code: "URL_UNAVAILABLE" }) };
+      }
+
+      const requestUrl = new UrlConstructor(`${this.client.url}/rest/v1/${encodeURIComponent(this.table)}`);
+      if (this.columns) requestUrl.searchParams.set("select", this.columns);
+      for (const [column, value] of this.filters) requestUrl.searchParams.append(column, value);
+      if (this.orderBy) requestUrl.searchParams.set("order", this.orderBy);
+      if (Number.isFinite(this.maxRows) && this.maxRows >= 0) requestUrl.searchParams.set("limit", String(this.maxRows));
 
       const headers = this.client.headers();
       if (this.returnRepresentation) headers.Prefer = "return=representation";
@@ -136,7 +141,7 @@
       if (this.body !== undefined) options.body = JSON.stringify(this.body);
 
       try {
-        const response = await fetchWithTimeout(url.toString(), options, this.client.timeoutMs);
+        const response = await fetchWithTimeout(requestUrl.toString(), options, this.client.timeoutMs);
         const result = await parseResponse(response);
         if (result.error) return result;
 
@@ -206,7 +211,7 @@
         Authorization: `Bearer ${this.key}`,
         Accept: "application/json",
         "Content-Type": "application/json",
-        "X-Client-Info": "bamavaremottak-supabase-lite/1.0"
+        "X-Client-Info": "bamavaremottak-supabase-lite/1.1"
       };
     }
 
@@ -215,9 +220,9 @@
     }
 
     async rpc(functionName, args = {}) {
-      const url = `${this.url}/rest/v1/rpc/${encodeURIComponent(functionName)}`;
+      const endpoint = `${this.url}/rest/v1/rpc/${encodeURIComponent(functionName)}`;
       try {
-        const response = await fetchWithTimeout(url, {
+        const response = await fetchWithTimeout(endpoint, {
           method: "POST",
           headers: this.headers(),
           body: JSON.stringify(args)
