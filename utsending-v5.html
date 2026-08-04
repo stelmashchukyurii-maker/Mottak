@@ -25,6 +25,10 @@ function baseDoc(){try{return innerFrame()?.contentDocument||null}catch{return n
 function baseWin(){try{return innerFrame()?.contentWindow||null}catch{return null}}
 function resizeOuter(){try{const d=v4doc();if(d)outer.style.height=Math.max(innerHeight,d.documentElement.scrollHeight,d.body?.scrollHeight||0)+"px"}catch{}}
 function currentOrder(){try{return baseWin()?.current?.()||null}catch{return null}}
+function setText(el,value){const text=String(value??"");if(el&&el.textContent!==text)el.textContent=text}
+function setHtml(el,value){const html=String(value??"");if(el&&el.innerHTML!==html)el.innerHTML=html}
+function setHidden(el,value){if(el&&el.hidden!==Boolean(value))el.hidden=Boolean(value)}
+function setClass(el,value){if(el&&el.className!==value)el.className=value}
 
 async function rpc(name,args={}){
   const response=await fetch(`${URL}/rest/v1/rpc/${encodeURIComponent(name)}`,{
@@ -62,14 +66,14 @@ function ensureBanner(doc){
   if(doc.getElementById("testV5Banner"))return;
   const banner=doc.createElement("div");banner.id="testV5Banner";banner.className="test-v5-banner";
   banner.innerHTML="<strong>TESTMODUS — INGEN LIVE-UTSENDING</strong><span>Varene blir først midlertidig trukket fra fysisk lager. Deretter må hele rampen returneres med en egen knapp.</span>";
-  const subtitle=doc.querySelector(".subtitle");subtitle?.insertAdjacentElement("afterend",banner);
+  doc.querySelector(".subtitle")?.insertAdjacentElement("afterend",banner);
 }
 
 function ensurePhysical(doc){
   if(doc.getElementById("physicalV5"))return;
   const card=doc.createElement("div");card.id="physicalV5";card.className="physical-v5";
   card.innerHTML='<span>FYSISK PÅ LAGER NÅ</span><strong id="physicalV5Value">Laster…</strong>';
-  const summary=doc.querySelector(".stock-summary");summary?.insertAdjacentElement("afterend",card);
+  doc.querySelector(".stock-summary")?.insertAdjacentElement("afterend",card);
 }
 
 function ensurePanel(doc){
@@ -95,61 +99,69 @@ function bindTestButton(doc){
 
 function patchStatic(doc){
   addStyles(doc);ensureBanner(doc);ensurePhysical(doc);ensurePanel(doc);bindTestButton(doc);
-  const version=doc.querySelector(".version");if(version)version.innerHTML="UT Lager v5 TEST<br>Oppdatert 04.08.2026 kl. 20:31";
-  const subtitle=doc.querySelector(".subtitle");if(subtitle)subtitle.textContent="Reversibel test av reservasjon, rampe, fysisk lagerfratrekk og full retur.";
-  const mode=doc.getElementById("modeText");if(mode)mode.innerHTML="<strong>Kun TEST:</strong> vanlig sluttutsending er deaktivert. Alle varer skal returneres etter at lagerfratrekket er kontrollert.";
-  const demo=doc.getElementById("demoButton");if(demo)demo.hidden=true;
-  const dispatchedLabel=doc.querySelector(".stock-state.dispatched span");if(dispatchedLabel)dispatchedLabel.textContent="TEST — MIDLERTIDIG TRUKKET";
-  const dispatchedSmall=doc.querySelector(".stock-state.dispatched small");if(dispatchedSmall)dispatchedSmall.textContent="Skal returneres til lager";
-  const checkText=doc.querySelector(".confirm-check span");if(checkText)checkText.textContent="Jeg bekrefter at hele rampen er kontrollert og klar for midlertidig testfratrekk.";
+  setHtml(doc.querySelector(".version"),"UT Lager v5 TEST<br>Oppdatert 04.08.2026 kl. 20:31");
+  setText(doc.querySelector(".subtitle"),"Reversibel test av reservasjon, rampe, fysisk lagerfratrekk og full retur.");
+  setHtml(doc.getElementById("modeText"),"<strong>Kun TEST:</strong> vanlig sluttutsending er deaktivert. Alle varer skal returneres etter at lagerfratrekket er kontrollert.");
+  setHidden(doc.getElementById("demoButton"),true);
+  setText(doc.querySelector(".stock-state.dispatched span"),"TEST — MIDLERTIDIG TRUKKET");
+  setText(doc.querySelector(".stock-state.dispatched small"),"Skal returneres til lager");
+  setText(doc.querySelector(".confirm-check span"),"Jeg bekrefter at hele rampen er kontrollert og klar for midlertidig testfratrekk.");
 }
 
 function patchOrderState(doc){
   const order=currentOrder(),panel=ensurePanel(doc);if(!panel)return;
-  const check=doc.getElementById("confirmCheck"),button=doc.getElementById("confirmButton"),returnBtn=doc.getElementById("testV5Return"),note=doc.getElementById("testV5Note"),grid=doc.getElementById("testV5Grid"),result=doc.getElementById("testV5Result"),pill=doc.getElementById("detailStatus");
-  if(!order){panel.hidden=true;return}panel.hidden=false;
+  const check=doc.getElementById("confirmCheck"),label=check?.closest("label"),button=doc.getElementById("confirmButton"),returnBtn=doc.getElementById("testV5Return"),note=doc.getElementById("testV5Note"),grid=doc.getElementById("testV5Grid"),result=doc.getElementById("testV5Result"),pill=doc.getElementById("detailStatus");
+  if(!order){setHidden(panel,true);return}setHidden(panel,false);
   const state=order.test_state||"active";
   if(state==="dispatched"){
-    if(check)check.closest("label").hidden=true;if(button)button.hidden=true;returnBtn.hidden=false;
-    if(pill)pill.textContent="TEST — списано";
-    note.textContent="Загальний фізичний залишок реально зменшено. Перевірте цифри, а потім обов’язково поверніть товар.";
-    grid.innerHTML=cell("ДО СПИСАННЯ",fmt(order.test_before_bunner,order.test_before_hyller))+cell("ПІСЛЯ СПИСАННЯ",fmt(order.test_after_dispatch_bunner,order.test_after_dispatch_hyller))+cell("СПИСАНО BUNNER",String((order.test_before_bunner||0)-(order.test_after_dispatch_bunner||0)))+cell("СПИСАНО HYLLER",String((order.test_before_hyller||0)-(order.test_after_dispatch_hyller||0)));
-    result.textContent="Тест ще не завершено: товар потрібно повернути на склад.";result.className="test-v5-result";
+    setHidden(label,true);setHidden(button,true);setHidden(returnBtn,false);setText(pill,"TEST — списано");
+    setText(note,"Загальний фізичний залишок реально зменшено. Перевірте цифри, а потім обов’язково поверніть товар.");
+    setHtml(grid,cell("ДО СПИСАННЯ",fmt(order.test_before_bunner,order.test_before_hyller))+cell("ПІСЛЯ СПИСАННЯ",fmt(order.test_after_dispatch_bunner,order.test_after_dispatch_hyller))+cell("СПИСАНО BUNNER",String((order.test_before_bunner||0)-(order.test_after_dispatch_bunner||0)))+cell("СПИСАНО HYLLER",String((order.test_before_hyller||0)-(order.test_after_dispatch_hyller||0))));
+    if(!busy){setText(result,"Тест ще не завершено: товар потрібно повернути на склад.");setClass(result,"test-v5-result")}
   }else if(state==="returned"){
-    if(check)check.closest("label").hidden=true;if(button)button.hidden=true;returnBtn.hidden=true;
-    if(pill)pill.textContent="TEST — повернено";
-    note.textContent="Тимчасово списані товари повернено до in_stock без видалення INN-записів.";
-    grid.innerHTML=cell("ДО ТЕСТУ",fmt(order.test_before_bunner,order.test_before_hyller))+cell("ПІСЛЯ СПИСАННЯ",fmt(order.test_after_dispatch_bunner,order.test_after_dispatch_hyller))+cell("ПІСЛЯ ПОВЕРНЕННЯ",fmt(order.test_after_return_bunner,order.test_after_return_hyller))+cell("РІЗНИЦЯ ПІСЛЯ ПОВЕРНЕННЯ",fmt((order.test_after_return_bunner||0)-(order.test_before_bunner||0),(order.test_after_return_hyller||0)-(order.test_before_hyller||0)));
+    setHidden(label,true);setHidden(button,true);setHidden(returnBtn,true);setText(pill,"TEST — повернено");
+    setText(note,"Тимчасово списані товари повернено до in_stock без видалення INN-записів.");
+    setHtml(grid,cell("ДО ТЕСТУ",fmt(order.test_before_bunner,order.test_before_hyller))+cell("ПІСЛЯ СПИСАННЯ",fmt(order.test_after_dispatch_bunner,order.test_after_dispatch_hyller))+cell("ПІСЛЯ ПОВЕРНЕННЯ",fmt(order.test_after_return_bunner,order.test_after_return_hyller))+cell("РІЗНИЦЯ ПІСЛЯ ПОВЕРНЕННЯ",fmt((order.test_after_return_bunner||0)-(order.test_before_bunner||0),(order.test_after_return_hyller||0)-(order.test_before_hyller||0))));
     const ok=Number(order.test_after_return_bunner)===Number(order.test_before_bunner)&&Number(order.test_after_return_hyller)===Number(order.test_before_hyller);
-    result.textContent=ok?"Повернення успішне. Початковий фізичний залишок відновлено.":"Увага: залишок після повернення відрізняється. Потрібна перевірка.";result.className=`test-v5-result ${ok?"ok":"bad"}`;
+    setText(result,ok?"Повернення успішне. Початковий фізичний залишок відновлено.":"Увага: залишок після повернення відрізняється. Потрібна перевірка.");setClass(result,`test-v5-result ${ok?"ok":"bad"}`);
   }else{
-    if(check)check.closest("label").hidden=false;if(button){button.hidden=false;button.textContent="Тестово списати всю рампу"}returnBtn.hidden=true;
-    note.textContent="Після тестового списання сторінка покаже фактичне зменшення фізичного залишку. Повернення виконується окремою кнопкою.";
-    grid.innerHTML="";result.textContent="";result.className="test-v5-result";
+    setHidden(label,false);setHidden(button,false);setText(button,"Тестово списати всю рампу");setHidden(returnBtn,true);
+    setText(note,"Після тестового списання сторінка покаже фактичне зменшення фізичного залишку. Повернення виконується окремою кнопкою.");setHtml(grid,"");
+    if(!busy&&result.dataset.keep!=="1"){setText(result,"");setClass(result,"test-v5-result")}
   }
 }
 
 async function refreshPhysical(){
   const doc=baseDoc();if(!doc)return;
-  try{const rows=await rpc("ut_physical_stock");const row=Array.isArray(rows)?rows[0]:rows;const value=doc.getElementById("physicalV5Value");if(value)value.textContent=fmt(row?.total_bunner,row?.total_hyller)}catch(error){const value=doc.getElementById("physicalV5Value");if(value)value.textContent="SQL TESTMODUS må installeres"}
+  try{const rows=await rpc("ut_physical_stock");const row=Array.isArray(rows)?rows[0]:rows;setText(doc.getElementById("physicalV5Value"),fmt(row?.total_bunner,row?.total_hyller))}
+  catch{setText(doc.getElementById("physicalV5Value"),"SQL TESTMODUS må installeres")}
 }
 
 async function dispatchTest(){
   if(busy)return;const doc=baseDoc(),win=baseWin(),order=currentOrder();if(!doc||!win||!order)return;
   const check=doc.getElementById("confirmCheck"),button=doc.getElementById("confirmButton"),result=doc.getElementById("testV5Result");
-  if(!check?.checked){result.textContent="Поставте контрольну галочку перед тестовим списанням.";result.className="test-v5-result bad";return}
-  busy=true;button.disabled=true;result.textContent="Виконується реальне тестове списання з фізичного залишку…";result.className="test-v5-result";
-  try{await rpc("test_dispatch_ut_order",{p_order_id:order.id});check.checked=false;await win.loadAll?.();await refreshPhysical();setTimeout(()=>patchOrderState(doc),150)}catch(error){result.textContent=error.message||String(error);result.className="test-v5-result bad"}finally{busy=false;patchOrderState(doc)}
+  result.dataset.keep="1";
+  if(!check?.checked){setText(result,"Поставте контрольну галочку перед тестовим списанням.");setClass(result,"test-v5-result bad");return}
+  busy=true;button.disabled=true;setText(result,"Виконується реальне тестове списання з фізичного залишку…");setClass(result,"test-v5-result");
+  try{await rpc("test_dispatch_ut_order",{p_order_id:order.id});check.checked=false;await win.loadAll?.();await refreshPhysical();setTimeout(()=>patchOrderState(doc),150)}
+  catch(error){setText(result,error.message||String(error));setClass(result,"test-v5-result bad")}
+  finally{busy=false;button.disabled=false;setTimeout(()=>{result.dataset.keep="0";patchOrderState(doc)},200)}
 }
 
 async function returnTest(){
   if(busy)return;const doc=baseDoc(),win=baseWin(),order=currentOrder(),button=doc?.getElementById("testV5Return"),result=doc?.getElementById("testV5Result");if(!doc||!win||!order)return;
-  busy=true;button.disabled=true;result.textContent="Повертаємо всі товари до in_stock…";result.className="test-v5-result";
-  try{await rpc("return_ut_test_order",{p_order_id:order.id});await win.loadAll?.();await refreshPhysical();setTimeout(()=>patchOrderState(doc),150)}catch(error){result.textContent=error.message||String(error);result.className="test-v5-result bad"}finally{busy=false;button.disabled=false;patchOrderState(doc)}
+  result.dataset.keep="1";busy=true;button.disabled=true;setText(result,"Повертаємо всі товари до in_stock…");setClass(result,"test-v5-result");
+  try{await rpc("return_ut_test_order",{p_order_id:order.id});await win.loadAll?.();await refreshPhysical();setTimeout(()=>patchOrderState(doc),150)}
+  catch(error){setText(result,error.message||String(error));setClass(result,"test-v5-result bad")}
+  finally{busy=false;button.disabled=false;setTimeout(()=>{result.dataset.keep="0";patchOrderState(doc)},200)}
 }
 
-function patch(){const doc=baseDoc();if(!doc)return;patchStatic(doc);patchOrderState(doc);resizeOuter();clearTimeout(patchTimer);patchTimer=setTimeout(refreshPhysical,250)}
-function connect(){const inner=innerFrame();if(!inner)return false;const attach=()=>{const doc=baseDoc();if(!doc)return;patch();baseObserver?.disconnect();baseObserver=new MutationObserver(patch);baseObserver.observe(doc.body,{childList:true,subtree:true,characterData:true});clearInterval(physicalTimer);physicalTimer=setInterval(refreshPhysical,5000);resizeOuter()};if(inner.contentDocument?.readyState==="complete")attach();else inner.addEventListener("load",attach,{once:true});return true}
+function patch(){const doc=baseDoc();if(!doc)return;patchStatic(doc);patchOrderState(doc);resizeOuter();clearTimeout(patchTimer);patchTimer=setTimeout(refreshPhysical,300)}
+function connect(){
+  const inner=innerFrame();if(!inner)return false;
+  const attach=()=>{const doc=baseDoc();if(!doc)return;patch();baseObserver?.disconnect();baseObserver=new MutationObserver(()=>requestAnimationFrame(patch));baseObserver.observe(doc.body,{childList:true,subtree:true});clearInterval(physicalTimer);physicalTimer=setInterval(refreshPhysical,5000);resizeOuter()};
+  if(inner.contentDocument?.readyState==="complete")attach();else inner.addEventListener("load",attach,{once:true});return true
+}
 outer.addEventListener("load",()=>{const timer=setInterval(()=>{if(connect())clearInterval(timer)},100);setTimeout(resizeOuter,500)});
 addEventListener("resize",resizeOuter);
 </script>
