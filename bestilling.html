@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="nb">
+<html lang="nb" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
 <meta name="google" content="notranslate">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>UT — Kontor / Rampe</title>
-<link rel="stylesheet" href="bestilling-v11.css?v=20260804-2048">
+<link rel="stylesheet" href="bestilling-v11.css?v=20260805-1800">
 </head>
-<body>
+<body class="notranslate">
 <main class="app">
-  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v18 LAGERRADER<br>Oppdatert 05.08.2026 kl. 15:36</div></div>
+  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v19 STABIL<br>Oppdatert 05.08.2026 kl. 18:00</div></div>
   <h1>UT — Kontor</h1>
   <div class="top-stock-line loading" id="topStockLine" aria-label="Tilgjengelig lager">
     <div class="top-stock-item" id="topStockBunner">Bunner: laster…</div>
@@ -32,7 +35,16 @@
 
     <div class="field">
       <label for="ramp">Rampe</label>
-      <input id="ramp" inputmode="numeric" maxlength="2" placeholder="Velg rampe 28–34">
+      <select id="ramp">
+        <option value="">Velg rampe</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+        <option value="32">32</option>
+        <option value="33">33</option>
+        <option value="34">34</option>
+      </select>
       <div class="field-help">Velg rampe 28, 29, 30, 31, 32, 33 eller 34. Det kan bare finnes ett aktivt oppdrag per rampe.</div>
     </div>
 
@@ -47,19 +59,19 @@
       <label>Varer på rampen</label>
       <div class="ramp-products">
         <article class="ramp-product bunner-row">
-          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Bunner</strong><small>Antall stabler · 1 stabel = 10 Bunner</small></div><output id="bunnerOutput">På lager: laster…</output></div>
+          <div class="ramp-product-head"><div><strong>Bunner</strong><small>Antall stabler · 1 stabel = 10 Bunner</small></div><output id="bunnerOutput">På lager: laster…</output></div>
           <div class="qty compact"><button class="step" type="button" data-minus="bunner">−</button><input id="bunnerQty" type="number" min="0" value="0"><button class="step" type="button" data-plus="bunner">+</button></div>
           <div class="quick"><button type="button" data-set="bunner:0">0</button><button type="button" data-set="bunner:1">1</button><button type="button" data-set="bunner:3">3</button><button type="button" data-set="bunner:10">10</button></div>
         </article>
 
         <article class="ramp-product">
-          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Hyller x30</strong><small>Antall komplette sett</small></div><output id="h30Output">På lager: laster…</output></div>
+          <div class="ramp-product-head"><div><strong>Hyller x30</strong><small>Antall komplette sett</small></div><output id="h30Output">På lager: laster…</output></div>
           <div class="qty compact"><button class="step" type="button" data-minus="h30">−</button><input id="h30Qty" type="number" min="0" value="0"><button class="step" type="button" data-plus="h30">+</button></div>
           <div class="quick"><button type="button" data-set="h30:0">0</button><button type="button" data-set="h30:1">1</button><button type="button" data-set="h30:5">5</button><button type="button" data-set="h30:10">10</button></div>
         </article>
 
         <article class="ramp-product">
-          <div class="ramp-product-head"><div><strong class="notranslate" translate="no">Hyller x60</strong><small>Antall komplette sett</small></div><output id="h60Output">På lager: laster…</output></div>
+          <div class="ramp-product-head"><div><strong>Hyller x60</strong><small>Antall komplette sett</small></div><output id="h60Output">På lager: laster…</output></div>
           <div class="qty compact"><button class="step" type="button" data-minus="h60">−</button><input id="h60Qty" type="number" min="0" value="0"><button class="step" type="button" data-plus="h60">+</button></div>
           <div class="quick"><button type="button" data-set="h60:0">0</button><button type="button" data-set="h60:1">1</button><button type="button" data-set="h60:5">5</button><button type="button" data-set="h60:10">10</button></div>
         </article>
@@ -90,9 +102,9 @@
       <div class="overview">
         <div class="overview-row total"><div class="name">Fysisk på lager</div><div class="value" id="physicalValue">0 Bunner · 0 hyller</div></div>
         <div class="overview-row"><div class="name">Tilgjengelig</div><div class="value" id="availableValue">0 Bunner · 0 hyller</div></div>
-        <div class="overview-row bunner"><div class="name notranslate" translate="no">Bunner</div><div class="value" id="bunnerValue">0 stabler × 10 = 0 stk.</div></div>
-        <div class="overview-row"><div class="name notranslate" translate="no">Hyller x30</div><div class="value" id="h30Value">0 sett</div></div>
-        <div class="overview-row"><div class="name notranslate" translate="no">Hyller x60</div><div class="value" id="h60Value">0 sett</div></div>
+        <div class="overview-row bunner"><div class="name">Bunner</div><div class="value" id="bunnerValue">0 stabler × 10 = 0 stk.</div></div>
+        <div class="overview-row"><div class="name">Hyller x30</div><div class="value" id="h30Value">0 sett</div></div>
+        <div class="overview-row"><div class="name">Hyller x60</div><div class="value" id="h60Value">0 sett</div></div>
       </div>
       <div class="pending" id="pendingValue">Pending: 0 Bunner · 0 Hyller x30 · 0 Hyller x60</div>
     </div>
@@ -101,15 +113,24 @@
   <details class="panel" id="historyDetails" open>
     <summary><span>Aktive ramper</span><span><span id="historyCount">0</span> <span class="summary-arrow">▼</span></span></summary>
     <div class="panel-body">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px"><small class="field-help">Gamle dubletter samles visuelt under samme rampe.</small><button class="small-btn" id="refresh" type="button">Oppdater</button></div>
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px"><small class="field-help">Data oppdateres bare når siden åpnes eller når du trykker Oppdater.</small><button class="small-btn" id="refresh" type="button">Oppdater</button></div>
       <div class="history" id="history"><div class="empty">Laster ramper…</div></div>
     </div>
   </details>
 </main>
-<script src="bestilling-v11.js?v=20260805-1049"></script>
-<script src="bestilling-stock-balance.js?v=20260805-1049"></script>
-<script src="bestilling-history-lines.js?v=20260804-2133"></script>
-<script src="shared-stock-status.js?v=20260805-1049"></script>
-<script src="bestilling-top-stock.js?v=20260805-1536"></script>
+<script>
+(() => {
+  const nativeSetInterval = window.setInterval.bind(window);
+  window.setInterval = (callback, delay, ...args) => {
+    if (Number(delay) <= 15000) return 0;
+    return nativeSetInterval(callback, delay, ...args);
+  };
+})();
+</script>
+<script src="bestilling-v11.js?v=20260805-1800"></script>
+<script src="bestilling-stock-balance.js?v=20260805-1800"></script>
+<script src="bestilling-history-lines.js?v=20260805-1800"></script>
+<script src="bestilling-top-stock.js?v=20260805-1800"></script>
+<script src="office-home-setting.js?v=20260805-1800"></script>
 </body>
 </html>
