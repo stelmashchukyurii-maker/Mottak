@@ -25,24 +25,41 @@
     return !window.frameElement && (file === "index.html" || file === "Mottak" || file === "");
   }
 
-  function installLagerstatusMainLink() {
-    if (!isMainPage() || document.getElementById("lagerstatusMainCard")) return;
-    const warehouse = document.querySelector('[data-page-id="ut-warehouse"]');
-    if (!warehouse?.parentElement) return;
+  function ensureLagerstatusPage() {
+    if (!isMainPage()) return false;
 
-    const card = document.createElement("article");
-    card.id = "lagerstatusMainCard";
-    card.className = "page-card approved";
-    card.innerHTML = `
-      <div class="card-head">
-        <a class="card-toggle" href="lagerstatus.html" style="text-decoration:none">
-          <span class="card-title">📦 LAGERSTATUS / HISTORIKK</span>
-          <span class="card-status">GODKJENT · MANUELL RETUR</span>
-        </a>
-        <span></span>
-        <a class="chevron" href="lagerstatus.html" style="text-decoration:none" aria-label="Åpne lagerstatus">→</a>
-      </div>`;
-    warehouse.insertAdjacentElement("afterend", card);
+    // Remove the former simple link card, if an older cached version created it.
+    document.getElementById("lagerstatusMainCard")?.remove();
+
+    // The main page keeps its page definitions in the shared `pages` array.
+    // Adding Lagerstatus there makes it a normal card with the same pin system
+    // as all other pages and allows it to appear under "Festede sider".
+    if (typeof pages === "undefined" || !Array.isArray(pages)) return false;
+    if (pages.some(page => page.id === "lagerstatus")) return false;
+
+    const lagerstatusPage = {
+      id: "lagerstatus",
+      section: "ut",
+      title: "LAGERSTATUS / HISTORIKK",
+      description: "Administrer lagerstatus, markering som sendt og manuell retur uten skanning.",
+      href: "lagerstatus.html",
+      file: "lagerstatus.html",
+      icon: "📦",
+      type: "approved",
+      status: "GODKJENT · MANUELL RETUR",
+      tags: ["LAGERSTATUS", "HISTORIKK", "RETUR"]
+    };
+
+    const warehouseIndex = pages.findIndex(page => page.id === "ut-warehouse");
+    if (warehouseIndex >= 0) pages.splice(warehouseIndex + 1, 0, lagerstatusPage);
+    else pages.push(lagerstatusPage);
+
+    return true;
+  }
+
+  function renderMainWithLagerstatus() {
+    const added = ensureLagerstatusPage();
+    if (added && typeof render === "function") render();
   }
 
   function setLegacyValue(enabled) {
@@ -136,7 +153,7 @@
   let busy = false;
 
   async function start() {
-    installLagerstatusMainLink();
+    renderMainWithLagerstatus();
     updateSwitch(currentValue, "loading");
     try {
       currentValue = await readSetting();
@@ -169,7 +186,7 @@
   document.addEventListener("change", handleChange);
   document.addEventListener("bama:office-switch-rendered", () => {
     apply(currentValue);
-    installLagerstatusMainLink();
+    ensureLagerstatusPage();
   });
 
   if (document.readyState === "loading") {
