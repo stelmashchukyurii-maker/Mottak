@@ -28,12 +28,8 @@
   function ensureLagerstatusPage() {
     if (!isMainPage()) return false;
 
-    // Remove the former simple link card, if an older cached version created it.
     document.getElementById("lagerstatusMainCard")?.remove();
 
-    // The main page keeps its page definitions in the shared `pages` array.
-    // Adding Lagerstatus there makes it a normal card with the same pin system
-    // as all other pages and allows it to appear under "Festede sider".
     if (typeof pages === "undefined" || !Array.isArray(pages)) return false;
     if (pages.some(page => page.id === "lagerstatus")) return false;
 
@@ -194,4 +190,13 @@
   } else {
     start();
   }
+})();
+
+(() => {
+  if (document.querySelector('script[data-bama-idebank]')) return;
+  const script = document.createElement("script");
+  script.src = "idebank-ui.js?v=20260805-2055";
+  script.defer = true;
+  script.dataset.bamaIdebank = "true";
+  document.head.appendChild(script);
 })();
