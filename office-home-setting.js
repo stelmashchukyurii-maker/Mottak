@@ -20,6 +20,31 @@
     return location.pathname.endsWith("/bestilling.html") || location.pathname.endsWith("bestilling.html");
   }
 
+  function isMainPage() {
+    const file = location.pathname.split("/").filter(Boolean).pop() || "";
+    return !window.frameElement && (file === "index.html" || file === "Mottak" || file === "");
+  }
+
+  function installLagerstatusMainLink() {
+    if (!isMainPage() || document.getElementById("lagerstatusMainCard")) return;
+    const warehouse = document.querySelector('[data-page-id="ut-warehouse"]');
+    if (!warehouse?.parentElement) return;
+
+    const card = document.createElement("article");
+    card.id = "lagerstatusMainCard";
+    card.className = "page-card approved";
+    card.innerHTML = `
+      <div class="card-head">
+        <a class="card-toggle" href="lagerstatus.html" style="text-decoration:none">
+          <span class="card-title">📦 LAGERSTATUS / HISTORIKK</span>
+          <span class="card-status">GODKJENT · MANUELL RETUR</span>
+        </a>
+        <span></span>
+        <a class="chevron" href="lagerstatus.html" style="text-decoration:none" aria-label="Åpne lagerstatus">→</a>
+      </div>`;
+    warehouse.insertAdjacentElement("afterend", card);
+  }
+
   function setLegacyValue(enabled) {
     try {
       localStorage.setItem(LEGACY_LOCAL_KEY, enabled ? "true" : "false");
@@ -111,6 +136,7 @@
   let busy = false;
 
   async function start() {
+    installLagerstatusMainLink();
     updateSwitch(currentValue, "loading");
     try {
       currentValue = await readSetting();
@@ -141,7 +167,10 @@
   }
 
   document.addEventListener("change", handleChange);
-  document.addEventListener("bama:office-switch-rendered", () => apply(currentValue));
+  document.addEventListener("bama:office-switch-rendered", () => {
+    apply(currentValue);
+    installLagerstatusMainLink();
+  });
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start, { once: true });
