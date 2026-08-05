@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="nb">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -12,8 +12,8 @@
   </style>
 </head>
 <body>
-  <div id="loader">Завантаження Camera Cloud v4.6…</div>
-  <iframe id="app" title="Camera Cloud v4.6" src="camera-live.html?base=46-2315"></iframe>
+  <div id="loader">Laster Camera Cloud v4.6…</div>
+  <iframe id="app" title="Camera Cloud v4.6" src="camera-live.html?base=46-20260805-1049"></iframe>
   <script>
     "use strict";
     const frame = document.getElementById("app");
@@ -33,17 +33,18 @@
       try {
         const doc = frame.contentDocument;
         const win = frame.contentWindow;
+        win.BAMA_HOME_TARGET = "camera-live-v4.html";
         await injectScript(doc, "camera-live-v4-source-fix.js?v=46-2315");
         await injectScript(doc, "camera-live-v4-server-ocr.js?v=46-2315");
-        await injectScript(doc, "shared-stock-status.js?v=20260804-2315");
+        await injectScript(doc, "shared-stock-status.js?v=20260805-1049");
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.6 FELLES LAGER<br>Oppdatert 04.08.2026 kl. 23:15";
+        if (version) version.innerHTML = "Kamera Cloud v4.6 FELLES LAGER<br>Oppdatert 05.08.2026 kl. 10:49";
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => win.refreshBamaStock?.().catch(() => {}), 80));
         });
         loader.style.display = "none";
       } catch (error) {
-        loader.textContent = `Помилка запуску Camera Cloud v4.6: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte Camera Cloud v4.6: ${error.message || error}`;
       }
     });
   </script>
