@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1020" />
-  <title>Camera Cloud v4.6</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Camera Cloud v4.7</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -12,8 +15,8 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster Camera Cloud v4.6…</div>
-  <iframe id="app" title="Camera Cloud v4.6" src="camera-live.html?base=46-20260805-1049"></iframe>
+  <div id="loader">Laster Camera Cloud v4.7…</div>
+  <iframe id="app" title="Camera Cloud v4.7" src="camera-live.html?base=47-20260805-1925"></iframe>
   <script>
     "use strict";
     const frame = document.getElementById("app");
@@ -34,17 +37,18 @@
         const doc = frame.contentDocument;
         const win = frame.contentWindow;
         win.BAMA_HOME_TARGET = "camera-live-v4.html";
-        await injectScript(doc, "camera-live-v4-source-fix.js?v=46-2315");
-        await injectScript(doc, "camera-live-v4-server-ocr.js?v=46-2315");
-        await injectScript(doc, "shared-stock-status.js?v=20260805-1049");
+        await injectScript(doc, "camera-live-v4-source-fix.js?v=47-20260805-1925");
+        await injectScript(doc, "camera-live-v4-server-ocr.js?v=47-20260805-1925");
+        await injectScript(doc, "camera-live-v4-stock-filters.js?v=47-20260805-1925");
+        await injectScript(doc, "shared-stock-status.js?v=20260805-1900");
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.6 FELLES LAGER<br>Oppdatert 05.08.2026 kl. 10:49";
+        if (version) version.innerHTML = "Kamera Cloud v4.7 LAGERFILTER<br>Oppdatert 05.08.2026 kl. 19:25";
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => win.refreshBamaStock?.().catch(() => {}), 80));
         });
         loader.style.display = "none";
       } catch (error) {
-        loader.textContent = `Kunne ikke starte Camera Cloud v4.6: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte Camera Cloud v4.7: ${error.message || error}`;
       }
     });
   </script>
