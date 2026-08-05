@@ -148,7 +148,9 @@
       padding: 0 12px 12px;
     }
 
-    .section-content[hidden] { display: none; }
+    .section-content[hidden],
+    .card-body[hidden],
+    .pinned-section[hidden] { display: none; }
 
     .page-card {
       border: 2px solid var(--line);
@@ -180,7 +182,7 @@
 
     .card-head {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: minmax(0, 1fr) auto auto;
       align-items: center;
       gap: 8px;
       min-height: 68px;
@@ -237,8 +239,6 @@
       border-top: 1px solid rgba(255, 255, 255, .06);
     }
 
-    .card-body[hidden] { display: none; }
-
     .card-description {
       margin: 12px 0;
       color: var(--muted);
@@ -287,8 +287,6 @@
       border-radius: 18px;
       background: rgba(244, 196, 48, .08);
     }
-
-    .pinned-section[hidden] { display: none; }
 
     .pinned-title {
       margin: 0 0 10px;
@@ -354,7 +352,12 @@
       outline: none;
     }
 
-    .save-note { min-height: 18px; margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .save-note {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
 
     .footer-note {
       margin-top: 18px;
@@ -369,19 +372,18 @@
 
     @media (max-width: 560px) {
       .global-actions { grid-template-columns: 1fr; }
-      .card-head { grid-template-columns: 1fr auto auto; }
       .pin-button, .chevron-button { width: 42px; height: 42px; }
     }
   </style>
 </head>
 <body>
   <main class="app">
-    <span class="version">Hovedmeny v10 · Oppdatert 04.08.2026 kl. 23:31</span>
+    <span class="version">Hovedmeny v12 · Oppdatert 05.08.2026 kl. 11:44</span>
     <h1>BaMavaremottak</h1>
     <p class="subtitle">Trykk på en rad for å åpne eller lukke detaljene. Fest viktige sider med 📌.</p>
 
-    <div class="help">
-      Når en side er lukket, forsvinner den ikke — bare detaljene skjules. Festede sider vises øverst som raske snarveier. Alle valg lagres automatisk i denne nettleseren.
+    <div class="help" id="mainHelp">
+      Hovedmenyen lastes nå uavhengig av lagerstatus. Alle seksjoner og lenker skal derfor virke selv om tilleggsfunksjonene bruker lengre tid på å laste.
     </div>
 
     <div class="global-actions">
@@ -408,10 +410,10 @@
     </div>
   </main>
 
-  <script src="shared-stock-status.js?v=20260804-2331"></script>
   <script>
     "use strict";
 
+    const VERSION_TEXT = "Hovedmeny v12 · Oppdatert 05.08.2026 kl. 11:44";
     const SECTION_STATE_KEY = "bamavaremottak_home_sections_v10";
     const CARD_STATE_KEY = "bamavaremottak_home_cards_v10";
     const PIN_STATE_KEY = "bamavaremottak_home_pins_v10";
@@ -453,60 +455,46 @@
     const pinnedSection = document.getElementById("pinnedSection");
     const pinnedGrid = document.getElementById("pinnedGrid");
 
-    let sectionState = loadObject(SECTION_STATE_KEY);
-    let cardState = loadObject(CARD_STATE_KEY);
-    let pins = loadArray(PIN_STATE_KEY);
-
     function loadObject(key) {
       try {
         const value = JSON.parse(localStorage.getItem(key) || "{}");
         return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-      } catch { return {}; }
+      } catch {
+        return {};
+      }
     }
 
     function loadArray(key) {
       try {
         const value = JSON.parse(localStorage.getItem(key) || "[]");
         return Array.isArray(value) ? value : [];
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     }
 
+    function safeSet(key, value) {
+      try { localStorage.setItem(key, value); } catch { /* Menyen skal fortsatt virke. */ }
+    }
+
+    let sectionState = loadObject(SECTION_STATE_KEY);
+    let cardState = loadObject(CARD_STATE_KEY);
+    let pins = loadArray(PIN_STATE_KEY);
+
     function saveState() {
-      localStorage.setItem(SECTION_STATE_KEY, JSON.stringify(sectionState));
-      localStorage.setItem(CARD_STATE_KEY, JSON.stringify(cardState));
-      localStorage.setItem(PIN_STATE_KEY, JSON.stringify(pins));
+      safeSet(SECTION_STATE_KEY, JSON.stringify(sectionState));
+      safeSet(CARD_STATE_KEY, JSON.stringify(cardState));
+      safeSet(PIN_STATE_KEY, JSON.stringify(pins));
     }
 
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, character => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
       })[character]);
-    }
-
-    function render() {
-      sectionsRoot.innerHTML = "";
-
-      sections.forEach(section => {
-        const isOpen = Object.prototype.hasOwnProperty.call(sectionState, section.id)
-          ? Boolean(sectionState[section.id])
-          : section.defaultOpen;
-
-        const wrapper = document.createElement("section");
-        wrapper.className = "accordion-section";
-        wrapper.innerHTML = `
-          <button class="section-toggle" type="button" aria-expanded="${isOpen}" data-section-toggle="${escapeHtml(section.id)}">
-            <span><strong>${escapeHtml(section.title)}</strong><small>${escapeHtml(section.note)}</small></span>
-            <span class="section-chevron">⌄</span>
-          </button>
-          <div class="section-content" data-section-content="${escapeHtml(section.id)}" ${isOpen ? "" : "hidden"}></div>
-        `;
-
-        const content = wrapper.querySelector(".section-content");
-        pages.filter(page => page.section === section.id).forEach(page => content.appendChild(createCard(page)));
-        sectionsRoot.appendChild(wrapper);
-      });
-
-      renderPinned();
     }
 
     function createCard(page) {
@@ -515,7 +503,6 @@
       const card = document.createElement("article");
       card.className = `page-card ${page.type}${isOpen ? " open" : ""}`;
       card.dataset.pageId = page.id;
-
       card.innerHTML = `
         <div class="card-head">
           <button class="card-toggle" type="button" data-card-toggle="${escapeHtml(page.id)}" aria-expanded="${isOpen}">
@@ -535,7 +522,6 @@
           <a class="open-link" href="${escapeHtml(page.href)}">ÅPNE SIDE</a>
         </div>
       `;
-
       return card;
     }
 
@@ -550,14 +536,38 @@
       `).join("");
     }
 
+    function render() {
+      sectionsRoot.innerHTML = "";
+      sections.forEach(section => {
+        const isOpen = Object.prototype.hasOwnProperty.call(sectionState, section.id)
+          ? Boolean(sectionState[section.id])
+          : section.defaultOpen;
+
+        const wrapper = document.createElement("section");
+        wrapper.className = "accordion-section";
+        wrapper.innerHTML = `
+          <button class="section-toggle" type="button" aria-expanded="${isOpen}" data-section-toggle="${escapeHtml(section.id)}">
+            <span><strong>${escapeHtml(section.title)}</strong><small>${escapeHtml(section.note)}</small></span>
+            <span class="section-chevron">⌄</span>
+          </button>
+          <div class="section-content" data-section-content="${escapeHtml(section.id)}" ${isOpen ? "" : "hidden"}></div>
+        `;
+
+        const content = wrapper.querySelector(".section-content");
+        pages.filter(page => page.section === section.id).forEach(page => content.appendChild(createCard(page)));
+        sectionsRoot.appendChild(wrapper);
+      });
+      renderPinned();
+    }
+
     document.addEventListener("click", event => {
       const sectionButton = event.target.closest("[data-section-toggle]");
       if (sectionButton) {
         const id = sectionButton.dataset.sectionToggle;
-        const content = document.querySelector(`[data-section-content="${CSS.escape(id)}"]`);
+        const content = document.querySelector(`[data-section-content="${id}"]`);
         const nextOpen = sectionButton.getAttribute("aria-expanded") !== "true";
         sectionButton.setAttribute("aria-expanded", String(nextOpen));
-        content.hidden = !nextOpen;
+        if (content) content.hidden = !nextOpen;
         sectionState[id] = nextOpen;
         saveState();
         return;
@@ -566,13 +576,14 @@
       const cardButton = event.target.closest("[data-card-toggle]");
       if (cardButton) {
         const id = cardButton.dataset.cardToggle;
-        const card = document.querySelector(`[data-page-id="${CSS.escape(id)}"]`);
-        const body = card.querySelector(`[data-card-body="${CSS.escape(id)}"]`);
+        const card = document.querySelector(`[data-page-id="${id}"]`);
+        if (!card) return;
+        const body = card.querySelector(`[data-card-body="${id}"]`);
         const toggle = card.querySelector(".card-toggle");
         const nextOpen = !card.classList.contains("open");
         card.classList.toggle("open", nextOpen);
-        body.hidden = !nextOpen;
-        toggle.setAttribute("aria-expanded", String(nextOpen));
+        if (body) body.hidden = !nextOpen;
+        if (toggle) toggle.setAttribute("aria-expanded", String(nextOpen));
         cardState[id] = nextOpen;
         saveState();
         return;
@@ -609,15 +620,34 @@
 
     const mainComment = document.getElementById("mainComment");
     const saveNote = document.getElementById("saveNote");
-    mainComment.value = localStorage.getItem(COMMENT_STORAGE_KEY) || "";
+    try { mainComment.value = localStorage.getItem(COMMENT_STORAGE_KEY) || ""; } catch { mainComment.value = ""; }
     mainComment.addEventListener("input", () => {
-      localStorage.setItem(COMMENT_STORAGE_KEY, mainComment.value);
+      safeSet(COMMENT_STORAGE_KEY, mainComment.value);
       saveNote.textContent = "Lagret automatisk.";
       clearTimeout(mainComment.saveTimer);
       mainComment.saveTimer = setTimeout(() => { saveNote.textContent = ""; }, 1600);
     });
 
+    function restoreVersion() {
+      const version = document.querySelector("main.app > .version");
+      if (version) version.textContent = VERSION_TEXT;
+    }
+
+    function loadSharedToolsWithoutBlockingMenu() {
+      const script = document.createElement("script");
+      script.src = "shared-stock-status.js?v=20260805-1144";
+      script.async = true;
+      script.onload = restoreVersion;
+      script.onerror = () => {
+        restoreVersion();
+        console.warn("Tilleggsfunksjonene kunne ikke lastes, men hovedmenyen virker fortsatt.");
+      };
+      document.body.appendChild(script);
+    }
+
     render();
+    restoreVersion();
+    loadSharedToolsWithoutBlockingMenu();
   </script>
 </body>
 </html>
