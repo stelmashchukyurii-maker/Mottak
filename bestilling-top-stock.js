@@ -1,6 +1,13 @@
 "use strict";
 
 (() => {
+  if (!document.getElementById("officeHomeSettingScript")) {
+    const homeSetting = document.createElement("script");
+    homeSetting.id = "officeHomeSettingScript";
+    homeSetting.src = "office-home-setting.js?v=20260805-1725";
+    document.body.appendChild(homeSetting);
+  }
+
   const style = document.createElement("style");
   style.textContent = `
     .top-stock-line{
