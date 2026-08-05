@@ -12,87 +12,52 @@
     :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--ok:#48d597;--test:#ff7373;--info:#75b7ff;--yellow:#f4c430}
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text)}
-    button,textarea{font:inherit}
-    button{cursor:pointer}
+    button,textarea{font:inherit}button{cursor:pointer}
     .app{width:min(920px,100%);margin:auto;padding:16px 14px 56px}
     .version{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:12px}
     h1{margin:12px 0 6px;font-size:clamp(31px,8vw,48px);line-height:1.05}
     .subtitle{margin:0 0 14px;color:var(--muted);line-height:1.5}
-    .help{margin-bottom:14px;padding:12px 14px;border:1px solid rgba(117,183,255,.42);border-radius:14px;background:rgba(117,183,255,.08);color:#dbeaff;line-height:1.48;font-size:13px}
-
-    .home-panel{margin:14px 0;padding:14px;border:2px solid rgba(72,213,151,.78);border-radius:18px;background:rgba(72,213,151,.07);box-shadow:0 10px 26px rgba(0,0,0,.18)}
-    .home-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
-    .home-panel h2{margin:0;color:var(--ok);font-size:clamp(20px,5vw,27px)}
-    .home-panel p{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.45}
-    .home-control-list{display:grid;gap:7px}
-    .home-control-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:13px;background:var(--panel2)}
-    .home-control-title{min-width:0;font-size:13px;font-weight:900;line-height:1.3}
-    .home-control-title small{display:block;margin-top:3px;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}
-    .archive-controls{margin-top:9px;border:1px solid var(--line);border-radius:13px;background:rgba(13,20,38,.65)}
-    .archive-controls summary{padding:11px 12px;color:var(--muted);font-weight:900;cursor:pointer}
-    .archive-controls .home-control-list{padding:0 9px 9px}
-
-    .home-switch{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:66px;min-height:48px;padding:4px 6px;border:1px solid var(--line);border-radius:12px;background:#0a1020;font-size:9px;font-weight:950;user-select:none;cursor:pointer}
-    .home-switch input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-    .track{position:relative;width:36px;height:20px;border-radius:999px;background:#5b647a;transition:.15s}
-    .track:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.15s}
-    .home-switch input:checked+.track{background:var(--ok)}
-    .home-switch input:checked+.track:after{transform:translateX(16px)}
-    .home-state{color:var(--muted);font-size:9px}
-    .home-switch input:checked~.home-state{color:var(--ok)}
-
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0}
+    .help{margin-bottom:16px;padding:12px 14px;border:1px solid rgba(117,183,255,.42);border-radius:14px;background:rgba(117,183,255,.08);color:#dbeaff;line-height:1.48;font-size:13px}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:15px}
     .action{min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-weight:800}
     .section{margin-top:14px;border:1px solid var(--line);border-radius:18px;background:rgba(13,20,38,.78);overflow:hidden}
     .section-toggle{width:100%;min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:0;background:transparent;color:var(--text);text-align:left}
-    .section-toggle strong{display:block;font-size:17px}
-    .section-toggle small{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:400}
-    .section-content{display:grid;gap:11px;padding:0 12px 12px}
-    .section-content[hidden],.card-body[hidden],.pinned[hidden]{display:none}
+    .section-toggle strong{display:block;font-size:17px}.section-toggle small{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:400}
+    .section-content{display:grid;gap:11px;padding:0 12px 12px}.section-content[hidden],.card-body[hidden],.pinned[hidden]{display:none}
     .page-card{border:2px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
     .page-card.approved{border-color:rgba(72,213,151,.75);background:linear-gradient(145deg,#0f3427,var(--panel))}
     .page-card.test{border-color:rgba(255,115,115,.78);background:linear-gradient(145deg,#3b1720,var(--panel))}
     .page-card.info{border-color:rgba(117,183,255,.72);background:linear-gradient(145deg,#142b49,var(--panel))}
-    .card-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:6px;min-height:68px;padding:8px 9px 8px 14px}
+    .card-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;min-height:68px;padding:8px 9px 8px 14px}
+    .card-head.office{grid-template-columns:minmax(0,1fr) auto auto auto}
     .card-toggle{min-width:0;padding:5px 0;border:0;background:transparent;color:var(--text);text-align:left}
-    .card-title{display:block;font-size:clamp(16px,4.5vw,23px);font-weight:900;line-height:1.18}
-    .card-status{display:block;margin-top:5px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase}
+    .card-title{display:block;font-size:clamp(16px,4.5vw,23px);font-weight:900;line-height:1.18}.card-status{display:block;margin-top:5px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase}
+    .office-home-switch{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:62px;min-height:48px;padding:4px 6px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);font-size:9px;font-weight:950;cursor:pointer;user-select:none}
+    .office-home-switch input{position:absolute;opacity:0;pointer-events:none}
+    .office-track{position:relative;width:34px;height:19px;border-radius:999px;background:#5b647a;transition:.18s}
+    .office-track:after{content:"";position:absolute;top:3px;left:3px;width:13px;height:13px;border-radius:50%;background:#fff;transition:.18s}
+    .office-home-switch input:checked+.office-track{background:var(--ok)}
+    .office-home-switch input:checked+.office-track:after{transform:translateX(15px)}
+    .office-home-state{color:var(--muted);font-size:8px}.office-home-switch input:checked~.office-home-state{color:var(--ok)}
+    .office-home-switch input:disabled~*{opacity:.65}
     .pin,.chevron,.unpin{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text)}
     .pin.active,.unpin{background:var(--yellow);border-color:var(--yellow);color:#17130a}
     .card-body{padding:0 14px 14px;border-top:1px solid rgba(255,255,255,.06)}
-    .description{margin:12px 0;color:var(--muted);line-height:1.48}
-    .tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-    .tag{padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:800}
-    .tag.approved{color:#062418;background:var(--ok);border-color:var(--ok)}
-    .tag.test{color:#2b080d;background:var(--test);border-color:var(--test)}
-    .tag.info{color:#071a2e;background:var(--info);border-color:var(--info)}
+    .description{margin:12px 0;color:var(--muted);line-height:1.48}.tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+    .tag{padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:800}.tag.approved{color:#062418;background:var(--ok);border-color:var(--ok)}.tag.test{color:#2b080d;background:var(--test);border-color:var(--test)}.tag.info{color:#071a2e;background:var(--info);border-color:var(--info)}
     .open-link{min-height:48px;display:grid;place-items:center;padding:11px 14px;border-radius:12px;background:var(--yellow);color:#17130a;text-decoration:none;text-align:center;font-weight:900}
-    .pinned{margin-top:15px;padding:14px;border:2px solid rgba(244,196,48,.72);border-radius:18px;background:rgba(244,196,48,.08)}
-    .pinned h2{margin:0 0 10px}
-    .pinned-grid{display:grid;gap:8px}
-    .pinned-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-    .pinned-link{min-height:48px;display:flex;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);text-decoration:none;font-weight:800}
-    .comment{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
-    .comment h2{margin:0 0 6px;font-size:20px}.comment p{margin:0 0 10px;color:var(--muted)}
-    textarea{width:100%;min-height:110px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);resize:vertical}
-    .save-note{min-height:18px;margin-top:8px;color:var(--muted);font-size:12px}
-    .footer{margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--muted);font-size:13px;line-height:1.5}
-    @media(max-width:560px){.actions{grid-template-columns:1fr}.card-head{grid-template-columns:minmax(0,1fr) auto auto;gap:4px;padding-left:10px}.card-head>.home-switch{grid-column:2;grid-row:1 / span 1;min-width:58px}.pin{display:none}.chevron{width:39px;height:39px}.home-control-row{padding:8px}.home-panel{padding:12px}}
+    .office-sync{margin-top:8px;color:var(--muted);font-size:10px;text-align:right}
+    .pinned{margin-top:15px;padding:14px;border:2px solid rgba(244,196,48,.72);border-radius:18px;background:rgba(244,196,48,.08)}.pinned h2{margin:0 0 10px}.pinned-grid{display:grid;gap:8px}.pinned-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.pinned-link{min-height:48px;display:flex;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);text-decoration:none;font-weight:800}
+    .comment{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}.comment h2{margin:0 0 6px;font-size:20px}.comment p{margin:0 0 10px;color:var(--muted)}textarea{width:100%;min-height:110px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);resize:vertical}.save-note{min-height:18px;margin-top:8px;color:var(--muted);font-size:12px}.footer{margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--muted);font-size:13px;line-height:1.5}
+    @media(max-width:560px){.actions{grid-template-columns:1fr}.card-head,.card-head.office{gap:4px;padding-left:10px}.office-home-switch{min-width:56px}.pin,.chevron{width:39px;height:39px}}
   </style>
 </head>
 <body>
 <main class="app">
-  <span class="version">Hovedmeny v14 · Oppdatert 05.08.2026 kl. 15:53</span>
+  <span class="version">Hovedmeny v15 · Oppdatert 05.08.2026 kl. 17:25</span>
   <h1>BaMavaremottak</h1>
-  <p class="subtitle">Velg side, åpne detaljer og bestem hvor knappen «Hovedmeny» skal vises.</p>
-  <div class="help">HJEM-bryterne er nå alltid synlige i det grønne kontrollfeltet, selv om arbeidsseksjonene nedenfor er lukket. PÅ viser «← Hovedmeny» på siden. AV skjuler knappen bare på den valgte siden.</div>
-
-  <section class="home-panel" aria-labelledby="homePanelTitle">
-    <div class="home-panel-head"><div><h2 id="homePanelTitle">HJEM — faste brytere</h2><p>Disse bryterne forsvinner ikke når seksjonene lukkes.</p></div></div>
-    <div class="home-control-list" id="activeHomeControls"></div>
-    <details class="archive-controls"><summary>HJEM-brytere for TEST / ARKIV</summary><div class="home-control-list" id="archiveHomeControls"></div></details>
-  </section>
-
+  <p class="subtitle">Trykk på en rad for å åpne eller lukke detaljene. Fest viktige sider med 📌.</p>
+  <div class="help">Bryteren <strong>HJEM</strong> finnes nå bare ved <strong>UT — Varebestilling • for kontor</strong>. Den viser eller skjuler knappen «Hovedmeny» på kontorsiden og er felles for telefon og PC.</div>
   <div class="actions"><button class="action" id="openAll" type="button">Åpne alle seksjoner</button><button class="action" id="closeAll" type="button">Lukk alle seksjoner</button></div>
   <section class="pinned" id="pinned" hidden><h2>📌 Festede sider</h2><div class="pinned-grid" id="pinnedGrid"></div></section>
   <div id="sectionsRoot"></div>
@@ -101,12 +66,7 @@
 </main>
 <script>
 "use strict";
-const SECTION_KEY="bamavaremottak_home_sections_v10";
-const CARD_KEY="bamavaremottak_home_cards_v10";
-const PIN_KEY="bamavaremottak_home_pins_v10";
-const COMMENT_KEY="bamavaremottak_main_comment_v1";
-const HOME_PREFIX="bamavaremottak_home_return_v1:";
-
+const SECTION_KEY="bamavaremottak_home_sections_v10",CARD_KEY="bamavaremottak_home_cards_v10",PIN_KEY="bamavaremottak_home_pins_v10",COMMENT_KEY="bamavaremottak_main_comment_v1";
 const pages=[
 {id:"camera-v4",section:"latest",title:"SISTE ARBEIDSLENKE — KAMERA CLOUD v4.6",description:"Siste korrigerte kameraversjon. Foto kobles til eksisterende Nordic ID-post uten å opprette duplikat.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"SISTE VERSJON",tags:["FELLES SKY / TABELL"]},
 {id:"inn-camera",section:"inn",title:"INN — KAMERA / TELEFON",description:"Fotografer etiketten, les numrene med Gemini og arbeid mot den felles Mottak-tabellen.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"GODKJENT",tags:["TELEFON","FELLES SKY"]},
@@ -126,90 +86,22 @@ const pages=[
 {id:"nordic-simple",section:"archive",title:"TEST — ENKEL NORDIC ID",description:"Minimalside for å kontrollere skanneren.",href:"nordic-id.html",file:"nordic-id.html",icon:"⌨️",type:"test",status:"TEST",tags:["UTSTYR"]},
 {id:"scanner-test",section:"archive",title:"TEST — DETALJERT CC-SKANNER",description:"Teknisk diagnose av tegn, lengde og duplikater.",href:"scanner-test.html",file:"scanner-test.html",icon:"🛠️",type:"test",status:"TEST",tags:["DIAGNOSE"]}
 ];
-
-const sections=[
-{id:"latest",title:"Siste arbeidslenke",note:"Siste versjon vi arbeider med",open:true},
-{id:"inn",title:"INN — Varemottak",note:"Telefon, Nordic ID, kontroll og historikk",open:true},
-{id:"ut",title:"UT — Bestilling og utsending",note:"Kontor, lager, rampe og retur",open:true},
-{id:"overview",title:"Oversikt og presentasjon",note:"Kommentarer, status og prosjektpresentasjon",open:false},
-{id:"archive",title:"TEST / ARKIV",note:"Gamle og tekniske sider",open:false}
-];
-
-function getJSON(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));return value??fallback}catch{return fallback}}
-function setStorage(key,value){try{localStorage.setItem(key,value)}catch{}}
-function esc(value){return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]))}
-function target(href){try{const url=new URL(href,location.href);const file=url.pathname.split("/").filter(Boolean).pop()||"index.html";return file+url.search}catch{return href}}
-function homeOn(targetKey){try{return localStorage.getItem(HOME_PREFIX+targetKey)!=="false"}catch{return true}}
-function setHome(targetKey,on){setStorage(HOME_PREFIX+targetKey,on?"true":"false");syncHomeSwitches(targetKey,on)}
-function syncHomeSwitches(targetKey,on=homeOn(targetKey)){
-  document.querySelectorAll("[data-home-target]").forEach(input=>{
-    if(input.dataset.homeTarget!==targetKey)return;
-    input.checked=on;
-    const state=input.closest(".home-switch")?.querySelector(".home-state");
-    if(state)state.textContent=on?"PÅ":"AV";
-  });
-}
-function switchMarkup(targetKey,on){return `<label class="home-switch" title="Vis eller skjul Hovedmeny-knappen bare på denne siden"><span>HJEM</span><input type="checkbox" data-home-target="${esc(targetKey)}" ${on?"checked":""}><span class="track"></span><span class="home-state">${on?"PÅ":"AV"}</span></label>`}
-
-let sectionState=getJSON(SECTION_KEY,{});
-let cardState=getJSON(CARD_KEY,{});
-let pins=getJSON(PIN_KEY,[]);
-const root=document.getElementById("sectionsRoot");
-const pinned=document.getElementById("pinned");
-const pinnedGrid=document.getElementById("pinnedGrid");
-const activeHomeControls=document.getElementById("activeHomeControls");
-const archiveHomeControls=document.getElementById("archiveHomeControls");
-
-function save(){setStorage(SECTION_KEY,JSON.stringify(sectionState));setStorage(CARD_KEY,JSON.stringify(cardState));setStorage(PIN_KEY,JSON.stringify(pins))}
-function controlRow(page){const key=target(page.href);return `<div class="home-control-row"><div class="home-control-title">${esc(page.icon)} ${esc(page.title)}<small>${esc(page.file)}</small></div>${switchMarkup(key,homeOn(key))}</div>`}
-function renderHomeControls(){activeHomeControls.innerHTML=pages.filter(page=>page.section!=="archive").map(controlRow).join("");archiveHomeControls.innerHTML=pages.filter(page=>page.section==="archive").map(controlRow).join("")}
-function card(page){
-  const open=!!cardState[page.id];
-  const isPinned=pins.includes(page.id);
-  const key=target(page.href);
-  const element=document.createElement("article");
-  element.className=`page-card ${page.type}${open?" open":""}`;
-  element.dataset.pageId=page.id;
-  element.innerHTML=`<div class="card-head"><button class="card-toggle" type="button" data-card-toggle="${esc(page.id)}"><span class="card-title">${esc(page.icon)} ${esc(page.title)}</span><span class="card-status">${esc(page.status)}</span></button>${switchMarkup(key,homeOn(key))}<button class="pin${isPinned?" active":""}" type="button" data-pin="${esc(page.id)}">📌</button><button class="chevron" type="button" data-card-toggle="${esc(page.id)}">⌄</button></div><div class="card-body" data-card-body="${esc(page.id)}" ${open?"":"hidden"}><p class="description">${esc(page.description)}</p><div class="tags"><span class="tag ${esc(page.type)}">${esc(page.status)}</span>${page.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join("")}<span class="tag">${esc(page.file)}</span></div><a class="open-link" href="${esc(page.href)}">ÅPNE SIDE</a></div>`;
-  return element;
-}
-function renderPinned(){const list=pins.map(id=>pages.find(page=>page.id===id)).filter(Boolean);pinned.hidden=!list.length;pinnedGrid.innerHTML=list.map(page=>`<div class="pinned-item"><a class="pinned-link" href="${esc(page.href)}">${esc(page.icon)} ${esc(page.title)}</a><button class="unpin" type="button" data-unpin="${esc(page.id)}">📌</button></div>`).join("")}
-function render(){
-  root.innerHTML="";
-  sections.forEach(section=>{
-    const open=Object.prototype.hasOwnProperty.call(sectionState,section.id)?!!sectionState[section.id]:section.open;
-    const wrapper=document.createElement("section");
-    wrapper.className="section";
-    wrapper.innerHTML=`<button class="section-toggle" type="button" data-section="${esc(section.id)}" aria-expanded="${open}"><span><strong>${esc(section.title)}</strong><small>${esc(section.note)}</small></span><span>⌄</span></button><div class="section-content" data-section-body="${esc(section.id)}" ${open?"":"hidden"}></div>`;
-    const body=wrapper.querySelector(".section-content");
-    pages.filter(page=>page.section===section.id).forEach(page=>body.appendChild(card(page)));
-    root.appendChild(wrapper);
-  });
-  renderPinned();
-  renderHomeControls();
-}
-
-document.addEventListener("change",event=>{const input=event.target.closest("[data-home-target]");if(input)setHome(input.dataset.homeTarget,input.checked)});
-document.addEventListener("click",event=>{
-  const sectionButton=event.target.closest("[data-section]");
-  if(sectionButton){const id=sectionButton.dataset.section;const next=sectionButton.getAttribute("aria-expanded")!=="true";const body=document.querySelector(`[data-section-body="${CSS.escape(id)}"]`);sectionButton.setAttribute("aria-expanded",String(next));if(body)body.hidden=!next;sectionState[id]=next;save();return}
-  const cardButton=event.target.closest("[data-card-toggle]");
-  if(cardButton){const id=cardButton.dataset.cardToggle;const current=document.querySelector(`[data-page-id="${CSS.escape(id)}"]`);if(!current)return;const body=current.querySelector(`[data-card-body="${CSS.escape(id)}"]`);const next=!current.classList.contains("open");current.classList.toggle("open",next);if(body)body.hidden=!next;cardState[id]=next;save();return}
-  const pinButton=event.target.closest("[data-pin]");
-  if(pinButton){const id=pinButton.dataset.pin;pins=pins.includes(id)?pins.filter(value=>value!==id):[...pins,id];save();render();return}
-  const unpinButton=event.target.closest("[data-unpin]");
-  if(unpinButton){pins=pins.filter(value=>value!==unpinButton.dataset.unpin);save();render()}
-});
-
-document.getElementById("openAll").addEventListener("click",()=>{sections.forEach(section=>sectionState[section.id]=true);save();render()});
-document.getElementById("closeAll").addEventListener("click",()=>{sections.forEach(section=>sectionState[section.id]=false);save();render()});
-const comment=document.getElementById("mainComment");
-const note=document.getElementById("saveNote");
-try{comment.value=localStorage.getItem(COMMENT_KEY)||""}catch{}
-comment.addEventListener("input",()=>{setStorage(COMMENT_KEY,comment.value);note.textContent="Lagret automatisk.";clearTimeout(comment._timer);comment._timer=setTimeout(()=>note.textContent="",1400)});
-window.addEventListener("storage",event=>{if(event.key?.startsWith(HOME_PREFIX)){const key=event.key.slice(HOME_PREFIX.length);syncHomeSwitches(key)}});
-window.addEventListener("pageshow",()=>renderHomeControls());
+const sections=[{id:"latest",title:"Siste arbeidslenke",note:"Siste versjon vi arbeider med",open:true},{id:"inn",title:"INN — Varemottak",note:"Telefon, Nordic ID, kontroll og historikk",open:true},{id:"ut",title:"UT — Bestilling og utsending",note:"Kontor, lager, rampe og retur",open:true},{id:"overview",title:"Oversikt og presentasjon",note:"Kommentarer, status og prosjektpresentasjon",open:false},{id:"archive",title:"TEST / ARKIV",note:"Gamle og tekniske sider",open:false}];
+function getJSON(k,d){try{const v=JSON.parse(localStorage.getItem(k)||JSON.stringify(d));return v??d}catch{return d}}
+function set(k,v){try{localStorage.setItem(k,v)}catch{}}
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+let sectionState=getJSON(SECTION_KEY,{}),cardState=getJSON(CARD_KEY,{}),pins=getJSON(PIN_KEY,[]);
+const root=document.getElementById("sectionsRoot"),pinned=document.getElementById("pinned"),pinnedGrid=document.getElementById("pinnedGrid");
+function save(){set(SECTION_KEY,JSON.stringify(sectionState));set(CARD_KEY,JSON.stringify(cardState));set(PIN_KEY,JSON.stringify(pins))}
+function officeSwitch(){return `<label class="office-home-switch" title="Vis eller skjul Hovedmeny-knappen bare på kontorsiden"><span>HJEM</span><input id="officeHomeSwitch" type="checkbox" disabled><span class="office-track"></span><span class="office-home-state" id="officeHomeState">…</span></label>`}
+function card(p){const open=!!cardState[p.id],isPinned=pins.includes(p.id),isOffice=p.id==="ut-office",el=document.createElement("article");el.className=`page-card ${p.type}${open?" open":""}`;el.dataset.pageId=p.id;el.innerHTML=`<div class="card-head${isOffice?" office":""}"><button class="card-toggle" type="button" data-card-toggle="${esc(p.id)}"><span class="card-title">${esc(p.icon)} ${esc(p.title)}</span><span class="card-status">${esc(p.status)}</span></button>${isOffice?officeSwitch():""}<button class="pin${isPinned?" active":""}" type="button" data-pin="${esc(p.id)}">📌</button><button class="chevron" type="button" data-card-toggle="${esc(p.id)}">⌄</button></div><div class="card-body" data-card-body="${esc(p.id)}" ${open?"":"hidden"}><p class="description">${esc(p.description)}</p><div class="tags"><span class="tag ${esc(p.type)}">${esc(p.status)}</span>${p.tags.map(x=>`<span class="tag">${esc(x)}</span>`).join("")}<span class="tag" translate="no">${esc(p.file)}</span></div><a class="open-link" href="${esc(p.href)}">ÅPNE SIDE</a>${isOffice?'<div class="office-sync" id="officeHomeStatus">Laster felles innstilling…</div>':""}</div>`;return el}
+function renderPinned(){const list=pins.map(id=>pages.find(p=>p.id===id)).filter(Boolean);pinned.hidden=!list.length;pinnedGrid.innerHTML=list.map(p=>`<div class="pinned-item"><a class="pinned-link" href="${esc(p.href)}">${esc(p.icon)} ${esc(p.title)}</a><button class="unpin" type="button" data-unpin="${esc(p.id)}">📌</button></div>`).join("")}
+function render(){root.innerHTML="";sections.forEach(s=>{const open=Object.prototype.hasOwnProperty.call(sectionState,s.id)?!!sectionState[s.id]:s.open,wrap=document.createElement("section");wrap.className="section";wrap.innerHTML=`<button class="section-toggle" type="button" data-section="${esc(s.id)}" aria-expanded="${open}"><span><strong>${esc(s.title)}</strong><small>${esc(s.note)}</small></span><span>⌄</span></button><div class="section-content" data-section-body="${esc(s.id)}" ${open?"":"hidden"}></div>`;const body=wrap.querySelector(".section-content");pages.filter(p=>p.section===s.id).forEach(p=>body.appendChild(card(p)));root.appendChild(wrap)});renderPinned()}
+document.addEventListener("click",e=>{const sb=e.target.closest("[data-section]");if(sb){const id=sb.dataset.section,n=sb.getAttribute("aria-expanded")!=="true",b=document.querySelector(`[data-section-body="${CSS.escape(id)}"]`);sb.setAttribute("aria-expanded",String(n));if(b)b.hidden=!n;sectionState[id]=n;save();return}const cb=e.target.closest("[data-card-toggle]");if(cb){const id=cb.dataset.cardToggle,c=document.querySelector(`[data-page-id="${CSS.escape(id)}"]`);if(!c)return;const b=c.querySelector(`[data-card-body="${CSS.escape(id)}"]`),n=!c.classList.contains("open");c.classList.toggle("open",n);if(b)b.hidden=!n;cardState[id]=n;save();return}const pin=e.target.closest("[data-pin]");if(pin){const id=pin.dataset.pin;pins=pins.includes(id)?pins.filter(x=>x!==id):[...pins,id];save();render();return}const un=e.target.closest("[data-unpin]");if(un){pins=pins.filter(x=>x!==un.dataset.unpin);save();render()}});
+document.getElementById("openAll").onclick=()=>{sections.forEach(s=>sectionState[s.id]=true);save();render()};document.getElementById("closeAll").onclick=()=>{sections.forEach(s=>sectionState[s.id]=false);save();render()};
+const comment=document.getElementById("mainComment"),note=document.getElementById("saveNote");try{comment.value=localStorage.getItem(COMMENT_KEY)||""}catch{}comment.addEventListener("input",()=>{set(COMMENT_KEY,comment.value);note.textContent="Lagret automatisk.";clearTimeout(comment._t);comment._t=setTimeout(()=>note.textContent="",1400)});
 render();
 </script>
+<script src="office-home-setting.js?v=20260805-1725"></script>
 </body>
 </html>
