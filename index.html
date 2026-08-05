@@ -10,7 +10,12 @@
   <meta http-equiv="Expires" content="0">
   <title>BaMavaremottak — Hovedmeny</title>
   <style>
-    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--ok:#48d597;--test:#ff7373;--info:#75b7ff;--yellow:#f4c430}
+    :root{
+      color-scheme:dark;
+      --bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;
+      --muted:#aab4ce;--line:#303b59;--ok:#48d597;--test:#ff7373;
+      --info:#75b7ff;--yellow:#f4c430
+    }
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text)}
     button,textarea{font:inherit}button{cursor:pointer}
@@ -19,17 +24,30 @@
     h1{margin:12px 0 6px;font-size:clamp(31px,8vw,48px);line-height:1.05}
     .subtitle{margin:0 0 14px;color:var(--muted);line-height:1.5}
     .help{margin-bottom:14px;padding:12px 14px;border:1px solid rgba(117,183,255,.42);border-radius:14px;background:rgba(117,183,255,.08);color:#dbeaff;line-height:1.48;font-size:13px}
+
     .pinned{margin:14px 0;padding:14px;border:2px solid rgba(244,196,48,.72);border-radius:18px;background:rgba(244,196,48,.08)}
     .pinned[hidden]{display:none}.pinned h2{margin:0 0 10px}.pinned-grid{display:grid;gap:8px}
     .pinned-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
     .pinned-link{min-height:58px;display:flex;align-items:center;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);text-decoration:none;font-size:clamp(15px,4vw,20px);font-weight:900;line-height:1.25}
     .unpin{width:52px;height:52px;display:grid;place-items:center;border:0;border-radius:14px;background:var(--yellow);color:#17130a;font-size:22px}
+
+    .drawer{margin-top:16px;border:1px solid var(--line);border-radius:18px;background:rgba(13,20,38,.86);overflow:hidden}
+    .drawer-toggle{width:100%;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border:0;background:transparent;color:var(--text);text-align:left}
+    .drawer-toggle strong{display:block;font-size:20px}
+    .drawer-toggle small{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:400}
+    .drawer-arrow{font-size:22px;color:var(--muted);transition:transform .18s ease}
+    .drawer-toggle[aria-expanded="true"] .drawer-arrow{transform:rotate(180deg)}
+    .drawer-body{padding:0 12px 14px}
+    .drawer-body[hidden]{display:none}
+
     .actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 15px}
     .action{min-height:54px;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);font-weight:900}
+
     .section{margin-top:14px;border:1px solid var(--line);border-radius:18px;background:rgba(13,20,38,.78);overflow:hidden}
     .section-toggle{width:100%;min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border:0;background:transparent;color:var(--text);text-align:left}
     .section-toggle strong{display:block;font-size:17px}.section-toggle small{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:400}
     .section-content{display:grid;gap:11px;padding:0 12px 12px}.section-content[hidden],.card-body[hidden]{display:none}
+
     .page-card{border:2px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden}
     .page-card.approved{border-color:rgba(72,213,151,.75);background:linear-gradient(145deg,#0f3427,var(--panel))}
     .page-card.test{border-color:rgba(255,115,115,.78);background:linear-gradient(145deg,#3b1720,var(--panel))}
@@ -39,6 +57,7 @@
     .card-toggle{min-width:0;padding:5px 0;border:0;background:transparent;color:var(--text);text-align:left}
     .card-title{display:block;font-size:clamp(16px,4.5vw,23px);font-weight:900;line-height:1.18}
     .card-status{display:block;margin-top:5px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase}
+
     .office-home-switch{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:62px;min-height:48px;padding:4px 6px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);font-size:9px;font-weight:950;cursor:pointer;user-select:none}
     .office-home-switch input{position:absolute;opacity:0;pointer-events:none}
     .office-track{position:relative;width:34px;height:19px;border-radius:999px;background:#5b647a;transition:.18s}
@@ -47,6 +66,7 @@
     .office-home-switch input:checked+.office-track:after{transform:translateX(15px)}
     .office-home-state{color:var(--muted);font-size:8px}.office-home-switch input:checked~.office-home-state{color:var(--ok)}
     .office-home-switch input:disabled~*{opacity:.65}
+
     .pin,.chevron{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text)}
     .pin.active{background:var(--yellow);border-color:var(--yellow);color:#17130a}
     .card-body{padding:0 14px 14px;border-top:1px solid rgba(255,255,255,.06)}
@@ -55,33 +75,74 @@
     .tag.approved{color:#062418;background:var(--ok);border-color:var(--ok)}.tag.test{color:#2b080d;background:var(--test);border-color:var(--test)}.tag.info{color:#071a2e;background:var(--info);border-color:var(--info)}
     .open-link{min-height:48px;display:grid;place-items:center;padding:11px 14px;border-radius:12px;background:var(--yellow);color:#17130a;text-decoration:none;text-align:center;font-weight:900}
     .office-sync{margin-top:8px;color:var(--muted);font-size:10px;text-align:right}
+
     .comment{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
     .comment h2{margin:0 0 6px;font-size:20px}.comment p{margin:0 0 10px;color:var(--muted)}
     textarea{width:100%;min-height:110px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);resize:vertical}
     .save-note{min-height:18px;margin-top:8px;color:var(--muted);font-size:12px}
     .footer{margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--muted);font-size:13px;line-height:1.5}
-    @media(max-width:560px){.actions{grid-template-columns:1fr}.card-head,.card-head.office{gap:4px;padding-left:10px}.office-home-switch{min-width:56px}.pin,.chevron{width:39px;height:39px}.pinned-link{min-height:54px}.unpin{width:50px;height:50px}}
+
+    @media(max-width:560px){
+      .actions{grid-template-columns:1fr}
+      .card-head,.card-head.office{gap:4px;padding-left:10px}
+      .office-home-switch{min-width:56px}
+      .pin,.chevron{width:39px;height:39px}
+      .pinned-link{min-height:54px}
+      .unpin{width:50px;height:50px}
+      .drawer-toggle strong{font-size:18px}
+    }
   </style>
 </head>
 <body class="notranslate">
 <main class="app">
-  <span class="version">Hovedmeny v17 STABIL · Oppdatert 05.08.2026 kl. 18:23</span>
+  <span class="version">Hovedmeny v18 STABIL · Oppdatert 05.08.2026 kl. 18:30</span>
   <h1>BaMavaremottak</h1>
-  <p class="subtitle">De viktigste sidene ligger øverst. Andre sider er lukket som standard.</p>
-  <div class="help">Tre faste sider vises først. Under dem kan du åpne alle seksjoner, lukke alle seksjoner eller åpne bare den delen du trenger.</div>
-  <section class="pinned" id="pinned" hidden><h2>📌 Festede sider</h2><div class="pinned-grid" id="pinnedGrid"></div></section>
-  <div class="actions"><button class="action" id="openAll" type="button">Åpne alle seksjoner</button><button class="action" id="closeAll" type="button">Lukk alle seksjoner</button></div>
-  <div id="sectionsRoot"></div>
-  <section class="comment"><h2>Kommentarer / endringer / forslag</h2><p>Skriv her hva som skal endres på hovedsiden.</p><textarea id="mainComment" placeholder="Skriv kommentar, endring eller forslag..."></textarea><div class="save-note" id="saveNote"></div></section>
-  <div class="footer">Godkjente sider er grønne. Testsider er røde. Gamle sider ligger under <strong>TEST / ARKIV</strong>.</div>
+  <p class="subtitle">De viktigste sidene ligger øverst. Alt annet kan skjules.</p>
+  <div class="help">Tre festede sider vises alltid øverst. Resten av hovedmenyen er skjult som standard og åpnes med pilen nedenfor.</div>
+
+  <section class="pinned" id="pinned" hidden>
+    <h2>📌 Festede sider</h2>
+    <div class="pinned-grid" id="pinnedGrid"></div>
+  </section>
+
+  <section class="drawer" id="otherPages">
+    <button class="drawer-toggle" id="otherPagesToggle" type="button" aria-expanded="false" aria-controls="otherPagesBody">
+      <span>
+        <strong>Andre sider og innstillinger</strong>
+        <small>Alle seksjoner, arkiv og kommentarer</small>
+      </span>
+      <span class="drawer-arrow">⌄</span>
+    </button>
+
+    <div class="drawer-body" id="otherPagesBody" hidden>
+      <div class="actions">
+        <button class="action" id="openAll" type="button">Åpne alle seksjoner</button>
+        <button class="action" id="closeAll" type="button">Lukk alle seksjoner</button>
+      </div>
+
+      <div id="sectionsRoot"></div>
+
+      <section class="comment">
+        <h2>Kommentarer / endringer / forslag</h2>
+        <p>Skriv her hva som skal endres på hovedsiden.</p>
+        <textarea id="mainComment" placeholder="Skriv kommentar, endring eller forslag..."></textarea>
+        <div class="save-note" id="saveNote"></div>
+      </section>
+
+      <div class="footer">Godkjente sider er grønne. Testsider er røde. Gamle sider ligger under <strong>TEST / ARKIV</strong>.</div>
+    </div>
+  </section>
 </main>
+
 <script>
 "use strict";
-const SECTION_KEY="bamavaremottak_home_sections_v17";
-const CARD_KEY="bamavaremottak_home_cards_v17";
-const PIN_KEY="bamavaremottak_home_pins_v17";
+
+const SECTION_KEY="bamavaremottak_home_sections_v18";
+const CARD_KEY="bamavaremottak_home_cards_v18";
+const PIN_KEY="bamavaremottak_home_pins_v18";
 const COMMENT_KEY="bamavaremottak_main_comment_v1";
 const DEFAULT_PINS=["camera-v4","ut-office","ut-warehouse"];
+
 const pages=[
 {id:"camera-v4",section:"latest",title:"SISTE ARBEIDSLENKE — KAMERA CLOUD v4.6",description:"Siste korrigerte kameraversjon. Foto kobles til eksisterende Nordic ID-post uten å opprette duplikat.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"SISTE VERSJON",tags:["FELLES SKY / TABELL"]},
 {id:"inn-camera",section:"inn",title:"INN — KAMERA / TELEFON",description:"Fotografer etiketten, les numrene med Gemini og arbeid mot den felles Mottak-tabellen.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"GODKJENT",tags:["TELEFON","FELLES SKY"]},
@@ -101,35 +162,184 @@ const pages=[
 {id:"nordic-simple",section:"archive",title:"TEST — ENKEL NORDIC ID",description:"Minimalside for å kontrollere skanneren.",href:"nordic-id.html",file:"nordic-id.html",icon:"⌨️",type:"test",status:"TEST",tags:["UTSTYR"]},
 {id:"scanner-test",section:"archive",title:"TEST — DETALJERT CC-SKANNER",description:"Teknisk diagnose av tegn, lengde og duplikater.",href:"scanner-test.html",file:"scanner-test.html",icon:"🛠️",type:"test",status:"TEST",tags:["DIAGNOSE"]}
 ];
+
 const sections=[
-{id:"latest",title:"Siste arbeidslenke",note:"Siste versjon vi arbeider med",open:false},
-{id:"inn",title:"INN — Varemottak",note:"Telefon, Nordic ID, kontroll og historikk",open:false},
-{id:"ut",title:"UT — Bestilling og utsending",note:"Kontor, lager, rampe og retur",open:false},
-{id:"overview",title:"Oversikt og presentasjon",note:"Kommentarer, status og prosjektpresentasjon",open:false},
-{id:"archive",title:"TEST / ARKIV",note:"Gamle og tekniske sider",open:false}
+{id:"latest",title:"Siste arbeidslenke",note:"Siste versjon vi arbeider med"},
+{id:"inn",title:"INN — Varemottak",note:"Telefon, Nordic ID, kontroll og historikk"},
+{id:"ut",title:"UT — Bestilling og utsending",note:"Kontor, lager, rampe og retur"},
+{id:"overview",title:"Oversikt og presentasjon",note:"Kommentarer, status og prosjektpresentasjon"},
+{id:"archive",title:"TEST / ARKIV",note:"Gamle og tekniske sider"}
 ];
-function getJSON(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));return value??fallback}catch{return fallback}}
+
+function getJSON(key,fallback){
+  try{
+    const value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));
+    return value??fallback;
+  }catch{return fallback}
+}
 function setValue(key,value){try{localStorage.setItem(key,value)}catch{}}
-function esc(value){return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]))}
+function esc(value){
+  return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+}
+
 let sectionState=getJSON(SECTION_KEY,{});
 let cardState=getJSON(CARD_KEY,{});
 let pins=getJSON(PIN_KEY,DEFAULT_PINS);
 if(!Array.isArray(pins)||!pins.length)pins=[...DEFAULT_PINS];
+
 const root=document.getElementById("sectionsRoot");
 const pinned=document.getElementById("pinned");
 const pinnedGrid=document.getElementById("pinnedGrid");
-function save(){setValue(SECTION_KEY,JSON.stringify(sectionState));setValue(CARD_KEY,JSON.stringify(cardState));setValue(PIN_KEY,JSON.stringify(pins))}
-function officeSwitch(){return `<label class="office-home-switch" title="Vis eller skjul Hovedmeny-knappen bare på kontorsiden"><span>HJEM</span><input id="officeHomeSwitch" type="checkbox" disabled><span class="office-track"></span><span class="office-home-state" id="officeHomeState">…</span></label>`}
-function card(page){const open=!!cardState[page.id],isPinned=pins.includes(page.id),isOffice=page.id==="ut-office",element=document.createElement("article");element.className=`page-card ${page.type}${open?" open":""}`;element.dataset.pageId=page.id;element.innerHTML=`<div class="card-head${isOffice?" office":""}"><button class="card-toggle" type="button" data-card-toggle="${esc(page.id)}"><span class="card-title">${esc(page.icon)} ${esc(page.title)}</span><span class="card-status">${esc(page.status)}</span></button>${isOffice?officeSwitch():""}<button class="pin${isPinned?" active":""}" type="button" data-pin="${esc(page.id)}">📌</button><button class="chevron" type="button" data-card-toggle="${esc(page.id)}">⌄</button></div><div class="card-body" data-card-body="${esc(page.id)}" ${open?"":"hidden"}><p class="description">${esc(page.description)}</p><div class="tags"><span class="tag ${esc(page.type)}">${esc(page.status)}</span>${page.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join("")}<span class="tag">${esc(page.file)}</span></div><a class="open-link" href="${esc(page.href)}">ÅPNE SIDE</a>${isOffice?'<div class="office-sync" id="officeHomeStatus">Laster felles innstilling…</div>':""}</div>`;return element}
-function renderPinned(){const list=pins.map(id=>pages.find(page=>page.id===id)).filter(Boolean);pinned.hidden=!list.length;pinnedGrid.innerHTML=list.map(page=>`<div class="pinned-item"><a class="pinned-link" href="${esc(page.href)}">${esc(page.icon)} ${esc(page.title)}</a><button class="unpin" type="button" data-unpin="${esc(page.id)}">📌</button></div>`).join("")}
-function render(){root.innerHTML="";sections.forEach(section=>{const open=Object.prototype.hasOwnProperty.call(sectionState,section.id)?!!sectionState[section.id]:false;const wrapper=document.createElement("section");wrapper.className="section";wrapper.innerHTML=`<button class="section-toggle" type="button" data-section="${esc(section.id)}" aria-expanded="${open}"><span><strong>${esc(section.title)}</strong><small>${esc(section.note)}</small></span><span>⌄</span></button><div class="section-content" data-section-body="${esc(section.id)}" ${open?"":"hidden"}></div>`;const body=wrapper.querySelector(".section-content");pages.filter(page=>page.section===section.id).forEach(page=>body.appendChild(card(page)));root.appendChild(wrapper)});renderPinned();document.dispatchEvent(new CustomEvent("bama:office-switch-rendered"))}
-document.addEventListener("click",event=>{const sectionButton=event.target.closest("[data-section]");if(sectionButton){const id=sectionButton.dataset.section;const next=sectionButton.getAttribute("aria-expanded")!=="true";const body=document.querySelector(`[data-section-body="${CSS.escape(id)}"]`);sectionButton.setAttribute("aria-expanded",String(next));if(body)body.hidden=!next;sectionState[id]=next;save();return}const cardButton=event.target.closest("[data-card-toggle]");if(cardButton){const id=cardButton.dataset.cardToggle;const current=document.querySelector(`[data-page-id="${CSS.escape(id)}"]`);if(!current)return;const body=current.querySelector(`[data-card-body="${CSS.escape(id)}"]`);const next=!current.classList.contains("open");current.classList.toggle("open",next);if(body)body.hidden=!next;cardState[id]=next;save();return}const pinButton=event.target.closest("[data-pin]");if(pinButton){const id=pinButton.dataset.pin;pins=pins.includes(id)?pins.filter(value=>value!==id):[...pins,id];save();render();return}const unpinButton=event.target.closest("[data-unpin]");if(unpinButton){pins=pins.filter(value=>value!==unpinButton.dataset.unpin);save();render()}});
-document.getElementById("openAll").onclick=()=>{sections.forEach(section=>sectionState[section.id]=true);save();render()};
-document.getElementById("closeAll").onclick=()=>{sections.forEach(section=>sectionState[section.id]=false);save();render()};
+
+function save(){
+  setValue(SECTION_KEY,JSON.stringify(sectionState));
+  setValue(CARD_KEY,JSON.stringify(cardState));
+  setValue(PIN_KEY,JSON.stringify(pins));
+}
+
+function officeSwitch(){
+  return `<label class="office-home-switch" title="Vis eller skjul Hovedmeny-knappen bare på kontorsiden">
+    <span>HJEM</span>
+    <input id="officeHomeSwitch" type="checkbox" disabled>
+    <span class="office-track"></span>
+    <span class="office-home-state" id="officeHomeState">…</span>
+  </label>`;
+}
+
+function card(page){
+  const open=!!cardState[page.id];
+  const isPinned=pins.includes(page.id);
+  const isOffice=page.id==="ut-office";
+  const element=document.createElement("article");
+  element.className=`page-card ${page.type}${open?" open":""}`;
+  element.dataset.pageId=page.id;
+  element.innerHTML=`
+    <div class="card-head${isOffice?" office":""}">
+      <button class="card-toggle" type="button" data-card-toggle="${esc(page.id)}">
+        <span class="card-title">${esc(page.icon)} ${esc(page.title)}</span>
+        <span class="card-status">${esc(page.status)}</span>
+      </button>
+      ${isOffice?officeSwitch():""}
+      <button class="pin${isPinned?" active":""}" type="button" data-pin="${esc(page.id)}">📌</button>
+      <button class="chevron" type="button" data-card-toggle="${esc(page.id)}">⌄</button>
+    </div>
+    <div class="card-body" data-card-body="${esc(page.id)}" ${open?"":"hidden"}>
+      <p class="description">${esc(page.description)}</p>
+      <div class="tags">
+        <span class="tag ${esc(page.type)}">${esc(page.status)}</span>
+        ${page.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join("")}
+        <span class="tag">${esc(page.file)}</span>
+      </div>
+      <a class="open-link" href="${esc(page.href)}">ÅPNE SIDE</a>
+      ${isOffice?'<div class="office-sync" id="officeHomeStatus">Laster felles innstilling…</div>':""}
+    </div>`;
+  return element;
+}
+
+function renderPinned(){
+  const list=pins.map(id=>pages.find(page=>page.id===id)).filter(Boolean);
+  pinned.hidden=!list.length;
+  pinnedGrid.innerHTML=list.map(page=>`
+    <div class="pinned-item">
+      <a class="pinned-link" href="${esc(page.href)}">${esc(page.icon)} ${esc(page.title)}</a>
+      <button class="unpin" type="button" data-unpin="${esc(page.id)}">📌</button>
+    </div>`).join("");
+}
+
+function render(){
+  root.innerHTML="";
+  sections.forEach(section=>{
+    const open=!!sectionState[section.id];
+    const wrapper=document.createElement("section");
+    wrapper.className="section";
+    wrapper.innerHTML=`
+      <button class="section-toggle" type="button" data-section="${esc(section.id)}" aria-expanded="${open}">
+        <span><strong>${esc(section.title)}</strong><small>${esc(section.note)}</small></span>
+        <span>⌄</span>
+      </button>
+      <div class="section-content" data-section-body="${esc(section.id)}" ${open?"":"hidden"}></div>`;
+    const body=wrapper.querySelector(".section-content");
+    pages.filter(page=>page.section===section.id).forEach(page=>body.appendChild(card(page)));
+    root.appendChild(wrapper);
+  });
+  renderPinned();
+  document.dispatchEvent(new CustomEvent("bama:office-switch-rendered"));
+}
+
+const drawerToggle=document.getElementById("otherPagesToggle");
+const drawerBody=document.getElementById("otherPagesBody");
+drawerToggle.addEventListener("click",()=>{
+  const next=drawerToggle.getAttribute("aria-expanded")!=="true";
+  drawerToggle.setAttribute("aria-expanded",String(next));
+  drawerBody.hidden=!next;
+});
+
+document.addEventListener("click",event=>{
+  const sectionButton=event.target.closest("[data-section]");
+  if(sectionButton){
+    const id=sectionButton.dataset.section;
+    const next=sectionButton.getAttribute("aria-expanded")!=="true";
+    const body=document.querySelector(`[data-section-body="${CSS.escape(id)}"]`);
+    sectionButton.setAttribute("aria-expanded",String(next));
+    if(body)body.hidden=!next;
+    sectionState[id]=next;
+    save();
+    return;
+  }
+
+  const cardButton=event.target.closest("[data-card-toggle]");
+  if(cardButton){
+    const id=cardButton.dataset.cardToggle;
+    const current=document.querySelector(`[data-page-id="${CSS.escape(id)}"]`);
+    if(!current)return;
+    const body=current.querySelector(`[data-card-body="${CSS.escape(id)}"]`);
+    const next=!current.classList.contains("open");
+    current.classList.toggle("open",next);
+    if(body)body.hidden=!next;
+    cardState[id]=next;
+    save();
+    return;
+  }
+
+  const pinButton=event.target.closest("[data-pin]");
+  if(pinButton){
+    const id=pinButton.dataset.pin;
+    pins=pins.includes(id)?pins.filter(value=>value!==id):[...pins,id];
+    save();
+    render();
+    return;
+  }
+
+  const unpinButton=event.target.closest("[data-unpin]");
+  if(unpinButton){
+    pins=pins.filter(value=>value!==unpinButton.dataset.unpin);
+    save();
+    render();
+  }
+});
+
+document.getElementById("openAll").addEventListener("click",()=>{
+  sections.forEach(section=>sectionState[section.id]=true);
+  save();
+  render();
+});
+
+document.getElementById("closeAll").addEventListener("click",()=>{
+  sections.forEach(section=>sectionState[section.id]=false);
+  save();
+  render();
+});
+
 const comment=document.getElementById("mainComment");
 const note=document.getElementById("saveNote");
 try{comment.value=localStorage.getItem(COMMENT_KEY)||""}catch{}
-comment.addEventListener("input",()=>{setValue(COMMENT_KEY,comment.value);note.textContent="Lagret automatisk.";clearTimeout(comment._timer);comment._timer=setTimeout(()=>note.textContent="",1400)});
+comment.addEventListener("input",()=>{
+  setValue(COMMENT_KEY,comment.value);
+  note.textContent="Lagret automatisk.";
+  clearTimeout(comment._timer);
+  comment._timer=setTimeout(()=>note.textContent="",1400);
+});
+
 render();
 </script>
 <script src="office-home-setting.js?v=20260805-1800"></script>
