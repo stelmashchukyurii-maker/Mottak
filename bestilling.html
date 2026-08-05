@@ -10,8 +10,13 @@
 </head>
 <body>
 <main class="app">
-  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v16 PROGNOSE<br>Oppdatert 05.08.2026 kl. 10:49</div></div>
+  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v17 TOPPLAGER<br>Oppdatert 05.08.2026 kl. 15:12</div></div>
   <h1>UT — Kontor</h1>
+  <div class="top-stock-line loading" id="topStockLine" aria-label="Tilgjengelig lager">
+    <div class="top-stock-item" id="topStockBunner">Bunner: laster…</div>
+    <div class="top-stock-item" id="topStockH30">Hyller x30: laster…</div>
+    <div class="top-stock-item" id="topStockH60">Hyller x60: laster…</div>
+  </div>
   <p class="subtitle">Én rampe = ett samlet oppdrag med alle varetyper.</p>
 
   <div class="status-strip">
@@ -105,5 +110,6 @@
 <script src="bestilling-stock-balance.js?v=20260805-1049"></script>
 <script src="bestilling-history-lines.js?v=20260804-2133"></script>
 <script src="shared-stock-status.js?v=20260805-1049"></script>
+<script src="bestilling-top-stock.js?v=20260805-1512"></script>
 </body>
 </html>
