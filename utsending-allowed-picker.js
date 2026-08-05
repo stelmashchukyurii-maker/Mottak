@@ -2,6 +2,7 @@
 
 (() => {
   const lowerInput = document.getElementById("lowerInput");
+  const upperInput = document.getElementById("upperInput");
   const reserveButton = document.getElementById("reserveButton");
   const pair = reserveButton?.closest(".pair");
 
@@ -23,11 +24,12 @@
 
   const help = document.createElement("div");
   help.className = "ut-picker-help";
-  help.textContent = "Тимчасово для тесту: список містить лише доступні товари тих видів, яких ще не вистачає на цій рампі.";
+  help.textContent = "Тимчасово для тесту: список містить лише доступні товари, яких ще не вистачає. Перше резервування автоматично запускає нову рампу в роботу.";
   pair.appendChild(help);
 
   const originalReserve = reserveButton.onclick;
   let fillingFromSelect = false;
+  let starting = false;
 
   const cleanLower = value => String(value || "")
     .toUpperCase()
@@ -53,8 +55,29 @@
     return Boolean(
       order &&
       (order.test_state || "active") === "active" &&
-      ["received", "in_progress", "problem"].includes(order.status)
+      ["new", "received", "in_progress", "problem"].includes(order.status)
     );
+  }
+
+  async function ensureRampStarted() {
+    const order = current();
+    if (!order) throw new Error("Рампу не відкрито.");
+    if (order.status !== "new") return;
+    if (starting) throw new Error("Рампа вже запускається. Зачекайте одну секунду.");
+
+    starting = true;
+    message("scanMessage", "Перше резервування: автоматично запускаємо всю рампу в роботу…", "warn");
+    try {
+      const now = new Date().toISOString();
+      await patchOrder({
+        status: "in_progress",
+        received_at: order.received_at || now,
+        started_at: now
+      });
+      message("scanMessage", "Рампу запущено. Резервуємо вибраний товар…", "ok");
+    } finally {
+      starting = false;
+    }
   }
 
   function availableRows() {
@@ -113,33 +136,54 @@
   });
 
   reserveButton.onclick = async event => {
-    if (!select.value) {
-      if (typeof originalReserve === "function") return originalReserve.call(reserveButton, event);
-      return;
-    }
+    try {
+      await ensureRampStarted();
 
-    const row = stockRows.find(item =>
-      String(item.id) === String(select.value) &&
-      (item.stock_status || "in_stock") === "in_stock"
-    );
+      if (!select.value) {
+        if (typeof originalReserve === "function") return await originalReserve.call(reserveButton, event);
+        return;
+      }
 
-    if (!row) {
-      message("scanMessage", "Вибраний товар уже недоступний. Список оновлено.", "bad");
+      const row = stockRows.find(item =>
+        String(item.id) === String(select.value) &&
+        (item.stock_status || "in_stock") === "in_stock"
+      );
+
+      if (!row) {
+        message("scanMessage", "Вибраний товар уже недоступний. Список оновлено.", "bad");
+        lowerInput.value = "";
+        refreshOptions();
+        return;
+      }
+
+      await reserveKnownRow(row);
+      select.value = "";
       lowerInput.value = "";
       refreshOptions();
-      return;
+    } catch (error) {
+      message("scanMessage", error.message || String(error), "bad");
+      renderDetail();
     }
-
-    await reserveKnownRow(row);
-    select.value = "";
-    lowerInput.value = "";
-    refreshOptions();
   };
 
   const originalRenderDetail = renderDetail;
   renderDetail = function renderDetailWithAllowedPicker() {
     originalRenderDetail();
     refreshOptions();
+
+    const order = current();
+    const allowFirstReservation = Boolean(
+      order &&
+      (order.test_state || "active") === "active" &&
+      order.status === "new"
+    );
+
+    if (allowFirstReservation) {
+      lowerInput.disabled = false;
+      if (upperInput) upperInput.disabled = false;
+      reserveButton.disabled = false;
+      message("scanMessage", "Нова рампа: перше резервування автоматично запустить її в роботу.", "ok");
+    }
   };
 
   refreshOptions();
