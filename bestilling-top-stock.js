@@ -51,6 +51,38 @@
       border-color:rgba(255,115,115,.55);
       color:var(--bad);
     }
+
+    #ramp{
+      width:100%;
+      min-height:60px;
+      padding:12px 46px 12px 15px;
+      border:3px solid var(--line);
+      border-radius:15px;
+      background-color:var(--dark);
+      color:var(--text);
+      font:950 20px/1.2 Arial,Helvetica,sans-serif;
+      outline:none;
+      transition:border-color .2s,box-shadow .2s,background-color .2s;
+    }
+    #ramp option{background:#0d1426;color:#f5f7ff}
+    #ramp.ramp-awaiting{
+      border-color:var(--accent);
+      background:linear-gradient(90deg,rgba(244,196,48,.16),rgba(13,20,38,.98));
+      box-shadow:0 0 0 4px rgba(244,196,48,.14),0 0 22px rgba(244,196,48,.34);
+      animation:rampAttention 1.35s ease-in-out infinite;
+    }
+    #ramp.ramp-selected{
+      border-color:var(--ok);
+      background:linear-gradient(90deg,rgba(72,213,151,.14),rgba(13,20,38,.98));
+      box-shadow:0 0 0 3px rgba(72,213,151,.12);
+      animation:none;
+    }
+    #ramp:focus{box-shadow:0 0 0 5px rgba(244,196,48,.18),0 0 24px rgba(244,196,48,.28)}
+    @keyframes rampAttention{
+      0%,100%{box-shadow:0 0 0 3px rgba(244,196,48,.10),0 0 12px rgba(244,196,48,.18)}
+      50%{box-shadow:0 0 0 6px rgba(244,196,48,.20),0 0 28px rgba(244,196,48,.48)}
+    }
+    @media(prefers-reduced-motion:reduce){#ramp.ramp-awaiting{animation:none}}
     @media(max-width:560px){
       .top-stock-item{
         grid-template-columns:minmax(100px,.75fr) minmax(0,1.25fr);
@@ -61,9 +93,23 @@
       }
       .top-stock-item strong{font-size:17px}
       .top-stock-value{font-size:16px}
+      #ramp{min-height:58px;font-size:18px}
     }
   `;
   document.head.appendChild(style);
+
+  const rampSelect = document.getElementById("ramp");
+  if (rampSelect) {
+    const syncRampHighlight = () => {
+      const selected = Boolean(rampSelect.value);
+      rampSelect.classList.toggle("ramp-awaiting", !selected);
+      rampSelect.classList.toggle("ramp-selected", selected);
+      rampSelect.setAttribute("aria-invalid", selected ? "false" : "true");
+    };
+    rampSelect.addEventListener("change", syncRampHighlight);
+    rampSelect.addEventListener("input", syncRampHighlight);
+    syncRampHighlight();
+  }
 
   const line = document.getElementById("topStockLine");
   if (!line || typeof request !== "function") return;
