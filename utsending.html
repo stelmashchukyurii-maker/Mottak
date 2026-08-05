@@ -11,7 +11,7 @@
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260805-1049" title="UT — Bekreft rampe"></iframe>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260805-1235" title="UT — Bekreft rampe"></iframe>
 <script>
 "use strict";
 const frame=document.getElementById("utCore");
@@ -29,7 +29,7 @@ function loadPicker(doc){
   if(doc.getElementById("utAllowedPickerModule")){loadSharedStock(doc);return}
   const picker=doc.createElement("script");
   picker.id="utAllowedPickerModule";
-  picker.src="utsending-allowed-picker.js?v=20260804-2250";
+  picker.src="utsending-allowed-picker.js?v=20260805-1235";
   picker.onload=()=>loadSharedStock(doc);
   doc.body.appendChild(picker);
 }
@@ -37,7 +37,7 @@ function enhance(){
   const doc=frame.contentDocument;
   if(!doc)return;
   const version=doc.querySelector(".version");
-  if(version)version.innerHTML="UT Bekreftelse v13 FELLES LAGER<br>Oppdatert 05.08.2026 kl. 10:49";
+  if(version)version.innerHTML="UT Bekreftelse v14 AUTO-START<br>Oppdatert 05.08.2026 kl. 12:35";
   doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
   const existing=doc.getElementById("utGeminiModule");
   if(existing){
