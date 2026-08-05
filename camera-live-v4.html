@@ -16,7 +16,7 @@
 </head>
 <body>
   <div id="loader">Laster Camera Cloud v4.7…</div>
-  <iframe id="app" title="Camera Cloud v4.7" src="camera-live.html?base=47-20260805-1925"></iframe>
+  <iframe id="app" title="Camera Cloud v4.7" src="camera-live.html?base=47-20260805-1930"></iframe>
   <script>
     "use strict";
     const frame = document.getElementById("app");
@@ -37,12 +37,12 @@
         const doc = frame.contentDocument;
         const win = frame.contentWindow;
         win.BAMA_HOME_TARGET = "camera-live-v4.html";
-        await injectScript(doc, "camera-live-v4-source-fix.js?v=47-20260805-1925");
-        await injectScript(doc, "camera-live-v4-server-ocr.js?v=47-20260805-1925");
-        await injectScript(doc, "camera-live-v4-stock-filters.js?v=47-20260805-1925");
+        await injectScript(doc, "camera-live-v4-source-fix.js?v=47-20260805-1930");
+        await injectScript(doc, "camera-live-v4-server-ocr.js?v=47-20260805-1930");
+        await injectScript(doc, "camera-live-v4-stock-filters.js?v=47-20260805-1930");
         await injectScript(doc, "shared-stock-status.js?v=20260805-1900");
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.7 LAGERFILTER<br>Oppdatert 05.08.2026 kl. 19:25";
+        if (version) version.innerHTML = "Kamera Cloud v4.7 LAGERFILTER<br>Oppdatert 05.08.2026 kl. 19:30";
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => win.refreshBamaStock?.().catch(() => {}), 80));
         });
