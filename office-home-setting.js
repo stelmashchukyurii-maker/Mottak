@@ -1,6 +1,9 @@
 "use strict";
 
 (() => {
+  if (window.__BAMA_OFFICE_HOME_SETTING__) return;
+  window.__BAMA_OFFICE_HOME_SETTING__ = true;
+
   const SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co";
   const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
   const SETTING_KEY = "ut_office_home_button";
@@ -59,8 +62,7 @@
     updateSwitch(enabled, status);
 
     if (isOfficePage()) {
-      const links = officeHomeLinks();
-      links.forEach(link => {
+      officeHomeLinks().forEach(link => {
         link.hidden = !enabled;
         link.style.display = enabled ? "" : "none";
         link.setAttribute("aria-hidden", enabled ? "false" : "true");
@@ -119,6 +121,7 @@
   async function handleChange(event) {
     const input = event.target.closest("#officeHomeSwitch");
     if (!input || busy) return;
+    const previous = currentValue;
     const requested = input.checked;
     busy = true;
     apply(requested, "saving");
@@ -126,17 +129,28 @@
       currentValue = await writeSetting(requested);
       apply(currentValue);
     } catch {
+      currentValue = previous;
       apply(currentValue, "error");
     } finally {
       busy = false;
     }
   }
 
-  document.addEventListener("change", handleChange);
-  document.addEventListener("DOMContentLoaded", () => {
+  function start() {
     updateSwitch(currentValue, "loading");
     refresh();
-  });
+  }
+
+  document.addEventListener("change", handleChange);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start, { once: true });
+  } else {
+    start();
+  }
+
+  const observer = new MutationObserver(() => apply(currentValue));
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
   window.addEventListener("pageshow", refresh);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) refresh();
