@@ -141,6 +141,8 @@
   }
 
   document.addEventListener("change", handleChange);
+  document.addEventListener("bama:office-switch-rendered", () => apply(currentValue));
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start, { once: true });
   } else {
