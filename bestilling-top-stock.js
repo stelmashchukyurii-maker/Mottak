@@ -4,33 +4,56 @@
   const style = document.createElement("style");
   style.textContent = `
     .top-stock-line{
-      display:flex;
-      align-items:center;
-      gap:0;
-      margin:7px 0 9px;
-      border:1px solid var(--line);
-      border-radius:13px;
-      background:var(--dark);
-      overflow-x:auto;
-      white-space:nowrap;
-      scrollbar-width:thin;
+      display:grid;
+      gap:10px;
+      margin:10px 0 13px;
     }
     .top-stock-item{
-      flex:1 0 auto;
-      min-width:max-content;
-      padding:10px 14px;
-      font-size:14px;
-      font-weight:950;
-      text-align:center;
+      display:grid;
+      grid-template-columns:minmax(125px,.7fr) minmax(0,1.3fr);
+      align-items:center;
+      gap:16px;
+      min-height:68px;
+      padding:15px 20px;
+      border:2px solid var(--line);
+      border-radius:16px;
+      background:var(--dark);
       color:var(--text);
+      font-size:20px;
+      font-weight:950;
+      line-height:1.25;
     }
-    .top-stock-item + .top-stock-item{border-left:1px solid var(--line)}
-    .top-stock-item strong{color:var(--accent)}
+    .top-stock-item:first-child{
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(244,196,48,.09);
+    }
+    .top-stock-item strong{
+      color:var(--accent);
+      font-size:22px;
+      text-align:left;
+    }
+    .top-stock-value{
+      text-align:right;
+      color:var(--text);
+      font-size:21px;
+      font-weight:950;
+    }
     .top-stock-line.loading .top-stock-item{color:var(--muted)}
-    .top-stock-line.error{border-color:rgba(255,115,115,.55)}
-    .top-stock-line.error .top-stock-item{color:var(--bad)}
+    .top-stock-line.loading .top-stock-item strong{color:var(--muted)}
+    .top-stock-line.error .top-stock-item{
+      border-color:rgba(255,115,115,.55);
+      color:var(--bad);
+    }
     @media(max-width:560px){
-      .top-stock-item{padding:9px 11px;font-size:12px}
+      .top-stock-item{
+        grid-template-columns:minmax(100px,.75fr) minmax(0,1.25fr);
+        gap:10px;
+        min-height:58px;
+        padding:12px 14px;
+        font-size:16px;
+      }
+      .top-stock-item strong{font-size:17px}
+      .top-stock-value{font-size:16px}
     }
   `;
   document.head.appendChild(style);
@@ -38,11 +61,17 @@
   const line = document.getElementById("topStockLine");
   if (!line) return;
 
+  function setRow(id, label, value) {
+    const row = document.getElementById(id);
+    if (!row) return;
+    row.innerHTML = `<strong>${label}</strong><span class="top-stock-value">${value}</span>`;
+  }
+
   function setLoading() {
     line.className = "top-stock-line loading";
-    document.getElementById("topStockBunner").textContent = "Bunner: laster…";
-    document.getElementById("topStockH30").textContent = "Hyller x30: laster…";
-    document.getElementById("topStockH60").textContent = "Hyller x60: laster…";
+    setRow("topStockBunner", "Bunner", "Laster…");
+    setRow("topStockH30", "Hyller x30", "Laster…");
+    setRow("topStockH60", "Hyller x60", "Laster…");
   }
 
   async function loadTopStock() {
@@ -57,14 +86,14 @@
       const h60 = available.filter((row) => row.product === "hyller60").length;
 
       line.className = "top-stock-line";
-      document.getElementById("topStockBunner").innerHTML = `<strong>Bunner:</strong> ${bunner} ${bunner === 1 ? "stabel" : "stabler"}`;
-      document.getElementById("topStockH30").innerHTML = `<strong>Hyller x30:</strong> ${h30} sett`;
-      document.getElementById("topStockH60").innerHTML = `<strong>Hyller x60:</strong> ${h60} sett`;
+      setRow("topStockBunner", "Bunner", `${bunner} ${bunner === 1 ? "stabel" : "stabler"} × 10 = ${bunner * 10} stk.`);
+      setRow("topStockH30", "Hyller x30", `${h30} sett = ${h30 * 30} hyller`);
+      setRow("topStockH60", "Hyller x60", `${h60} sett = ${h60 * 60} hyller`);
     } catch (error) {
       line.className = "top-stock-line error";
-      document.getElementById("topStockBunner").textContent = "Lagerdata ikke tilgjengelig";
-      document.getElementById("topStockH30").textContent = "";
-      document.getElementById("topStockH60").textContent = "";
+      setRow("topStockBunner", "Lagerstatus", "Data ikke tilgjengelig");
+      setRow("topStockH30", "Hyller x30", "—");
+      setRow("topStockH60", "Hyller x60", "—");
     }
   }
 
