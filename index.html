@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="nb">
+<html lang="nb" translate="no">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
+  <meta name="google" content="notranslate">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -52,12 +53,12 @@
     @media(max-width:560px){.actions{grid-template-columns:1fr}.card-head,.card-head.office{gap:4px;padding-left:10px}.office-home-switch{min-width:56px}.pin,.chevron{width:39px;height:39px}}
   </style>
 </head>
-<body>
+<body class="notranslate">
 <main class="app">
-  <span class="version">Hovedmeny v15 · Oppdatert 05.08.2026 kl. 17:25</span>
+  <span class="version">Hovedmeny v16 STABIL · Oppdatert 05.08.2026 kl. 18:00</span>
   <h1>BaMavaremottak</h1>
   <p class="subtitle">Trykk på en rad for å åpne eller lukke detaljene. Fest viktige sider med 📌.</p>
-  <div class="help">Bryteren <strong>HJEM</strong> finnes nå bare ved <strong>UT — Varebestilling • for kontor</strong>. Den viser eller skjuler knappen «Hovedmeny» på kontorsiden og er felles for telefon og PC.</div>
+  <div class="help">Siden kjører ikke lenger bakgrunnsoppdateringer. HJEM-bryteren finnes bare ved <strong>UT — Varebestilling • for kontor</strong> og leses én gang når siden åpnes.</div>
   <div class="actions"><button class="action" id="openAll" type="button">Åpne alle seksjoner</button><button class="action" id="closeAll" type="button">Lukk alle seksjoner</button></div>
   <section class="pinned" id="pinned" hidden><h2>📌 Festede sider</h2><div class="pinned-grid" id="pinnedGrid"></div></section>
   <div id="sectionsRoot"></div>
@@ -94,14 +95,14 @@ let sectionState=getJSON(SECTION_KEY,{}),cardState=getJSON(CARD_KEY,{}),pins=get
 const root=document.getElementById("sectionsRoot"),pinned=document.getElementById("pinned"),pinnedGrid=document.getElementById("pinnedGrid");
 function save(){set(SECTION_KEY,JSON.stringify(sectionState));set(CARD_KEY,JSON.stringify(cardState));set(PIN_KEY,JSON.stringify(pins))}
 function officeSwitch(){return `<label class="office-home-switch" title="Vis eller skjul Hovedmeny-knappen bare på kontorsiden"><span>HJEM</span><input id="officeHomeSwitch" type="checkbox" disabled><span class="office-track"></span><span class="office-home-state" id="officeHomeState">…</span></label>`}
-function card(p){const open=!!cardState[p.id],isPinned=pins.includes(p.id),isOffice=p.id==="ut-office",el=document.createElement("article");el.className=`page-card ${p.type}${open?" open":""}`;el.dataset.pageId=p.id;el.innerHTML=`<div class="card-head${isOffice?" office":""}"><button class="card-toggle" type="button" data-card-toggle="${esc(p.id)}"><span class="card-title">${esc(p.icon)} ${esc(p.title)}</span><span class="card-status">${esc(p.status)}</span></button>${isOffice?officeSwitch():""}<button class="pin${isPinned?" active":""}" type="button" data-pin="${esc(p.id)}">📌</button><button class="chevron" type="button" data-card-toggle="${esc(p.id)}">⌄</button></div><div class="card-body" data-card-body="${esc(p.id)}" ${open?"":"hidden"}><p class="description">${esc(p.description)}</p><div class="tags"><span class="tag ${esc(p.type)}">${esc(p.status)}</span>${p.tags.map(x=>`<span class="tag">${esc(x)}</span>`).join("")}<span class="tag" translate="no">${esc(p.file)}</span></div><a class="open-link" href="${esc(p.href)}">ÅPNE SIDE</a>${isOffice?'<div class="office-sync" id="officeHomeStatus">Laster felles innstilling…</div>':""}</div>`;return el}
+function card(p){const open=!!cardState[p.id],isPinned=pins.includes(p.id),isOffice=p.id==="ut-office",el=document.createElement("article");el.className=`page-card ${p.type}${open?" open":""}`;el.dataset.pageId=p.id;el.innerHTML=`<div class="card-head${isOffice?" office":""}"><button class="card-toggle" type="button" data-card-toggle="${esc(p.id)}"><span class="card-title">${esc(p.icon)} ${esc(p.title)}</span><span class="card-status">${esc(p.status)}</span></button>${isOffice?officeSwitch():""}<button class="pin${isPinned?" active":""}" type="button" data-pin="${esc(p.id)}">📌</button><button class="chevron" type="button" data-card-toggle="${esc(p.id)}">⌄</button></div><div class="card-body" data-card-body="${esc(p.id)}" ${open?"":"hidden"}><p class="description">${esc(p.description)}</p><div class="tags"><span class="tag ${esc(p.type)}">${esc(p.status)}</span>${p.tags.map(x=>`<span class="tag">${esc(x)}</span>`).join("")}<span class="tag">${esc(p.file)}</span></div><a class="open-link" href="${esc(p.href)}">ÅPNE SIDE</a>${isOffice?'<div class="office-sync" id="officeHomeStatus">Laster felles innstilling…</div>':""}</div>`;return el}
 function renderPinned(){const list=pins.map(id=>pages.find(p=>p.id===id)).filter(Boolean);pinned.hidden=!list.length;pinnedGrid.innerHTML=list.map(p=>`<div class="pinned-item"><a class="pinned-link" href="${esc(p.href)}">${esc(p.icon)} ${esc(p.title)}</a><button class="unpin" type="button" data-unpin="${esc(p.id)}">📌</button></div>`).join("")}
-function render(){root.innerHTML="";sections.forEach(s=>{const open=Object.prototype.hasOwnProperty.call(sectionState,s.id)?!!sectionState[s.id]:s.open,wrap=document.createElement("section");wrap.className="section";wrap.innerHTML=`<button class="section-toggle" type="button" data-section="${esc(s.id)}" aria-expanded="${open}"><span><strong>${esc(s.title)}</strong><small>${esc(s.note)}</small></span><span>⌄</span></button><div class="section-content" data-section-body="${esc(s.id)}" ${open?"":"hidden"}></div>`;const body=wrap.querySelector(".section-content");pages.filter(p=>p.section===s.id).forEach(p=>body.appendChild(card(p)));root.appendChild(wrap)});renderPinned()}
+function render(){root.innerHTML="";sections.forEach(s=>{const open=Object.prototype.hasOwnProperty.call(sectionState,s.id)?!!sectionState[s.id]:s.open,wrap=document.createElement("section");wrap.className="section";wrap.innerHTML=`<button class="section-toggle" type="button" data-section="${esc(s.id)}" aria-expanded="${open}"><span><strong>${esc(s.title)}</strong><small>${esc(s.note)}</small></span><span>⌄</span></button><div class="section-content" data-section-body="${esc(s.id)}" ${open?"":"hidden"}></div>`;const body=wrap.querySelector(".section-content");pages.filter(p=>p.section===s.id).forEach(p=>body.appendChild(card(p)));root.appendChild(wrap)});renderPinned();document.dispatchEvent(new CustomEvent("bama:office-switch-rendered"))}
 document.addEventListener("click",e=>{const sb=e.target.closest("[data-section]");if(sb){const id=sb.dataset.section,n=sb.getAttribute("aria-expanded")!=="true",b=document.querySelector(`[data-section-body="${CSS.escape(id)}"]`);sb.setAttribute("aria-expanded",String(n));if(b)b.hidden=!n;sectionState[id]=n;save();return}const cb=e.target.closest("[data-card-toggle]");if(cb){const id=cb.dataset.cardToggle,c=document.querySelector(`[data-page-id="${CSS.escape(id)}"]`);if(!c)return;const b=c.querySelector(`[data-card-body="${CSS.escape(id)}"]`),n=!c.classList.contains("open");c.classList.toggle("open",n);if(b)b.hidden=!n;cardState[id]=n;save();return}const pin=e.target.closest("[data-pin]");if(pin){const id=pin.dataset.pin;pins=pins.includes(id)?pins.filter(x=>x!==id):[...pins,id];save();render();return}const un=e.target.closest("[data-unpin]");if(un){pins=pins.filter(x=>x!==un.dataset.unpin);save();render()}});
 document.getElementById("openAll").onclick=()=>{sections.forEach(s=>sectionState[s.id]=true);save();render()};document.getElementById("closeAll").onclick=()=>{sections.forEach(s=>sectionState[s.id]=false);save();render()};
 const comment=document.getElementById("mainComment"),note=document.getElementById("saveNote");try{comment.value=localStorage.getItem(COMMENT_KEY)||""}catch{}comment.addEventListener("input",()=>{set(COMMENT_KEY,comment.value);note.textContent="Lagret automatisk.";clearTimeout(comment._t);comment._t=setTimeout(()=>note.textContent="",1400)});
 render();
 </script>
-<script src="office-home-setting.js?v=20260805-1725"></script>
+<script src="office-home-setting.js?v=20260805-1800"></script>
 </body>
 </html>
