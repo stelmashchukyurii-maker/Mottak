@@ -4,7 +4,7 @@
   if (!document.getElementById("officeHomeSettingScript")) {
     const homeSetting = document.createElement("script");
     homeSetting.id = "officeHomeSettingScript";
-    homeSetting.src = "office-home-setting.js?v=20260805-1725";
+    homeSetting.src = "office-home-setting.js?v=20260805-1800";
     document.body.appendChild(homeSetting);
   }
 
@@ -66,7 +66,7 @@
   document.head.appendChild(style);
 
   const line = document.getElementById("topStockLine");
-  if (!line) return;
+  if (!line || typeof request !== "function") return;
 
   function setRow(id, label, value) {
     const row = document.getElementById(id);
@@ -96,7 +96,7 @@
       setRow("topStockBunner", "Bunner", `${bunner} ${bunner === 1 ? "stabel" : "stabler"} × 10 = ${bunner * 10} stk.`);
       setRow("topStockH30", "Hyller x30", `${h30} sett = ${h30 * 30} hyller`);
       setRow("topStockH60", "Hyller x60", `${h60} sett = ${h60 * 60} hyller`);
-    } catch (error) {
+    } catch {
       line.className = "top-stock-line error";
       setRow("topStockBunner", "Lagerstatus", "Data ikke tilgjengelig");
       setRow("topStockH30", "Hyller x30", "—");
@@ -105,10 +105,4 @@
   }
 
   loadTopStock();
-  setInterval(() => {
-    if (!document.hidden) loadTopStock();
-  }, 10000);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) loadTopStock();
-  });
 })();
