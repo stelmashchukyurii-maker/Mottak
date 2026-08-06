@@ -193,10 +193,19 @@
 })();
 
 (() => {
-  if (document.querySelector('script[data-bama-idebank]')) return;
-  const script = document.createElement("script");
-  script.src = "idebank-ui.js?v=20260805-2055";
-  script.defer = true;
-  script.dataset.bamaIdebank = "true";
-  document.head.appendChild(script);
+  if (!document.querySelector('script[data-bama-idebank]')) {
+    const script = document.createElement("script");
+    script.src = "idebank-ui.js?v=20260806-0655";
+    script.defer = true;
+    script.dataset.bamaIdebank = "true";
+    document.head.appendChild(script);
+  }
+
+  if (!document.querySelector('script[data-bama-ramp-notifications]')) {
+    const script = document.createElement("script");
+    script.src = "ramp-notifications.js?v=20260806-0655";
+    script.defer = true;
+    script.dataset.bamaRampNotifications = "true";
+    document.head.appendChild(script);
+  }
 })();
