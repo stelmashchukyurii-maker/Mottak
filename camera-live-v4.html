@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Camera Cloud v4.8</title>
+  <title>Camera Cloud v4.9</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,8 +15,8 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster Camera Cloud v4.8…</div>
-  <iframe id="app" title="Camera Cloud v4.8" src="camera-live.html?base=48-20260806-1544"></iframe>
+  <div id="loader">Laster Camera Cloud v4.9…</div>
+  <iframe id="app" title="Camera Cloud v4.9" src="camera-live.html?base=49-20260806-1600"></iframe>
   <script>
     "use strict";
     const frame = document.getElementById("app");
@@ -37,19 +37,19 @@
         const doc = frame.contentDocument;
         const win = frame.contentWindow;
         win.BAMA_HOME_TARGET = "camera-live-v4.html";
-        await injectScript(doc, "camera-live-v4-source-fix.js?v=48-20260806-1544");
-        await injectScript(doc, "camera-live-v4-server-ocr.js?v=48-20260806-1544");
-        await injectScript(doc, "camera-live-v4-stock-filters.js?v=48-20260806-1544");
-        await injectScript(doc, "upper-number-policy.js?v=20260806-1544");
-        await injectScript(doc, "shared-stock-status.js?v=20260806-1544");
+        await injectScript(doc, "camera-live-v4-source-fix.js?v=49-20260806-1600");
+        await injectScript(doc, "camera-live-v4-server-ocr.js?v=49-20260806-1600");
+        await injectScript(doc, "camera-live-v4-stock-filters.js?v=49-20260806-1600");
+        await injectScript(doc, "upper-number-policy.js?v=20260806-1600");
+        await injectScript(doc, "shared-stock-status.js?v=20260806-1600");
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.8 ETT NUMMER<br>Oppdatert 06.08.2026 kl. 15:44";
+        if (version) version.innerHTML = "Kamera Cloud v4.9 ФІЛЬТР ПРОДУКТУ<br>Oppdatert 06.08.2026 kl. 16:00";
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => win.refreshBamaStock?.().catch(() => {}), 80));
         });
         loader.style.display = "none";
       } catch (error) {
-        loader.textContent = `Kunne ikke starte Camera Cloud v4.8: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte Camera Cloud v4.9: ${error.message || error}`;
       }
     });
   </script>
