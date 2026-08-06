@@ -8,6 +8,9 @@
     document.body.appendChild(homeSetting);
   }
 
+  const version = document.querySelector(".version");
+  if (version) version.innerHTML = "UT Kontor v21 STABIL<br>Oppdatert 06.08.2026 kl. 07:10";
+
   const style = document.createElement("style");
   style.textContent = `
     .top-stock-line{
