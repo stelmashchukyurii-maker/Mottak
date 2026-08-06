@@ -1,10 +1,11 @@
 "use strict";
 
-// Camera Cloud v4.5 — protected server-side OCR.
-// Gemini is the primary recognizer. OpenAI remains a separate reserve button.
-(function installServerOcrV45() {
+// Camera Cloud v4.8 — protected server-side OCR.
+// Only the unique lower number is recognized. 078500 is a hidden system constant.
+(function installServerOcrV48() {
   const GEMINI_FUNCTION = "gemini-ocr";
   const OPENAI_FUNCTION = "clever-responder";
+  const SYSTEM_UPPER = "078500";
 
   const recognizeButton = document.getElementById("recognizeButton");
   const newPhotoButton = document.getElementById("newPhotoButton");
@@ -21,70 +22,55 @@
   const COPY = {
     nb: {
       aiTitle: "2. AI-gjenkjenning — beskyttet server",
-      aiNote: "Gemini er hovedmotoren. OpenAI er reserve. Begge nøklene ligger beskyttet i Supabase og skal ikke skrives inn på telefonen.",
-      geminiButton: "Les med Gemini",
+      aiNote: "AI leser bare det unike 6-tegnsnummeret. Systemnummeret lagres automatisk og vises ikke.",
+      geminiButton: "Les nummer med Gemini",
       openaiButton: "OpenAI reserve",
-      geminiAnalyzing: "Gemini analyserer etiketten…",
-      openaiAnalyzing: "OpenAI analyserer etiketten…",
-      geminiRecognized: "Gemini har lest numrene. Kontroller eller korriger dem før lagring.",
-      openaiRecognized: "OpenAI har lest numrene. Kontroller eller korriger dem før lagring.",
-      geminiInvalid: "Gemini kunne ikke lese begge numrene sikkert. Bildet beholdes, og numrene kan skrives inn manuelt.",
-      openaiInvalid: "OpenAI kunne ikke lese begge numrene sikkert. Bildet beholdes, og numrene kan skrives inn manuelt.",
-      geminiError: "Gemini kunne ikke fullføre. Bildet og eventuelle innskrevne numre er beholdt.",
-      openaiError: "OpenAI-reserven kunne ikke fullføre. Bildet og eventuelle innskrevne numre er beholdt."
+      geminiAnalyzing: "Gemini leser det unike nummeret…",
+      openaiAnalyzing: "OpenAI leser det unike nummeret…",
+      geminiRecognized: "Nummeret er lest. Kontroller eller korriger det før lagring.",
+      openaiRecognized: "Nummeret er lest. Kontroller eller korriger det før lagring.",
+      geminiInvalid: "Gemini kunne ikke lese nummeret sikkert. Skriv det inn manuelt.",
+      openaiInvalid: "OpenAI kunne ikke lese nummeret sikkert. Skriv det inn manuelt.",
+      geminiError: "Gemini kunne ikke fullføre. Bildet er beholdt.",
+      openaiError: "OpenAI-reserven kunne ikke fullføre. Bildet er beholdt."
     },
     pl: {
       aiTitle: "2. Rozpoznawanie AI — chroniony serwer",
-      aiNote: "Gemini jest głównym silnikiem, a OpenAI rezerwą. Oba klucze są chronione w Supabase i nie wpisuje się ich w telefonie.",
-      geminiButton: "Rozpoznaj przez Gemini",
+      aiNote: "AI odczytuje tylko unikalny 6-znakowy numer. Numer systemowy jest zapisywany automatycznie i pozostaje ukryty.",
+      geminiButton: "Odczytaj numer przez Gemini",
       openaiButton: "Rezerwa OpenAI",
-      geminiAnalyzing: "Gemini analizuje etykietę…",
-      openaiAnalyzing: "OpenAI analizuje etykietę…",
-      geminiRecognized: "Gemini odczytał numery. Sprawdź lub popraw je przed zapisem.",
-      openaiRecognized: "OpenAI odczytał numery. Sprawdź lub popraw je przed zapisem.",
-      geminiInvalid: "Gemini nie odczytał pewnie obu numerów. Zdjęcie pozostaje, a numery można wpisać ręcznie.",
-      openaiInvalid: "OpenAI nie odczytał pewnie obu numerów. Zdjęcie pozostaje, a numery można wpisać ręcznie.",
-      geminiError: "Gemini nie zakończył rozpoznawania. Zdjęcie i wpisane numery zostały zachowane.",
-      openaiError: "Rezerwa OpenAI nie zakończyła rozpoznawania. Zdjęcie i wpisane numery zostały zachowane."
+      geminiAnalyzing: "Gemini odczytuje unikalny numer…",
+      openaiAnalyzing: "OpenAI odczytuje unikalny numer…",
+      geminiRecognized: "Numer został odczytany. Sprawdź go przed zapisem.",
+      openaiRecognized: "Numer został odczytany. Sprawdź go przed zapisem.",
+      geminiInvalid: "Gemini nie odczytał numeru pewnie. Wpisz go ręcznie.",
+      openaiInvalid: "OpenAI nie odczytał numeru pewnie. Wpisz go ręcznie.",
+      geminiError: "Gemini nie zakończył rozpoznawania. Zdjęcie zostało zachowane.",
+      openaiError: "Rezerwa OpenAI nie zakończyła rozpoznawania. Zdjęcie zostało zachowane."
     },
     uk: {
       aiTitle: "2. AI-розпізнавання — захищений сервер",
-      aiNote: "Gemini — основне розпізнавання, OpenAI — резерв. Обидва ключі захищені в Supabase, вводити їх на телефоні не потрібно.",
-      geminiButton: "Розпізнати через Gemini",
+      aiNote: "AI читає лише унікальний 6-символьний номер. Системний номер записується автоматично й не показується.",
+      geminiButton: "Розпізнати номер через Gemini",
       openaiButton: "Резерв OpenAI",
-      geminiAnalyzing: "Gemini аналізує бірку…",
-      openaiAnalyzing: "OpenAI аналізує бірку…",
-      geminiRecognized: "Gemini прочитав номери. Перевірте або виправте їх перед збереженням.",
-      openaiRecognized: "OpenAI прочитав номери. Перевірте або виправте їх перед збереженням.",
-      geminiInvalid: "Gemini не зміг надійно прочитати обидва номери. Фото залишено на екрані, номери можна ввести вручну.",
-      openaiInvalid: "OpenAI не зміг надійно прочитати обидва номери. Фото залишено на екрані, номери можна ввести вручну.",
-      geminiError: "Gemini не завершив розпізнавання. Фото та вже введені номери не втрачено.",
-      openaiError: "Резерв OpenAI не завершив розпізнавання. Фото та вже введені номери не втрачено."
+      geminiAnalyzing: "Gemini читає унікальний номер…",
+      openaiAnalyzing: "OpenAI читає унікальний номер…",
+      geminiRecognized: "Номер розпізнано. Перевірте або виправте його перед збереженням.",
+      openaiRecognized: "Номер розпізнано. Перевірте або виправте його перед збереженням.",
+      geminiInvalid: "Gemini не зміг надійно прочитати номер. Введіть його вручну.",
+      openaiInvalid: "OpenAI не зміг надійно прочитати номер. Введіть його вручну.",
+      geminiError: "Gemini не завершив розпізнавання. Фото збережено на екрані.",
+      openaiError: "Резерв OpenAI не завершив розпізнавання. Фото збережено на екрані."
     }
   };
 
   const style = document.createElement("style");
   style.textContent = `
-    .server-ai-note {
-      margin:0;
-      padding:11px 12px;
-      border:1px solid rgba(117,183,255,.45);
-      border-radius:11px;
-      color:#d9edff;
-      background:rgba(117,183,255,.08);
-      line-height:1.45;
-      font-size:13px;
-    }
-    .openai-backup {
-      color:#eafff6;
-      background:#163c32;
-      border:2px solid #48d597;
-    }
-    .openai-backup:not(:disabled):hover { filter:brightness(1.08); }
-    .ocr-actions-v45 { grid-template-columns:repeat(3,1fr); }
-    @media(max-width:760px) {
-      .ocr-actions-v45 { grid-template-columns:1fr; }
-    }
+    .server-ai-note{margin:0;padding:11px 12px;border:1px solid rgba(117,183,255,.45);border-radius:11px;color:#d9edff;background:rgba(117,183,255,.08);line-height:1.45;font-size:13px}
+    .openai-backup{color:#eafff6;background:#163c32;border:2px solid #48d597}
+    .openai-backup:not(:disabled):hover{filter:brightness(1.08)}
+    .ocr-actions-v48{grid-template-columns:repeat(3,1fr)}
+    @media(max-width:760px){.ocr-actions-v48{grid-template-columns:1fr}}
   `;
   document.head.appendChild(style);
 
@@ -99,11 +85,10 @@
     keyNote.removeAttribute("data-t");
     keyNote.className = "server-ai-note";
   }
-
   recognizeButton.removeAttribute("data-t");
 
   const actions = recognizeButton.closest(".actions");
-  if (actions) actions.classList.add("ocr-actions-v45");
+  if (actions) actions.classList.add("ocr-actions-v48");
 
   const openaiButton = document.createElement("button");
   openaiButton.type = "button";
@@ -121,9 +106,7 @@
     if (keyNote) keyNote.textContent = copy().aiNote;
     recognizeButton.textContent = copy().geminiButton;
     openaiButton.textContent = copy().openaiButton;
-    if (version) {
-      version.innerHTML = "Kamera Cloud v4.5<br />Oppdatert 03.08.2026 kl. 22:47";
-    }
+    if (version) version.innerHTML = "Kamera Cloud v4.8 ETT NUMMER<br>Oppdatert 06.08.2026 kl. 15:27";
   }
 
   function syncButtons() {
@@ -140,9 +123,7 @@
         const payload = await response.clone().json();
         if (payload?.error) message = payload.error;
       }
-    } catch (_) {
-      // Keep the original error message.
-    }
+    } catch (_) {}
     return message;
   }
 
@@ -163,12 +144,11 @@
       const response = await client.functions.invoke(functionName, {
         body: { image: imageData.dataUrl }
       });
-
       if (response.error) throw response.error;
       if (response.data?.error) throw new Error(response.data.error);
 
       result = validate({
-        line1: response.data?.upper_number,
+        line1: SYSTEM_UPPER,
         line2: response.data?.lower_number,
         confidence: response.data?.confidence
       });
@@ -182,10 +162,7 @@
     } catch (error) {
       result = previousResult;
       const detail = await extractFunctionError(error);
-      show(
-        `${isGemini ? copy().geminiError : copy().openaiError}\n${detail}`,
-        "bad"
-      );
+      show(`${isGemini ? copy().geminiError : copy().openaiError}\n${detail}`, "bad");
     } finally {
       busy = false;
       renderResult();
@@ -199,13 +176,13 @@
     recognizeWithServer("gemini");
   }, true);
 
-  openaiButton.addEventListener("click", () => {
-    recognizeWithServer("openai");
-  });
+  openaiButton.addEventListener("click", () => recognizeWithServer("openai"));
 
   const originalRenderResult = renderResult;
   renderResult = function renderResultWithServerOcr() {
     originalRenderResult();
+    const upper = document.getElementById("upperValue");
+    if (upper) upper.value = SYSTEM_UPPER;
     syncButtons();
   };
 
@@ -218,6 +195,5 @@
 
   updateText();
   syncButtons();
-
-  console.info("Camera Cloud v4.5 protected Gemini and OpenAI OCR are active.");
+  console.info("Camera Cloud v4.8 single-number OCR is active.");
 })();
