@@ -13,11 +13,12 @@
 
   const upperIds = ["upperValue", "upperNumber", "upperInput"];
   const upperText = /^(upper|upper number|øvre nummer|górny numer|верхній номер)$/i;
+  let applyQueued = false;
 
   function hideContainer(input) {
     const container = input.closest(".result-box,.part,.field,.edit-cell,.form-group,.input-group");
     if (container) container.classList.add("bama-upper-hidden");
-    const label = document.querySelector(`label[for="${CSS.escape(input.id)}"]`);
+    const label = input.id ? document.querySelector(`label[for="${CSS.escape(input.id)}"]`) : null;
     if (label) label.classList.add("bama-upper-hidden");
   }
 
@@ -39,13 +40,12 @@
       headers.forEach((header, index) => {
         const dataKey = String(header.dataset.t || "").toLowerCase();
         const text = header.textContent.trim();
-        if (dataKey === "upper" || upperText.test(text)) {
-          header.classList.add("bama-upper-column");
-          table.querySelectorAll("tr").forEach(row => {
-            const cell = row.children[index];
-            if (cell) cell.classList.add("bama-upper-column");
-          });
-        }
+        if (dataKey !== "upper" && !upperText.test(text)) return;
+        header.classList.add("bama-upper-column");
+        table.querySelectorAll("tr").forEach(row => {
+          const cell = row.children[index];
+          if (cell) cell.classList.add("bama-upper-column");
+        });
       });
     });
   }
@@ -58,25 +58,51 @@
     });
   }
 
+  function showNordicStructureError() {
+    const message = document.getElementById("message");
+    if (message) {
+      message.textContent = "Ukjent RFID-struktur: systemdelen stemmer ikke. Skann etiketten på nytt.";
+      message.className = "message bad";
+    }
+    const save = document.getElementById("saveScanButton");
+    if (save) save.disabled = true;
+  }
+
+  function rawNordicCode(input) {
+    const raw = String(input?.value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return raw.length >= 24 ? raw.slice(-24) : "";
+  }
+
+  function hasValidSystemPart(input) {
+    const code = rawNordicCode(input);
+    return !code || code.slice(12, 18) === SYSTEM_UPPER;
+  }
+
   function protectNordicInput() {
     const scanInput = document.getElementById("scanInput");
     if (!scanInput || scanInput.dataset.upperPolicyBound) return;
     scanInput.dataset.upperPolicyBound = "1";
 
     scanInput.addEventListener("input", event => {
-      const raw = String(scanInput.value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (raw.length < 24) return;
-      const code = raw.slice(-24);
-      if (code.slice(12, 18) === SYSTEM_UPPER) return;
-
+      if (hasValidSystemPart(scanInput)) return;
       event.stopImmediatePropagation();
-      const message = document.getElementById("message");
-      if (message) {
-        message.textContent = "Ukjent RFID-struktur: systemdelen stemmer ikke. Skann etiketten på nytt.";
-        message.className = "message bad";
-      }
-      const save = document.getElementById("saveScanButton");
-      if (save) save.disabled = true;
+      showNordicStructureError();
+    }, true);
+
+    scanInput.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== "Tab") return;
+      if (hasValidSystemPart(scanInput)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showNordicStructureError();
+    }, true);
+
+    const splitButton = document.getElementById("splitButton");
+    splitButton?.addEventListener("click", event => {
+      if (hasValidSystemPart(scanInput)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showNordicStructureError();
     }, true);
   }
 
@@ -88,8 +114,20 @@
     protectNordicInput();
   }
 
+  function queueApply() {
+    if (applyQueued) return;
+    applyQueued = true;
+    requestAnimationFrame(() => {
+      applyQueued = false;
+      apply();
+    });
+  }
+
   apply();
   document.addEventListener("DOMContentLoaded", apply, { once: true });
-  new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
-  setInterval(apply, 500);
+  new MutationObserver(queueApply).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
 })();
