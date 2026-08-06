@@ -203,7 +203,7 @@
 
   if (!document.querySelector('script[data-bama-ramp-notifications]')) {
     const script = document.createElement("script");
-    script.src = "ramp-notifications.js?v=20260806-0655";
+    script.src = "ramp-notifications.js?v=20260806-0700";
     script.defer = true;
     script.dataset.bamaRampNotifications = "true";
     document.head.appendChild(script);
