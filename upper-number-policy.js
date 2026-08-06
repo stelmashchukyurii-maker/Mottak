@@ -24,7 +24,9 @@
   function hideContainer(input) {
     const container = input.closest(".result-box,.part,.field,.edit-cell,.form-group,.input-group");
     if (container) container.classList.add("bama-upper-hidden");
-    const label = input.id ? document.querySelector(`label[for="${CSS.escape(input.id)}"]`) : null;
+    const label = input.id
+      ? Array.from(document.querySelectorAll("label[for]")).find(item => item.htmlFor === input.id)
+      : null;
     if (label) label.classList.add("bama-upper-hidden");
   }
 
