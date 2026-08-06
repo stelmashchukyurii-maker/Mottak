@@ -55,9 +55,9 @@
     style.id = "rampNotificationCss";
     style.textContent = `
       .ramp-badge{
-        position:absolute;left:-8px;bottom:-8px;min-width:27px;height:27px;padding:0 6px;
+        position:absolute;left:-10px;bottom:-9px;min-width:29px;height:29px;max-width:92px;padding:0 7px;
         display:grid;place-items:center;border:3px solid #0b1020;border-radius:999px;
-        background:#ff7a3d;color:#fff;font:900 12px Arial,sans-serif
+        background:#ff7a3d;color:#fff;font:950 12px Arial,sans-serif;white-space:nowrap;overflow:hidden
       }
       .ramp-badge[hidden]{display:none}
       .ibell.ramp-hot{animation:rampBellPulse 1.35s infinite}
@@ -114,6 +114,22 @@
     return parts.join(" · ") || "Ingen varer registrert";
   }
 
+  function orderState(order) {
+    const labels = {
+      new: "Ny",
+      received: "Mottatt",
+      in_progress: "I arbeid",
+      problem: "Problem",
+      staged: "På rampe"
+    };
+    return labels[order.status] || "Aktiv";
+  }
+
+  function activeRampNumbers() {
+    return [...new Set(rampRows.map(row => String(row.ramp || "").trim()).filter(Boolean))]
+      .sort((a, b) => Number(a) - Number(b));
+  }
+
   function ensureBell() {
     const bell = document.getElementById("ideaBell");
     if (!bell) return null;
@@ -124,7 +140,7 @@
       badge = document.createElement("span");
       badge.className = "ramp-badge";
       badge.hidden = true;
-      badge.textContent = "0";
+      badge.textContent = "";
       bell.appendChild(badge);
     }
     return bell;
@@ -156,29 +172,32 @@
     if (!bell || !panel) return;
 
     const badge = bell.querySelector(".ramp-badge");
-    const rampCount = rampRows.length;
-    badge.textContent = rampCount > 99 ? "99+" : String(rampCount);
+    const ramps = activeRampNumbers();
+    const rampCount = ramps.length;
+    const fullRampLabel = ramps.join(" · ");
+    badge.textContent = rampCount <= 3 ? fullRampLabel : `${ramps.slice(0, 2).join("·")}+${rampCount - 2}`;
+    badge.title = fullRampLabel ? `Aktive ramper: ${fullRampLabel}` : "Ingen aktive ramper";
     badge.hidden = rampCount === 0;
     bell.classList.toggle("ramp-hot", rampCount > 0);
 
     const total = rampCount + ideaCount;
     document.getElementById("rnpSummary").textContent = total
-      ? `${rampCount} nye rampeoppdrag · ${ideaCount} nye meldinger`
+      ? `${rampCount} aktive ramper · ${ideaCount} nye meldinger`
       : "Ingen nye varsler";
 
     const body = document.getElementById("rnpBody");
     const blocks = [];
 
     if (rampRows.length) {
-      blocks.push('<div class="rnp-section-title">Nye ramper til lageret</div>');
+      blocks.push('<div class="rnp-section-title">Aktive ramper — til avgang er bekreftet</div>');
       blocks.push(...rampRows.map(order => `
         <a class="rnp-item ramp" href="utsending.html">
           <div class="rnp-top">
-            <span class="rnp-title">🚚 RAMPE ${esc(order.ramp || "—")}</span>
+            <span class="rnp-title">🚚 RAMPE ${esc(order.ramp || "—")} · ${esc(orderState(order))}</span>
             <span class="rnp-time">${esc(formatDate(order.created_at))}</span>
           </div>
           <div class="rnp-details">${esc(orderDetails(order))}</div>
-          <div class="rnp-note">${esc(order.order_number || "Nytt lageroppdrag")}${order.office_note ? ` · ${esc(order.office_note)}` : ""}</div>
+          <div class="rnp-note">${esc(order.order_number || "Lageroppdrag")}${order.office_note ? ` · ${esc(order.office_note)}` : ""}</div>
         </a>`));
     }
 
@@ -199,7 +218,7 @@
     busy = true;
     try {
       const [orders, ideas] = await Promise.all([
-        api("ut_orders?select=id,order_number,ramp,bunner_stacks,hyller30_sets,hyller60_sets,office_note,status,created_at&status=eq.new&order=created_at.desc&limit=50"),
+        api("ut_orders?select=id,order_number,ramp,bunner_stacks,hyller30_sets,hyller60_sets,office_note,status,test_state,created_at&status=in.(new,received,in_progress,problem,staged)&order=created_at.desc&limit=50"),
         api("idebank_suggestions?select=id&read_at=is.null&limit=1000")
       ]);
       rampRows = orders;
@@ -271,7 +290,7 @@
     setInterval(refresh, 30000);
 
     const version = document.querySelector(".version");
-    if (version) version.textContent = "Hovedmeny v21 STABIL · Oppdatert 06.08.2026 kl. 06:55";
+    if (version) version.textContent = "Hovedmeny v22 STABIL · Oppdatert 06.08.2026 kl. 07:00";
   }
 
   document.readyState === "loading"
