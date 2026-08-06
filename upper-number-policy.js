@@ -8,6 +8,12 @@
   style.textContent = `
     .bama-upper-hidden{display:none!important}
     table .bama-upper-column{display:none!important}
+    #scanInput.bama-system-protected{
+      -webkit-text-security:disc;
+      color:transparent!important;
+      caret-color:#f4c430!important;
+      text-shadow:0 0 0 transparent!important;
+    }
   `;
   document.head.appendChild(style);
 
@@ -82,6 +88,7 @@
     const scanInput = document.getElementById("scanInput");
     if (!scanInput || scanInput.dataset.upperPolicyBound) return;
     scanInput.dataset.upperPolicyBound = "1";
+    scanInput.classList.add("bama-system-protected");
 
     scanInput.addEventListener("input", event => {
       if (hasValidSystemPart(scanInput)) return;
