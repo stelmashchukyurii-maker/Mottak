@@ -14,7 +14,7 @@
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260806-1527" title="UT — Bekreft rampe"></iframe>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260806-1544" title="UT — Bekreft rampe"></iframe>
 <script>
 "use strict";
 const frame=document.getElementById("utCore");
@@ -29,18 +29,18 @@ function addScript(doc,id,src,onload){
   doc.body.appendChild(script);
 }
 function loadSharedStock(doc){
-  addScript(doc,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260806-1527");
+  addScript(doc,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260806-1544");
   if(!doc.getElementById("bamaSharedStockScript")){
     frame.contentWindow.BAMA_HOME_TARGET="utsending.html";
     const shared=doc.createElement("script");
     shared.id="bamaSharedStockScript";
-    shared.src="shared-stock-status.js?v=20260806-1527";
+    shared.src="shared-stock-status.js?v=20260806-1544";
     doc.body.appendChild(shared);
   }
   if(!doc.getElementById("bamaLagerstatusLinkScript")){
     const admin=doc.createElement("script");
     admin.id="bamaLagerstatusLinkScript";
-    admin.src="lagerstatus-link.js?v=20260806-1527";
+    admin.src="lagerstatus-link.js?v=20260806-1544";
     doc.body.appendChild(admin);
   }
 }
@@ -48,7 +48,7 @@ function loadPicker(doc){
   if(doc.getElementById("utAllowedPickerModule")){loadSharedStock(doc);return}
   const picker=doc.createElement("script");
   picker.id="utAllowedPickerModule";
-  picker.src="utsending-allowed-picker.js?v=20260806-1527";
+  picker.src="utsending-allowed-picker.js?v=20260806-1544";
   picker.onload=()=>loadSharedStock(doc);
   doc.body.appendChild(picker);
 }
@@ -56,7 +56,7 @@ function enhance(){
   const doc=frame.contentDocument;
   if(!doc)return;
   const version=doc.querySelector(".version");
-  if(version)version.innerHTML="UT Bekreftelse v17 ETT NUMMER<br>Oppdatert 06.08.2026 kl. 15:27";
+  if(version)version.innerHTML="UT Bekreftelse v17 ETT NUMMER<br>Oppdatert 06.08.2026 kl. 15:44";
   doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
   const existing=doc.getElementById("utGeminiModule");
   if(existing){
@@ -64,7 +64,7 @@ function enhance(){
   }else{
     const script=doc.createElement("script");
     script.id="utGeminiModule";
-    script.src="utsending-photo-gemini.js?v=20260806-1527";
+    script.src="utsending-photo-gemini.js?v=20260806-1544";
     script.onload=()=>loadPicker(doc);
     doc.body.appendChild(script);
   }
