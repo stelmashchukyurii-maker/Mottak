@@ -14,10 +14,10 @@
 "use strict";
 (async()=>{
   try{
-    const response=await fetch("lagerstatus-core-v1.html?v=20260806-1527",{cache:"no-store"});
+    const response=await fetch("lagerstatus-core-v1.html?v=20260806-1544",{cache:"no-store"});
     if(!response.ok)throw new Error(`HTTP ${response.status}`);
     let html=await response.text();
-    const policy='<script src="upper-number-policy.js?v=20260806-1527"><\/script>';
+    const policy='<script src="upper-number-policy.js?v=20260806-1544"><\/script>';
     html=html.includes("</body>")?html.replace("</body>",`${policy}</body>`):`${html}${policy}`;
     document.open();document.write(html);document.close();
   }catch(error){document.getElementById("loading").textContent=`Kunne ikke laste lagerstatus: ${error.message||error}`;}
