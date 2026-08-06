@@ -14,24 +14,33 @@
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260806-0744" title="UT — Bekreft rampe"></iframe>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260806-1527" title="UT — Bekreft rampe"></iframe>
 <script>
 "use strict";
 const frame=document.getElementById("utCore");
 let observer=null;
 function resize(){try{const doc=frame.contentDocument;if(!doc)return;frame.style.height=Math.max(innerHeight,doc.documentElement.scrollHeight,doc.body?.scrollHeight||0)+"px"}catch{}}
+function addScript(doc,id,src,onload){
+  if(doc.getElementById(id)){onload?.();return}
+  const script=doc.createElement("script");
+  script.id=id;
+  script.src=src;
+  if(onload)script.onload=onload;
+  doc.body.appendChild(script);
+}
 function loadSharedStock(doc){
+  addScript(doc,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260806-1527");
   if(!doc.getElementById("bamaSharedStockScript")){
     frame.contentWindow.BAMA_HOME_TARGET="utsending.html";
     const shared=doc.createElement("script");
     shared.id="bamaSharedStockScript";
-    shared.src="shared-stock-status.js?v=20260805-1905";
+    shared.src="shared-stock-status.js?v=20260806-1527";
     doc.body.appendChild(shared);
   }
   if(!doc.getElementById("bamaLagerstatusLinkScript")){
     const admin=doc.createElement("script");
     admin.id="bamaLagerstatusLinkScript";
-    admin.src="lagerstatus-link.js?v=20260805-1905";
+    admin.src="lagerstatus-link.js?v=20260806-1527";
     doc.body.appendChild(admin);
   }
 }
@@ -39,16 +48,15 @@ function loadPicker(doc){
   if(doc.getElementById("utAllowedPickerModule")){loadSharedStock(doc);return}
   const picker=doc.createElement("script");
   picker.id="utAllowedPickerModule";
-  picker.src="utsending-allowed-picker.js?v=20260805-1235";
+  picker.src="utsending-allowed-picker.js?v=20260806-1527";
   picker.onload=()=>loadSharedStock(doc);
   doc.body.appendChild(picker);
 }
 function enhance(){
   const doc=frame.contentDocument;
   if(!doc)return;
-  doc.querySelector(".test-banner")?.remove();
   const version=doc.querySelector(".version");
-  if(version)version.innerHTML="UT Bekreftelse v16 LAGERADMIN<br>Oppdatert 06.08.2026 kl. 07:44";
+  if(version)version.innerHTML="UT Bekreftelse v17 ETT NUMMER<br>Oppdatert 06.08.2026 kl. 15:27";
   doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
   const existing=doc.getElementById("utGeminiModule");
   if(existing){
@@ -56,7 +64,7 @@ function enhance(){
   }else{
     const script=doc.createElement("script");
     script.id="utGeminiModule";
-    script.src="utsending-photo-gemini.js?v=20260804-2240";
+    script.src="utsending-photo-gemini.js?v=20260806-1527";
     script.onload=()=>loadPicker(doc);
     doc.body.appendChild(script);
   }
