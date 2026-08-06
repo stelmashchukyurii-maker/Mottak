@@ -134,6 +134,9 @@
 
   apply();
   document.addEventListener("DOMContentLoaded", apply, { once: true });
+  document.addEventListener("click", queueApply, true);
+  document.addEventListener("change", queueApply, true);
+  document.addEventListener("input", queueApply, true);
   new MutationObserver(queueApply).observe(document.documentElement, {
     childList: true,
     subtree: true,
