@@ -78,11 +78,11 @@
   }
 
   const lower = document.getElementById("lowerInput");
-  const find = document.getElementById("findButton");
-  const add = document.getElementById("addButton");
+  const findButtonEl = document.getElementById("findButton");
+  const addButtonEl = document.getElementById("addButton");
   const candidate = document.getElementById("candidate");
   const host = document.querySelector("section.card:last-of-type");
-  if (!lower || !find || !add || !candidate || !host) return;
+  if (!lower || !findButtonEl || !addButtonEl || !candidate || !host) return;
 
   document.getElementById("utMissingBox")?.remove();
 
@@ -132,6 +132,7 @@
   let registeredRow = null;
   let regBusy = false;
   const previousFind = findCandidate;
+  const baseAdd = window.add;
 
   function allowedProducts() {
     const a = PRODUCTS.filter(p => {
@@ -244,7 +245,7 @@
   }
 
   findCandidate = enhancedFind;
-  find.onclick = enhancedFind;
+  findButtonEl.onclick = enhancedFind;
 
   productButtons.forEach(button => {
     button.addEventListener("click", () => {
@@ -276,7 +277,7 @@
       selectedRow = row;
       showCandidate(row, false);
       document.getElementById("candidateText").textContent = c().registeredText;
-      add.disabled = false;
+      addButtonEl.disabled = false;
       showRegistered(row);
       msg(c().registeredTitle, "ok");
     } catch (e) {
@@ -289,19 +290,29 @@
     }
   }
 
+  async function moveSelectedToRamp() {
+    const row = selectedRow;
+    if (!row || busy || typeof baseAdd !== "function") return false;
+    emit({ phase: "sending", code: clean(row.lower_number), row, selectedProduct: row.product, message: "" });
+    await baseAdd();
+    if (!selectedRow) {
+      emit({ phase: "added", code: clean(row.lower_number), row, selectedProduct: row.product, message: c().sent });
+      return true;
+    }
+    emit({ phase: "error", code: clean(row.lower_number), row, selectedProduct: row.product, message: document.getElementById("message")?.textContent || "" });
+    return false;
+  }
+
   async function sendRegistered() {
     if (!registeredRow || busy) return;
     selectedRow = registeredRow;
-    add.disabled = false;
-    emit({ phase: "sending", code: clean(registeredRow.lower_number), row: registeredRow, selectedProduct: registeredRow.product, message: "" });
-    await add();
-    if (!selectedRow) {
-      const sent = registeredRow;
+    addButtonEl.disabled = false;
+    const sent = registeredRow;
+    const ok = await moveSelectedToRamp();
+    if (ok) {
       box.className = "ut-register-v2";
       registeredRow = null;
       emit({ phase: "added", code: clean(sent.lower_number), row: sent, selectedProduct: sent.product, message: c().sent });
-    } else {
-      emit({ phase: "error", code: clean(registeredRow.lower_number), row: registeredRow, selectedProduct: registeredRow.product, message: document.getElementById("message")?.textContent || "" });
     }
   }
 
@@ -314,7 +325,7 @@
     const row = registeredRow;
     resetBox();
     selectedRow = null;
-    add.disabled = true;
+    addButtonEl.disabled = true;
     candidate.className = "candidate";
     msg(c().kept, "ok");
     emit({ phase: "kept", code: clean(row?.lower_number), row, selectedProduct: row?.product || "", message: c().kept });
@@ -326,13 +337,18 @@
     emit({ phase: imageData ? "photo" : "idle", code: clean(lower.value), row: null, selectedProduct: "", message: "" });
   });
 
-  const originalAdd = add;
-  add = async function addWithFlowEvent() {
-    const row = selectedRow;
-    await originalAdd();
-    if (row && !selectedRow) emit({ phase: "added", code: clean(row.lower_number), row, selectedProduct: row.product, message: c().sent });
+  addButtonEl.onclick = moveSelectedToRamp;
+
+  window.UT_REGISTER_FLOW_V2 = {
+    registerOnly,
+    sendRegistered,
+    moveSelectedToRamp,
+    getSelectedProduct: () => selectedProduct,
+    selectProduct: product => {
+      const button = productButtons.find(b => b.dataset.utRegProduct === product && !b.hidden);
+      if (button) button.click();
+    }
   };
-  add.onclick = add;
 
   window.addEventListener("ut:refresh-register-flow", () => {
     if (box.classList.contains("show")) {
