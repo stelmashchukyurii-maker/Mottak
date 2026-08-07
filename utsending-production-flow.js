@@ -1,11 +1,18 @@
 "use strict";
 
 (() => {
-  const VERSION = "UT Lager v19 SPRÅK<br>Oppdatert 07.08.2026 kl. 10:52";
+  const VERSION = "UT Lager v21 RAMPEFLYT<br>Oppdatert 07.08.2026 kl. 12:38";
   const nb = {
     statusNew:"Ny",statusWork:"I arbeid",statusRamp:"På rampe",statusSent:"Sendt",statusStorno:"Stornert",unknown:"Ukjent",
-    sendButton:"Send fra rampe",confirmCheck:"Jeg bekrefter at alle varer er kontrollert og står på riktig rampe.",
-    rampFirst:"Rampen må først være ferdig kontrollert og markert På rampe.",confirmFirst:"Bekreft først at alle varer står på riktig rampe.",
+    readyRampButton:"Klar på rampe",
+    sendButton:"Send fra rampe",
+    confirmCheck:"Jeg bekrefter at alle varer er kontrollert og står på riktig rampe.",
+    departCheck:"Jeg bekrefter at hele rampen sendes ut fra lageret nå.",
+    completeFirst:"Alle bestilte varer må være registrert før rampen kan markeres som klar.",
+    confirmRampFirst:"Bekreft først at alle varer er kontrollert og står på riktig rampe.",
+    staging:"Markerer hele rampen som klar…",
+    rampReadyBefore:"RAMPE",rampReadyAfter:"er klar og står På rampe.",
+    rampFirst:"Rampen må først være ferdig kontrollert og markert På rampe.",confirmFirst:"Bekreft først at rampen sendes ut fra lageret nå.",
     sendConfirmBefore:"Send hele RAMPE",sendConfirmAfter:"Etter dette flyttes varene til Sendt.",sending:"Sender rampen…",sentAlertBefore:"RAMPE",sentAlertAfter:"er sendt."
   };
   const tr = (key) => typeof window.utText === "function" ? window.utText(key) : (nb[key] || key);
@@ -26,6 +33,39 @@
       return !["completed", "cancelled"].includes(order.status);
     };
   } catch {}
+
+  async function markReadyOnRamp() {
+    const order = typeof current === "function" ? current() : null;
+    if (!order || busy) return;
+
+    if (typeof complete === "function" && !complete(order)) {
+      message("testMessage", tr("completeFirst"), "bad");
+      return;
+    }
+
+    const check = document.getElementById("confirmCheck");
+    if (check && !check.checked) {
+      message("testMessage", tr("confirmRampFirst"), "bad");
+      return;
+    }
+
+    busy = true;
+    const button = document.getElementById("testDispatchButton");
+    if (button) button.disabled = true;
+    message("testMessage", tr("staging"));
+
+    try {
+      await rpc("stage_ut_order", { p_order_id: order.id });
+      if (check) check.checked = false;
+      await loadAll(true);
+      alert(`${tr("rampReadyBefore")} ${order.ramp} ${tr("rampReadyAfter")}`);
+    } catch (error) {
+      message("testMessage", error.message || String(error), "bad");
+    } finally {
+      busy = false;
+      enhance();
+    }
+  }
 
   async function sendFromRamp() {
     const order = typeof current === "function" ? current() : null;
@@ -76,18 +116,27 @@
 
     document.querySelector(".test-banner")?.remove();
 
+    const order = typeof current === "function" ? current() : null;
     const button = document.getElementById("testDispatchButton");
+    const check = document.querySelector(".confirm-box .check");
+
     if (button) {
-      setText(button, tr("sendButton"));
       button.classList.add("production-send-button");
-      button.onclick = sendFromRamp;
+      if (order?.status === "staged") {
+        setText(button, tr("sendButton"));
+        button.classList.add("final-dispatch-button");
+        button.onclick = sendFromRamp;
+        if (check) setText(check.querySelector("span"), tr("departCheck"));
+      } else {
+        setText(button, tr("readyRampButton"));
+        button.classList.remove("final-dispatch-button");
+        button.onclick = markReadyOnRamp;
+        if (check) setText(check.querySelector("span"), tr("confirmCheck"));
+      }
     }
 
     const returnButton = document.getElementById("returnButton");
     if (returnButton) returnButton.style.display = "none";
-
-    const check = document.querySelector(".confirm-box .check");
-    if (check) setText(check.querySelector("span"), tr("confirmCheck"));
 
     document.querySelectorAll(".test-result").forEach((node) => node.style.display = "none");
 
@@ -100,7 +149,8 @@
     const style = document.createElement("style");
     style.id = "productionFlowStyle";
     style.textContent = `
-      .production-send-button{background:#48d597!important;color:#062418!important;border:0!important;min-height:66px!important;font-size:20px!important;font-weight:950!important;box-shadow:0 8px 22px rgba(72,213,151,.18)!important}
+      .production-send-button{background:#f4c430!important;color:#17130a!important;border:0!important;min-height:66px!important;font-size:20px!important;font-weight:950!important;box-shadow:0 8px 22px rgba(244,196,48,.16)!important}
+      .production-send-button.final-dispatch-button{background:#48d597!important;color:#062418!important;box-shadow:0 8px 22px rgba(72,213,151,.2)!important}
       .production-send-button:disabled{opacity:.42!important}
     `;
     document.head.appendChild(style);
