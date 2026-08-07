@@ -1,16 +1,23 @@
 "use strict";
 
 (() => {
-  const VERSION = "UT Lager v18 PRODUKSJON<br>Oppdatert 07.08.2026 kl. 10:27";
+  const VERSION = "UT Lager v19 SPRÅK<br>Oppdatert 07.08.2026 kl. 10:52";
+  const nb = {
+    statusNew:"Ny",statusWork:"I arbeid",statusRamp:"På rampe",statusSent:"Sendt",statusStorno:"Stornert",unknown:"Ukjent",
+    sendButton:"Send fra rampe",confirmCheck:"Jeg bekrefter at alle varer er kontrollert og står på riktig rampe.",
+    rampFirst:"Rampen må først være ferdig kontrollert og markert På rampe.",confirmFirst:"Bekreft først at alle varer står på riktig rampe.",
+    sendConfirmBefore:"Send hele RAMPE",sendConfirmAfter:"Etter dette flyttes varene til Sendt.",sending:"Sender rampen…",sentAlertBefore:"RAMPE",sentAlertAfter:"er sendt."
+  };
+  const tr = (key) => typeof window.utText === "function" ? window.utText(key) : (nb[key] || key);
 
   try {
     statusLabel = function productionStatusLabel(order) {
-      if (order.status === "new") return "Ny";
-      if (["received", "in_progress", "problem"].includes(order.status)) return "I arbeid";
-      if (order.status === "staged") return "På rampe";
-      if (order.status === "completed") return "Sendt";
-      if (order.status === "cancelled") return "Stornert";
-      return order.status || "Ukjent";
+      if (order.status === "new") return tr("statusNew");
+      if (["received", "in_progress", "problem"].includes(order.status)) return tr("statusWork");
+      if (order.status === "staged") return tr("statusRamp");
+      if (order.status === "completed") return tr("statusSent");
+      if (order.status === "cancelled") return tr("statusStorno");
+      return order.status || tr("unknown");
     };
   } catch {}
 
@@ -25,22 +32,22 @@
     if (!order || busy) return;
 
     if (order.status !== "staged") {
-      message("testMessage", "Rampen må først være ferdig kontrollert og markert På rampe.", "bad");
+      message("testMessage", tr("rampFirst"), "bad");
       return;
     }
 
     const check = document.getElementById("confirmCheck");
     if (check && !check.checked) {
-      message("testMessage", "Bekreft først at alle varer står på riktig rampe.", "bad");
+      message("testMessage", tr("confirmFirst"), "bad");
       return;
     }
 
-    if (!confirm(`Send hele RAMPE ${order.ramp}? Etter dette flyttes varene til Sendt.`)) return;
+    if (!confirm(`${tr("sendConfirmBefore")} ${order.ramp}? ${tr("sendConfirmAfter")}`)) return;
 
     busy = true;
     const button = document.getElementById("testDispatchButton");
     if (button) button.disabled = true;
-    message("testMessage", "Sender rampen…");
+    message("testMessage", tr("sending"));
 
     try {
       await rpc("confirm_ut_dispatch", { p_order_id: order.id });
@@ -50,7 +57,7 @@
       selectedScans = [];
       document.getElementById("detail")?.classList.remove("show");
       document.getElementById("ramps")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      alert(`RAMPE ${order.ramp} er sendt.`);
+      alert(`${tr("sentAlertBefore")} ${order.ramp} ${tr("sentAlertAfter")}`);
     } catch (error) {
       message("testMessage", error.message || String(error), "bad");
     } finally {
@@ -59,15 +66,19 @@
     }
   }
 
+  function setText(node, text) {
+    if (node && node.textContent !== text) node.textContent = text;
+  }
+
   function replaceFixedCopy() {
     const version = document.querySelector(".version");
-    if (version) version.innerHTML = VERSION;
+    if (version && version.innerHTML !== VERSION) version.innerHTML = VERSION;
 
     document.querySelector(".test-banner")?.remove();
 
     const button = document.getElementById("testDispatchButton");
     if (button) {
-      button.textContent = "Send fra rampe";
+      setText(button, tr("sendButton"));
       button.classList.add("production-send-button");
       button.onclick = sendFromRamp;
     }
@@ -76,20 +87,12 @@
     if (returnButton) returnButton.style.display = "none";
 
     const check = document.querySelector(".confirm-box .check");
-    if (check) {
-      const span = check.querySelector("span");
-      if (span) span.textContent = "Jeg bekrefter at alle varer er kontrollert og står på riktig rampe.";
-    }
+    if (check) setText(check.querySelector("span"), tr("confirmCheck"));
 
     document.querySelectorAll(".test-result").forEach((node) => node.style.display = "none");
 
     const testMessage = document.getElementById("testMessage");
     if (testMessage && /test/i.test(testMessage.textContent || "")) testMessage.textContent = "";
-
-    document.querySelectorAll(".status").forEach((node) => {
-      if (node.textContent.trim() === "Test trukket") node.textContent = "Sendt";
-      if (node.textContent.trim() === "Test returnert") node.textContent = "Stornert";
-    });
   }
 
   function addStyle() {
@@ -97,15 +100,7 @@
     const style = document.createElement("style");
     style.id = "productionFlowStyle";
     style.textContent = `
-      .production-send-button{
-        background:#48d597!important;
-        color:#062418!important;
-        border:0!important;
-        min-height:66px!important;
-        font-size:20px!important;
-        font-weight:950!important;
-        box-shadow:0 8px 22px rgba(72,213,151,.18)!important;
-      }
+      .production-send-button{background:#48d597!important;color:#062418!important;border:0!important;min-height:66px!important;font-size:20px!important;font-weight:950!important;box-shadow:0 8px 22px rgba(72,213,151,.18)!important}
       .production-send-button:disabled{opacity:.42!important}
     `;
     document.head.appendChild(style);
@@ -116,8 +111,9 @@
     replaceFixedCopy();
   }
 
+  window.UT_PRODUCTION_ENHANCE = enhance;
   const observer = new MutationObserver(() => requestAnimationFrame(enhance));
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  observer.observe(document.body, { childList: true, subtree: true });
   enhance();
   setTimeout(() => {
     try { renderRamps(); } catch {}
