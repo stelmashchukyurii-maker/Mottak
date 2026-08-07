@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const VERSION = "UT Lager v27.9 LETT UI<br>Oppdatert 07.08.2026 kl. 22:00";
+  const VERSION = "UT Lager v27.12 AVBRYT<br>Oppdatert 07.08.2026 kl. 22:37";
   const nb = {
     statusNew:"Ny",statusWork:"I arbeid",statusRamp:"På rampe",statusSent:"Sendt",statusStorno:"Stornert",unknown:"Ukjent",
     readyRampButton:"Klar på rampe",sendButton:"Send fra rampe",
@@ -14,6 +14,37 @@
     sendConfirmBefore:"Send hele RAMPE",sendConfirmAfter:"Etter dette flyttes varene til Sendt.",sending:"Sender rampen…",sentAlertBefore:"RAMPE",sentAlertAfter:"er sendt."
   };
   const tr = key => typeof window.utText === "function" ? window.utText(key) : (nb[key] || key);
+
+  const cancelCopy = () => {
+    const l = window.UT_LANG || localStorage.getItem("mottak_ut_language") || "nb";
+    if (l === "uk") return {
+      button:"❌ Скасувати замовлення",
+      confirm:ramp=>`Скасувати замовлення RAMPE ${ramp}?\n\nТІЛЬКИ товари, які ще зарезервовані / стоять на рампі, повернуться на склад. Уже списані (dispatched) товари НЕ змінюються.`,
+      reason:"Причина скасування:",
+      defaultReason:"Скасовано користувачем — товар з рампи повернути на склад",
+      working:"Скасовую замовлення і повертаю залишок з рампи на склад…",
+      done:ramp=>`RAMPE ${ramp} скасовано. Товар, який ще був на рампі, повернуто на склад. Уже списаний товар не змінено.`,
+      error:"Не вдалося скасувати замовлення."
+    };
+    if (l === "pl") return {
+      button:"❌ Anuluj zamówienie",
+      confirm:ramp=>`Anulować zamówienie RAMPA ${ramp}?\n\nTYLKO towary nadal zarezerwowane / stojące na rampie wrócą na magazyn. Towary już wysłane (dispatched) NIE zostaną zmienione.`,
+      reason:"Powód anulowania:",
+      defaultReason:"Anulowane przez użytkownika — zwrot z rampy na magazyn",
+      working:"Anuluję zamówienie i zwracam pozostałe towary z rampy…",
+      done:ramp=>`RAMPA ${ramp} anulowana. Towary, które nadal były na rampie, wróciły na magazyn. Wysłane towary nie zostały zmienione.`,
+      error:"Nie udało się anulować zamówienia."
+    };
+    return {
+      button:"❌ Avbryt bestilling",
+      confirm:ramp=>`Avbryte bestillingen for RAMPE ${ramp}?\n\nBARE varer som fortsatt er reservert / står på rampen returneres til lager. Varer som allerede er sendt (dispatched) endres IKKE.`,
+      reason:"Årsak til avbrytelse:",
+      defaultReason:"Avbrutt av bruker — varer på rampen returneres til lager",
+      working:"Avbryter bestillingen og returnerer resterende varer fra rampen…",
+      done:ramp=>`RAMPE ${ramp} er avbrutt. Varer som fortsatt sto på rampen er returnert til lager. Sendte varer er ikke endret.`,
+      error:"Bestillingen kunne ikke avbrytes."
+    };
+  };
 
   try { statusLabel = order => order.status === "new" ? tr("statusNew") : ["received","in_progress","problem"].includes(order.status) ? tr("statusWork") : order.status === "staged" ? tr("statusRamp") : order.status === "completed" ? tr("statusSent") : order.status === "cancelled" ? tr("statusStorno") : (order.status || tr("unknown")); } catch {}
   try { activeOrder = order => !["completed","cancelled"].includes(order.status); } catch {}
@@ -60,8 +91,57 @@
     finally { busy=false; enhance(); }
   }
 
+  async function cancelCurrentOrder() {
+    const order = typeof current === "function" ? current() : null;
+    if (!order || busy || ["completed","cancelled"].includes(order.status)) return;
+    const c = cancelCopy();
+    if (!confirm(c.confirm(order.ramp || "—"))) return;
+    const reason = prompt(c.reason, c.defaultReason);
+    if (reason === null) return;
+
+    busy = true;
+    const button = document.getElementById("utSafeCancelOrder");
+    if (button) button.disabled = true;
+    if (typeof message === "function") message("scanMessage",c.working,"warn");
+    try {
+      await rpc("cancel_ut_order",{p_order_id:order.id,p_reason:(reason.trim()||c.defaultReason)});
+      await loadAll(true);
+      selectedId=null; selectedScans=[];
+      document.getElementById("detail")?.classList.remove("show");
+      alert(c.done(order.ramp || "—"));
+    } catch (error) {
+      if (typeof message === "function") message("scanMessage",error.message||c.error,"bad");
+      else alert(`${c.error}\n${error.message||error}`);
+    } finally {
+      busy=false;
+      enhance();
+    }
+  }
+
   function setText(node,text){ if(node && node.textContent!==text) node.textContent=text; }
-  function addStyle(){ if(document.getElementById("productionFlowStyle")) return; const s=document.createElement("style"); s.id="productionFlowStyle"; s.textContent=`.production-send-button{background:#f4c430!important;color:#17130a!important;border:0!important;min-height:66px!important;font-size:20px!important;font-weight:950!important;box-shadow:0 8px 22px rgba(244,196,48,.16)!important}.production-send-button.final-dispatch-button{background:#48d597!important;color:#062418!important;box-shadow:0 8px 22px rgba(72,213,151,.2)!important}.production-send-button:disabled{opacity:.42!important}`; document.head.appendChild(s); }
+  function addStyle(){ if(document.getElementById("productionFlowStyle")) return; const s=document.createElement("style"); s.id="productionFlowStyle"; s.textContent=`.production-send-button{background:#f4c430!important;color:#17130a!important;border:0!important;min-height:66px!important;font-size:20px!important;font-weight:950!important;box-shadow:0 8px 22px rgba(244,196,48,.16)!important}.production-send-button.final-dispatch-button{background:#48d597!important;color:#062418!important;box-shadow:0 8px 22px rgba(72,213,151,.2)!important}.production-send-button:disabled{opacity:.42!important}.production-cancel-button{width:100%!important;min-height:54px!important;margin-top:9px!important;border:2px solid #ff7373!important;border-radius:13px!important;background:rgba(255,115,115,.12)!important;color:#ffd2d2!important;font-size:16px!important;font-weight:950!important;touch-action:manipulation!important}.production-cancel-button:disabled{opacity:.42!important}`; document.head.appendChild(s); }
+
+  function ensureCancelButton(order) {
+    const actions = document.getElementById("detailActions");
+    if (!actions) return;
+
+    const oldCoreCancel = actions.querySelector('[data-action="cancel"]');
+    if (oldCoreCancel) oldCoreCancel.style.display = "none";
+
+    let button = document.getElementById("utSafeCancelOrder");
+    if (!button) {
+      button = document.createElement("button");
+      button.id = "utSafeCancelOrder";
+      button.type = "button";
+      button.className = "btn production-cancel-button";
+      actions.appendChild(button);
+    }
+    button.textContent = cancelCopy().button;
+    button.hidden = !order || (order.test_state && order.test_state !== "active") || ["completed","cancelled"].includes(order.status);
+    button.disabled = Boolean(busy);
+    button.onclick = cancelCurrentOrder;
+  }
+
   function enhance(){
     addStyle();
     const version=document.querySelector(".version"); if(version && version.innerHTML!==VERSION) version.innerHTML=VERSION;
@@ -77,11 +157,13 @@
         setText(button,tr("readyRampButton")); button.classList.remove("final-dispatch-button"); button.onclick=markReadyOnRamp; if(check) setText(check.querySelector("span"),tr("confirmCheck"));
       }
     }
+    ensureCancelButton(order);
     const returnButton=document.getElementById("returnButton"); if(returnButton) returnButton.style.display="none";
     document.querySelectorAll(".test-result").forEach(n=>n.style.display="none");
     const testMessage=document.getElementById("testMessage"); if(testMessage && /test/i.test(testMessage.textContent||"")) testMessage.textContent="";
   }
 
   window.UT_PRODUCTION_ENHANCE = enhance;
+  window.UT_CANCEL_CURRENT_ORDER = cancelCurrentOrder;
   enhance();
 })();
