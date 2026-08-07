@@ -14,7 +14,7 @@
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260807-1027" title="UT — Lager og utsending"></iframe>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260807-1052" title="UT — Lager og utsending"></iframe>
 <script>
 "use strict";
 const frame=document.getElementById("utCore");
@@ -56,9 +56,11 @@ function enhance(){
   const doc=frame.contentDocument;
   if(!doc)return;
   const version=doc.querySelector(".version");
-  if(version)version.innerHTML="UT Lager v18 PRODUKSJON<br>Oppdatert 07.08.2026 kl. 10:27";
+  if(version)version.innerHTML="UT Lager v19 SPRÅK<br>Oppdatert 07.08.2026 kl. 10:52";
   doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
-  addScript(doc,"utProductionFlow","utsending-production-flow.js?v=20260807-1027");
+  addScript(doc,"utProductionFlow","utsending-production-flow.js?v=20260807-1052",()=>{
+    addScript(doc,"utLanguageSwitch","utsending-language.js?v=20260807-1052");
+  });
   const existing=doc.getElementById("utGeminiModule");
   if(existing){
     loadPicker(doc);
