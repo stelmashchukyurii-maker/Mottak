@@ -1,7 +1,8 @@
 "use strict";
 
 (() => {
-  const VERSION = "UT Kontor v24 LAGER-RAMPE-SENDT<br>Oppdatert 07.08.2026 kl. 10:24";
+  const VERSION = "UT Kontor v26 REDIGERING<br>Oppdatert 07.08.2026 kl. 13:46";
+  const get = (id) => document.getElementById(id);
 
   function applyVersion() {
     const node = document.querySelector(".version");
@@ -15,7 +16,7 @@
     };
   }
 
-  // Simple visible workflow. Technical statuses can stay in the database.
+  // Simple visible workflow. Technical statuses stay in the database.
   if (typeof statusLabel === "function") {
     statusLabel = function officeStatusLabel(order) {
       if (order?.status === "new") return "Ny";
@@ -27,6 +28,154 @@
       return order?.status || "Ukjent";
     };
   }
+
+  function canEditOrder(order) {
+    return order && !["completed", "cancelled"].includes(order.status);
+  }
+
+  function ensureEditButtons() {
+    if (!Array.isArray(orders)) return;
+    document.querySelectorAll("#history .order").forEach((card) => {
+      const storno = card.querySelector("[data-storno]");
+      if (!storno) return;
+      const id = storno.dataset.storno;
+      const order = orders.find((item) => String(item.id) === String(id));
+      if (!canEditOrder(order)) return;
+
+      let edit = card.querySelector("[data-edit]");
+      if (!edit) {
+        edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "order-action edit-action";
+        edit.dataset.edit = id;
+        edit.addEventListener("click", () => startEdit(id));
+        storno.parentElement?.insertBefore(edit, storno);
+      }
+      edit.textContent = "Rediger bestilling";
+    });
+  }
+
+  if (typeof renderHistory === "function") {
+    const previousRenderHistory = renderHistory;
+    renderHistory = function renderHistoryEditableUntilSent() {
+      previousRenderHistory();
+      ensureEditButtons();
+    };
+  }
+
+  // Office may edit every active order until it is actually sent.
+  startEdit = function startEditUntilSent(id) {
+    const order = Array.isArray(orders)
+      ? orders.find((item) => String(item.id) === String(id))
+      : null;
+
+    if (!canEditOrder(order)) {
+      msg("Et sendt eller stornert oppdrag kan ikke redigeres.", "bad");
+      return;
+    }
+
+    editingId = order.id;
+    get("ramp").value = order.ramp || "";
+    get("officeNote").value = order.office_note || "";
+    if (get("mottaker")) get("mottaker").value = order.recipient || "";
+    if (get("transporter")) get("transporter").value = order.transporter || "";
+
+    state = {
+      bunner: Number(order.bunner_stacks) || 0,
+      h30: Number(order.hyller30_sets) || 0,
+      h60: Number(order.hyller60_sets) || 0,
+    };
+    get("bunnerQty").value = state.bunner;
+    get("h30Qty").value = state.h30;
+    get("h60Qty").value = state.h60;
+
+    get("formTitle").textContent = `Rediger RAMPE ${order.ramp}`;
+    const label = statusLabel(order);
+    get("editBanner").textContent = order.status === "new"
+      ? `Redigerer ${order.order_number || order.id}. Hele bestillingen kan endres.`
+      : `Status: ${label}. Bestillingen kan redigeres frem til Sendt. Endres rampe eller antall, starter lageroppdraget på nytt som Ny.`;
+    get("editBanner").classList.add("show");
+    get("send").textContent = "Lagre endringer";
+    get("reset").textContent = "Avbryt redigering";
+    renderForm();
+    get("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  async function saveEditedOrder(event) {
+    if (!editingId) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (busy) return;
+
+    const order = Array.isArray(orders)
+      ? orders.find((item) => String(item.id) === String(editingId))
+      : null;
+    if (!canEditOrder(order)) {
+      msg("Oppdraget er allerede Sendt eller Stornert og kan ikke redigeres.", "bad");
+      return;
+    }
+
+    const data = payload(false);
+    if (!data.ramp) {
+      msg("Velg rampe.", "bad");
+      get("ramp")?.focus();
+      return;
+    }
+    if ((Number(data.bunner_stacks) || 0) + (Number(data.hyller30_sets) || 0) + (Number(data.hyller60_sets) || 0) === 0) {
+      msg("Legg minst én varetype til rampen.", "bad");
+      return;
+    }
+
+    const collision = orders.find((item) =>
+      active(item) && normalizeRamp(item.ramp) === normalizeRamp(data.ramp) && String(item.id) !== String(editingId)
+    );
+    if (collision) {
+      msg(`RAMPE ${data.ramp} har allerede et aktivt oppdrag.`, "bad");
+      return;
+    }
+
+    const operationalChange =
+      normalizeRamp(order.ramp) !== normalizeRamp(data.ramp)
+      || (Number(order.bunner_stacks) || 0) !== (Number(data.bunner_stacks) || 0)
+      || (Number(order.hyller30_sets) || 0) !== (Number(data.hyller30_sets) || 0)
+      || (Number(order.hyller60_sets) || 0) !== (Number(data.hyller60_sets) || 0);
+
+    if (order.status !== "new" && operationalChange) {
+      const ok = confirm("Lageret har allerede startet dette oppdraget. Ved endring av rampe eller antall returneres plukkede varer til På lager, og oppdraget starter på nytt som Ny. Fortsette?");
+      if (!ok) return;
+    }
+
+    busy = true;
+    get("send").disabled = true;
+    msg("Lagrer endringene…");
+    try {
+      await request("rpc/update_ut_order_before_dispatch", {
+        method: "POST",
+        body: JSON.stringify({
+          p_order_id: editingId,
+          p_ramp: data.ramp,
+          p_bunner_stacks: Number(data.bunner_stacks) || 0,
+          p_hyller30_sets: Number(data.hyller30_sets) || 0,
+          p_hyller60_sets: Number(data.hyller60_sets) || 0,
+          p_office_note: data.office_note || null,
+          p_recipient: data.recipient || null,
+          p_transporter: data.transporter || null,
+        }),
+      });
+      clearForm(false);
+      msg(operationalChange && order.status !== "new"
+        ? "Bestillingen er oppdatert og sendt til lageret på nytt som Ny."
+        : "Bestillingen er oppdatert.", "ok");
+      await Promise.all([loadInn(), loadUt()]);
+    } catch (error) {
+      msg(`Kunne ikke lagre bestillingen.\n${error.message || error}`, "bad");
+    } finally {
+      busy = false;
+      get("send").disabled = false;
+    }
+  }
+
+  get("send")?.addEventListener("click", saveEditedOrder, true);
 
   async function refreshVisibleWarehouse() {
     const line = document.getElementById("topStockLine");
