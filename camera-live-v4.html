@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Camera Cloud v4.12</title>
+  <title>Camera Cloud v4.13</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,8 +15,8 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster Camera Cloud v4.12…</div>
-  <iframe id="app" title="Camera Cloud v4.12" src="camera-live.html?base=412-20260807-0703"></iframe>
+  <div id="loader">Laster Camera Cloud v4.13…</div>
+  <iframe id="app" title="Camera Cloud v4.13" src="camera-live.html?base=413-20260807-0739"></iframe>
   <script>
     "use strict";
     const frame = document.getElementById("app");
@@ -38,17 +38,18 @@
         const win = frame.contentWindow;
         win.BAMA_HOME_TARGET = "camera-live-v4.html";
 
-        await injectScript(doc, "camera-live-v4-source-fix.js?v=412-20260807-0703");
-        await injectScript(doc, "camera-live-v4-server-ocr.js?v=412-20260807-0703");
-        await injectScript(doc, "camera-live-v4-stock-filters.js?v=412-20260807-0703");
-        await injectScript(doc, "upper-number-policy.js?v=412-20260807-0703");
-        await injectScript(doc, "shared-stock-status.js?v=412-20260807-0703");
-        await injectScript(doc, "camera-live-v4-floating-camera.js?v=412-20260807-0703");
-        await injectScript(doc, "camera-live-v4-floating-workflow.js?v=412-20260807-0703");
+        await injectScript(doc, "camera-live-v4-source-fix.js?v=413-20260807-0739");
+        await injectScript(doc, "camera-live-v4-server-ocr.js?v=413-20260807-0739");
+        await injectScript(doc, "camera-live-v4-stock-filters.js?v=413-20260807-0739");
+        await injectScript(doc, "upper-number-policy.js?v=413-20260807-0739");
+        await injectScript(doc, "shared-stock-status.js?v=413-20260807-0739");
+        await injectScript(doc, "camera-live-v4-floating-camera.js?v=413-20260807-0739");
+        await injectScript(doc, "camera-live-v4-floating-workflow.js?v=413-20260807-0739");
+        await injectScript(doc, "camera-live-v4-compact-language.js?v=413-20260807-0739");
 
         const version = doc.querySelector(".version");
         if (version) {
-          version.innerHTML = "Kamera Cloud v4.12 FLYTENDE WORKFLOW<br>Oppdatert 07.08.2026 kl. 07:03";
+          version.innerHTML = "Kamera Cloud v4.13 KOMPAKT SPRÅK<br>Oppdatert 07.08.2026 kl. 07:39";
         }
 
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
@@ -59,7 +60,7 @@
 
         loader.style.display = "none";
       } catch (error) {
-        loader.textContent = `Kunne ikke starte Camera Cloud v4.12: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte Camera Cloud v4.13: ${error.message || error}`;
       }
     });
   </script>
