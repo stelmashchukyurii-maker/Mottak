@@ -31,7 +31,7 @@
           ${party ? `<div class="meta">${party}</div>` : ""}
           <div class="meta">${date(order.created_at)}${order.office_note ? ` · ${esc(order.office_note)}` : ""}</div>
           <div class="order-actions">
-            ${isEditable(order) ? `<button class="order-action edit-action" data-edit="${esc(order.id)}">Rediger rampen</button>` : ""}
+            ${isEditable(order) ? `<button class="order-action edit-action" data-edit="${esc(order.id)}">Rediger bestilling</button>` : ""}
             <button class="order-action storno-action" data-storno="${esc(order.id)}">Storner</button>
           </div>
         </article>`;
@@ -79,10 +79,9 @@
     get("h60Qty").value = state.h60;
 
     get("formTitle").textContent = `Rediger RAMPE ${order.ramp}`;
-    const started = order.status !== "new";
-    get("editBanner").textContent = started
-      ? `Redigerer ${order.order_number || order.id}. Lagerarbeidet er allerede startet. Når du lagrer, nullstilles plukkingen og oppdraget blir Ny igjen.`
-      : `Redigerer ${order.order_number || order.id}. Du kan endre hele bestillingen.`;
+    get("editBanner").textContent = order.status === "new"
+      ? `Redigerer ${order.order_number || order.id}. Du kan endre hele bestillingen.`
+      : `Status: ${statusLabel(order)}. Du kan redigere frem til Sendt. Endring av rampe eller antall starter lageroppdraget på nytt som Ny.`;
     get("editBanner").classList.add("show");
     get("send").textContent = "Lagre endringer";
     get("reset").textContent = "Avbryt redigering";
@@ -107,10 +106,16 @@
       return;
     }
 
-    if (order.status !== "new") {
+    const operationalChange =
+      normalizeRamp(order.ramp) !== ramp
+      || (Number(order.bunner_stacks) || 0) !== (Number(state.bunner) || 0)
+      || (Number(order.hyller30_sets) || 0) !== (Number(state.h30) || 0)
+      || (Number(order.hyller60_sets) || 0) !== (Number(state.h60) || 0);
+
+    if (order.status !== "new" && operationalChange) {
       const ok = confirm(
         `RAMPE ${order.ramp} er allerede ${statusLabel(order)}.\n\n` +
-        "Når endringen lagres, returneres allerede valgte varer til På lager og oppdraget starter på nytt som Ny.\n\nLagre endringene?"
+        "Du endrer rampe eller antall. Allerede valgte varer returneres til På lager, og oppdraget starter på nytt som Ny.\n\nLagre endringene?"
       );
       if (!ok) return;
     }
@@ -135,7 +140,9 @@
       });
 
       clearForm(false);
-      msg("Bestillingen er oppdatert og står som Ny.", "ok");
+      msg(order.status !== "new" && operationalChange
+        ? "Bestillingen er oppdatert og sendt til lageret på nytt som Ny."
+        : "Bestillingen er oppdatert.", "ok");
       await Promise.all([loadInn(), loadUt()]);
     } catch (error) {
       msg(`Kunne ikke lagre bestillingen.\n${error.message || error}`, "bad");
@@ -153,7 +160,7 @@
   }, true);
 
   const version = document.querySelector(".version");
-  if (version) version.innerHTML = "UT Kontor v26 REDIGERING<br>Oppdatert 07.08.2026 kl. 13:39";
+  if (version) version.innerHTML = "UT Kontor v27 REDIGERING<br>Oppdatert 07.08.2026 kl. 13:46";
 
   renderHistory();
 })();
