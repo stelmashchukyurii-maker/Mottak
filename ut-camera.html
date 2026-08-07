@@ -13,7 +13,7 @@
 </head>
 <body>
 <main class="app">
-  <div class="top"><a class="back" id="backLink" href="utsending.html">← UT</a><div class="lang"><button data-lang="nb">NO</button><button data-lang="pl">PL</button><button data-lang="uk">UA</button></div><div class="version">UT Kamera v3 AI<br>07.08.2026 kl. 14:22</div></div>
+  <div class="top"><a class="back" id="backLink" href="utsending.html">← UT</a><div class="lang"><button data-lang="nb">NO</button><button data-lang="pl">PL</button><button data-lang="uk">UA</button></div><div class="version">UT Kamera v4 AI + INN<br>07.08.2026 kl. 14:55</div></div>
   <h1 id="title">UT — Kamera / telefon</h1><p class="subtitle" id="subtitle"></p>
   <section class="ramp"><small id="rampCaption"></small><strong id="rampName">RAMPE —</strong><div class="progress"><div class="p"><span>Bunner</span><strong id="bProgress">0 / 0</strong></div><div class="p"><span>Hyller x30</span><strong id="h30Progress">0 / 0</strong></div><div class="p"><span>Hyller x60</span><strong id="h60Progress">0 / 0</strong></div></div></section>
   <section class="card">
@@ -71,5 +71,6 @@ $("lowerInput").addEventListener("input",()=>{selectedRow=null;$("candidate").cl
 document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;localStorage.setItem("mottak_ut_language",lang);applyLang()});
 applyLang();load().catch(e=>msg(e.message||String(e),"bad"));
 </script>
+<script src="ut-camera-register-missing.js?v=20260807-1455"></script>
 </body>
 </html>
