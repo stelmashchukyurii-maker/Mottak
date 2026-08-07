@@ -7,14 +7,14 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>UT — Bekreft rampe</title>
+  <title>UT — Lager og utsending</title>
   <style>
     html,body{margin:0;min-height:100%;background:#0b1020}
     #utCore{display:block;width:100%;min-height:100vh;border:0;background:#0b1020}
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260806-1544" title="UT — Bekreft rampe"></iframe>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260807-1027" title="UT — Lager og utsending"></iframe>
 <script>
 "use strict";
 const frame=document.getElementById("utCore");
@@ -56,8 +56,9 @@ function enhance(){
   const doc=frame.contentDocument;
   if(!doc)return;
   const version=doc.querySelector(".version");
-  if(version)version.innerHTML="UT Bekreftelse v17 ETT NUMMER<br>Oppdatert 06.08.2026 kl. 15:44";
+  if(version)version.innerHTML="UT Lager v18 PRODUKSJON<br>Oppdatert 07.08.2026 kl. 10:27";
   doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
+  addScript(doc,"utProductionFlow","utsending-production-flow.js?v=20260807-1027");
   const existing=doc.getElementById("utGeminiModule");
   if(existing){
     loadPicker(doc);
