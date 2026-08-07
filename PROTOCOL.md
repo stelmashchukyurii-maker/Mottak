@@ -61,4 +61,4 @@ All other rows that had still been `in_stock` during cleanup were moved to `disp
 - Keep test labels excluded from real stock.
 
 ### Session closure marker
-🧱 Conversation/session archived by user request.
+⛔ Conversation/session archived by user request.
