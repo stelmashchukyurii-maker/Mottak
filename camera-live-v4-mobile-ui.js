@@ -11,9 +11,9 @@
   let originalRecognizeClick = null;
 
   const COPY = {
-    nb: { ai: "AI", gemini: "Gemini", openai: "OpenAI", back: "← Tilbake", close: "Lukk", closeLabel: "Lukk varsel", duplicateHint: "Denne etiketten finnes allerede. Velg hva du vil gjøre." },
-    pl: { ai: "AI", gemini: "Gemini", openai: "OpenAI", back: "← Wróć", close: "Zamknij", closeLabel: "Zamknij ostrzeżenie", duplicateHint: "Ta etykieta już istnieje. Wybierz, co chcesz zrobić." },
-    uk: { ai: "AI", gemini: "Gemini", openai: "OpenAI", back: "← Назад", close: "Закрити", closeLabel: "Закрити попередження", duplicateHint: "Така бірка вже існує. Виберіть, що робити далі." }
+    nb: { back: "← Tilbake", close: "Lukk", closeLabel: "Lukk varsel", duplicateHint: "Denne etiketten finnes allerede. Velg hva du vil gjøre." },
+    pl: { back: "← Wróć", close: "Zamknij", closeLabel: "Zamknij ostrzeżenie", duplicateHint: "Ta etykieta już istnieje. Wybierz, co chcesz zrobić." },
+    uk: { back: "← Назад", close: "Закрити", closeLabel: "Закрити попередження", duplicateHint: "Така бірка вже існує. Виберіть, що робити далі." }
   };
 
   function lang() {
@@ -39,158 +39,128 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
-      main.app > h1 + .subtitle {
-        display: none !important;
-      }
+      main.app > h1 + .subtitle { display:none !important; }
 
       #${PANEL_ID} .bama-floating-bar {
-        grid-template-columns: auto auto minmax(118px, auto) auto !important;
+        grid-template-columns:auto auto minmax(118px,auto) auto !important;
       }
 
       #${PANEL_ID} .bama-ai-picker {
-        display: grid;
-        grid-template-rows: auto 1fr;
-        min-width: 108px;
-        min-height: 58px;
-        padding: 4px;
-        gap: 3px;
-        border: 1px solid #303b59;
-        border-radius: 12px;
-        background: #10182b;
-        pointer-events: auto;
+        display:grid;
+        grid-template-rows:auto 1fr;
+        min-width:108px;
+        min-height:58px;
+        padding:4px;
+        gap:3px;
+        border:1px solid #303b59;
+        border-radius:12px;
+        background:#10182b;
+        pointer-events:auto;
       }
 
       #${PANEL_ID} .bama-ai-title {
-        color: #aab4ce;
-        font-size: 9px;
-        font-weight: 900;
-        line-height: 1;
-        text-align: center;
-        letter-spacing: .08em;
+        color:#aab4ce;
+        font-size:9px;
+        font-weight:900;
+        line-height:1;
+        text-align:center;
+        letter-spacing:.08em;
       }
 
       #${PANEL_ID} .bama-ai-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 3px;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:3px;
       }
 
       #${PANEL_ID} .bama-ai-choice {
-        min-width: 0;
-        min-height: 36px;
-        padding: 4px 5px;
-        border: 1px solid #303b59;
-        border-radius: 8px;
-        background: #151c30;
-        color: #dbe4f7;
-        font-size: 10px;
-        font-weight: 900;
-        line-height: 1;
-        cursor: pointer;
+        min-width:0;
+        min-height:36px;
+        padding:4px 5px;
+        border:1px solid #303b59;
+        border-radius:8px;
+        background:#151c30;
+        color:#dbe4f7;
+        font-size:10px;
+        font-weight:900;
+        line-height:1;
+        cursor:pointer;
       }
 
       #${PANEL_ID} .bama-ai-choice.active {
-        border-color: #48d597;
-        background: #164534;
-        color: #ffffff;
-        box-shadow: 0 0 0 2px rgba(72,213,151,.14);
+        border-color:#48d597;
+        background:#164534;
+        color:#fff;
+        box-shadow:0 0 0 2px rgba(72,213,151,.14);
       }
 
-      #${PANEL_ID} .bama-workflow-status {
-        position: relative;
-      }
+      #${PANEL_ID} .bama-workflow-status { position:relative; }
 
       #${PANEL_ID} .bama-duplicate-close-x {
-        position: absolute;
-        top: 5px;
-        right: 6px;
-        width: 32px;
-        min-height: 32px;
-        padding: 0;
-        border: 0;
-        border-radius: 50%;
-        background: transparent;
-        color: #ff9aa4;
-        font-size: 24px;
-        font-weight: 900;
-        line-height: 1;
-        cursor: pointer;
+        position:absolute;
+        top:5px;
+        right:6px;
+        width:32px;
+        min-height:32px;
+        padding:0;
+        border:0;
+        border-radius:50%;
+        background:transparent;
+        color:#ff9aa4;
+        font-size:24px;
+        font-weight:900;
+        line-height:1;
+        cursor:pointer;
       }
 
       #${PANEL_ID} .bama-duplicate-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 7px;
-        margin-top: 9px;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:7px;
+        margin-top:9px;
       }
 
-      #${PANEL_ID} .bama-duplicate-actions[hidden] {
-        display: none;
-      }
+      #${PANEL_ID} .bama-duplicate-actions[hidden] { display:none; }
 
       #${PANEL_ID} .bama-duplicate-action {
-        min-height: 42px;
-        padding: 8px 10px;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: 900;
-        cursor: pointer;
+        min-height:42px;
+        padding:8px 10px;
+        border-radius:10px;
+        font-size:12px;
+        font-weight:900;
+        cursor:pointer;
       }
 
       #${PANEL_ID} .bama-duplicate-back {
-        border: 1px solid #64748b;
-        background: #151c30;
-        color: #f5f7ff;
+        border:1px solid #64748b;
+        background:#151c30;
+        color:#f5f7ff;
       }
 
       #${PANEL_ID} .bama-duplicate-close {
-        border: 1px solid #ff7373;
-        background: rgba(255,115,115,.15);
-        color: #ffd9dd;
+        border:1px solid #ff7373;
+        background:rgba(255,115,115,.15);
+        color:#ffd9dd;
       }
 
-      #${PANEL_ID}.collapsed .bama-ai-picker {
-        display: none;
-      }
+      #${PANEL_ID}.collapsed .bama-ai-picker { display:none; }
+      #${PANEL_ID}.collapsed .bama-floating-bar { grid-template-columns:auto auto auto !important; }
 
-      #${PANEL_ID}.collapsed .bama-floating-bar {
-        grid-template-columns: auto auto auto !important;
-      }
-
-      @media (max-width: 430px) {
+      @media (max-width:430px) {
         #${PANEL_ID} .bama-floating-bar {
-          grid-template-columns: auto 92px minmax(108px, auto) auto !important;
-          gap: 5px !important;
-          padding: 5px !important;
+          grid-template-columns:auto 92px minmax(108px,auto) auto !important;
+          gap:5px !important;
+          padding:5px !important;
         }
-
-        #${PANEL_ID} .bama-ai-picker {
-          min-width: 92px;
-        }
-
-        #${PANEL_ID} .bama-ai-choice {
-          padding-inline: 3px;
-          font-size: 9px;
-        }
-
-        #${PANEL_ID} .bama-photo-button {
-          padding-inline: 10px !important;
-          font-size: 17px !important;
-        }
+        #${PANEL_ID} .bama-ai-picker { min-width:92px; }
+        #${PANEL_ID} .bama-ai-choice { padding-inline:3px; font-size:9px; }
+        #${PANEL_ID} .bama-photo-button { padding-inline:10px !important; font-size:17px !important; }
       }
 
-      @media (max-width: 360px) {
-        #${PANEL_ID} .bama-floating-bar {
-          grid-template-columns: auto 78px minmax(94px, auto) auto !important;
-        }
-
-        #${PANEL_ID} .bama-ai-picker {
-          min-width: 78px;
-        }
-
-        #${PANEL_ID} .bama-ai-choice {
-          font-size: 8px;
-        }
+      @media (max-width:360px) {
+        #${PANEL_ID} .bama-floating-bar { grid-template-columns:auto 78px minmax(94px,auto) auto !important; }
+        #${PANEL_ID} .bama-ai-picker { min-width:78px; }
+        #${PANEL_ID} .bama-ai-choice { font-size:8px; }
       }
     `;
     document.head.appendChild(style);
@@ -208,7 +178,6 @@
 
   function installAiPicker(panel) {
     if (panel.querySelector(".bama-ai-picker")) return;
-
     const bar = panel.querySelector(".bama-floating-bar");
     const photoButton = panel.querySelector(".bama-photo-button");
     if (!bar || !photoButton) return;
@@ -280,7 +249,6 @@
       <button type="button" class="bama-duplicate-action bama-duplicate-back"></button>
       <button type="button" class="bama-duplicate-action bama-duplicate-close"></button>
     `;
-
     status.append(closeX, actions);
 
     const back = actions.querySelector(".bama-duplicate-back");
@@ -288,7 +256,7 @@
 
     const dismiss = () => {
       dismissedDuplicateKey = currentCodeKey();
-      status.hidden = true;
+      if (!status.hidden) status.hidden = true;
     };
 
     closeX.addEventListener("click", event => {
@@ -321,12 +289,12 @@
     const close = status.querySelector(".bama-duplicate-close");
     const detail = status.querySelector("span");
 
-    if (back) back.textContent = t().back;
-    if (close) close.textContent = t().close;
-    if (closeX) closeX.setAttribute("aria-label", t().closeLabel);
+    if (back && back.textContent !== t().back) back.textContent = t().back;
+    if (close && close.textContent !== t().close) close.textContent = t().close;
+    if (closeX && closeX.getAttribute("aria-label") !== t().closeLabel) closeX.setAttribute("aria-label", t().closeLabel);
 
-    if (closeX) closeX.hidden = !isDuplicate;
-    if (actions) actions.hidden = !isDuplicate;
+    if (closeX && closeX.hidden === isDuplicate) closeX.hidden = !isDuplicate;
+    if (actions && actions.hidden === isDuplicate) actions.hidden = !isDuplicate;
 
     if (isDuplicate && detail && !detail.dataset.bamaDuplicateHint) {
       detail.dataset.bamaDuplicateHint = "1";
@@ -341,7 +309,7 @@
       delete detail.dataset.originalText;
     }
 
-    if (isDuplicate && dismissedDuplicateKey && dismissedDuplicateKey === currentCodeKey()) {
+    if (isDuplicate && dismissedDuplicateKey && dismissedDuplicateKey === currentCodeKey() && !status.hidden) {
       status.hidden = true;
     }
   }
@@ -365,11 +333,11 @@
 
     const observer = new MutationObserver(() => syncDuplicateUi(status));
     observer.observe(status, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ["class", "hidden"]
+      subtree:true,
+      childList:true,
+      characterData:true,
+      attributes:true,
+      attributeFilter:["class", "hidden"]
     });
 
     [document.getElementById("upperValue"), document.getElementById("lowerValue")].filter(Boolean).forEach(input => {
@@ -378,9 +346,7 @@
       });
     });
 
-    const languageContainer = document.getElementById("languages");
-    languageContainer?.addEventListener("click", () => setTimeout(() => syncDuplicateUi(status), 50));
-
+    document.getElementById("languages")?.addEventListener("click", () => setTimeout(() => syncDuplicateUi(status), 50));
     console.info("Camera Cloud mobile UI optimizer is active.");
   }
 
