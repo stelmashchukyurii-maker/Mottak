@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const VERSION = "UT Lager v21 RAMPEFLYT<br>Oppdatert 07.08.2026 kl. 12:38";
+  const VERSION = "UT Lager v27 AKTIVE RAMPER<br>Oppdatert 07.08.2026 kl. 19:47";
   const nb = {
     statusNew:"Ny",statusWork:"I arbeid",statusRamp:"På rampe",statusSent:"Sendt",statusStorno:"Stornert",unknown:"Ukjent",
     readyRampButton:"Klar på rampe",
@@ -25,6 +25,12 @@
       if (order.status === "completed") return tr("statusSent");
       if (order.status === "cancelled") return tr("statusStorno");
       return order.status || tr("unknown");
+    };
+  } catch {}
+
+  try {
+    activeOrder = function productionActiveOrder(order) {
+      return !["completed", "cancelled"].includes(order.status);
     };
   } catch {}
 
