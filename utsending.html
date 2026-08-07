@@ -11,36 +11,38 @@
   <style>
     html,body{margin:0;min-height:100%;background:#0b1020}
     #utCore{display:block;width:100%;min-height:100vh;border:0;background:#0b1020}
-    #utFloatScan{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(16px,calc(env(safe-area-inset-bottom) + 10px));z-index:99999;display:flex;align-items:center;gap:8px;min-height:58px;padding:10px 16px;border:2px solid #75b7ff;border-radius:999px;background:#132445;color:#f5f7ff;font:900 16px Arial,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.48);cursor:pointer}
+    #utFloatScan{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(16px,calc(env(safe-area-inset-bottom) + 10px));z-index:99999;display:flex;align-items:center;gap:8px;min-height:60px;padding:10px 17px;border:2px solid #f4c430;border-radius:999px;background:#f4c430;color:#17130a;font:950 16px Arial,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.48);cursor:pointer}
     #utFloatScan .cam{font-size:25px;line-height:1}#utFloatScan:active{transform:scale(.97)}
-    #utFloatHint{position:fixed;right:14px;bottom:84px;z-index:99998;display:none;max-width:min(330px,calc(100vw - 28px));padding:10px 12px;border:1px solid #303b59;border-radius:12px;background:#151c30;color:#f5f7ff;font:700 13px/1.4 Arial,sans-serif;box-shadow:0 10px 25px rgba(0,0,0,.38)}
-    #utFloatHint.show{display:block}
-    @media(max-width:520px){#utFloatScan{right:10px;bottom:max(10px,calc(env(safe-area-inset-bottom) + 6px));min-height:54px;padding:8px 13px;font-size:14px}#utFloatScan .cam{font-size:23px}#utFloatHint{right:10px;bottom:74px}}
+    #utFloatHint{position:fixed;right:14px;bottom:88px;z-index:99998;display:none;max-width:min(330px,calc(100vw - 28px));padding:10px 12px;border:1px solid #303b59;border-radius:12px;background:#151c30;color:#f5f7ff;font:700 13px/1.4 Arial,sans-serif;box-shadow:0 10px 25px rgba(0,0,0,.38)}#utFloatHint.show{display:block}
+    @media(max-width:520px){#utFloatScan{right:10px;bottom:max(10px,calc(env(safe-area-inset-bottom) + 6px));min-height:56px;padding:8px 14px;font-size:14px}#utFloatScan .cam{font-size:23px}#utFloatHint{right:10px;bottom:78px}}
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260807-1244" title="UT — Lager og utsending"></iframe>
-<button id="utFloatScan" type="button"><span class="cam">📷</span><span id="utFloatScanText">Skann</span></button>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260807-1328" title="UT — Lager og utsending"></iframe>
+<button id="utFloatScan" type="button"><span class="cam">📷</span><span id="utFloatScanText">Kamera</span></button>
 <div id="utFloatHint"></div>
 <script>
 "use strict";
-const frame=document.getElementById("utCore");
-const floatScan=document.getElementById("utFloatScan");
-const floatText=document.getElementById("utFloatScanText");
-const floatHint=document.getElementById("utFloatHint");
-let observer=null,hintTimer=null;
+const frame=document.getElementById("utCore"),floatScan=document.getElementById("utFloatScan"),floatText=document.getElementById("utFloatScanText"),floatHint=document.getElementById("utFloatHint");let observer=null,hintTimer=null,openAttempts=0;
 function resize(){try{const doc=frame.contentDocument;if(!doc)return;frame.style.height=Math.max(innerHeight,doc.documentElement.scrollHeight,doc.body?.scrollHeight||0)+"px"}catch{}}
 function addScript(doc,id,src,onload){if(doc.getElementById(id)){onload?.();return}const script=doc.createElement("script");script.id=id;script.src=src;if(onload)script.onload=onload;doc.body.appendChild(script)}
-function loadSharedStock(doc){addScript(doc,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260806-1544");addScript(doc,"utStatusColors","utsending-status-colors.js?v=20260807-1230");if(!doc.getElementById("bamaSharedStockScript")){frame.contentWindow.BAMA_HOME_TARGET="utsending.html";const shared=doc.createElement("script");shared.id="bamaSharedStockScript";shared.src="shared-stock-status.js?v=20260806-1544";doc.body.appendChild(shared)}if(!doc.getElementById("bamaLagerstatusLinkScript")){const admin=doc.createElement("script");admin.id="bamaLagerstatusLinkScript";admin.src="lagerstatus-link.js?v=20260806-1544";doc.body.appendChild(admin)}}
+function loadSharedStock(doc){addScript(doc,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260807-1328");addScript(doc,"utStatusColors","utsending-status-colors.js?v=20260807-1230");if(!doc.getElementById("bamaSharedStockScript")){frame.contentWindow.BAMA_HOME_TARGET="utsending.html";const shared=doc.createElement("script");shared.id="bamaSharedStockScript";shared.src="shared-stock-status.js?v=20260806-1544";doc.body.appendChild(shared)}if(!doc.getElementById("bamaLagerstatusLinkScript")){const admin=doc.createElement("script");admin.id="bamaLagerstatusLinkScript";admin.src="lagerstatus-link.js?v=20260806-1544";doc.body.appendChild(admin)}}
 function loadPicker(doc){if(doc.getElementById("utAllowedPickerModule")){loadSharedStock(doc);return}const picker=doc.createElement("script");picker.id="utAllowedPickerModule";picker.src="utsending-allowed-picker.js?v=20260806-1544";picker.onload=()=>loadSharedStock(doc);doc.body.appendChild(picker)}
-function enhance(){const doc=frame.contentDocument;if(!doc)return;const version=doc.querySelector(".version");if(version)version.innerHTML="UT Lager v22 FLOATSCAN<br>Oppdatert 07.08.2026 kl. 12:44";doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");addScript(doc,"utProductionFlow","utsending-production-flow.js?v=20260807-1238",()=>{addScript(doc,"utLanguageSwitch","utsending-language.js?v=20260807-1052")});const existing=doc.getElementById("utGeminiModule");if(existing){loadPicker(doc)}else{const script=doc.createElement("script");script.id="utGeminiModule";script.src="utsending-photo-gemini.js?v=20260806-1544";script.onload=()=>loadPicker(doc);doc.body.appendChild(script)}observer?.disconnect();observer=new MutationObserver(()=>requestAnimationFrame(()=>{resize();updateFloatLabel()}));observer.observe(doc.body,{childList:true,subtree:true});resize();updateFloatLabel()}
-function language(){try{return frame.contentWindow.UT_LANG||"nb"}catch{return"nb"}}
-function text(){const l=language();return l==="uk"?{button:"Скан",open:"Спочатку відкрийте потрібну рампу.",done:"Ця рампа вже завершена.",go:"Камеру відкрито — можна сканувати."}:l==="pl"?{button:"Skanuj",open:"Najpierw otwórz właściwą rampę.",done:"Ta rampa jest już zakończona.",go:"Kamera otwarta — można skanować."}:{button:"Skann",open:"Åpne først riktig rampe.",done:"Denne rampen er allerede avsluttet.",go:"Kamera er åpnet — du kan skanne."}}
-function updateFloatLabel(){floatText.textContent=text().button}
+function language(){try{return frame.contentWindow.UT_LANG||localStorage.getItem("mottak_ut_language")||"nb"}catch{return"nb"}}
+function texts(){const l=language();return l==="uk"?{float:"Камера",big:"📷 Камера / телефон — сканувати на",open:"Спочатку відкрийте потрібну рампу.",done:"Ця рампа вже завершена."}:l==="pl"?{float:"Aparat",big:"📷 Aparat / telefon — skanuj do",open:"Najpierw otwórz właściwą rampę.",done:"Ta rampa jest już zakończona."}:{float:"Kamera",big:"📷 Kamera / telefon — skann til",open:"Åpne først riktig rampe.",done:"Denne rampen er allerede avsluttet."}}
+function currentOrder(){try{return typeof frame.contentWindow.current==="function"?frame.contentWindow.current():null}catch{return null}}
+function cameraUrl(order){return `ut-camera.html?order=${encodeURIComponent(order.id)}&ramp=${encodeURIComponent(order.ramp||"")}`}
 function showHint(msg){clearTimeout(hintTimer);floatHint.textContent=msg;floatHint.classList.add("show");hintTimer=setTimeout(()=>floatHint.classList.remove("show"),2600)}
-function activeOrder(){try{return typeof frame.contentWindow.current==="function"?frame.contentWindow.current():null}catch{return null}}
-function scrollToInnerElement(el){const outerTop=window.scrollY+frame.getBoundingClientRect().top;const innerTop=el.getBoundingClientRect().top+(frame.contentWindow.scrollY||0);window.scrollTo({top:Math.max(0,outerTop+innerTop-18),behavior:"smooth"})}
-floatScan.addEventListener("click",()=>{const doc=frame.contentDocument,order=activeOrder();if(!doc||!order||!doc.getElementById("detail")?.classList.contains("show")){showHint(text().open);return}if(["completed","cancelled"].includes(order.status)){showHint(text().done);return}const scanBox=doc.getElementById("scanBox");if(!scanBox){showHint(text().open);return}const photo=doc.querySelector('[data-mode="photo"]');if(photo&&!photo.disabled)photo.click();scanBox.classList.remove("hidden");scrollToInnerElement(scanBox);showHint(text().go);setTimeout(()=>{try{doc.getElementById("photoInput")?.focus()}catch{}},450)});
+function updateFloatLabel(){floatText.textContent=texts().float}
+function ensureCameraButton(doc){
+  const scanBox=doc.getElementById("scanBox"),order=currentOrder();if(!scanBox)return;
+  doc.querySelector('[data-mode="photo"]')?.classList.add("hidden");doc.getElementById("photoPanel")?.classList.add("hidden");
+  let button=doc.getElementById("utDedicatedCameraButton");if(!button){button=doc.createElement("button");button.id="utDedicatedCameraButton";button.type="button";button.style.cssText="width:100%;min-height:64px;margin:0 0 12px;padding:11px 14px;border:0;border-radius:14px;background:#f4c430;color:#17130a;font-weight:950;font-size:18px;box-shadow:0 8px 22px rgba(244,196,48,.17);cursor:pointer";scanBox.insertAdjacentElement("beforebegin",button)}
+  const ramp=order?.ramp||"—";button.textContent=`${texts().big} RAMPE ${ramp}`;button.disabled=!order||["completed","cancelled"].includes(order.status);button.onclick=()=>{const o=currentOrder();if(!o){showHint(texts().open);return}if(["completed","cancelled"].includes(o.status)){showHint(texts().done);return}location.href=cameraUrl(o)};
+}
+function openRequested(){const id=new URLSearchParams(location.search).get("open");if(!id)return;try{const win=frame.contentWindow;if(typeof win.openOrder==="function"&&Array.isArray(win.orders)&&win.orders.some(o=>String(o.id)===String(id))){win.openOrder(id,true);history.replaceState(null,"","utsending.html");return}}catch{}if(openAttempts++<25)setTimeout(openRequested,300)}
+function enhance(){const doc=frame.contentDocument;if(!doc)return;const version=doc.querySelector(".version");if(version)version.innerHTML="UT Lager v23 KAMERA<br>Oppdatert 07.08.2026 kl. 13:28";doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");addScript(doc,"utProductionFlow","utsending-production-flow.js?v=20260807-1238",()=>addScript(doc,"utLanguageSwitch","utsending-language.js?v=20260807-1052"));loadPicker(doc);ensureCameraButton(doc);observer?.disconnect();observer=new MutationObserver(()=>requestAnimationFrame(()=>{resize();updateFloatLabel();ensureCameraButton(doc)}));observer.observe(doc.body,{childList:true,subtree:true});resize();updateFloatLabel();setTimeout(openRequested,350)}
+floatScan.addEventListener("click",()=>{const order=currentOrder();if(!order){showHint(texts().open);return}if(["completed","cancelled"].includes(order.status)){showHint(texts().done);return}location.href=cameraUrl(order)});
 frame.addEventListener("load",enhance);addEventListener("resize",resize);setInterval(updateFloatLabel,1000);
 </script>
 </body>
