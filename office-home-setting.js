@@ -8,6 +8,7 @@
   const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
   const SETTING_KEY = "ut_office_home_button";
   const LEGACY_LOCAL_KEY = "bamavaremottak_home_return_v1:bestilling.html";
+  const LATEST_CAMERA_HREF = "camera-live-v414.html";
 
   const headers = {
     apikey: SUPABASE_KEY,
@@ -23,6 +24,26 @@
   function isMainPage() {
     const file = location.pathname.split("/").filter(Boolean).pop() || "";
     return !window.frameElement && (file === "index.html" || file === "Mottak" || file === "");
+  }
+
+  function ensureLatestCameraLinks() {
+    if (!isMainPage()) return false;
+    if (typeof pages === "undefined" || !Array.isArray(pages)) return false;
+
+    let changed = false;
+    pages.forEach(page => {
+      if (page.id === "camera-v4" || page.id === "inn-camera") {
+        if (page.href !== LATEST_CAMERA_HREF) {
+          page.href = LATEST_CAMERA_HREF;
+          changed = true;
+        }
+        if (page.id === "camera-v4") {
+          page.title = "SISTE ARBEIDSLENKE — KAMERA CLOUD v4.14";
+          page.status = "SISTE VERSJON";
+        }
+      }
+    });
+    return changed;
   }
 
   function ensureLagerstatusPage() {
@@ -53,9 +74,10 @@
     return true;
   }
 
-  function renderMainWithLagerstatus() {
-    const added = ensureLagerstatusPage();
-    if (added && typeof render === "function") render();
+  function renderMainEnhancements() {
+    const cameraChanged = ensureLatestCameraLinks();
+    const lagerstatusAdded = ensureLagerstatusPage();
+    if ((cameraChanged || lagerstatusAdded) && typeof render === "function") render();
   }
 
   function setLegacyValue(enabled) {
@@ -149,7 +171,7 @@
   let busy = false;
 
   async function start() {
-    renderMainWithLagerstatus();
+    renderMainEnhancements();
     updateSwitch(currentValue, "loading");
     try {
       currentValue = await readSetting();
@@ -182,6 +204,7 @@
   document.addEventListener("change", handleChange);
   document.addEventListener("bama:office-switch-rendered", () => {
     apply(currentValue);
+    ensureLatestCameraLinks();
     ensureLagerstatusPage();
   });
 
