@@ -21,7 +21,7 @@
 </head>
 <body class="notranslate">
 <main class="app">
-  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v25 KONTAKT<br>Oppdatert 07.08.2026 kl. 11:12</div></div>
+  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v26 REDIGERING<br>Oppdatert 07.08.2026 kl. 13:39</div></div>
   <h1>UT — Kontor</h1>
   <div class="top-stock-line loading" id="topStockLine" aria-label="Varer på lager">
     <div class="top-stock-item" id="topStockBunner">Bunner: laster…</div>
@@ -89,7 +89,7 @@
 
   <details class="panel" id="stockDetails"><summary><span>Lageroversikt</span><span><span id="stockSummary">Laster…</span> <span class="summary-arrow">▼</span></span></summary><div class="panel-body"><div class="overview"><div class="overview-row total"><div class="name">Fysisk på lager</div><div class="value" id="physicalValue">0 Bunner · 0 hyller</div></div><div class="overview-row"><div class="name">Tilgjengelig</div><div class="value" id="availableValue">0 Bunner · 0 hyller</div></div><div class="overview-row bunner"><div class="name">Bunner</div><div class="value" id="bunnerValue">0 stabler × 10 = 0 stk.</div></div><div class="overview-row"><div class="name">Hyller x30</div><div class="value" id="h30Value">0 sett</div></div><div class="overview-row"><div class="name">Hyller x60</div><div class="value" id="h60Value">0 sett</div></div></div><div class="pending" id="pendingValue">Pending: 0 Bunner · 0 Hyller x30 · 0 Hyller x60</div></div></details>
 
-  <details class="panel" id="historyDetails" open><summary><span>Aktive ramper</span><span><span id="historyCount">0</span> <span class="summary-arrow">▼</span></span></summary><div class="panel-body"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px"><small class="field-help">På lager → På rampe → Sendt. Sendte og stornert oppdrag ligger i historikken og vises ikke her.</small><button class="small-btn" id="refresh" type="button">Oppdater</button></div><div class="history" id="history"><div class="empty">Laster ramper…</div></div></div></details>
+  <details class="panel" id="historyDetails" open><summary><span>Aktive ramper</span><span><span id="historyCount">0</span> <span class="summary-arrow">▼</span></span></summary><div class="panel-body"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px"><small class="field-help">På lager → På rampe → Sendt. Alle oppdrag kan redigeres frem til Sendt. Sendte og stornert oppdrag ligger i historikken og vises ikke her.</small><button class="small-btn" id="refresh" type="button">Oppdater</button></div><div class="history" id="history"><div class="empty">Laster ramper…</div></div></div></details>
 </main>
 <script>(()=>{const nativeSetInterval=window.setInterval.bind(window);window.setInterval=(callback,delay,...args)=>{if(Number(delay)<=15000)return 0;return nativeSetInterval(callback,delay,...args)}})();</script>
 <script src="bestilling-v11.js?v=20260807-1112"></script>
@@ -99,5 +99,6 @@
 <script src="bestilling-top-stock.js?v=20260807-1024"></script>
 <script src="bestilling-warehouse-model.js?v=20260807-1024"></script>
 <script src="office-home-setting.js?v=20260807-1024"></script>
+<script src="bestilling-edit-unsent.js?v=20260807-1339"></script>
 </body>
 </html>
