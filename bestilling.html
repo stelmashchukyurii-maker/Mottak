@@ -9,11 +9,19 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>UT — Kontor / Rampe</title>
-<link rel="stylesheet" href="bestilling-v11.css?v=20260807-1024">
+<link rel="stylesheet" href="bestilling-v11.css?v=20260807-1112">
+<style>
+.future-fields .active-field{padding:10px 12px;border:2px solid var(--line);border-radius:13px;background:var(--dark)}
+.future-fields .active-field:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(244,196,48,.12)}
+.future-fields .active-field label{display:block;margin:0 0 7px;color:var(--text);font-size:16px;font-weight:950}
+.future-fields .active-field input{width:100%;min-height:46px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#070b14;color:var(--text);font-size:16px;font-weight:850;outline:none}
+.future-fields .active-field input:focus{border-color:var(--accent);box-shadow:none}
+.future-fields .active-field input::placeholder{color:var(--muted);font-weight:600}
+</style>
 </head>
 <body class="notranslate">
 <main class="app">
-  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v24 LAGER-RAMPE-SENDT<br>Oppdatert 07.08.2026 kl. 10:24</div></div>
+  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v25 KONTAKT<br>Oppdatert 07.08.2026 kl. 11:12</div></div>
   <h1>UT — Kontor</h1>
   <div class="top-stock-line loading" id="topStockLine" aria-label="Varer på lager">
     <div class="top-stock-item" id="topStockBunner">Bunner: laster…</div>
@@ -42,8 +50,10 @@
       <div class="field-help">Velg rampe 28, 29, 30, 31, 32, 33 eller 34. Det kan bare finnes ett aktivt oppdrag per rampe.</div>
     </div>
 
-    <div class="future-fields" aria-label="Fremtidige felt">
-      <div><span>Mottaker</span><small>legges til senere</small></div><div><span>Adresse</span><small>legges til senere</small></div><div><span>Dato</span><small>legges til senere</small></div><div><span>CMR</span><small>legges til senere</small></div>
+    <div class="future-fields" aria-label="Oppdragsinformasjon">
+      <div class="active-field"><label for="mottaker">Mottaker</label><input id="mottaker" type="text" autocomplete="organization" placeholder="Skriv mottaker"></div>
+      <div class="active-field"><label for="transporter">Transportør</label><input id="transporter" type="text" autocomplete="organization" placeholder="Skriv transportør"></div>
+      <div><span>Dato</span><small>legges til senere</small></div><div><span>CMR</span><small>legges til senere</small></div>
     </div>
 
     <div class="field">
@@ -82,7 +92,8 @@
   <details class="panel" id="historyDetails" open><summary><span>Aktive ramper</span><span><span id="historyCount">0</span> <span class="summary-arrow">▼</span></span></summary><div class="panel-body"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px"><small class="field-help">På lager → På rampe → Sendt. Sendte og stornert oppdrag ligger i historikken og vises ikke her.</small><button class="small-btn" id="refresh" type="button">Oppdater</button></div><div class="history" id="history"><div class="empty">Laster ramper…</div></div></div></details>
 </main>
 <script>(()=>{const nativeSetInterval=window.setInterval.bind(window);window.setInterval=(callback,delay,...args)=>{if(Number(delay)<=15000)return 0;return nativeSetInterval(callback,delay,...args)}})();</script>
-<script src="bestilling-v11.js?v=20260807-1024"></script>
+<script src="bestilling-v11.js?v=20260807-1112"></script>
+<script src="bestilling-party-fields.js?v=20260807-1112"></script>
 <script src="bestilling-stock-balance.js?v=20260807-1024"></script>
 <script src="bestilling-history-lines.js?v=20260807-1024"></script>
 <script src="bestilling-top-stock.js?v=20260807-1024"></script>
