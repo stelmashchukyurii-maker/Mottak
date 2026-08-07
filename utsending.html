@@ -7,7 +7,7 @@ html,body{margin:0;min-height:100%;background:#0b1020}#utCore{display:block;widt
 </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260807-2050" title="UT — Lager og utsending"></iframe><button id="utFloatScan" type="button">📷 <span id="utFloatText">Kamera</span></button><div id="utHint"></div>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260807-2055" title="UT — Lager og utsending"></iframe><button id="utFloatScan" type="button">📷 <span id="utFloatText">Kamera</span></button><div id="utHint"></div>
 <script>
 "use strict";
 const f=document.getElementById("utCore"),scan=document.getElementById("utFloatScan"),scanText=document.getElementById("utFloatText"),hint=document.getElementById("utHint");let obs,timer,tries=0;
@@ -16,8 +16,8 @@ function add(d,id,src){if(d.getElementById(id))return;const s=d.createElement("s
 function lang(){try{return f.contentWindow.UT_LANG||localStorage.getItem("mottak_ut_language")||"nb"}catch{return"nb"}}
 function tx(){return lang()==="uk"?{cam:"Камера",open:"Спочатку відкрийте потрібну рампу.",done:"Ця рампа вже завершена.",camera:"📷 Камера / телефон — сканувати на",bulk:"☑ Масово вибрати зі складу для"}:lang()==="pl"?{cam:"Aparat",open:"Najpierw otwórz właściwą rampę.",done:"Ta rampa jest już zakończona.",camera:"📷 Aparat / telefon — skanuj do",bulk:"☑ Wybierz wiele z magazynu do"}:{cam:"Kamera",open:"Åpne først riktig rampe.",done:"Denne rampen er allerede avsluttet.",camera:"📷 Kamera / telefon — skann til",bulk:"☑ Velg mange fra lager til"}}
 function order(){try{return typeof f.contentWindow.current==="function"?f.contentWindow.current():null}catch{return null}}
-function cameraUrl(o){return`ut-camera-v5.html?order=${encodeURIComponent(o.id)}&ramp=${encodeURIComponent(o.ramp||"")}&v=20260807-2050`}
-function bulkUrl(o){return`ut-bulk.html?order=${encodeURIComponent(o.id)}&ramp=${encodeURIComponent(o.ramp||"")}&v=20260807-2050`}
+function cameraUrl(o){return`ut-camera-v5.html?order=${encodeURIComponent(o.id)}&ramp=${encodeURIComponent(o.ramp||"")}&v=20260807-2055`}
+function bulkUrl(o){return`ut-bulk.html?order=${encodeURIComponent(o.id)}&ramp=${encodeURIComponent(o.ramp||"")}&v=20260807-2055`}
 function note(s){clearTimeout(timer);hint.textContent=s;hint.classList.add("show");timer=setTimeout(()=>hint.classList.remove("show"),2600)}
 function goCamera(){const o=order();if(!o)return note(tx().open);if(["completed","cancelled"].includes(o.status))return note(tx().done);location.href=cameraUrl(o)}
 function hideStockOverview(d){
@@ -57,7 +57,7 @@ function installStableRampOpen(d){
   },true);
 }
 function openRequested(){const id=new URLSearchParams(location.search).get("open");if(!id)return;try{if(typeof f.contentWindow.openOrder==="function"){stableOpenRamp(id);history.replaceState(null,"","utsending.html");return}}catch{}if(tries++<25)setTimeout(openRequested,300)}
-function enhance(){const d=f.contentDocument;if(!d)return;f.contentWindow.BAMA_HOME_TARGET="utsending.html";const v=d.querySelector(".version");if(v)v.innerHTML="UT Lager v27.4 STABIL RAMPE<br>Oppdatert 07.08.2026 kl. 20:50";d.querySelectorAll("a[href]").forEach(a=>a.target="_top");add(d,"utProductionFlow","utsending-production-flow.js?v=20260807-2050");add(d,"utLanguageSwitch","utsending-language.js?v=20260807-2050");add(d,"utAllowedPickerModule","utsending-allowed-picker.js?v=20260807-2050");add(d,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260807-2050");add(d,"utStatusColors","utsending-status-colors.js?v=20260807-2050");add(d,"bamaSharedStockScript","shared-stock-status.js?v=20260807-2050");add(d,"bamaLagerstatusLinkScript","lagerstatus-link.js?v=20260807-2050");add(d,"utProductStockV273","utsending-product-stock-v273.js?v=20260807-2050");hideStockOverview(d);installStableRampOpen(d);tools(d);obs?.disconnect();obs=new MutationObserver(()=>requestAnimationFrame(()=>{resize();hideStockOverview(d);tools(d);scanText.textContent=tx().cam}));obs.observe(d.body,{childList:true,subtree:true});resize();scanText.textContent=tx().cam;setTimeout(openRequested,450)}
+function enhance(){const d=f.contentDocument;if(!d)return;f.contentWindow.BAMA_HOME_TARGET="utsending.html";const v=d.querySelector(".version");if(v)v.innerHTML="UT Lager v27.5 KOMPAKT TILKOBLING<br>Oppdatert 07.08.2026 kl. 20:55";d.querySelectorAll("a[href]").forEach(a=>a.target="_top");add(d,"utProductionFlow","utsending-production-flow.js?v=20260807-2055");add(d,"utLanguageSwitch","utsending-language.js?v=20260807-2055");add(d,"utAllowedPickerModule","utsending-allowed-picker.js?v=20260807-2055");add(d,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260807-2055");add(d,"utStatusColors","utsending-status-colors.js?v=20260807-2055");add(d,"bamaSharedStockScript","shared-stock-status.js?v=20260807-2055");add(d,"bamaLagerstatusLinkScript","lagerstatus-link.js?v=20260807-2055");add(d,"utProductStockV273","utsending-product-stock-v273.js?v=20260807-2055");add(d,"utCompactConnectionV275","utsending-compact-connection-v275.js?v=20260807-2055");hideStockOverview(d);installStableRampOpen(d);tools(d);obs?.disconnect();obs=new MutationObserver(()=>requestAnimationFrame(()=>{resize();hideStockOverview(d);tools(d);scanText.textContent=tx().cam}));obs.observe(d.body,{childList:true,subtree:true});resize();scanText.textContent=tx().cam;setTimeout(openRequested,450)}
 scan.onclick=goCamera;f.addEventListener("load",enhance);addEventListener("resize",resize);setInterval(()=>scanText.textContent=tx().cam,1000);
 </script>
 </body></html>
