@@ -14,7 +14,7 @@
   </style>
 </head>
 <body>
-<iframe id="utCore" src="utsending-core-v7.html?v=20260807-1052" title="UT — Lager og utsending"></iframe>
+<iframe id="utCore" src="utsending-core-v7.html?v=20260807-1230" title="UT — Lager og utsending"></iframe>
 <script>
 "use strict";
 const frame=document.getElementById("utCore");
@@ -30,6 +30,7 @@ function addScript(doc,id,src,onload){
 }
 function loadSharedStock(doc){
   addScript(doc,"bamaUpperNumberPolicy","upper-number-policy.js?v=20260806-1544");
+  addScript(doc,"utStatusColors","utsending-status-colors.js?v=20260807-1230");
   if(!doc.getElementById("bamaSharedStockScript")){
     frame.contentWindow.BAMA_HOME_TARGET="utsending.html";
     const shared=doc.createElement("script");
@@ -56,7 +57,7 @@ function enhance(){
   const doc=frame.contentDocument;
   if(!doc)return;
   const version=doc.querySelector(".version");
-  if(version)version.innerHTML="UT Lager v19 SPRÅK<br>Oppdatert 07.08.2026 kl. 10:52";
+  if(version)version.innerHTML="UT Lager v20 STATUS + IDÉBANK<br>Oppdatert 07.08.2026 kl. 12:30";
   doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
   addScript(doc,"utProductionFlow","utsending-production-flow.js?v=20260807-1052",()=>{
     addScript(doc,"utLanguageSwitch","utsending-language.js?v=20260807-1052");
@@ -79,5 +80,6 @@ function enhance(){
 frame.addEventListener("load",enhance);
 addEventListener("resize",resize);
 </script>
+<script src="idebank-float.js?v=20260807-1230"></script>
 </body>
 </html>
