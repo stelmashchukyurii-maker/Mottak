@@ -12,6 +12,8 @@
   style.textContent = `
     body.ut-clean-v28 .subtitle{display:none!important}
     body.ut-clean-v28 > .app, body.ut-clean-v28 .app{padding-top:10px!important}
+    body.ut-clean-v28 .top > .version{display:none!important}
+    body.ut-clean-v28 .ut-v28-badge{margin-left:auto;color:#aab4ce;font-size:10px;line-height:1.35;text-align:right}
 
     body.ut-clean-v28 .connection-card{padding:10px 12px!important;margin:9px 0!important}
     body.ut-clean-v28 .connection-card .head{align-items:center!important;margin:0!important}
@@ -68,9 +70,13 @@
   function compactHeader() {
     const title = document.querySelector("main.app > h1, .app > h1, h1");
     if (title && title.textContent !== "UT — Ramper") title.textContent = "UT — Ramper";
-    const version = document.querySelector(".version");
-    if (version && !/v28/.test(version.textContent || "")) {
-      version.innerHTML = "UT Lager v28 RYDDIG<br>Oppdatert 07.08.2026 kl. 20:01";
+
+    const top = document.querySelector(".top");
+    if (top && !top.querySelector(".ut-v28-badge")) {
+      const badge = document.createElement("div");
+      badge.className = "ut-v28-badge";
+      badge.innerHTML = "UT Lager v28 RYDDIG<br>07.08.2026 kl. 20:01";
+      top.appendChild(badge);
     }
   }
 
@@ -129,13 +135,12 @@
       chevron.textContent = "⌄";
       chevron.setAttribute("aria-label", "Vis eller skjul lagerstatus");
       head.appendChild(chevron);
-      const toggle = event => {
+      head.addEventListener("click", event => {
         if (event.target.closest("a")) return;
         const collapsed = !card.classList.contains("ut-stock-collapsed");
         card.classList.toggle("ut-stock-collapsed", collapsed);
         localSet(STOCK_KEY, collapsed ? "true" : "false");
-      };
-      head.addEventListener("click", toggle);
+      });
     }
 
     const collapsed = localGet(STOCK_KEY, "true") !== "false";
@@ -161,6 +166,9 @@
   setInterval(() => {
     const card = document.getElementById("bamaSharedStock");
     const summary = card?.querySelector(".ut-stock-summary");
-    if (card && summary) summary.textContent = stockSummary(card);
+    if (card && summary) {
+      const next = stockSummary(card);
+      if (summary.textContent !== next) summary.textContent = next;
+    }
   }, 1500);
 })();
