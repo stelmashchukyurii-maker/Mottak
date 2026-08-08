@@ -25,6 +25,7 @@
     cancel_ut_order: "ut_test_cancel_order",
     office_edit_unsent_ut_order: "ut_test_office_edit_order",
     update_ut_order_before_dispatch: "ut_test_office_edit_order",
+    register_ut_scan_only: "ut_test_register_scan_only",
   };
 
   function requestMethod(input, init) {
@@ -87,7 +88,7 @@
     isolated: true,
     tables: { ...tableMap },
     rpcs: { ...rpcMap },
-    version: "1.0.0",
+    version: "1.1.0",
     updatedAt: "2026-08-08T10:41:00+02:00",
   };
 })();
