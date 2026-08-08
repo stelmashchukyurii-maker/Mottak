@@ -4,7 +4,7 @@
   if (window.__BAMA_GREEN_MARKER__) return;
   window.__BAMA_GREEN_MARKER__ = true;
 
-  const UPDATED = "08.08.2026 kl. 16:07";
+  const UPDATED = "08.08.2026 kl. 16:18";
   const PREFIX = "GREEN — ";
 
   if (!document.title.startsWith(PREFIX)) {
@@ -50,5 +50,46 @@
     fullFrame.classList.add("bama-green-fullframe");
   } else {
     document.body.classList.add("bama-green-offset");
+  }
+
+  function isGreenOffice() {
+    return location.pathname.endsWith("/green/bestilling.html");
+  }
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[data-green-feature="${src}"]`)) return resolve();
+      const script = document.createElement("script");
+      script.src = `${src}?v=20260808-1618`;
+      script.dataset.greenFeature = src;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`Kunne ikke laste ${src}`));
+      document.body.appendChild(script);
+    });
+  }
+
+  async function loadGreenOffice() {
+    if (!isGreenOffice() || window.__BAMA_GREEN_OFFICE_FEATURES_LOADING__) return;
+    window.__BAMA_GREEN_OFFICE_FEATURES_LOADING__ = true;
+    try {
+      await loadScript("products.js");
+      await loadScript("ut-kontor-products.js");
+      await loadScript("ut-kontor-history-visuals.js");
+      await loadScript("ut-test-language.js");
+      await loadScript("ut-kontor-green-adapter.js");
+    } catch (error) {
+      console.error("[GREEN UT Kontor]", error);
+      const box = document.getElementById("utError");
+      if (box) {
+        box.textContent = `GREEN startfeil: ${error.message || error}`;
+        box.classList.add("show");
+      }
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadGreenOffice, { once: true });
+  } else {
+    loadGreenOffice();
   }
 })();
