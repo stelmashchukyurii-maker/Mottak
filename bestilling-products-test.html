@@ -12,7 +12,7 @@
     *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
     body{display:flex;flex-direction:column}.bar{flex:0 0 auto;padding:10px 12px;border-bottom:2px solid var(--accent);background:#10172a;box-shadow:0 4px 16px rgba(0,0,0,.28);z-index:5}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.bar>.row:first-child{align-items:flex-start;flex-wrap:nowrap}.bar>.row:first-child>div:first-child{flex:1 1 auto;min-width:0}.bar>.row:nth-of-type(2){display:block}.title{color:var(--accent);font-weight:1000;font-size:16px;line-height:19px;min-height:38px}.sub{margin-top:3px;color:var(--muted);font-size:11px;line-height:15px;min-height:30px}.nav{display:grid;grid-template-columns:80px minmax(0,1fr) 108px;gap:6px;width:100%}.nav a,.lang button{display:flex;align-items:center;justify-content:center;min-height:38px;padding:6px 8px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--text);text-decoration:none;font-size:10px;font-weight:950;text-align:center;line-height:1.15}.nav a.test{border-color:var(--ok);color:var(--ok)}.lang{display:flex;justify-content:flex-end;gap:4px;flex:0 0 104px;width:104px}.lang button{width:50px;font-size:11px}.lang button.active{border-color:var(--accent);background:var(--accent);color:#17130a}.badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:32px;margin-top:7px}.badge{padding:5px 8px;border:1px solid rgba(72,213,151,.45);border-radius:999px;background:rgba(72,213,151,.08);color:var(--ok);font-size:10px;font-weight:900}.badge.info{border-color:rgba(117,183,255,.45);background:rgba(117,183,255,.08);color:#cce4ff}iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}#loader{position:fixed;inset:0;top:154px;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font-weight:900;z-index:4}@media(max-width:600px){.bar{padding:9px 10px}.title{font-size:15px}.lang{flex-basis:100px;width:100px}.lang button{width:48px}.nav{grid-template-columns:76px minmax(0,1fr) 100px}.nav a{padding:5px 5px;font-size:9.5px}}
   </style>
-  <script src="./products.js?v=20260808-1404"></script>
+  <script src="./products.js?v=20260808-1412"></script>
 </head>
 <body>
   <header class="bar">
@@ -29,7 +29,7 @@
   <iframe id="app" title="TEST — UT Kontor"></iframe>
 <script>
 "use strict";
-const VERSION="20260808-1404",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const VERSION="20260808-1412",frame=document.getElementById("app"),loader=document.getElementById("loader");
 const langKey="mottak_ut_language";
 function language(){return localStorage.getItem(langKey)==="uk"?"uk":"nb"}
 function isUk(){return language()==="uk"}
@@ -90,7 +90,7 @@ function patchLabels(doc){
   const ids=[["bunner","bunnerQty"],["hyller30","h30Qty"],["hyller60","h60Qty"]];
   ids.forEach(([id,input])=>{const p=window.BAMA_PRODUCTS?.getProductById?.(id),el=doc.getElementById(input)?.closest("article")?.querySelector("strong");if(p&&el)el.textContent=window.BAMA_PRODUCTS.getProductName(p,uk?"uk":"no")});
   const home=doc.querySelector("a.home");if(home)home.href="test-home.html";
-  const v=doc.querySelector(".version");if(v)v.innerHTML=`TEST UT Kontor v2.9 · BUNDLE TOTAL<br>${uk?"Оновлено":"Oppdatert"} 08.08.2026 kl. 14:04`;
+  const v=doc.querySelector(".version");if(v)v.innerHTML=`TEST UT Kontor v2.10 · RAMP TOTAL<br>${uk?"Оновлено":"Oppdatert"} 08.08.2026 kl. 14:12`;
 }
 function patchExtraLanguage(doc){
   const uk=isUk();
