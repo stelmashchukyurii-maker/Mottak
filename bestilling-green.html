@@ -6,9 +6,11 @@
 <meta name="theme-color" content="#0b1020">
 <meta name="google" content="notranslate">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>GREEN — UT Kontor v29</title>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>GREEN — UT Kontor v30</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#10172a;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--green:#48d597;--yellow:#f4c430}
+:root{color-scheme:dark;--bg:#0b1020;--panel:#10172a;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--green:#48d597;--blue:#75b7ff}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}body{display:flex;flex-direction:column}
 .bar{flex:0 0 auto;padding:10px 12px;border-bottom:2px solid var(--green);background:var(--panel);box-shadow:0 4px 16px rgba(0,0,0,.28);z-index:5}
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.title{color:var(--green);font-weight:1000;font-size:17px;line-height:1.2}.sub{margin-top:3px;color:var(--muted);font-size:11px;line-height:1.4}
@@ -17,36 +19,52 @@
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.badge{padding:5px 8px;border:1px solid rgba(72,213,151,.45);border-radius:999px;background:rgba(72,213,151,.08);color:var(--green);font-size:10px;font-weight:900}.badge.dim{border-color:rgba(117,183,255,.35);color:#cce4ff;background:rgba(117,183,255,.06)}
 iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}#loader{position:fixed;inset:0;top:154px;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);font-weight:900;z-index:4;text-align:center}
 </style>
-<script src="./products.js?v=20260808-1340"></script>
+<script src="./products.js?v=20260808-2107"></script>
 </head>
 <body class="notranslate">
 <header class="bar">
   <div class="top">
-    <div><div class="title" id="greenTitle">GREEN — UT Kontor v29</div><div class="sub" id="greenSub">Parallell arbeidsversjon. Isolerte data til GREEN-kjeden er ferdig godkjent.</div></div>
+    <div>
+      <div class="title" id="greenTitle">GREEN — UT Kontor v30</div>
+      <div class="sub" id="greenSub">Parallell klone. Bestilling og UT Lager bruker samme isolerte sandbox-data. Production-skriving er blokkert.</div>
+    </div>
     <div class="lang"><button id="noBtn" type="button">NO</button><button id="uaBtn" type="button">UA</button></div>
   </div>
   <nav class="nav"><a href="green-home.html">⌂ HOME</a><a class="current" href="utsending-green.html">✓ UT Lager GREEN</a><a href="camera-green.html">📷 Kamera GREEN</a></nav>
-  <div class="badges"><span class="badge">GREEN · PRIVAT RUTE</span><span class="badge dim" id="productBadge">products.js</span></div>
+  <div class="badges">
+    <span class="badge">GREEN · PRIVAT RUTE</span>
+    <span class="badge">PROD WRITE · BLOKKERT</span>
+    <span class="badge dim" id="productBadge">products.js</span>
+  </div>
 </header>
-<div id="loader">Laster GREEN — UT Kontor v29…</div>
-<iframe id="app" title="GREEN — UT Kontor v29"></iframe>
+<div id="loader">Laster GREEN — UT Kontor v30…</div>
+<iframe id="app" title="GREEN — UT Kontor v30"></iframe>
 <script>
 "use strict";
-const VERSION="20260808-1447";
+const VERSION="20260808-2107";
 const LANG_KEY="mottak_ut_language";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
+let brandTimer=0;
 function lang(){return localStorage.getItem(LANG_KEY)==="uk"?"uk":"nb"}
 function uk(){return lang()==="uk"}
 function paint(){
   document.getElementById("noBtn").classList.toggle("active",!uk());
   document.getElementById("uaBtn").classList.toggle("active",uk());
   document.documentElement.lang=uk()?"uk":"nb";
-  document.getElementById("greenTitle").textContent=uk()?"GREEN — UT Офіс v29":"GREEN — UT Kontor v29";
-  document.getElementById("greenSub").textContent=uk()?"Паралельна робоча версія. Дані GREEN поки ізольовані від BLUE-користувачів.":"Parallell arbeidsversjon. GREEN-data er foreløpig isolert fra BLUE-brukere.";
+  document.getElementById("greenTitle").textContent=uk()?"GREEN — UT Офіс v30":"GREEN — UT Kontor v30";
+  document.getElementById("greenSub").textContent=uk()
+    ?"Паралельний клон. Замовлення та UT Склад використовують одну ізольовану sandbox-базу. Запис у production заблокований."
+    :"Parallell klone. Bestilling og UT Lager bruker samme isolerte sandbox-data. Production-skriving er blokkert.";
   const p=window.BAMA_PRODUCTS?.getActiveProducts?.()||[];
   document.getElementById("productBadge").textContent=`products.js v${window.BAMA_PRODUCTS?.meta?.version||"?"} · ${p.length}`;
 }
 function inject(doc,src){return new Promise((ok,bad)=>{const s=doc.createElement("script");s.src=src;s.onload=ok;s.onerror=bad;doc.body.appendChild(s)})}
+function brandInner(){
+  const doc=frame.contentDocument;if(!doc?.body)return;
+  const version=doc.querySelector(".version");
+  if(version)version.innerHTML=`GREEN UT Kontor v30 · FORLENGERE + LIVE TOTALS<br>${uk()?"Оновлено":"Oppdatert"} 08.08.2026 kl. 21:07`;
+  const home=doc.querySelector("a.home");if(home)home.href="green-home.html";
+}
 async function build(){
   paint();
   try{
@@ -54,7 +72,7 @@ async function build(){
     if(!r.ok)throw new Error(`HTTP ${r.status}`);
     let html=await r.text();
     html=html.replace(/<script src="office-home-setting\.js[^\"]*"><\/script>/i,"");
-    html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
+    html=html.replace("</head>",`<script src="./green-ut-api.js?v=${VERSION}"><\/script></head>`);
     frame.srcdoc=html;
   }catch(e){loader.textContent=`GREEN startfeil: ${e.message||e}`}
 }
@@ -63,6 +81,7 @@ function applyLanguage(){
   const doc=frame.contentDocument,win=frame.contentWindow;if(!doc?.body)return;
   win.UT_TEST_LANG?.apply?.();
   win.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
+  brandInner();
 }
 frame.addEventListener("load",async()=>{
   try{
@@ -71,15 +90,15 @@ frame.addEventListener("load",async()=>{
     await inject(doc,`ut-kontor-products.js?v=${VERSION}`);
     await inject(doc,`ut-kontor-history-visuals.js?v=${VERSION}`);
     await inject(doc,`ut-test-language.js?v=${VERSION}`);
-    const version=doc.querySelector(".version");
-    if(version)version.innerHTML=`GREEN UT Kontor v29 · PARALLELL<br>${uk()?"Оновлено":"Oppdatert"} 08.08.2026 kl. 14:47`;
-    applyLanguage();setTimeout(applyLanguage,300);
+    applyLanguage();
+    setTimeout(applyLanguage,300);
+    clearInterval(brandTimer);brandTimer=setInterval(brandInner,1200);
     loader.style.display="none";
   }catch(e){loader.textContent=`GREEN startfeil: ${e.message||e}`}
 });
 document.getElementById("noBtn").addEventListener("click",()=>{localStorage.setItem(LANG_KEY,"nb");applyLanguage()});
 document.getElementById("uaBtn").addEventListener("click",()=>{localStorage.setItem(LANG_KEY,"uk");applyLanguage()});
-build();
+paint();build();
 </script>
 </body>
 </html>
