@@ -19,14 +19,14 @@
     <div class="top"><div><h1>Produkter</h1><div class="subtitle">Sentral produktliste for BaMavaremottak</div></div><div class="badge" id="versionBadge">Laster register …</div></div>
     <div class="notice">Denne siden er foreløpig kun for visning. Produksjonssidene er ikke koblet til produktregisteret ennå. TEST-sidene kan lese registeret.</div>
     <section class="grid" id="productGrid" aria-live="polite"></section>
-    <footer><div id="footerVersion"></div><div id="footerUpdated"></div><div>Products view v1.1 · Oppdatert 08.08.2026 kl. 13:35 · Europe/Oslo</div></footer>
+    <footer><div id="footerVersion"></div><div id="footerUpdated"></div><div>Products view v1.2 · Oppdatert 08.08.2026 kl. 13:40 · Europe/Oslo</div></footer>
   </main>
-  <script src="./products.js?v=20260808-1256"></script>
+  <script src="./products.js?v=20260808-1340"></script>
   <script>
     (function(){
       const api=window.BAMA_PRODUCTS,grid=document.getElementById("productGrid"),versionBadge=document.getElementById("versionBadge"),footerVersion=document.getElementById("footerVersion"),footerUpdated=document.getElementById("footerUpdated");
       if(!api){grid.innerHTML='<div class="empty">Produktregisteret kunne ikke lastes.</div>';versionBadge.textContent="Register ikke tilgjengelig";return}
-      versionBadge.textContent=`Register v${api.meta.version} · view 1.1`;footerVersion.textContent=`Produktregister v${api.meta.version} · schema ${api.meta.schemaVersion}`;
+      versionBadge.textContent=`Register v${api.meta.version} · view 1.2`;footerVersion.textContent=`Produktregister v${api.meta.version} · schema ${api.meta.schemaVersion}`;
       try{const updated=new Date(api.meta.updatedAt);footerUpdated.textContent=`Register oppdatert: ${updated.toLocaleString("nb-NO",{timeZone:"Europe/Oslo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})} (Europe/Oslo)`}catch(_){footerUpdated.textContent=`Register oppdatert: ${api.meta.updatedAt}`}
       const labels={bunner:"Bunner",hyller:"Hyller",cc_post:"CC Post",forlengere:"Forlengere"};
       function listComponents(components){return Object.entries(components||{}).map(([key,c])=>{const label=labels[key]||key;if(c.mode==="fixed")return `${c.quantity} ${label}`;if(c.mode==="ut_confirmation")return `${label}: registreres per vogn`;return label}).join(" + ")}
@@ -34,6 +34,9 @@
         if(product.id==="bunner") return "10 Bunner + 40 CC Post (10 × 4)";
         if(product.id==="hyller30") return "1 Bunner + 30 Hyller + 4 CC Post";
         if(product.id==="hyller60") return "1 Bunner + 60 Hyller + 4 CC Post";
+        if(product.id==="forlengere_korte") return "1 Bunner + 4 CC Post + Hyller/Forlengere registreres ved UT-bekreftelse";
+        if(product.id==="forlengere_lange") return "1 Bunner + 4 CC Post + Hyller/Forlengere registreres ved UT-bekreftelse";
+        if(product.id==="forlengere_plast") return "1 eske · ingen Bunner, Hyller eller CC Post";
         if(product.id==="cc_post") return "Kun visningskomponent · ingen lager/INN/rampe/UT-flyt";
         const normal=listComponents(product.shipment?.components);
         return normal||"—";
