@@ -143,6 +143,22 @@
     return result;
   }
 
+  async function linkNordicToCurrentReceipt(row, parts, rawData) {
+    const result = await client.from(TABLE).update({
+      product,
+      scanner_code: parts.scannerCode,
+      upper_number: "",
+      lower_number: parts.lowerNumber,
+      status: "pending",
+      source: row.source || (row.photo_url ? "camera" : "nordic_id"),
+      device_id: row.device_id || deviceId,
+      raw_data: rawData
+    }).eq("id", row.id).select("id").maybeSingle();
+    if (result.error) throw result.error;
+    if (!result.data?.id) throw new Error("Database did not confirm the write");
+    return result;
+  }
+
   async function saveLowerOnlyPending() {
     if (saving) return;
     const parts = currentParts();
@@ -162,53 +178,30 @@
         .select("id,scanner_code,photo_url,photo_path,source,status,stock_status,device_id,raw_data")
         .eq("lower_number", parts.lowerNumber)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(2);
       if (query.error) throw query.error;
 
-      const matches = query.data || [];
-      const exactRow = matches.find(row => compact(row.scanner_code) === parts.scannerCode);
+      const row = (query.data || [])[0] || null;
       const rawData = parsedCode || `${parts.scannerCode}${parts.lowerNumber}`;
-
-      if (exactRow) {
-        const stock = exactRow.stock_status || "in_stock";
-        if (stock === "dispatched") {
-          await reuseDispatchedRow(exactRow, parts, rawData);
-          show(t().saved, "ok");
-          await loadCloud();
-          clearForm();
-          return;
-        }
-        show(stockMessage(stock), stock === "staged" ? "bad" : "warn");
-        return;
-      }
-
-      const conflicting = matches.find(row => compact(row.scanner_code) && compact(row.scanner_code) !== parts.scannerCode);
-      if (conflicting) {
-        show(t().pairConflict, "bad");
-        return;
-      }
-
-      const cameraRow = matches.find(row => !compact(row.scanner_code));
       let dbResult;
 
-      if (cameraRow) {
-        const stock = cameraRow.stock_status || "in_stock";
-        if (stock === "staged") {
+      if (row) {
+        const stock = row.stock_status || "in_stock";
+
+        // lower_number is the only tag identity. A service/scanner-code difference
+        // never creates a second tag or a pair-conflict decision.
+        if (stock === "dispatched") {
+          dbResult = await reuseDispatchedRow(row, parts, rawData);
+        } else if (stock === "staged") {
           show(stockMessage("staged"), "bad");
           return;
-        }
-        if (stock === "dispatched") {
-          dbResult = await reuseDispatchedRow(cameraRow, parts, rawData);
+        } else if (!compact(row.scanner_code)) {
+          // Camera may have created this current receipt first. Nordic only completes
+          // the same receipt with its service/scanner code; it is not a second receipt.
+          dbResult = await linkNordicToCurrentReceipt(row, parts, rawData);
         } else {
-          dbResult = await client.from(TABLE).update({
-            product,
-            scanner_code: parts.scannerCode,
-            upper_number: "",
-            status: "pending",
-            source: cameraRow.source || (cameraRow.photo_url ? "camera" : "nordic_id"),
-            device_id: cameraRow.device_id || deviceId,
-            raw_data: rawData
-          }).eq("id", cameraRow.id).select("id").maybeSingle();
+          show(stockMessage("in_stock"), "warn");
+          return;
         }
       } else {
         dbResult = await client.from(TABLE).insert({
@@ -228,7 +221,7 @@
 
       if (dbResult.error) throw dbResult.error;
       if (!dbResult.data?.id) throw new Error("Database did not confirm the write");
-      show(cameraRow ? t().linked : t().saved, "ok");
+      show(row ? t().linked : t().saved, "ok");
       await loadCloud();
       clearForm();
     } catch (error) {
@@ -249,5 +242,5 @@
 
   clearUpperUi();
   renderPartState();
-  console.info("Nordic lower-number-only mode active: dispatched tags can be received again as the current product.");
+  console.info("Nordic lower-number-only mode active: lower_number is the sole tag identity.");
 })();
