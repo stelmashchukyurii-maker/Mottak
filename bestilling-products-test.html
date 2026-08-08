@@ -12,7 +12,7 @@
     *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
     body{display:flex;flex-direction:column}.bar{flex:0 0 auto;padding:10px 12px;border-bottom:2px solid var(--accent);background:#10172a;box-shadow:0 4px 16px rgba(0,0,0,.28);z-index:5}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.title{color:var(--accent);font-weight:1000;font-size:16px}.sub{margin-top:3px;color:var(--muted);font-size:11px;line-height:1.35}.nav{display:flex;gap:6px;flex-wrap:wrap}.nav a,.lang button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--text);text-decoration:none;font-size:11px;font-weight:950}.nav a.test{border-color:var(--ok);color:var(--ok)}.lang{display:flex;gap:4px}.lang button.active{border-color:var(--accent);background:var(--accent);color:#17130a}.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.badge{padding:5px 8px;border:1px solid rgba(72,213,151,.45);border-radius:999px;background:rgba(72,213,151,.08);color:var(--ok);font-size:10px;font-weight:900}.badge.info{border-color:rgba(117,183,255,.45);background:rgba(117,183,255,.08);color:#cce4ff}iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}#loader{position:fixed;inset:0;top:96px;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font-weight:900;z-index:4}@media(max-width:600px){.bar{padding:9px 10px}.title{font-size:15px}.nav a{padding:5px 8px}.sub{font-size:10px}}
   </style>
-  <script src="./products.js?v=20260808-1038"></script>
+  <script src="./products.js?v=20260808-1046"></script>
 </head>
 <body>
   <header class="bar">
@@ -29,7 +29,7 @@
   <iframe id="app" title="TEST — UT Kontor"></iframe>
 <script>
 "use strict";
-const VERSION="20260808-1038",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const VERSION="20260808-1046",frame=document.getElementById("app"),loader=document.getElementById("loader");
 const langKey="mottak_ut_language";
 function language(){return localStorage.getItem(langKey)==="uk"?"uk":"nb"}
 function paintLang(){const l=language();document.getElementById("noBtn").classList.toggle("active",l==="nb");document.getElementById("uaBtn").classList.toggle("active",l==="uk")}
@@ -38,6 +38,7 @@ async function build(){
   try{
     const res=await fetch(`bestilling.html?v=${VERSION}`,{cache:"no-store"});if(!res.ok)throw new Error(`HTTP ${res.status}`);
     let html=await res.text();
+    html=html.replace(/<script src="office-home-setting\.js[^\"]*"><\/script>/i,"");
     html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
     frame.srcdoc=html;
   }catch(e){loader.textContent=`Kunne ikke laste TEST UT Kontor: ${e.message||e}`}
@@ -56,7 +57,7 @@ function patchLabels(doc){
   const ids=[["bunner","bunnerQty"],["hyller30","h30Qty"],["hyller60","h60Qty"]];
   ids.forEach(([id,input])=>{const p=window.BAMA_PRODUCTS?.getProductById?.(id),el=doc.getElementById(input)?.closest("article")?.querySelector("strong");if(p&&el)el.textContent=window.BAMA_PRODUCTS.getProductName(p,"no")});
   const home=doc.querySelector("a.home");if(home)home.href="test-home.html";
-  const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Kontor v2.0 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:38";
+  const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Kontor v2.1 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:46";
 }
 frame.addEventListener("load",async()=>{
   try{
