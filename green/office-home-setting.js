@@ -209,3 +209,12 @@
     document.head.appendChild(script);
   }
 })();
+
+(() => {
+  if (document.querySelector('script[data-bama-green-marker]')) return;
+  const script = document.createElement("script");
+  script.src = "green-marker.js?v=20260808-1607";
+  script.defer = true;
+  script.dataset.bamaGreenMarker = "true";
+  document.head.appendChild(script);
+})();
