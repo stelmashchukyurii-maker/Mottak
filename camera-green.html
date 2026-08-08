@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>GREEN — Camera Cloud v4.21</title>
+  <title>GREEN — Camera Cloud v4.22</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster GREEN — Camera Cloud v4.21…</div>
-  <iframe id="app" title="GREEN — Camera Cloud v4.21" src="camera-live.html?base=green-421-no-grand-total-20260809-0050"></iframe>
+  <div id="loader">Laster GREEN — Camera Cloud v4.22…</div>
+  <iframe id="app" title="GREEN — Camera Cloud v4.22" src="camera-live.html?base=green-422-compact-stock-20260809-0103"></iframe>
   <script>
     "use strict";
-    const VERSION = "20260809-0050";
+    const VERSION = "20260809-0103";
     const frame = document.getElementById("app");
     const loader = document.getElementById("loader");
 
@@ -52,24 +52,28 @@
         await injectScript(doc, `camera-lower-only.js?v=${VERSION}`);
         await injectScript(doc, `stock-lifecycle-ui.js?v=${VERSION}`);
         await injectScript(doc, `camera-current-stock-only.js?v=${VERSION}`);
+        await injectScript(doc, `compact-stock-counter.js?v=${VERSION}`);
 
         const back = doc.querySelector("a.back");
         if (back) back.href = `green-home.html?v=${VERSION}`;
 
         const version = doc.querySelector(".version");
         if (version) {
-          version.innerHTML = "GREEN · Kamera Cloud v4.21 · NO GRAND TOTAL<br>Oppdatert 09.08.2026 kl. 00:50";
+          version.innerHTML = "GREEN · Kamera Cloud v4.22 · COMPACT STOCK<br>Oppdatert 09.08.2026 kl. 01:03";
         }
 
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => {
-            setTimeout(() => win.refreshBamaStock?.().catch(() => {}), 80);
+            setTimeout(() => {
+              win.refreshBamaStock?.().catch(() => {});
+              win.BAMA_COMPACT_STOCK_REFRESH?.();
+            }, 80);
           });
         });
 
         loader.style.display = "none";
       } catch (error) {
-        loader.textContent = `Kunne ikke starte GREEN Camera Cloud v4.21: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte GREEN Camera Cloud v4.22: ${error.message || error}`;
       }
     });
   </script>
