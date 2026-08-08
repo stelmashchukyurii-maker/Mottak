@@ -1,8 +1,8 @@
 "use strict";
 
 // BaMavaremottak — TEST UT Kontor history visuals
-// Version 1.1.0
-// Updated: 2026-08-08 12:53 Europe/Oslo
+// Version 1.2.0
+// Updated: 2026-08-08 13:40 Europe/Oslo
 // CSS-only pictograms: no image files, no extra network requests.
 (() => {
   if (window.__UT_KONTOR_HISTORY_VISUALS__) return;
@@ -53,13 +53,24 @@
       : `${count} sett = <strong>${count} Bunner + ${hyller} hyller + ${posts} CC Post</strong>`;
   }
 
+  function forlengereSummaryText(count) {
+    const posts = count * 4;
+    return isUk()
+      ? `${count} ${count === 1 ? "візок" : "візків"} = ${count} Bunner + ${posts} CC Post`
+      : `${count} ${count === 1 ? "vogn" : "vogner"} = ${count} Bunner + ${posts} CC Post`;
+  }
+
   function decorateSummary() {
     const b = n(document.getElementById("bunnerQty")?.value);
     const h30 = n(document.getElementById("h30Qty")?.value);
     const h60 = n(document.getElementById("h60Qty")?.value);
+    const short = n(document.getElementById("forlengere_korteQty")?.value);
+    const long = n(document.getElementById("forlengere_langeQty")?.value);
     const sumB = document.getElementById("sumBunner");
     const sum30 = document.getElementById("sumH30");
     const sum60 = document.getElementById("sumH60");
+    const sumShort = document.getElementById("sumForlengereKorte");
+    const sumLong = document.getElementById("sumForlengereLange");
 
     if (sumB) {
       const bases = b * 10;
@@ -78,6 +89,34 @@
         ? `${h60} комплектів = ${h60} Bunner + ${h60 * 60} полиць + ${h60 * 4} CC Post`
         : `${h60} sett = ${h60} Bunner + ${h60 * 60} hyller + ${h60 * 4} CC Post`;
     }
+    if (sumShort) sumShort.textContent = forlengereSummaryText(short);
+    if (sumLong) sumLong.textContent = forlengereSummaryText(long);
+  }
+
+  function decorateForlengereHistory() {
+    document.querySelectorAll("#history .ut-extra-history").forEach((box) => {
+      const lines = (box.innerText || "").split(/\n+/).map((line) => line.trim()).filter(Boolean);
+      if (!lines.length) return;
+      box.innerHTML = lines.map((line) => {
+        const clean = line.replace(/\s*=\s*\d+\s+Bunner\s*\+\s*\d+\s+CC Post\s*$/i, "");
+        const isMetal = /Forlengere\s+(korte|lange)|Подовжувачі\s+(короткі|довгі)/i.test(clean);
+        if (!isMetal) return clean;
+        const match = clean.match(/:\s*(\d+)/);
+        const count = match ? n(match[1]) : 0;
+        return `${clean} = ${count} Bunner + ${count * 4} CC Post`;
+      }).join("<br>");
+    });
+
+    document.querySelectorAll("#history .ut-extra-ramp-total").forEach((el) => {
+      const clean = (el.textContent || "").replace(/\s*·\s*\d+\s+CC Post\s*$/i, "");
+      if (!/Forlengere/i.test(clean)) {
+        el.textContent = clean;
+        return;
+      }
+      const match = clean.match(/^(\d+)/);
+      const carts = match ? n(match[1]) : 0;
+      el.textContent = carts ? `${clean} · ${carts * 4} CC Post` : clean;
+    });
   }
 
   function decorateHistory() {
@@ -103,6 +142,8 @@
       amount.classList.add("ut-visual-amount");
       amount.innerHTML = rows.join("");
     });
+
+    decorateForlengereHistory();
   }
 
   function decorate() {
@@ -122,13 +163,13 @@
     decorateSummary();
   };
 
-  ["bunnerQty", "h30Qty", "h60Qty"].forEach((id) => {
+  ["bunnerQty", "h30Qty", "h60Qty", "forlengere_korteQty", "forlengere_langeQty"].forEach((id) => {
     const input = document.getElementById(id);
     input?.addEventListener("input", () => setTimeout(decorateSummary, 0));
     input?.addEventListener("change", () => setTimeout(decorateSummary, 0));
   });
   document.querySelector(".ramp-products")?.addEventListener("click", () => setTimeout(decorateSummary, 0));
 
-  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.1.0", decorate };
+  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.2.0", decorate };
   decorate();
 })();
