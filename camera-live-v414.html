@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Camera Cloud v4.18</title>
+  <title>Camera Cloud v4.19</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster Camera Cloud v4.18…</div>
-  <iframe id="app" title="Camera Cloud v4.18" src="camera-live.html?base=418-lifecycle-20260809-0004b"></iframe>
+  <div id="loader">Laster Camera Cloud v4.19…</div>
+  <iframe id="app" title="Camera Cloud v4.19" src="camera-live.html?base=419-stockonly-20260809-0035"></iframe>
   <script>
     "use strict";
-    const VERSION = "20260809-0004b";
+    const VERSION = "20260809-0035";
     const frame = document.getElementById("app");
     const loader = document.getElementById("loader");
 
@@ -50,10 +50,11 @@
         await injectScript(doc, "camera-live-v4-mobile-ui.js?v=414-newurl-20260807-1834");
         await injectScript(doc, `camera-lower-only.js?v=${VERSION}`);
         await injectScript(doc, `stock-lifecycle-ui.js?v=${VERSION}`);
+        await injectScript(doc, `camera-current-stock-only.js?v=${VERSION}`);
 
         const version = doc.querySelector(".version");
         if (version) {
-          version.innerHTML = "Kamera Cloud v4.18 · LOWER + 3 STATUS<br>Oppdatert 09.08.2026 kl. 00:04";
+          version.innerHTML = "Kamera Cloud v4.19 · IN STOCK ONLY<br>Oppdatert 09.08.2026 kl. 00:35";
         }
 
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
@@ -64,7 +65,7 @@
 
         loader.style.display = "none";
       } catch (error) {
-        loader.textContent = `Kunne ikke starte Camera Cloud v4.18: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte Camera Cloud v4.19: ${error.message || error}`;
       }
     });
   </script>
