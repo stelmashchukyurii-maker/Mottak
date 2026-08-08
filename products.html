@@ -16,125 +16,25 @@
       --ok: #48d597;
       --line: #303b59;
     }
-
     * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #0b1020 0%, #10172a 100%);
-      color: var(--text);
-    }
-
-    .wrap {
-      width: min(920px, calc(100% - 28px));
-      margin: 0 auto;
-      padding: 28px 0 48px;
-    }
-
-    .top {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      margin: 0 0 6px;
-      font-size: clamp(28px, 6vw, 44px);
-    }
-
-    .subtitle, .meta, .empty {
-      color: var(--muted);
-    }
-
-    .badge {
-      white-space: nowrap;
-      border: 1px solid var(--line);
-      background: var(--card);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 13px;
-    }
-
-    .notice {
-      border: 1px solid rgba(244, 196, 48, 0.45);
-      background: rgba(244, 196, 48, 0.08);
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 18px;
-      color: #ffe88a;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 16px;
-    }
-
-    .card h2 {
-      margin: 0 0 12px;
-      font-size: 22px;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      color: var(--ok);
-      margin-bottom: 12px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    dl {
-      margin: 0;
-      display: grid;
-      grid-template-columns: 92px 1fr;
-      gap: 8px 10px;
-      font-size: 14px;
-    }
-
+    body { margin: 0; min-height: 100vh; font-family: Arial, Helvetica, sans-serif; background: linear-gradient(180deg, #0b1020 0%, #10172a 100%); color: var(--text); }
+    .wrap { width: min(920px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 48px; }
+    .top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+    h1 { margin: 0 0 6px; font-size: clamp(28px, 6vw, 44px); }
+    .subtitle, .meta, .empty { color: var(--muted); }
+    .badge { white-space: nowrap; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 12px; font-size: 13px; }
+    .notice { border: 1px solid rgba(244, 196, 48, 0.45); background: rgba(244, 196, 48, 0.08); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; color: #ffe88a; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+    .card h2 { margin: 0 0 12px; font-size: 22px; }
+    .status { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ok); margin-bottom: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    dl { margin: 0; display: grid; grid-template-columns: 92px 1fr; gap: 8px 10px; font-size: 14px; }
     dt { color: var(--muted); }
     dd { margin: 0; }
-
-    .note {
-      margin-top: 13px;
-      padding-top: 12px;
-      border-top: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    footer {
-      border-top: 1px solid var(--line);
-      margin-top: 24px;
-      padding-top: 16px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 620px) {
-      .top { flex-direction: column; }
-      .badge { white-space: normal; }
-    }
+    .note { margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.45; }
+    footer { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 16px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    @media (max-width: 620px) { .top { flex-direction: column; } .badge { white-space: normal; } }
   </style>
 </head>
 <body>
@@ -146,20 +46,11 @@
       </div>
       <div class="badge" id="versionBadge">Laster register …</div>
     </div>
-
-    <div class="notice">
-      Denne siden er foreløpig kun for visning. Produksjonssidene er ikke koblet til produktregisteret ennå. TEST-sidene kan lese registeret.
-    </div>
-
+    <div class="notice">Denne siden er foreløpig kun for visning. Produksjonssidene er ikke koblet til produktregisteret ennå. TEST-sidene kan lese registeret.</div>
     <section class="grid" id="productGrid" aria-live="polite"></section>
-
-    <footer>
-      <div id="footerVersion"></div>
-      <div id="footerUpdated"></div>
-    </footer>
+    <footer><div id="footerVersion"></div><div id="footerUpdated"></div></footer>
   </main>
-
-  <script src="./products.js?v=20260808-0936"></script>
+  <script src="./products.js?v=20260808-1253"></script>
   <script>
     (function () {
       const api = window.BAMA_PRODUCTS;
@@ -167,80 +58,31 @@
       const versionBadge = document.getElementById("versionBadge");
       const footerVersion = document.getElementById("footerVersion");
       const footerUpdated = document.getElementById("footerUpdated");
-
-      if (!api) {
-        grid.innerHTML = '<div class="empty">Produktregisteret kunne ikke lastes.</div>';
-        versionBadge.textContent = "Register ikke tilgjengelig";
-        return;
-      }
-
+      if (!api) { grid.innerHTML = '<div class="empty">Produktregisteret kunne ikke lastes.</div>'; versionBadge.textContent = "Register ikke tilgjengelig"; return; }
       versionBadge.textContent = `Register v${api.meta.version}`;
       footerVersion.textContent = `Produktregister v${api.meta.version} · schema ${api.meta.schemaVersion}`;
-
       try {
         const updated = new Date(api.meta.updatedAt);
-        footerUpdated.textContent = `Oppdatert: ${updated.toLocaleString("nb-NO", {
-          timeZone: "Europe/Oslo",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit"
-        })} (Europe/Oslo)`;
-      } catch (_) {
-        footerUpdated.textContent = `Oppdatert: ${api.meta.updatedAt}`;
-      }
-
-      const componentLabels = {
-        bunner: "Bunner",
-        hyller: "Hyller",
-        forlengere: "Forlengere"
-      };
-
+        footerUpdated.textContent = `Oppdatert: ${updated.toLocaleString("nb-NO", {timeZone:"Europe/Oslo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})} (Europe/Oslo)`;
+      } catch (_) { footerUpdated.textContent = `Oppdatert: ${api.meta.updatedAt}`; }
+      const componentLabels = { bunner: "Bunner", hyller: "Hyller", cc_post: "CC Post", forlengere: "Forlengere" };
       function describeShipment(product) {
         const components = product.shipment?.components;
-        if (!components) return "—";
-
+        if (!components) return product.ut?.derivedOnly ? "Automatisk komponent · ikke manuelt UT-felt" : "—";
         return Object.entries(components).map(([key, component]) => {
           const label = componentLabels[key] || key;
-          if (component.mode === "fixed") {
-            return `${component.quantity} ${label}`;
-          }
-          if (component.mode === "ut_confirmation") {
-            return `${label}: registreres per vogn`;
-          }
+          if (component.mode === "fixed") return `${component.quantity} ${label}`;
+          if (component.mode === "ut_confirmation") return `${label}: registreres per vogn`;
           return label;
         }).join(" + ");
       }
-
       const products = api.getAllProducts();
-      if (!products.length) {
-        grid.innerHTML = '<div class="empty">Ingen produkter i registeret.</div>';
-        return;
-      }
-
+      if (!products.length) { grid.innerHTML = '<div class="empty">Ingen produkter i registeret.</div>'; return; }
       grid.innerHTML = products.map((product) => {
-        const stack = product.stackSize == null
-          ? (product.shipment ? "Variabel" : "Ikke fastsatt")
-          : `${product.stackSize} stk`;
+        const stack = product.stackSize == null ? (product.shipment ? "Variabel" : "Ikke fastsatt") : `${product.stackSize} stk`;
         const shipment = describeShipment(product);
         const note = product.notes?.no || "";
-        return `
-          <article class="card">
-            <h2>${product.name.no}</h2>
-            <div class="status"><span class="dot"></span>${product.active ? "Aktiv" : "Inaktiv"}</div>
-            <dl>
-              <dt>ID</dt><dd>${product.id}</dd>
-              <dt>Norsk</dt><dd>${product.name.no}</dd>
-              <dt>Polski</dt><dd>${product.name.pl}</dd>
-              <dt>Українська</dt><dd>${product.name.uk}</dd>
-              <dt>Enhet</dt><dd>${product.unit}</dd>
-              <dt>Stabel</dt><dd>${stack}</dd>
-              <dt>UT-oppsett</dt><dd>${shipment}</dd>
-              <dt>Rekkefølge</dt><dd>${product.sortOrder}</dd>
-            </dl>
-            ${note ? `<div class="note">${note}</div>` : ""}
-          </article>`;
+        return `<article class="card"><h2>${product.name.no}</h2><div class="status"><span class="dot"></span>${product.active ? "Aktiv" : "Inaktiv"}</div><dl><dt>ID</dt><dd>${product.id}</dd><dt>Norsk</dt><dd>${product.name.no}</dd><dt>Polski</dt><dd>${product.name.pl}</dd><dt>Українська</dt><dd>${product.name.uk}</dd><dt>Enhet</dt><dd>${product.unit}</dd><dt>Stabel</dt><dd>${stack}</dd><dt>UT-oppsett</dt><dd>${shipment}</dd><dt>Rekkefølge</dt><dd>${product.sortOrder}</dd></dl>${note ? `<div class="note">${note}</div>` : ""}</article>`;
       }).join("");
     })();
   </script>
