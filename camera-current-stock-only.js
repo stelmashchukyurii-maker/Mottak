@@ -6,16 +6,20 @@
   if (window.__BAMA_CAMERA_CURRENT_STOCK_ONLY__) return;
   window.__BAMA_CAMERA_CURRENT_STOCK_ONLY__ = true;
 
+  function langCode() {
+    try { return typeof language !== "undefined" ? language : "nb"; } catch { return "nb"; }
+  }
+
   const copy = () => {
-    let l = "nb";
-    try { l = typeof language !== "undefined" ? language : "nb"; } catch {}
+    const l = langCode();
     if (l === "uk") return {
       title: "Поточна кількість · На складі",
       bunner: n => `${n} стопок × 10 = ${n * 10} шт.`,
       h30: n => `${n} Bunner × 30 = ${n * 30} hyller`,
       h60: n => `${n} Bunner × 60 = ${n * 60} hyller`,
       totalLabel: "Всього на складі",
-      total: (b, h) => `${b} Bunner · ${h} hyller`
+      total: (b, h) => `${b} Bunner · ${h} hyller`,
+      aiNote: "AI читає лише унікальний 6-символьний номер. Середня системна частина RFID ігнорується та не зберігається."
     };
     if (l === "pl") return {
       title: "Aktualna ilość · Na magazynie",
@@ -23,7 +27,8 @@
       h30: n => `${n} Bunner × 30 = ${n * 30} półek`,
       h60: n => `${n} Bunner × 60 = ${n * 60} półek`,
       totalLabel: "Razem na magazynie",
-      total: (b, h) => `${b} Bunner · ${h} półek`
+      total: (b, h) => `${b} Bunner · ${h} półek`,
+      aiNote: "AI odczytuje tylko unikalny 6-znakowy numer. Środkowa systemowa część RFID jest ignorowana i nie jest zapisywana."
     };
     return {
       title: "Nåværende antall · På lager",
@@ -31,7 +36,8 @@
       h30: n => `${n} Bunner × 30 = ${n * 30} hyller`,
       h60: n => `${n} Bunner × 60 = ${n * 60} hyller`,
       totalLabel: "Totalt på lager",
-      total: (b, h) => `${b} Bunner · ${h} hyller`
+      total: (b, h) => `${b} Bunner · ${h} hyller`,
+      aiNote: "AI leser bare det unike 6-tegnsnummeret. Den midtre systemdelen av RFID-koden ignoreres og lagres ikke."
     };
   };
 
@@ -59,6 +65,9 @@
       const el = document.getElementById(id);
       if (el && el.textContent !== value) el.textContent = value;
     });
+
+    const aiNote = document.querySelector(".server-ai-note");
+    if (aiNote && aiNote.textContent !== c.aiNote) aiNote.textContent = c.aiNote;
   }
 
   let queued = false;
