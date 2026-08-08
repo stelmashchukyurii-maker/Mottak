@@ -1,8 +1,8 @@
 "use strict";
 
 // BaMavaremottak — TEST UT Kontor history visuals
-// Version 1.2.0
-// Updated: 2026-08-08 13:40 Europe/Oslo
+// Version 1.3.0
+// Updated: 2026-08-08 13:50 Europe/Oslo
 // CSS-only pictograms: no image files, no extra network requests.
 (() => {
   if (window.__UT_KONTOR_HISTORY_VISUALS__) return;
@@ -54,10 +54,9 @@
   }
 
   function forlengereSummaryText(count) {
-    const posts = count * 4;
     return isUk()
-      ? `${count} ${count === 1 ? "візок" : "візків"} = ${count} Bunner + ${posts} CC Post`
-      : `${count} ${count === 1 ? "vogn" : "vogner"} = ${count} Bunner + ${posts} CC Post`;
+      ? `${count} ${count === 1 ? "візок" : "візків"} = ${count} Bunner`
+      : `${count} ${count === 1 ? "vogn" : "vogner"} = ${count} Bunner`;
   }
 
   function decorateSummary() {
@@ -74,20 +73,19 @@
 
     if (sumB) {
       const bases = b * 10;
-      const posts = bases * 4;
       sumB.textContent = isUk()
-        ? `${b} ${b === 1 ? "стопка" : "стопок"} = ${bases} Bunner + ${posts} CC Post`
-        : `${b} ${b === 1 ? "stabel" : "stabler"} = ${bases} Bunner + ${posts} CC Post`;
+        ? `${b} ${b === 1 ? "стопка" : "стопок"} = ${bases} Bunner`
+        : `${b} ${b === 1 ? "stabel" : "stabler"} = ${bases} Bunner`;
     }
     if (sum30) {
       sum30.textContent = isUk()
-        ? `${h30} комплектів = ${h30} Bunner + ${h30 * 30} полиць + ${h30 * 4} CC Post`
-        : `${h30} sett = ${h30} Bunner + ${h30 * 30} hyller + ${h30 * 4} CC Post`;
+        ? `${h30} комплектів = ${h30} Bunner + ${h30 * 30} полиць`
+        : `${h30} sett = ${h30} Bunner + ${h30 * 30} hyller`;
     }
     if (sum60) {
       sum60.textContent = isUk()
-        ? `${h60} комплектів = ${h60} Bunner + ${h60 * 60} полиць + ${h60 * 4} CC Post`
-        : `${h60} sett = ${h60} Bunner + ${h60 * 60} hyller + ${h60 * 4} CC Post`;
+        ? `${h60} комплектів = ${h60} Bunner + ${h60 * 60} полиць`
+        : `${h60} sett = ${h60} Bunner + ${h60 * 60} hyller`;
     }
     if (sumShort) sumShort.textContent = forlengereSummaryText(short);
     if (sumLong) sumLong.textContent = forlengereSummaryText(long);
@@ -170,6 +168,6 @@
   });
   document.querySelector(".ramp-products")?.addEventListener("click", () => setTimeout(decorateSummary, 0));
 
-  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.2.0", decorate };
+  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.3.0", decorate };
   decorate();
 })();
