@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>TEST — UT Bekreft</title>
+  <style>
+    html,body{margin:0;width:100%;min-height:100%;background:#0b1020;color:#f5f7ff;font-family:Arial,Helvetica,sans-serif}body{overflow-x:hidden}.bar{position:sticky;top:0;z-index:99999;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 11px;border-bottom:2px solid #f4c430;background:#10172a;box-shadow:0 4px 16px rgba(0,0,0,.3)}.bar strong{color:#f4c430;font-size:15px}.bar small{display:block;margin-top:2px;color:#aab4ce;font-size:10px}.nav{display:flex;gap:6px;flex-wrap:wrap}.nav a{display:inline-flex;align-items:center;min-height:34px;padding:6px 9px;border:1px solid #303b59;border-radius:999px;color:#f5f7ff;text-decoration:none;font-size:11px;font-weight:900}.nav a.ok{border-color:#48d597;color:#48d597}#utCore{display:block;width:100%;min-height:calc(100vh - 56px);border:0;background:#0b1020}#camera{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px));z-index:99998;min-height:58px;padding:9px 16px;border:2px solid #f4c430;border-radius:999px;background:#f4c430;color:#17130a;font:950 15px Arial,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.48)}#hint{position:fixed;right:12px;bottom:82px;z-index:99997;display:none;max-width:min(340px,calc(100vw - 24px));padding:10px 12px;border:1px solid #303b59;border-radius:12px;background:#151c30;color:#f5f7ff;font:700 13px/1.4 Arial,sans-serif}#hint.show{display:block}#loader{position:fixed;inset:56px 0 0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font-weight:900;text-align:center;z-index:99996}
+  </style>
+</head>
+<body>
+  <header class="bar"><div><strong>TEST — UT Bekreft · ISOLERT</strong><small>TEST-ordre + TEST-lager. Production REST er blokkert.</small></div><nav class="nav"><a href="test-home.html">⌂ TEST</a><a class="ok" href="bestilling-products-test.html">UT Kontor TEST</a></nav></header>
+  <div id="loader">Laster isolert TEST — UT Bekreft…</div>
+  <iframe id="utCore" title="TEST — UT Bekreft"></iframe>
+  <button id="camera" type="button">📷 Foto TEST</button><div id="hint"></div>
+<script>
+"use strict";
+const VERSION="20260808-1040",frame=document.getElementById("utCore"),loader=document.getElementById("loader"),camera=document.getElementById("camera"),hint=document.getElementById("hint");let hintTimer=0,openTries=0;
+function note(text){clearTimeout(hintTimer);hint.textContent=text;hint.classList.add("show");hintTimer=setTimeout(()=>hint.classList.remove("show"),2800)}
+function inject(doc,src){return new Promise((resolve,reject)=>{const s=doc.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;doc.body.appendChild(s)})}
+function resize(){try{const d=frame.contentDocument;frame.style.height=Math.max(innerHeight-55,d.documentElement.scrollHeight,d.body?.scrollHeight||0)+"px"}catch{}}
+async function build(){
+  try{
+    const res=await fetch(`utsending-core-v7.html?v=${VERSION}`,{cache:"no-store"});if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    let html=await res.text();
+    html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
+    frame.srcdoc=html;
+  }catch(e){loader.textContent=`Kunne ikke laste TEST UT Bekreft: ${e.message||e}`}
+}
+function current(){try{return typeof frame.contentWindow.current==="function"?frame.contentWindow.current():null}catch{return null}}
+function goCamera(){const o=current();if(!o)return note("Спочатку відкрий потрібну TEST-рампу.");if(["completed","cancelled"].includes(o.status))return note("Ця TEST-рампа вже завершена.");location.href=`ut-camera-test.html?order=${encodeURIComponent(o.id)}&ramp=${encodeURIComponent(o.ramp||"")}`}
+function openRequested(){const id=new URLSearchParams(location.search).get("open");if(!id)return;try{const w=frame.contentWindow;if(typeof w.openOrder==="function"){w.openOrder(id,true);return}}catch{}if(openTries++<25)setTimeout(openRequested,250)}
+frame.addEventListener("load",async()=>{
+  try{
+    const doc=frame.contentDocument,w=frame.contentWindow;w.BAMA_HOME_TARGET="test-home.html";
+    const home=doc.querySelector("a.home");if(home){home.href="test-home.html";home.target="_top"}
+    const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Bekreft v1.0 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:40";
+    const notice=doc.createElement("div");notice.style.cssText="margin:10px 0;padding:11px;border:1px solid #48d597;border-radius:12px;background:rgba(72,213,151,.08);color:#48d597;font:900 12px/1.45 Arial,sans-serif;text-align:center";notice.innerHTML="TEST — окремий склад: <b>10 Bunner + 10 Hyller x30 + 10 Hyller x60</b>. Номери взяті з історично відправлених позицій; перетин із поточним production-складом = 0.";doc.querySelector("main")?.prepend(notice);
+    try{await inject(doc,`utsending-language.js?v=${VERSION}`)}catch{}
+    try{await inject(doc,`utsending-status-colors.js?v=${VERSION}`)}catch{}
+    doc.querySelectorAll("button").forEach(b=>{if(b.textContent.trim()==="PL"&&b.closest("#utLanguageSwitch,.ut-language-switch,.lang"))b.remove()});
+    doc.querySelectorAll("a[href]").forEach(a=>a.target="_top");
+    loader.style.display="none";resize();setTimeout(resize,250);setTimeout(openRequested,350);
+  }catch(e){loader.textContent=`TEST UT startfeil: ${e.message||e}`}
+});
+camera.addEventListener("click",goCamera);addEventListener("resize",resize,{passive:true});build();
+</script>
+</body>
+</html>
