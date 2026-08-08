@@ -29,7 +29,7 @@
   <iframe id="app" title="TEST — UT Kontor"></iframe>
 <script>
 "use strict";
-const VERSION="20260808-1427",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const VERSION="20260808-1958",frame=document.getElementById("app"),loader=document.getElementById("loader");
 const langKey="mottak_ut_language";
 function language(){return localStorage.getItem(langKey)==="uk"?"uk":"nb"}
 function isUk(){return language()==="uk"}
@@ -90,7 +90,7 @@ function patchLabels(doc){
   const ids=[["bunner","bunnerQty"],["hyller30","h30Qty"],["hyller60","h60Qty"]];
   ids.forEach(([id,input])=>{const p=window.BAMA_PRODUCTS?.getProductById?.(id),el=doc.getElementById(input)?.closest("article")?.querySelector("strong");if(p&&el)el.textContent=window.BAMA_PRODUCTS.getProductName(p,uk?"uk":"no")});
   const home=doc.querySelector("a.home");if(home)home.href="test-home.html";
-  const v=doc.querySelector(".version");if(v)v.innerHTML=`TEST UT Kontor v2.11 · UNIFIED LAYOUT<br>${uk?"Оновлено":"Oppdatert"} 08.08.2026 kl. 14:27`;
+  const v=doc.querySelector(".version");if(v)v.innerHTML=`TEST UT Kontor v2.12 · RAMP TOTALS<br>${uk?"Оновлено":"Oppdatert"} 08.08.2026 kl. 19:58`;
 }
 function patchExtraLanguage(doc){
   const uk=isUk();
