@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>INN — Varemottak</title>
   <style>
     :root { color-scheme: dark; --bg:#0b1020; --card:#151c30; --card-dark:#0d1426; --text:#f5f7ff; --muted:#aab4ce; --accent:#f4c430; --ok:#48d597; --info:#75b7ff; --line:#303b59; }
@@ -12,18 +15,18 @@
 </head>
 <body>
   <main class="app">
-    <div class="topbar"><a class="home-link" href="index.html">← Hovedmeny</a><span class="version">INN-meny v5<br />Oppdatert 07.08.2026 kl. 18:34</span></div>
+    <div class="topbar"><a class="home-link" href="index.html">← Hovedmeny</a><span class="version">INN-meny v6 RELEASE<br />Oppdatert 09.08.2026 kl. 01:47</span></div>
     <h1>INN — Varemottak</h1>
     <p class="subtitle">Velg hvordan varen skal registreres, kontrolleres eller finnes i historikken.</p>
-    <div class="principle">Kamera og Nordic ID er to måter å opprette eller komplettere den samme INN-posten på. En post blir endelig først etter kontroll eller godkjenning.</div>
+    <div class="principle">Kamera og Nordic ID arbeider mot den samme mottakstabellen. Etiketten identifiseres med det unike 6-tegnsnummeret; den gamle systemdelen 078500 brukes ikke.</div>
     <nav class="menu" aria-label="INN-meny">
-      <a class="menu-card primary" href="camera-live-v414.html"><div class="card-top"><div><h2 class="card-title">Kamera / telefon</h2><p class="card-description">Ta bilde, velg Gemini eller OpenAI, og arbeid mot den felles Mottak-tabellen.</p></div><span class="icon">📷</span></div><div class="details"><span class="tag accent">Åpne telefonskanner</span><span class="tag ok">Camera Cloud v4.14</span></div></a>
-      <a class="menu-card" href="mottak-live-v2.html"><div class="card-top"><div><h2 class="card-title">Nordic ID</h2><p class="card-description">Skann etiketter med industriskanneren og koble skanningen til foto og etikettdata.</p></div><span class="icon">▥</span></div><div class="details"><span class="tag">Åpne Nordic ID</span><span class="tag test">Testversjon</span></div></a>
-      <a class="menu-card" href="camera-live-v414.html"><div class="card-top"><div><h2 class="card-title">Kontroll / bilder</h2><p class="card-description">Se skyregistreringer og bilder, kontroller koblinger og slett feilregistrerte testposter.</p></div><span class="icon">✓</span></div><div class="details"><span class="tag">Bilder</span><span class="tag">Sletting</span></div></a>
-      <a class="menu-card" href="shared-page.html?src=mottak-table-v1.html"><div class="card-top"><div><h2 class="card-title">Historikk</h2><p class="card-description">Vis registrerte INN-poster i tabell sammen med det aktuelle lagerbildet.</p></div><span class="icon">☷</span></div><div class="details"><span class="tag">Tabell</span><span class="tag test">Testversjon</span></div></a>
+      <a class="menu-card primary" href="camera-live-v414.html?v=20260809-0147"><div class="card-top"><div><h2 class="card-title">Kamera / telefon</h2><p class="card-description">Ta bilde, velg Gemini eller OpenAI, og arbeid mot den felles Mottak-tabellen.</p></div><span class="icon">📷</span></div><div class="details"><span class="tag accent">Åpne telefonskanner</span><span class="tag ok">Camera Cloud v4.24</span></div></a>
+      <a class="menu-card" href="mottak-live-v45.html?v=20260809-0147"><div class="card-top"><div><h2 class="card-title">Nordic ID</h2><p class="card-description">Skann etiketter med industriskanneren. Bare det unike 6-tegnsnummeret brukes som etikett-ID.</p></div><span class="icon">▥</span></div><div class="details"><span class="tag">Åpne Nordic ID</span><span class="tag ok">WORKING v4.10</span></div></a>
+      <a class="menu-card" href="camera-live-v414.html?v=20260809-0147"><div class="card-top"><div><h2 class="card-title">Kontroll / bilder</h2><p class="card-description">Se skyregistreringer og bilder, kontroller koblinger og slett feilregistrerte testposter.</p></div><span class="icon">✓</span></div><div class="details"><span class="tag">Bilder</span><span class="tag">Kontroll</span></div></a>
+      <a class="menu-card" href="shared-page.html?src=mottak-table-v1.html"><div class="card-top"><div><h2 class="card-title">Historikk</h2><p class="card-description">Vis registrerte INN-poster i tabell sammen med det aktuelle lagerbildet.</p></div><span class="icon">☷</span></div><div class="details"><span class="tag">Tabell</span><span class="tag test">Historikk</span></div></a>
     </nav>
-    <div class="footer-note">Produkter i INN: <strong>Bunner</strong>, <strong>Hyller x30</strong> og <strong>Hyller x60</strong>.</div>
+    <div class="footer-note">Produkter i INN: <strong>Bunner</strong>, <strong>Hyller x30</strong> og <strong>Hyller x60</strong>. Lagerstatus: <strong>På lager → På rampe → Sendt</strong>.</div>
   </main>
-  <script src="shared-stock-status.js?v=20260807-1834"></script>
+  <script src="shared-stock-status.js?v=20260809-0147"></script>
 </body>
 </html>
