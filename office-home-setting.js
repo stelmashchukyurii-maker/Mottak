@@ -8,7 +8,8 @@
   const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
   const SETTING_KEY = "ut_office_home_button";
   const LEGACY_LOCAL_KEY = "bamavaremottak_home_return_v1:bestilling.html";
-  const LATEST_CAMERA_HREF = "camera-live-v414.html";
+  const LATEST_CAMERA_HREF = "camera-live-v414.html?v=20260809-0147";
+  const LATEST_NORDIC_HREF = "mottak-live-v45.html?v=20260809-0147";
 
   const headers = {
     apikey: SUPABASE_KEY,
@@ -26,21 +27,47 @@
     return !window.frameElement && (file === "index.html" || file === "Mottak" || file === "");
   }
 
-  function ensureLatestCameraLinks() {
+  function ensureReleaseLinks() {
     if (!isMainPage()) return false;
     if (typeof pages === "undefined" || !Array.isArray(pages)) return false;
 
     let changed = false;
     pages.forEach(page => {
       if (page.id === "camera-v4" || page.id === "inn-camera") {
-        if (page.href !== LATEST_CAMERA_HREF) {
-          page.href = LATEST_CAMERA_HREF;
-          changed = true;
-        }
+        if (page.href !== LATEST_CAMERA_HREF) { page.href = LATEST_CAMERA_HREF; changed = true; }
+        if (page.file !== "camera-live-v414.html") { page.file = "camera-live-v414.html"; changed = true; }
         if (page.id === "camera-v4") {
-          page.title = "SISTE ARBEIDSLENKE — KAMERA CLOUD v4.14";
-          page.status = "SISTE VERSJON";
+          page.title = "SISTE ARBEIDSLENKE — KAMERA CLOUD v4.24";
+          page.status = "GODKJENT · RELEASE";
+          page.type = "approved";
+          page.tags = ["SHARED DB", "LOWER ONLY", "3 STATUS"];
+        } else {
+          page.status = "GODKJENT · RELEASE";
+          page.type = "approved";
+          page.tags = ["TELEFON", "SHARED DB", "LOWER ONLY"];
         }
+      }
+
+      if (page.id === "inn-nordic") {
+        if (page.href !== LATEST_NORDIC_HREF) { page.href = LATEST_NORDIC_HREF; changed = true; }
+        page.file = "mottak-live-v45.html";
+        page.type = "approved";
+        page.status = "GODKJENT · RELEASE";
+        page.description = "Firmaskanner Nordic ID. Bare det unike 6-tegnsnummeret brukes som etikett-ID i den felles Mottak-tabellen.";
+        page.tags = ["FIRMASKANNER", "SHARED DB", "LOWER ONLY"];
+      }
+
+      if (page.id === "ut-office") {
+        page.type = "approved";
+        page.status = "GODKJENT · RELEASE";
+        page.tags = ["FOR KONTOR", "BESTILLING", "LAGER − RAMPER"];
+      }
+
+      if (page.id === "ut-warehouse") {
+        page.type = "approved";
+        page.status = "GODKJENT · RELEASE";
+        page.description = "Lagerarbeideren åpner rampen, skanner konkrete etiketter til rampen og sender varene videre. Status: På lager → På rampe → Sendt.";
+        page.tags = ["RAMPE", "3 STATUS", "SHARED DB"];
       }
     });
     return changed;
@@ -75,24 +102,19 @@
   }
 
   function renderMainEnhancements() {
-    const cameraChanged = ensureLatestCameraLinks();
+    const releaseChanged = ensureReleaseLinks();
     const lagerstatusAdded = ensureLagerstatusPage();
-    if ((cameraChanged || lagerstatusAdded) && typeof render === "function") render();
+    if ((releaseChanged || lagerstatusAdded) && typeof render === "function") render();
   }
 
   function setLegacyValue(enabled) {
-    try {
-      localStorage.setItem(LEGACY_LOCAL_KEY, enabled ? "true" : "false");
-    } catch {}
+    try { localStorage.setItem(LEGACY_LOCAL_KEY, enabled ? "true" : "false"); } catch {}
   }
 
   function officeHomeLinks() {
     return [...document.querySelectorAll('a[href]')].filter(link => {
-      try {
-        return new URL(link.getAttribute("href"), location.href).pathname.endsWith("/index.html");
-      } catch {
-        return false;
-      }
+      try { return new URL(link.getAttribute("href"), location.href).pathname.endsWith("/index.html"); }
+      catch { return false; }
     });
   }
 
@@ -120,7 +142,6 @@
   function apply(enabled, status = "") {
     setLegacyValue(enabled);
     updateSwitch(enabled, status);
-
     if (!isOfficePage()) return;
     officeHomeLinks().forEach(link => {
       link.hidden = !enabled;
@@ -132,11 +153,8 @@
   async function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      return await fetch(url, { ...options, signal: controller.signal });
-    } finally {
-      clearTimeout(timer);
-    }
+    try { return await fetch(url, { ...options, signal: controller.signal }); }
+    finally { clearTimeout(timer); }
   }
 
   async function readSetting() {
@@ -152,15 +170,8 @@
   async function writeSetting(enabled) {
     const response = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/app_settings`, {
       method: "POST",
-      headers: {
-        ...headers,
-        Prefer: "resolution=merge-duplicates,return=representation"
-      },
-      body: JSON.stringify({
-        key: SETTING_KEY,
-        bool_value: Boolean(enabled),
-        updated_at: new Date().toISOString()
-      })
+      headers: { ...headers, Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify({ key: SETTING_KEY, bool_value: Boolean(enabled), updated_at: new Date().toISOString() })
     });
     const body = await response.json().catch(() => null);
     if (!response.ok) throw new Error(body?.message || `HTTP ${response.status}`);
@@ -173,46 +184,31 @@
   async function start() {
     renderMainEnhancements();
     updateSwitch(currentValue, "loading");
-    try {
-      currentValue = await readSetting();
-      apply(currentValue);
-    } catch {
-      apply(currentValue, "error");
-    }
+    try { currentValue = await readSetting(); apply(currentValue); }
+    catch { apply(currentValue, "error"); }
   }
 
   async function handleChange(event) {
     const input = event.target.closest("#officeHomeSwitch");
     if (!input || busy) return;
-
     const previous = currentValue;
     const requested = input.checked;
     busy = true;
     apply(requested, "saving");
-
-    try {
-      currentValue = await writeSetting(requested);
-      apply(currentValue);
-    } catch {
-      currentValue = previous;
-      apply(currentValue, "error");
-    } finally {
-      busy = false;
-    }
+    try { currentValue = await writeSetting(requested); apply(currentValue); }
+    catch { currentValue = previous; apply(currentValue, "error"); }
+    finally { busy = false; }
   }
 
   document.addEventListener("change", handleChange);
   document.addEventListener("bama:office-switch-rendered", () => {
     apply(currentValue);
-    ensureLatestCameraLinks();
+    ensureReleaseLinks();
     ensureLagerstatusPage();
   });
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start, { once: true });
-  } else {
-    start();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
+  else start();
 })();
 
 (() => {
@@ -262,9 +258,7 @@
     document.head.appendChild(style);
   }
 
-  function protectedButtons() {
-    return [...document.querySelectorAll("[data-unpin], [data-pin].active")];
-  }
+  function protectedButtons() { return [...document.querySelectorAll("[data-unpin], [data-pin].active")]; }
 
   function paint() {
     const button = document.getElementById("bamaPinLockButton");
@@ -296,18 +290,8 @@
     }, 2400);
   }
 
-  function lock() {
-    unlocked = false;
-    clearTimeout(relockTimer);
-    paint();
-  }
-
-  function unlock() {
-    unlocked = true;
-    clearTimeout(relockTimer);
-    relockTimer = setTimeout(lock, 60000);
-    paint();
-  }
+  function lock() { unlocked = false; clearTimeout(relockTimer); paint(); }
+  function unlock() { unlocked = true; clearTimeout(relockTimer); relockTimer = setTimeout(lock, 60000); paint(); }
 
   function ensureBar() {
     ensureStyle();
@@ -333,26 +317,22 @@
     const toggle = event.target.closest?.("[data-pin]");
     const isRemoval = Boolean(remove || (toggle && toggle.classList.contains("active")));
     if (!isRemoval || unlocked) return;
-
     event.preventDefault();
     event.stopImmediatePropagation();
     showHint("🔒 Закладка захищена. Натисніть замок, щоб дозволити зняття на 60 секунд.");
   }, true);
 
-  document.addEventListener("bama:office-switch-rendered", () => queueMicrotask(() => {
-    ensureBar();
-    paint();
-  }));
+  document.addEventListener("bama:office-switch-rendered", () => queueMicrotask(() => { ensureBar(); paint(); }));
+
+  function stampRelease() {
+    const version = document.querySelector(".version");
+    if (version) version.textContent = "Hovedmeny v19 RELEASE · Oppdatert 09.08.2026 kl. 01:47";
+  }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      ensureBar();
-      const version = document.querySelector(".version");
-      if (version) version.textContent = "Hovedmeny v18.1 PIN-LÅS · Oppdatert 07.08.2026 kl. 22:25";
-    }, { once: true });
+    document.addEventListener("DOMContentLoaded", () => { ensureBar(); stampRelease(); }, { once: true });
   } else {
     ensureBar();
-    const version = document.querySelector(".version");
-    if (version) version.textContent = "Hovedmeny v18.1 PIN-LÅS · Oppdatert 07.08.2026 kl. 22:25";
+    stampRelease();
   }
 })();
