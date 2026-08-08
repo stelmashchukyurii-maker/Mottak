@@ -34,3 +34,13 @@
     };
   }
 })();
+
+// Shared compact counter: WORKING and GREEN read the same mottak_scans rows.
+// It counts only verified + in_stock, so a newly created order does not reduce the number.
+(() => {
+  if (document.querySelector('script[data-bama-compact-stock]')) return;
+  const script = document.createElement("script");
+  script.src = "compact-stock-counter.js?v=20260809-0103";
+  script.dataset.bamaCompactStock = "true";
+  document.body.appendChild(script);
+})();
