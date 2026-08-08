@@ -25,7 +25,7 @@ iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:v
     <div><div class="title" id="greenTitle">GREEN — UT Kontor v29</div><div class="sub" id="greenSub">Parallell arbeidsversjon. Isolerte data til GREEN-kjeden er ferdig godkjent.</div></div>
     <div class="lang"><button id="noBtn" type="button">NO</button><button id="uaBtn" type="button">UA</button></div>
   </div>
-  <nav class="nav"><a href="index.html">⌂ HOME</a><a class="current" href="utsending-green.html">✓ UT Lager GREEN</a><a href="camera-green.html">📷 Kamera GREEN</a></nav>
+  <nav class="nav"><a href="green-home.html">⌂ HOME</a><a class="current" href="utsending-green.html">✓ UT Lager GREEN</a><a href="camera-green.html">📷 Kamera GREEN</a></nav>
   <div class="badges"><span class="badge">GREEN · PRIVAT RUTE</span><span class="badge dim" id="productBadge">products.js</span></div>
 </header>
 <div id="loader">Laster GREEN — UT Kontor v29…</div>
@@ -67,7 +67,7 @@ function applyLanguage(){
 frame.addEventListener("load",async()=>{
   try{
     const doc=frame.contentDocument;
-    const home=doc.querySelector("a.home");if(home)home.href="index.html";
+    const home=doc.querySelector("a.home");if(home)home.href="green-home.html";
     await inject(doc,`ut-kontor-products.js?v=${VERSION}`);
     await inject(doc,`ut-kontor-history-visuals.js?v=${VERSION}`);
     await inject(doc,`ut-test-language.js?v=${VERSION}`);
