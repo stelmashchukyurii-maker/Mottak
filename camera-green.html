@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>GREEN — Camera Cloud v4.23</title>
+  <title>GREEN — Camera Cloud v4.24</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster GREEN — Camera Cloud v4.23…</div>
-  <iframe id="app" title="GREEN — Camera Cloud v4.23" src="camera-live.html?base=green-423-compact-safe-20260809-0116"></iframe>
+  <div id="loader">Laster GREEN — Camera Cloud v4.24…</div>
+  <iframe id="app" title="GREEN — Camera Cloud v4.24" src="camera-live.html?base=green-424-stock-minus-ramp-20260809-0121"></iframe>
   <script>
     "use strict";
-    const VERSION = "20260809-0116";
+    const VERSION = "20260809-0121";
     const frame = document.getElementById("app");
     const loader = document.getElementById("loader");
 
@@ -56,9 +56,8 @@
         const back = doc.querySelector("a.back");
         if (back) back.href = `green-home.html?v=${VERSION}`;
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "GREEN · Kamera Cloud v4.23 · COMPACT STOCK SAFE<br>Oppdatert 09.08.2026 kl. 01:16";
+        if (version) version.innerHTML = "GREEN · Kamera Cloud v4.24 · STOCK − RAMP<br>Oppdatert 09.08.2026 kl. 01:21";
 
-        // Do not let optional counter block the whole camera page.
         loader.style.display = "none";
         win.__BAMA_COMPACT_STOCK_COUNTER__ = true;
         injectScript(doc, `compact-stock-counter-v2.js?v=${VERSION}`).catch(error => console.warn("Compact stock v2 failed", error));
@@ -70,7 +69,7 @@
           }, 80));
         });
       } catch (error) {
-        loader.textContent = `Kunne ikke starte GREEN Camera Cloud v4.23: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte GREEN Camera Cloud v4.24: ${error.message || error}`;
       }
     });
   </script>
