@@ -70,7 +70,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 14px;
     }
 
@@ -113,6 +113,15 @@
     dt { color: var(--muted); }
     dd { margin: 0; }
 
+    .note {
+      margin-top: 13px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     footer {
       border-top: 1px solid var(--line);
       margin-top: 24px;
@@ -139,24 +148,25 @@
     </div>
 
     <div class="notice">
-      Denne siden er foreløpig kun for visning. Eksisterende arbeidsider er ikke koblet til produktregisteret ennå.
+      Denne siden er foreløpig kun for visning. Produksjonssidene er ikke koblet til produktregisteret ennå. TEST-sidene kan lese registeret.
     </div>
 
     <section class="grid" id="productGrid" aria-live="polite"></section>
 
     <footer>
       <div id="footerVersion"></div>
-      <div>Oppdatert: 08.08.2026 kl. 08:28 (Europe/Oslo)</div>
+      <div id="footerUpdated"></div>
     </footer>
   </main>
 
-  <script src="./products.js"></script>
+  <script src="./products.js?v=20260808-0936"></script>
   <script>
     (function () {
       const api = window.BAMA_PRODUCTS;
       const grid = document.getElementById("productGrid");
       const versionBadge = document.getElementById("versionBadge");
       const footerVersion = document.getElementById("footerVersion");
+      const footerUpdated = document.getElementById("footerUpdated");
 
       if (!api) {
         grid.innerHTML = '<div class="empty">Produktregisteret kunne ikke lastes.</div>';
@@ -167,6 +177,42 @@
       versionBadge.textContent = `Register v${api.meta.version}`;
       footerVersion.textContent = `Produktregister v${api.meta.version} · schema ${api.meta.schemaVersion}`;
 
+      try {
+        const updated = new Date(api.meta.updatedAt);
+        footerUpdated.textContent = `Oppdatert: ${updated.toLocaleString("nb-NO", {
+          timeZone: "Europe/Oslo",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        })} (Europe/Oslo)`;
+      } catch (_) {
+        footerUpdated.textContent = `Oppdatert: ${api.meta.updatedAt}`;
+      }
+
+      const componentLabels = {
+        bunner: "Bunner",
+        hyller: "Hyller",
+        forlengere: "Forlengere"
+      };
+
+      function describeShipment(product) {
+        const components = product.shipment?.components;
+        if (!components) return "—";
+
+        return Object.entries(components).map(([key, component]) => {
+          const label = componentLabels[key] || key;
+          if (component.mode === "fixed") {
+            return `${component.quantity} ${label}`;
+          }
+          if (component.mode === "ut_confirmation") {
+            return `${label}: registreres per vogn`;
+          }
+          return label;
+        }).join(" + ");
+      }
+
       const products = api.getAllProducts();
       if (!products.length) {
         grid.innerHTML = '<div class="empty">Ingen produkter i registeret.</div>';
@@ -174,7 +220,11 @@
       }
 
       grid.innerHTML = products.map((product) => {
-        const stack = product.stackSize == null ? "Ikke fastsatt" : `${product.stackSize} stk`;
+        const stack = product.stackSize == null
+          ? (product.shipment ? "Variabel" : "Ikke fastsatt")
+          : `${product.stackSize} stk`;
+        const shipment = describeShipment(product);
+        const note = product.notes?.no || "";
         return `
           <article class="card">
             <h2>${product.name.no}</h2>
@@ -186,8 +236,10 @@
               <dt>Українська</dt><dd>${product.name.uk}</dd>
               <dt>Enhet</dt><dd>${product.unit}</dd>
               <dt>Stabel</dt><dd>${stack}</dd>
+              <dt>UT-oppsett</dt><dd>${shipment}</dd>
               <dt>Rekkefølge</dt><dd>${product.sortOrder}</dd>
             </dl>
+            ${note ? `<div class="note">${note}</div>` : ""}
           </article>`;
       }).join("");
     })();
