@@ -1,8 +1,8 @@
 "use strict";
 
 // BaMavaremottak — TEST UT Kontor history visuals
-// Version 1.0.0
-// Updated: 2026-08-08 12:24 Europe/Oslo
+// Version 1.1.0
+// Updated: 2026-08-08 12:53 Europe/Oslo
 // CSS-only pictograms: no image files, no extra network requests.
 (() => {
   if (window.__UT_KONTOR_HISTORY_VISUALS__) return;
@@ -27,6 +27,7 @@
       .ut-product-mark.rack{border:2px solid currentColor;border-top-width:2px;border-bottom-width:3px;border-radius:1px}
       .ut-product-mark.rack::before{content:"";position:absolute;inset:3px 4px;background:repeating-linear-gradient(to bottom,currentColor 0 1.4px,transparent 1.4px 5px)}
       .ut-product-mark.rack60::before{background:repeating-linear-gradient(to bottom,currentColor 0 1.2px,transparent 1.2px 3px)}
+      .ut-post-inline{color:#f4c430;font-weight:1000}
       @media(max-width:520px){.ut-product-line{grid-template-columns:46px minmax(0,1fr);gap:8px;padding:8px}.ut-product-iconbox{width:43px;height:43px}.ut-product-title{font-size:13px}.ut-product-detail{font-size:11.5px}}
     `;
     document.head.appendChild(style);
@@ -38,19 +39,48 @@
 
   function detailBunner(count) {
     const total = count * 10;
+    const posts = total * 4;
     return isUk()
-      ? `${count} ${count === 1 ? "стопка" : "стопок"} = <strong>${total} Bunner</strong>`
-      : `${count} ${count === 1 ? "stabel" : "stabler"} = <strong>${total} Bunner</strong>`;
+      ? `${count} ${count === 1 ? "стопка" : "стопок"} = <strong>${total} Bunner + ${posts} CC Post</strong>`
+      : `${count} ${count === 1 ? "stabel" : "stabler"} = <strong>${total} Bunner + ${posts} CC Post</strong>`;
   }
 
   function detailHyller(count, size) {
     const hyller = count * size;
+    const posts = count * 4;
     return isUk()
-      ? `${count} ${count === 1 ? "комплект" : "комплектів"} = <strong>${count} Bunner + ${hyller} полиць</strong>`
-      : `${count} sett = <strong>${count} Bunner + ${hyller} hyller</strong>`;
+      ? `${count} ${count === 1 ? "комплект" : "комплектів"} = <strong>${count} Bunner + ${hyller} полиць + ${posts} CC Post</strong>`
+      : `${count} sett = <strong>${count} Bunner + ${hyller} hyller + ${posts} CC Post</strong>`;
   }
 
-  function decorate() {
+  function decorateSummary() {
+    const b = n(document.getElementById("bunnerQty")?.value);
+    const h30 = n(document.getElementById("h30Qty")?.value);
+    const h60 = n(document.getElementById("h60Qty")?.value);
+    const sumB = document.getElementById("sumBunner");
+    const sum30 = document.getElementById("sumH30");
+    const sum60 = document.getElementById("sumH60");
+
+    if (sumB) {
+      const bases = b * 10;
+      const posts = bases * 4;
+      sumB.textContent = isUk()
+        ? `${b} ${b === 1 ? "стопка" : "стопок"} = ${bases} Bunner + ${posts} CC Post`
+        : `${b} ${b === 1 ? "stabel" : "stabler"} = ${bases} Bunner + ${posts} CC Post`;
+    }
+    if (sum30) {
+      sum30.textContent = isUk()
+        ? `${h30} комплектів = ${h30} Bunner + ${h30 * 30} полиць + ${h30 * 4} CC Post`
+        : `${h30} sett = ${h30} Bunner + ${h30 * 30} hyller + ${h30 * 4} CC Post`;
+    }
+    if (sum60) {
+      sum60.textContent = isUk()
+        ? `${h60} комплектів = ${h60} Bunner + ${h60 * 60} полиць + ${h60 * 4} CC Post`
+        : `${h60} sett = ${h60} Bunner + ${h60 * 60} hyller + ${h60 * 4} CC Post`;
+    }
+  }
+
+  function decorateHistory() {
     installStyle();
     if (typeof orders === "undefined" || !Array.isArray(orders)) return;
 
@@ -75,12 +105,30 @@
     });
   }
 
+  function decorate() {
+    decorateHistory();
+    decorateSummary();
+  }
+
   const previousRenderHistory = window.renderHistory;
   window.renderHistory = function renderHistoryWithVisuals() {
     if (typeof previousRenderHistory === "function") previousRenderHistory();
     decorate();
   };
 
-  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.0.0", decorate };
+  const previousRenderForm = window.renderForm;
+  window.renderForm = function renderFormWithCcPosts() {
+    if (typeof previousRenderForm === "function") previousRenderForm();
+    decorateSummary();
+  };
+
+  ["bunnerQty", "h30Qty", "h60Qty"].forEach((id) => {
+    const input = document.getElementById(id);
+    input?.addEventListener("input", () => setTimeout(decorateSummary, 0));
+    input?.addEventListener("change", () => setTimeout(decorateSummary, 0));
+  });
+  document.querySelector(".ramp-products")?.addEventListener("click", () => setTimeout(decorateSummary, 0));
+
+  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.1.0", decorate };
   decorate();
 })();
