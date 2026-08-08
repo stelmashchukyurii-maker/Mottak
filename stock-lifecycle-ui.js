@@ -2,6 +2,7 @@
 
 // BaMavaremottak — visible warehouse lifecycle
 // Agreed 09.08.2026: På lager -> På rampe -> Sendt.
+// Updated 09.08.2026 00:45 Europe/Oslo: hide top LAGER NÅ summary card on camera pages.
 (() => {
   if (window.__BAMA_THREE_STOCK_STATES_UI__) return;
   window.__BAMA_THREE_STOCK_STATES_UI__ = true;
@@ -42,31 +43,18 @@
     if (title) title.textContent = c.title;
   }
 
-  function applySharedCard() {
+  function hideSharedStockCard() {
     const card = document.getElementById("bamaSharedStock");
     if (!card) return;
-
-    // Keep legacy nodes in the DOM because shared-stock-status.js refreshes them every 5s.
-    // Hide them instead of removing them, otherwise refresh throws "Cannot set properties of null".
-    const physicalCell = document.getElementById("bssPhysical")?.closest(".bss-cell");
-    const reservedCell = document.getElementById("bssReserved")?.closest(".bss-cell");
-    if (physicalCell) physicalCell.style.display = "none";
-    if (reservedCell) reservedCell.style.display = "none";
-
-    const grid = card.querySelector(".bss-grid");
-    if (grid) grid.style.gridTemplateColumns = "repeat(3,minmax(0,1fr))";
-    const c = labels();
-    const stock = document.getElementById("bssAvailable")?.closest(".bss-cell");
-    const ramp = document.getElementById("bssStaged")?.closest(".bss-cell");
-    const sent = document.getElementById("bssDispatched")?.closest(".bss-cell");
-    if (stock?.querySelector("span")) stock.querySelector("span").textContent = c.stock.toUpperCase();
-    if (ramp?.querySelector("span")) ramp.querySelector("span").textContent = c.ramp.toUpperCase();
-    if (sent?.querySelector("span")) sent.querySelector("span").textContent = c.sent.toUpperCase();
+    // Do not remove child nodes: shared-stock-status.js still updates them in the background.
+    // Hiding the whole card keeps refresh safe and removes these figures from WORKING and GREEN UI.
+    card.style.display = "none";
+    card.setAttribute("aria-hidden", "true");
   }
 
   function apply() {
     applyCameraFilters();
-    applySharedCard();
+    hideSharedStockCard();
   }
 
   let queued = false;
