@@ -2,6 +2,7 @@
 
 // Camera current quantity: ONLY verified rows with stock_status=in_stock.
 // Agreed warehouse lifecycle 09.08.2026: in_stock -> staged -> dispatched.
+// The combined "total" row is intentionally hidden; only per-product quantities are shown.
 (() => {
   if (window.__BAMA_CAMERA_CURRENT_STOCK_ONLY__) return;
   window.__BAMA_CAMERA_CURRENT_STOCK_ONLY__ = true;
@@ -17,8 +18,6 @@
       bunner: n => `${n} стопок × 10 = ${n * 10} шт.`,
       h30: n => `${n} Bunner × 30 = ${n * 30} hyller`,
       h60: n => `${n} Bunner × 60 = ${n * 60} hyller`,
-      totalLabel: "Всього на складі",
-      total: (b, h) => `${b} Bunner · ${h} hyller`,
       aiNote: "AI читає лише унікальний 6-символьний номер. Середня системна частина RFID ігнорується та не зберігається."
     };
     if (l === "pl") return {
@@ -26,8 +25,6 @@
       bunner: n => `${n} stosów × 10 = ${n * 10} szt.`,
       h30: n => `${n} Bunner × 30 = ${n * 30} półek`,
       h60: n => `${n} Bunner × 60 = ${n * 60} półek`,
-      totalLabel: "Razem na magazynie",
-      total: (b, h) => `${b} Bunner · ${h} półek`,
       aiNote: "AI odczytuje tylko unikalny 6-znakowy numer. Środkowa systemowa część RFID jest ignorowana i nie jest zapisywana."
     };
     return {
@@ -35,8 +32,6 @@
       bunner: n => `${n} stabler × 10 = ${n * 10} stk.`,
       h30: n => `${n} Bunner × 30 = ${n * 30} hyller`,
       h60: n => `${n} Bunner × 60 = ${n * 60} hyller`,
-      totalLabel: "Totalt på lager",
-      total: (b, h) => `${b} Bunner · ${h} hyller`,
       aiNote: "AI leser bare det unike 6-tegnsnummeret. Den midtre systemdelen av RFID-koden ignoreres og lagres ikke."
     };
   };
@@ -50,21 +45,20 @@
       h30: current.filter(row => row.product === "hyller30").length,
       h60: current.filter(row => row.product === "hyller60").length
     };
-    const totalBunner = counts.bunner * 10 + counts.h30 + counts.h60;
-    const totalHyller = counts.h30 * 30 + counts.h60 * 60;
     const c = copy();
     const values = [
       ["productTotalsTitle", c.title],
       ["bunnerTotal", c.bunner(counts.bunner)],
       ["hyller30Total", c.h30(counts.h30)],
-      ["hyller60Total", c.h60(counts.h60)],
-      ["grandTotalLabel", c.totalLabel],
-      ["grandTotalValue", c.total(totalBunner, totalHyller)]
+      ["hyller60Total", c.h60(counts.h60)]
     ];
     values.forEach(([id, value]) => {
       const el = document.getElementById(id);
       if (el && el.textContent !== value) el.textContent = value;
     });
+
+    const grandRow = document.querySelector("#productTotalsCard .product-total-row.grand-total");
+    if (grandRow) grandRow.style.display = "none";
 
     const aiNote = document.querySelector(".server-ai-note");
     if (aiNote && aiNote.textContent !== c.aiNote) aiNote.textContent = c.aiNote;
