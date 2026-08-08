@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="nb"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><title>GREEN — BaMavaremottak</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}#load{position:fixed;inset:0;display:grid;place-items:center;background:#0b1020;color:#f5f7ff;font:900 18px Arial,sans-serif;text-align:center;padding:24px}#load b{color:#48d597}</style></head><body><div id="load"><div><b>GREEN — BaMavaremottak</b><br><br>Laster parallell arbeidskolonne…</div></div><iframe id="home" title="GREEN — BaMavaremottak"></iframe><script>
+(async()=>{
+ const f=document.getElementById('home'),load=document.getElementById('load');
+ try{
+  const r=await fetch('index.html?v=20260808-1447',{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+  let h=await r.text();
+  h=h.replace('</head>','<base target="_top"></head>');
+  h=h.replace('</body>',`<script>(function(){
+    const MAP={"camera-v4":"camera-green.html","inn-camera":"camera-green.html","ut-office":"bestilling-green.html","ut-warehouse":"utsending-green.html"};
+    function applyGreen(){
+      try{
+        if(typeof pages!=="undefined"&&Array.isArray(pages)){
+          let changed=false;
+          pages.forEach(p=>{if(MAP[p.id]&&p.href!==MAP[p.id]){p.href=MAP[p.id];changed=true;}});
+          if(changed&&typeof render==="function")render();
+        }
+        document.querySelectorAll('a[href="index.html"]').forEach(a=>a.href="green-home.html");
+        const v=document.querySelector('.version');if(v&&!v.dataset.green){v.dataset.green="1";v.textContent="GREEN · PARALLELL ARBEID · 08.08.2026 kl. 14:47";v.style.borderColor="#48d597";v.style.color="#48d597";}
+        const pinned=document.getElementById('pinned');if(pinned&&!document.getElementById('greenPrivateNote')){const n=document.createElement('div');n.id='greenPrivateNote';n.textContent='🟢 GREEN — denne arbeidskolonnen vises bare via den private GREEN-lenken.';n.style.cssText='margin:0 0 10px;padding:9px 11px;border:1px solid #48d597;border-radius:12px;background:rgba(72,213,151,.08);color:#48d597;font-size:12px;font-weight:900;line-height:1.4';pinned.insertBefore(n,pinned.firstChild);}
+      }catch(e){console.error('[GREEN HOME]',e)}
+    }
+    document.addEventListener('bama:office-switch-rendered',()=>setTimeout(applyGreen,0));
+    document.addEventListener('DOMContentLoaded',()=>{applyGreen();setTimeout(applyGreen,120);setTimeout(applyGreen,600)});
+    setTimeout(applyGreen,1000);
+  })();<\/script></body>`);
+  f.srcdoc=h;f.addEventListener('load',()=>load.style.display='none',{once:true});
+ }catch(e){load.innerHTML='<div><b>GREEN startfeil</b><br><br>'+String(e.message||e)+'</div>'}
+})();
+</script></body></html>
