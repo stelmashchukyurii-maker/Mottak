@@ -5,188 +5,69 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
   <meta name="google" content="notranslate" />
-  <title>UT Kontor — Produkttest</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>TEST — UT Kontor</title>
   <style>
-    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff7373;--line:#303b59}
-    *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
-    body{display:flex;flex-direction:column}
-    .testbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 14px;border-bottom:2px solid var(--accent);background:#10172a;box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:2}
-    .testbar-main{min-width:0}
-    .testbar strong{display:block;font-size:15px;color:var(--accent);letter-spacing:.02em}
-    .testbar small{display:block;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.35}
-    .testbar-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-    .lang-switch{display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
-    .lang-btn{min-width:42px;border:0;border-radius:999px;padding:6px 9px;background:transparent;color:var(--muted);font-size:11px;font-weight:950;cursor:pointer}
-    .lang-btn.active{background:var(--accent);color:#111827}
-    .registry-state{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
-    .registry-state.ok{border-color:rgba(72,213,151,.5);color:var(--ok)}
-    .registry-state.bad{border-color:rgba(255,115,115,.55);color:var(--bad)}
-    iframe{display:block;width:100%;flex:1 1 auto;min-height:0;border:0;background:var(--bg)}
-    @media(max-width:640px){.testbar{align-items:flex-start;padding:8px 10px}.testbar small{max-width:210px}.testbar-tools{flex-direction:column;align-items:flex-end;gap:5px}.registry-state{padding:5px 7px;font-size:9px}.lang-btn{min-width:38px;padding:5px 7px;font-size:10px}}
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
+    body{display:flex;flex-direction:column}.bar{flex:0 0 auto;padding:10px 12px;border-bottom:2px solid var(--accent);background:#10172a;box-shadow:0 4px 16px rgba(0,0,0,.28);z-index:5}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.title{color:var(--accent);font-weight:1000;font-size:16px}.sub{margin-top:3px;color:var(--muted);font-size:11px;line-height:1.35}.nav{display:flex;gap:6px;flex-wrap:wrap}.nav a,.lang button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--text);text-decoration:none;font-size:11px;font-weight:950}.nav a.test{border-color:var(--ok);color:var(--ok)}.lang{display:flex;gap:4px}.lang button.active{border-color:var(--accent);background:var(--accent);color:#17130a}.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.badge{padding:5px 8px;border:1px solid rgba(72,213,151,.45);border-radius:999px;background:rgba(72,213,151,.08);color:var(--ok);font-size:10px;font-weight:900}.badge.info{border-color:rgba(117,183,255,.45);background:rgba(117,183,255,.08);color:#cce4ff}iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}#loader{position:fixed;inset:0;top:96px;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font-weight:900;z-index:4}@media(max-width:600px){.bar{padding:9px 10px}.title{font-size:15px}.nav a{padding:5px 8px}.sub{font-size:10px}}
   </style>
+  <script src="./products.js?v=20260808-1038"></script>
 </head>
-<body class="notranslate">
-  <header class="testbar">
-    <div class="testbar-main">
-      <strong>UT Kontor — PRODUKTTEST</strong>
-      <small>Isolert testkopi · sentral produktliste · skriving til databasen er blokkert</small>
+<body>
+  <header class="bar">
+    <div class="row">
+      <div><div class="title">TEST — UT Kontor · ISOLERT</div><div class="sub">Kun TEST-data. Production-tabeller er blokkert av ut-test-api.js.</div></div>
+      <div class="lang"><button id="noBtn" type="button">NO</button><button id="uaBtn" type="button">UA</button></div>
     </div>
-    <div class="testbar-tools">
-      <div class="lang-switch" aria-label="Språk / Мова">
-        <button class="lang-btn" type="button" data-lang-choice="no" aria-pressed="true">NO</button>
-        <button class="lang-btn" type="button" data-lang-choice="uk" aria-pressed="false">UA</button>
-      </div>
-      <div class="registry-state" id="registryState">Laster products.js…</div>
+    <div class="row" style="margin-top:7px">
+      <nav class="nav"><a href="test-home.html">⌂ TEST</a><a class="test" href="utsending-test.html">✓ UT Bekreft TEST</a><a href="ut-camera-test.html">📷 Foto TEST</a></nav>
+      <div class="badges"><span class="badge" id="dbBadge">TEST lager: 10 + 10 + 10</span><span class="badge info" id="productBadge">products.js</span></div>
     </div>
   </header>
-
-  <iframe id="appFrame" src="./bestilling-products-test-base.html?v=20260808-0843" title="UT Kontor produkttest"></iframe>
-
-  <script src="./products.js?v=20260808-0947"></script>
-  <script src="./ut-test-language.js?v=20260808-1007"></script>
-  <script>
-  "use strict";
-  (() => {
-    const frame = document.getElementById("appFrame");
-    const state = document.getElementById("registryState");
-    const supported = new Set(["bunner", "hyller30", "hyller60"]);
-
-    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
-      "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"
-    }[char]));
-
-    function productName(api, id) {
-      const product = api.getProductById(id);
-      const lang = window.UT_TEST_LANG?.getLang?.() || "no";
-      return product ? api.getProductName(product, lang) : "";
-    }
-
-    function injectProductRegistry() {
-      const api = window.BAMA_PRODUCTS;
-      if (!api) {
-        state.textContent = "products.js ikke tilgjengelig";
-        state.className = "registry-state bad";
-        return;
-      }
-
-      const doc = frame.contentDocument;
-      const win = frame.contentWindow;
-      if (!doc || !win) return;
-
-      if (!win.__UT_PRODUCT_TEST_READ_ONLY__) {
-        const originalFetch = win.fetch.bind(win);
-        win.fetch = (input, init = {}) => {
-          const method = String(init.method || "GET").toUpperCase();
-          if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
-            return Promise.reject(new Error(`TESTKOPI: ${method} er blokkert. Ingen data er skrevet.`));
-          }
-          return originalFetch(input, init);
-        };
-        win.__UT_PRODUCT_TEST_READ_ONLY__ = true;
-      }
-
-      const all = api.getAllProducts();
-      const active = api.getActiveProducts();
-      const lang = window.UT_TEST_LANG?.getLang?.() || "no";
-      state.textContent = lang === "uk"
-        ? `products.js v${api.meta.version} · ${active.length} активних`
-        : `products.js v${api.meta.version} · ${active.length} aktive`;
-      state.className = "registry-state ok";
-
-      const version = doc.querySelector(".version");
-      if (version) {
-        version.innerHTML = `UT Kontor PRODUKTTEST v1.4<br>${lang === "uk" ? "Оновлено" : "Oppdatert"} 08.08.2026 kl. 10:07`;
-      }
-
-      if (!doc.getElementById("productTestNotice")) {
-        const notice = doc.createElement("div");
-        notice.id = "productTestNotice";
-        notice.style.cssText = "margin:10px 0 14px;padding:11px 13px;border:2px solid #f4c430;border-radius:14px;background:rgba(244,196,48,.08);color:#ffe88a;font-weight:850;font-size:13px;line-height:1.45";
-        notice.innerHTML = `<strong>TESTKOPI</strong> · Produktnavn hentes fra <code>products.js</code>. Lesing av lagerdata er tillatt, men lagring/endring i databasen er blokkert.`;
-        const subtitle = doc.querySelector(".subtitle");
-        if (subtitle) subtitle.insertAdjacentElement("afterend", notice);
-      }
-
-      const bunner = productName(api, "bunner");
-      const h30 = productName(api, "hyller30");
-      const h60 = productName(api, "hyller60");
-
-      const bunnerCard = doc.getElementById("bunnerQty")?.closest("article");
-      const h30Card = doc.getElementById("h30Qty")?.closest("article");
-      const h60Card = doc.getElementById("h60Qty")?.closest("article");
-      if (bunnerCard?.querySelector("strong")) bunnerCard.querySelector("strong").textContent = bunner;
-      if (h30Card?.querySelector("strong")) h30Card.querySelector("strong").textContent = h30;
-      if (h60Card?.querySelector("strong")) h60Card.querySelector("strong").textContent = h60;
-
-      const summaryMap = [
-        ["sumBunner", bunner], ["sumH30", h30], ["sumH60", h60]
-      ];
-      summaryMap.forEach(([id, label]) => {
-        const row = doc.getElementById(id)?.closest(".summary-row");
-        const span = row?.querySelector("span");
-        if (span && label) span.textContent = label;
-      });
-
-      const stockMap = [
-        ["bunnerValue", bunner], ["h30Value", h30], ["h60Value", h60]
-      ];
-      stockMap.forEach(([id, label]) => {
-        const row = doc.getElementById(id)?.closest(".overview-row");
-        const name = row?.querySelector(".name");
-        if (name && label) name.textContent = label;
-      });
-
-      doc.getElementById("centralProductTestPanel")?.remove();
-      const panel = doc.createElement("section");
-      panel.className = "card";
-      panel.id = "centralProductTestPanel";
-      panel.innerHTML = `
-        <h2>${lang === "uk" ? "Центральний список продуктів" : "Sentral produktliste"} <span style="font-size:12px;color:#aab4ce">products.js v${esc(api.meta.version)}</span></h2>
-        <div style="display:grid;gap:8px">
-          ${all.map((product) => {
-            const name = api.getProductName(product, lang);
-            const connected = supported.has(product.id);
-            const statusText = product.active ? (lang === "uk" ? "Активний" : "Aktiv") : (lang === "uk" ? "Неактивний" : "Inaktiv");
-            const connectionText = connected
-              ? (lang === "uk" ? "Підключено до наявного поля UT" : "Koblet til eksisterende UT-felt")
-              : (lang === "uk" ? "Зареєстровано · поле UT ще не створено" : "Registrert · UT-felt ikke opprettet ennå");
-            return `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 12px;border:1px solid #303b59;border-radius:12px;background:#0b1020">
-              <div><strong>${esc(name)}</strong><div style="margin-top:3px;color:#aab4ce;font-size:11px">ID: ${esc(product.id)}</div></div>
-              <div style="text-align:right;font-size:11px;font-weight:850;color:${product.active ? "#48d597" : "#aab4ce"}">${esc(statusText)}<div style="margin-top:3px;color:${connected ? "#f4c430" : "#aab4ce"}">${esc(connectionText)}</div></div>
-            </div>`;
-          }).join("")}
-        </div>`;
-
-      const form = doc.getElementById("formCard");
-      if (form) form.insertAdjacentElement("beforebegin", panel);
-
-      const send = doc.getElementById("send");
-      if (send) {
-        send.disabled = true;
-        send.textContent = lang === "uk" ? "TEST — відправлення вимкнено" : "TEST — sending deaktivert";
-        send.title = lang === "uk" ? "Ця тестова копія не може записувати в базу" : "Denne testkopien kan ikke skrive til databasen";
-        send.style.opacity = ".55";
-        send.style.cursor = "not-allowed";
-      }
-
-      window.UT_TEST_LANG?.apply?.();
-    }
-
-    frame.addEventListener("load", () => {
-      try {
-        injectProductRegistry();
-      } catch (error) {
-        console.error("UT product test injection failed", error);
-        state.textContent = "Feil i produkttest";
-        state.className = "registry-state bad";
-      }
-    });
-
-    window.addEventListener("ut-test-language-change", () => {
-      try { injectProductRegistry(); } catch (error) { console.error(error); }
-    });
-  })();
-  </script>
+  <div id="loader">Laster isolert TEST — UT Kontor…</div>
+  <iframe id="app" title="TEST — UT Kontor"></iframe>
+<script>
+"use strict";
+const VERSION="20260808-1038",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const langKey="mottak_ut_language";
+function language(){return localStorage.getItem(langKey)==="uk"?"uk":"nb"}
+function paintLang(){const l=language();document.getElementById("noBtn").classList.toggle("active",l==="nb");document.getElementById("uaBtn").classList.toggle("active",l==="uk")}
+async function build(){
+  loader.style.display="flex";
+  try{
+    const res=await fetch(`bestilling.html?v=${VERSION}`,{cache:"no-store"});if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    let html=await res.text();
+    html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
+    frame.srcdoc=html;
+  }catch(e){loader.textContent=`Kunne ikke laste TEST UT Kontor: ${e.message||e}`}
+}
+function inject(doc,src){return new Promise((resolve,reject)=>{const s=doc.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;doc.body.appendChild(s)})}
+function addTestPanel(doc){
+  if(doc.getElementById("utTestRegistryPanel"))return;
+  const products=window.BAMA_PRODUCTS?.getActiveProducts?.()||[];
+  document.getElementById("productBadge").textContent=`products.js v${window.BAMA_PRODUCTS?.meta?.version||"?"} · ${products.length} aktive`;
+  const supported=new Set(["bunner","hyller30","hyller60"]);
+  const panel=doc.createElement("section");panel.className="card";panel.id="utTestRegistryPanel";
+  panel.innerHTML=`<h2 style="margin-top:0;color:#48d597">TEST — Sentral produktliste</h2><div style="padding:10px;border:1px solid #48d597;border-radius:12px;background:rgba(72,213,151,.07);font-size:12px;line-height:1.5"><b>Isolert database:</b> 10 Bunner + 10 Hyller x30 + 10 Hyller x60 er kopiert fra historiske sendte varer. Ingen av de 30 nedre numrene finnes i dagens production-lager.</div><div style="display:grid;gap:7px;margin-top:10px">${products.map(p=>`<div style="padding:9px 10px;border:1px solid #303b59;border-radius:11px;background:#0d1426"><b>${window.BAMA_PRODUCTS.getProductName(p,"no")}</b><div style="margin-top:3px;color:#aab4ce;font-size:10px">ID: ${p.id} · ${supported.has(p.id)?"UT-felt aktivt i denne testen":"registrert · UT-felt kommer senere"}</div></div>`).join("")}</div>`;
+  const form=doc.getElementById("formCard");form?.insertAdjacentElement("beforebegin",panel);
+}
+function patchLabels(doc){
+  const ids=[["bunner","bunnerQty"],["hyller30","h30Qty"],["hyller60","h60Qty"]];
+  ids.forEach(([id,input])=>{const p=window.BAMA_PRODUCTS?.getProductById?.(id),el=doc.getElementById(input)?.closest("article")?.querySelector("strong");if(p&&el)el.textContent=window.BAMA_PRODUCTS.getProductName(p,"no")});
+  const home=doc.querySelector("a.home");if(home)home.href="test-home.html";
+  const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Kontor v2.0 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:38";
+}
+frame.addEventListener("load",async()=>{
+  try{
+    const doc=frame.contentDocument;
+    patchLabels(doc);addTestPanel(doc);
+    try{await inject(doc,`ut-test-language.js?v=${VERSION}`)}catch{}
+    loader.style.display="none";
+  }catch(e){loader.textContent=`TEST startfeil: ${e.message||e}`}
+});
+[document.getElementById("noBtn"),document.getElementById("uaBtn")].forEach((b,i)=>b.addEventListener("click",()=>{localStorage.setItem(langKey,i===0?"nb":"uk");paintLang();build()}));
+paintLang();build();
+</script>
 </body>
 </html>
