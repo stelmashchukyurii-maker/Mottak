@@ -88,11 +88,6 @@
     return nativeFetch(replacement, init);
   };
 
-  // TEST UT Lager mobile picker protection.
-  // The legacy detail renderer refreshes every few seconds and rebuilds the
-  // Bunner/Hyller <select> elements. On mobile that can close an open picker
-  // and erase a choice before the user presses "Legg til". Keep this fix
-  // inside the isolated TEST contour; production files are not modified.
   function installPickerStability() {
     if (window.__UT_TEST_PICKER_STABILITY__) return;
     if (typeof window.renderDetail !== "function") return;
@@ -159,19 +154,25 @@
 
       const text = copy();
       const available = Math.max(0, select.options.length - 1);
-      if (select.options[0]) select.options[0].textContent = text.choose(available);
+      const placeholder = text.choose(available);
+      if (select.options[0] && select.options[0].textContent !== placeholder) {
+        select.options[0].textContent = placeholder;
+      }
 
       const picker = select.closest(".test-picker");
       const button = picker?.querySelector("[data-test-add]");
       const note = picker?.querySelector(".test-picker-note");
       if (button) {
-        button.textContent = select.value ? text.selected : text.add;
+        const label = select.value ? text.selected : text.add;
+        if (button.textContent !== label) button.textContent = label;
         button.disabled = select.disabled || !select.value;
       }
-      if (note) note.textContent = text.note;
+      if (note && note.textContent !== text.note) note.textContent = text.note;
 
-      select.style.borderColor = select.value ? "#48d597" : "";
-      select.style.boxShadow = select.value ? "0 0 0 2px rgba(72,213,151,.12)" : "";
+      const border = select.value ? "#48d597" : "";
+      const shadow = select.value ? "0 0 0 2px rgba(72,213,151,.12)" : "";
+      if (select.style.borderColor !== border) select.style.borderColor = border;
+      if (select.style.boxShadow !== shadow) select.style.boxShadow = shadow;
     }
 
     function applyAll() {
@@ -205,32 +206,13 @@
 
     document.addEventListener("focusout", event => {
       if (!isPicker(event.target)) return;
-      // Give the subsequent "Legg til" tap time to finish before any redraw.
       busyUntil = Date.now() + 1800;
-    }, true);
-
-    document.addEventListener("click", event => {
-      const button = event.target?.closest?.("[data-test-add]");
-      if (!button) return;
-      const product = button.dataset.testAdd || "";
-      // The reservation itself will refresh the stock. Forget the old choice
-      // only after the click has been handed to the core handler.
-      setTimeout(() => {
-        drafts.delete(draftKey(product));
-        applyAll();
-      }, 700);
     }, true);
 
     const baseRenderDetail = window.renderDetail;
     window.renderDetail = function renderDetailWithStableTestPickers(...args) {
-      const active = document.activeElement;
-      const pickerOpen = isPicker(active) || Date.now() < busyUntil;
-
-      if (pickerOpen) {
-        // Background data can refresh, but do not replace the native mobile
-        // select while the user is choosing or moving to "Legg til".
-        return;
-      }
+      const pickerOpen = isPicker(document.activeElement) || Date.now() < busyUntil;
+      if (pickerOpen) return;
 
       rememberVisibleChoices();
       const result = baseRenderDetail.apply(this, args);
@@ -238,8 +220,6 @@
       return result;
     };
 
-    // Re-apply translation/UX after language modules or outer TEST wrappers
-    // have updated the detail without changing the selected stock row.
     const observer = new MutationObserver(() => {
       if (document.querySelector("[data-test-select]")) queueMicrotask(applyAll);
     });
@@ -247,22 +227,25 @@
 
     applyAll();
 
-    // Visible TEST version marker. Parent wrapper can write its banner first;
-    // this applies the current fix marker afterwards without touching BLUE.
     const markVersion = () => {
       const version = document.querySelector(".version");
-      if (version && /UT Lager/i.test(version.textContent || "")) {
-        version.innerHTML = "TEST · UT Lager v27.14 · PICKER FIX<br>Oppdatert 08.08.2026 kl. 18:28";
+      const html = "TEST · UT Lager v27.14 · PICKER FIX<br>Oppdatert 08.08.2026 kl. 18:28";
+      if (version && /UT Lager/i.test(version.textContent || "") && version.innerHTML !== html) {
+        version.innerHTML = html;
       }
-      try { parent.document.title = "TEST — UT Lager v27.14"; } catch {}
+      try {
+        if (parent.document.title !== "TEST — UT Lager v27.14") parent.document.title = "TEST — UT Lager v27.14";
+      } catch {}
     };
-    new MutationObserver(() => queueMicrotask(markVersion)).observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+
+    new MutationObserver(() => queueMicrotask(markVersion)).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
     markVersion();
   }
 
-  // ut-test-api.js is loaded in <head>, before the legacy core and its
-  // enhancement modules. Install after DOMContentLoaded and keep checking
-  // briefly in case the iframe wrapper finishes loading modules later.
   const startPickerStability = () => {
     let attempts = 0;
     const timer = setInterval(() => {
@@ -283,7 +266,7 @@
     isolated: true,
     tables: { ...tableMap },
     rpcs: { ...rpcMap },
-    version: "1.4.0",
+    version: "1.4.1",
     updatedAt: "2026-08-08T18:28:00+02:00",
   };
 })();
