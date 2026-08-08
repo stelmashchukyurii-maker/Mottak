@@ -12,7 +12,7 @@
     *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
     body{display:flex;flex-direction:column}.bar{flex:0 0 auto;padding:10px 12px;border-bottom:2px solid var(--accent);background:#10172a;box-shadow:0 4px 16px rgba(0,0,0,.28);z-index:5}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.title{color:var(--accent);font-weight:1000;font-size:16px}.sub{margin-top:3px;color:var(--muted);font-size:11px;line-height:1.35}.nav{display:flex;gap:6px;flex-wrap:wrap}.nav a,.lang button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--text);text-decoration:none;font-size:11px;font-weight:950}.nav a.test{border-color:var(--ok);color:var(--ok)}.lang{display:flex;gap:4px}.lang button.active{border-color:var(--accent);background:var(--accent);color:#17130a}.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.badge{padding:5px 8px;border:1px solid rgba(72,213,151,.45);border-radius:999px;background:rgba(72,213,151,.08);color:var(--ok);font-size:10px;font-weight:900}.badge.info{border-color:rgba(117,183,255,.45);background:rgba(117,183,255,.08);color:#cce4ff}iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}#loader{position:fixed;inset:0;top:96px;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font-weight:900;z-index:4}@media(max-width:600px){.bar{padding:9px 10px}.title{font-size:15px}.nav a{padding:5px 8px}.sub{font-size:10px}}
   </style>
-  <script src="./products.js?v=20260808-1046"></script>
+  <script src="./products.js?v=20260808-1125"></script>
 </head>
 <body>
   <header class="bar">
@@ -29,7 +29,7 @@
   <iframe id="app" title="TEST — UT Kontor"></iframe>
 <script>
 "use strict";
-const VERSION="20260808-1046",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const VERSION="20260808-1125",frame=document.getElementById("app"),loader=document.getElementById("loader");
 const langKey="mottak_ut_language";
 function language(){return localStorage.getItem(langKey)==="uk"?"uk":"nb"}
 function paintLang(){const l=language();document.getElementById("noBtn").classList.toggle("active",l==="nb");document.getElementById("uaBtn").classList.toggle("active",l==="uk")}
@@ -48,22 +48,23 @@ function addTestPanel(doc){
   if(doc.getElementById("utTestRegistryPanel"))return;
   const products=window.BAMA_PRODUCTS?.getActiveProducts?.()||[];
   document.getElementById("productBadge").textContent=`products.js v${window.BAMA_PRODUCTS?.meta?.version||"?"} · ${products.length} aktive`;
-  const supported=new Set(["bunner","hyller30","hyller60"]);
+  const supported=new Set(["bunner","hyller30","hyller60","forlengere_korte","forlengere_lange","forlengere_plast"]);
   const panel=doc.createElement("section");panel.className="card";panel.id="utTestRegistryPanel";
-  panel.innerHTML=`<h2 style="margin-top:0;color:#48d597">TEST — Sentral produktliste</h2><div style="padding:10px;border:1px solid #48d597;border-radius:12px;background:rgba(72,213,151,.07);font-size:12px;line-height:1.5"><b>Isolert database:</b> 10 Bunner + 10 Hyller x30 + 10 Hyller x60 er kopiert fra historiske sendte varer. Ingen av de 30 nedre numrene finnes i dagens production-lager.</div><div style="display:grid;gap:7px;margin-top:10px">${products.map(p=>`<div style="padding:9px 10px;border:1px solid #303b59;border-radius:11px;background:#0d1426"><b>${window.BAMA_PRODUCTS.getProductName(p,"no")}</b><div style="margin-top:3px;color:#aab4ce;font-size:10px">ID: ${p.id} · ${supported.has(p.id)?"UT-felt aktivt i denne testen":"registrert · UT-felt kommer senere"}</div></div>`).join("")}</div>`;
+  panel.innerHTML=`<h2 style="margin-top:0;color:#48d597">TEST — Sentral produktliste</h2><div style="padding:10px;border:1px solid #48d597;border-radius:12px;background:rgba(72,213,151,.07);font-size:12px;line-height:1.5"><b>Isolert database:</b> 10 Bunner + 10 Hyller x30 + 10 Hyller x60 er kopiert fra historiske sendte varer. Forlengere kan nå legges til TEST-bestillingen; fysisk TEST-lager for Forlengere bygges i neste steg.</div><div style="display:grid;gap:7px;margin-top:10px">${products.map(p=>`<div style="padding:9px 10px;border:1px solid #303b59;border-radius:11px;background:#0d1426"><b>${window.BAMA_PRODUCTS.getProductName(p,"no")}</b><div style="margin-top:3px;color:#aab4ce;font-size:10px">ID: ${p.id} · ${supported.has(p.id)?"UT-bestilling aktiv i denne testen":"registrert · UT-felt kommer senere"}</div></div>`).join("")}</div>`;
   const form=doc.getElementById("formCard");form?.insertAdjacentElement("beforebegin",panel);
 }
 function patchLabels(doc){
   const ids=[["bunner","bunnerQty"],["hyller30","h30Qty"],["hyller60","h60Qty"]];
   ids.forEach(([id,input])=>{const p=window.BAMA_PRODUCTS?.getProductById?.(id),el=doc.getElementById(input)?.closest("article")?.querySelector("strong");if(p&&el)el.textContent=window.BAMA_PRODUCTS.getProductName(p,"no")});
   const home=doc.querySelector("a.home");if(home)home.href="test-home.html";
-  const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Kontor v2.1 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:46";
+  const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Kontor v2.2 · 6 PRODUKTER<br>Oppdatert 08.08.2026 kl. 11:25";
 }
 frame.addEventListener("load",async()=>{
   try{
     const doc=frame.contentDocument;
     patchLabels(doc);addTestPanel(doc);
     try{await inject(doc,`ut-test-language.js?v=${VERSION}`)}catch{}
+    await inject(doc,`ut-kontor-products.js?v=${VERSION}`);
     loader.style.display="none";
   }catch(e){loader.textContent=`TEST startfeil: ${e.message||e}`}
 });
