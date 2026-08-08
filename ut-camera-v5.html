@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>UT Kamera v5.1</title>
+  <title>UT Kamera v5.2</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster UT Kamera v5.1…</div>
-  <iframe id="app" title="UT Kamera v5.1"></iframe>
+  <div id="loader">Laster UT Kamera v5.2…</div>
+  <iframe id="app" title="UT Kamera v5.2"></iframe>
   <script>
     "use strict";
-    const VERSION="20260807-2142";
+    const VERSION="20260809-0004";
     const params=new URLSearchParams(location.search);
     const order=params.get("order")||"";
     const ramp=params.get("ramp")||"";
@@ -33,14 +33,15 @@
     frame.addEventListener("load",async()=>{
       try{
         const doc=frame.contentDocument;
+        await inject(doc,`ut-camera-lower-query-compat.js?v=${VERSION}`);
         await inject(doc,`ut-camera-register-flow-v2.js?v=${VERSION}`);
         await inject(doc,`ut-camera-floating-workflow.js?v=${VERSION}`);
         await inject(doc,`ut-camera-manual-toggle.js?v=${VERSION}`);
         const version=doc.querySelector(".version");
-        if(version)version.innerHTML="UT Kamera v5.1 FOTO + MANUELL<br>Oppdatert 07.08.2026 kl. 21:42";
+        if(version)version.innerHTML="UT Kamera v5.2 · LOWER + DIREKTE RAMPE<br>Oppdatert 09.08.2026 kl. 00:04";
         loader.style.display="none";
       }catch(error){
-        loader.textContent=`Kunne ikke starte UT Kamera v5.1: ${error.message||error}`;
+        loader.textContent=`Kunne ikke starte UT Kamera v5.2: ${error.message||error}`;
       }
     });
   </script>
