@@ -1,9 +1,10 @@
 "use strict";
 
 // BaMavaremottak — TEST UT Kontor unified order summary
-// Version 1.6.0
-// Updated: 2026-08-08 14:27 Europe/Oslo
+// Version 1.7.0
+// Updated: 2026-08-08 19:43 Europe/Oslo
 // Same visual structure is used while ordering and after the order is created.
+// Confirmed Hyller/Forlengere from UT Lager are shown ONLY in Totalt.
 (() => {
   if (window.__UT_KONTOR_HISTORY_VISUALS__) return;
   window.__UT_KONTOR_HISTORY_VISUALS__ = true;
@@ -16,6 +17,8 @@
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+
+  const progressByOrder = new Map();
 
   function installStyle() {
     if (document.getElementById("utHistoryVisualStyle")) return;
@@ -121,13 +124,95 @@
     return result;
   }
 
-  function totalRows(totalBunner, totalHyller, short, long, plast) {
+  function emptyActual() {
+    return {
+      short: { complete: false, hyller: 0, forlengere: 0, ordered: 0, confirmed: 0 },
+      long: { complete: false, hyller: 0, forlengere: 0, ordered: 0, confirmed: 0 },
+      plast: { complete: false, hyller: 0, forlengere: 0, ordered: 0, confirmed: 0 },
+    };
+  }
+
+  function summarizeProgress(rows) {
+    const grouped = {
+      forlengere_korte: [],
+      forlengere_lange: [],
+      forlengere_plast: [],
+    };
+    (rows || []).forEach((row) => {
+      if (grouped[row.product_id]) grouped[row.product_id].push(row);
+    });
+
+    const one = (id) => {
+      const list = grouped[id] || [];
+      if (!list.length) return { complete: false, hyller: 0, forlengere: 0, ordered: 0, confirmed: 0 };
+      const ordered = Math.max(0, ...list.map((row) => n(row.ordered_quantity)));
+      const confirmedRows = list.filter((row) => row.confirmed === true);
+      const complete = ordered > 0 && confirmedRows.length === ordered;
+      return {
+        complete,
+        ordered,
+        confirmed: confirmedRows.length,
+        hyller: complete ? confirmedRows.reduce((sum, row) => sum + n(row.hyller_count), 0) : 0,
+        forlengere: complete ? confirmedRows.reduce((sum, row) => sum + n(row.forlengere_count), 0) : 0,
+      };
+    };
+
+    return {
+      short: one("forlengere_korte"),
+      long: one("forlengere_lange"),
+      plast: one("forlengere_plast"),
+    };
+  }
+
+  function actualFor(orderId) {
+    return progressByOrder.get(String(orderId)) || emptyActual();
+  }
+
+  async function refreshProgress() {
+    if (typeof request !== "function") return;
+    const ids = [...document.querySelectorAll("#history .order")]
+      .map((card) => card.querySelector("[data-storno]")?.dataset.storno || card.querySelector("[data-edit]")?.dataset.edit)
+      .filter(Boolean);
+
+    if (!ids.length) {
+      progressByOrder.clear();
+      return;
+    }
+
+    const live = new Set(ids.map(String));
+    [...progressByOrder.keys()].forEach((key) => {
+      if (!live.has(key)) progressByOrder.delete(key);
+    });
+
+    await Promise.all(ids.map(async (id) => {
+      try {
+        const rows = await request("rpc/ut_extra_progress", {
+          method: "POST",
+          body: JSON.stringify({ p_order_id: id }),
+        });
+        progressByOrder.set(String(id), summarizeProgress(rows));
+      } catch (error) {
+        console.warn("[UT Kontor TEST] could not load confirmed extra totals", id, error);
+        progressByOrder.delete(String(id));
+      }
+    }));
+  }
+
+  function extraTotalText(carts, actual) {
+    const base = `${carts} ${cartUnit(carts)}`;
+    if (!actual?.complete) return base;
+    return isUk()
+      ? `${base} · ${n(actual.forlengere)} шт.`
+      : `${base} · ${n(actual.forlengere)} stk.`;
+  }
+
+  function totalRows(totalBunner, totalHyller, short, long, plast, actual = emptyActual()) {
     const l = labels();
     const rows = [
       ["Bunner", totalBunner, ""],
       [l.hyller, totalHyller, ""],
-      [l.short, `${short} ${cartUnit(short)}`, ""],
-      [l.long, `${long} ${cartUnit(long)}`, ""],
+      [l.short, extraTotalText(short, actual.short), ""],
+      [l.long, extraTotalText(long, actual.long), ""],
       [l.plast, `${plast} ${boxUnit(plast)}`, ""],
       [l.post, totalBunner * 4, "cc-post"],
     ];
@@ -142,8 +227,12 @@
     const short = n(extras.short);
     const long = n(extras.long);
     const plast = n(extras.plast);
+    const actual = actualFor(order.id);
     const totalBunner = b * 10 + h30 + h60 + short + long;
-    const totalHyller = h30 * 30 + h60 * 60;
+    const confirmedExtraHyller =
+      (actual.short?.complete ? n(actual.short.hyller) : 0) +
+      (actual.long?.complete ? n(actual.long.hyller) : 0);
+    const totalHyller = h30 * 30 + h60 * 60 + confirmedExtraHyller;
     const ramp = String(order.ramp || "—").trim() || "—";
 
     const rows = [
@@ -156,7 +245,7 @@
       [l.plast, `${plast} ${boxUnit(plast)}`],
     ];
 
-    return `<div class="ut-unified-summary">${rows.map(([label, value]) => `<div class="ut-unified-row"><span class="ut-unified-label">${html(label)}</span><span class="ut-unified-value">${html(value)}</span></div>`).join("")}<div class="ut-unified-section"><div class="ut-unified-section-title">${html(l.total)}</div>${totalRows(totalBunner, totalHyller, short, long, plast)}</div></div>`;
+    return `<div class="ut-unified-summary">${rows.map(([label, value]) => `<div class="ut-unified-row"><span class="ut-unified-label">${html(label)}</span><span class="ut-unified-value">${html(value)}</span></div>`).join("")}<div class="ut-unified-section"><div class="ut-unified-section-title">${html(l.total)}</div>${totalRows(totalBunner, totalHyller, short, long, plast, actual)}</div></div>`;
   }
 
   function decorateSummary() {
@@ -190,20 +279,47 @@
       if (cards.length <= 1) return;
 
       let bunner = 0, hyller = 0, short = 0, long = 0, plast = 0;
+      let shortActual = 0, longActual = 0;
+      let shortExpected = 0, shortComplete = 0, longExpected = 0, longComplete = 0;
+
       cards.forEach((card) => {
         const id = card.querySelector("[data-storno]")?.dataset.storno || card.querySelector("[data-edit]")?.dataset.edit;
         const order = orders.find((item) => String(item.id) === String(id));
         if (!order) return;
         const ext = parseExtraBox(card);
+        const actual = actualFor(id);
         const b = n(order.bunner_stacks), h30 = n(order.hyller30_sets), h60 = n(order.hyller60_sets);
         bunner += b * 10 + h30 + h60 + ext.short + ext.long;
         hyller += h30 * 30 + h60 * 60;
+        if (actual.short?.complete) hyller += n(actual.short.hyller);
+        if (actual.long?.complete) hyller += n(actual.long.hyller);
         short += ext.short; long += ext.long; plast += ext.plast;
+
+        if (ext.short > 0) {
+          shortExpected += 1;
+          if (actual.short?.complete) {
+            shortComplete += 1;
+            shortActual += n(actual.short.forlengere);
+          }
+        }
+        if (ext.long > 0) {
+          longExpected += 1;
+          if (actual.long?.complete) {
+            longComplete += 1;
+            longActual += n(actual.long.forlengere);
+          }
+        }
       });
+
+      const aggregateActual = emptyActual();
+      aggregateActual.short.complete = shortExpected > 0 && shortComplete === shortExpected;
+      aggregateActual.short.forlengere = shortActual;
+      aggregateActual.long.complete = longExpected > 0 && longComplete === longExpected;
+      aggregateActual.long.forlengere = longActual;
 
       const panel = document.createElement("div");
       panel.className = "ut-ramp-total-panel";
-      panel.innerHTML = `<div class="ut-ramp-total-title">${html(l.totalRamp)}</div>${totalRows(bunner, hyller, short, long, plast).replaceAll("ut-unified-total-row", "ut-ramp-total-row").replaceAll("ut-unified-total-label", "ut-ramp-total-label").replaceAll("ut-unified-total-value", "ut-ramp-total-value")}`;
+      panel.innerHTML = `<div class="ut-ramp-total-title">${html(l.totalRamp)}</div>${totalRows(bunner, hyller, short, long, plast, aggregateActual).replaceAll("ut-unified-total-row", "ut-ramp-total-row").replaceAll("ut-unified-total-label", "ut-ramp-total-label").replaceAll("ut-unified-total-value", "ut-ramp-total-value")}`;
       rampCard.querySelector(".ramp-orders")?.insertAdjacentElement("beforebegin", panel);
     });
   }
@@ -227,9 +343,16 @@
     decorateRampTotals();
   }
 
+  function updateVersionLabel() {
+    const version = document.querySelector(".version");
+    if (!version) return;
+    version.innerHTML = `TEST UT Kontor v2.12 · RAMP TOTALS<br>${isUk() ? "Оновлено" : "Oppdatert"} 08.08.2026 kl. 19:43`;
+  }
+
   function decorate() {
     decorateHistory();
     decorateSummary();
+    updateVersionLabel();
   }
 
   const previousRenderHistory = window.renderHistory;
@@ -242,7 +365,18 @@
   window.renderForm = function renderFormUnified() {
     if (typeof previousRenderForm === "function") previousRenderForm();
     decorateSummary();
+    updateVersionLabel();
   };
+
+  const previousLoadUt = window.loadUt;
+  if (typeof previousLoadUt === "function") {
+    window.loadUt = async function loadUtWithConfirmedTotals(...args) {
+      const result = await previousLoadUt.apply(this, args);
+      await refreshProgress();
+      decorate();
+      return result;
+    };
+  }
 
   ["bunnerQty", "h30Qty", "h60Qty", "forlengere_korteQty", "forlengere_langeQty", "forlengere_plastQty"].forEach((id) => {
     const input = document.getElementById(id);
@@ -251,6 +385,16 @@
   });
   document.querySelector(".ramp-products")?.addEventListener("click", () => setTimeout(decorateSummary, 0));
 
-  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.6.0", decorate };
+  window.UT_KONTOR_HISTORY_VISUALS = {
+    version: "1.7.0",
+    updatedAt: "2026-08-08T19:43:00+02:00",
+    decorate,
+    refreshProgress: async () => {
+      await refreshProgress();
+      decorate();
+    },
+  };
+
   decorate();
+  refreshProgress().then(decorate).catch((error) => console.warn("[UT Kontor TEST] initial confirmed totals refresh failed", error));
 })();
