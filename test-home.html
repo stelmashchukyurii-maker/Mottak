@@ -45,7 +45,7 @@
   <h1>TEST — BaMavaremottak</h1>
   <p class="sub">Окремий тестовий контур для перевірки всього руху товару без ризику для робочих сторінок і production-складу.</p>
 
-  <section class="status"><strong>UT-TEST-CHAIN активовано.</strong><br>TEST-база містить 10 Bunner + 10 Hyller x30 + 10 Hyller x60, скопійованих з історично відправлених товарів. Перетин їхніх нижніх номерів із поточним production-складом: 0.</section>
+  <section class="status"><strong>UT-TEST-CHAIN активовано.</strong><br>TEST-база містить 10 Bunner + 10 Hyller x30 + 10 Hyller x60, скопійованих з історично відправлених товарів. Нові Forlengere проходять окреме TEST-підтвердження та списання без втручання в production.</section>
 
   <section class="section">
     <div class="section-title">🧭 Основний TEST-процес</div>
@@ -69,16 +69,16 @@
 
       <a class="card primary" href="bestilling-products-test.html">
         <h2>📋 TEST — UT Kontor</h2>
-        <p>Офіс створює TEST-замовлення на рампу. Читає та змінює лише окремі TEST-таблиці.</p>
+        <p>Офіс створює TEST-замовлення на рампу, включно з Forlengere korte/lange/plast. Читає та змінює лише TEST-таблиці.</p>
         <span class="tag accent">2 · BESTILLING</span>
       </a>
 
       <div class="flow">↓</div>
 
-      <a class="card ok" href="utsending-test.html?v=20260808-1641">
+      <a class="card ok" href="utsending-test.html?v=20260808-1658">
         <h2>🚚 TEST — UT Lager og utsending</h2>
-        <p>Ізольований клон робочої UT Lager v27.12 AVBRYT. Склад бачить TEST-рампи, комплектує, ставить на рампу, списує та скасовує тільки в TEST-контурі.</p>
-        <span class="tag ok">3 · UT Lager v27.12 CLONE</span>
+        <p>Ізольований клон UT Lager v27.12. Bunner/Hyller скануються як раніше; Forlengere korte/lange підтверджуються по кожному візку, plast — по ящику, після чого всі разом переходять На рампу → Відправлено.</p>
+        <span class="tag ok">3 · UT Lager · NYE PRODUKTER</span>
       </a>
     </div>
   </section>
@@ -100,7 +100,7 @@
     </section>
   </section>
 
-  <div class="version">TEST HOME v2.4 · CAMERA + UT CLONE FIX<br>Oppdatert 08.08.2026 kl. 16:41 · Europe/Oslo</div>
+  <div class="version">TEST HOME v2.5 · UT NEW PRODUCTS DISPATCH<br>Oppdatert 08.08.2026 kl. 16:58 · Europe/Oslo</div>
 </main>
 </body>
 </html>
