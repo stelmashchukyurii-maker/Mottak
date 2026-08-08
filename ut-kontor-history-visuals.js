@@ -1,9 +1,9 @@
 "use strict";
 
 // BaMavaremottak — TEST UT Kontor history visuals
-// Version 1.4.0
-// Updated: 2026-08-08 14:04 Europe/Oslo
-// Bundled Bunner/CC Post are counted in Totalt only.
+// Version 1.5.0
+// Updated: 2026-08-08 14:12 Europe/Oslo
+// Bundled Bunner/CC Post are counted in Totalt only, including ramp totals.
 (() => {
   if (window.__UT_KONTOR_HISTORY_VISUALS__) return;
   window.__UT_KONTOR_HISTORY_VISUALS__ = true;
@@ -27,7 +27,13 @@
       .ut-product-mark.rack{border:2px solid currentColor;border-top-width:2px;border-bottom-width:3px;border-radius:1px}
       .ut-product-mark.rack::before{content:"";position:absolute;inset:3px 4px;background:repeating-linear-gradient(to bottom,currentColor 0 1.4px,transparent 1.4px 5px)}
       .ut-product-mark.rack60::before{background:repeating-linear-gradient(to bottom,currentColor 0 1.2px,transparent 1.2px 3px)}
-      @media(max-width:520px){.ut-product-line{grid-template-columns:46px minmax(0,1fr);gap:8px;padding:8px}.ut-product-iconbox{width:43px;height:43px}.ut-product-title{font-size:13px}.ut-product-detail{font-size:11.5px}}
+      .ut-ramp-total-panel{margin:10px 0 12px;padding:10px 12px;border:1px solid rgba(72,213,151,.42);border-radius:12px;background:rgba(72,213,151,.055)}
+      .ut-ramp-total-title{margin-bottom:5px;color:#f5f7ff;font-size:13px;font-weight:1000}
+      .ut-ramp-total-grid{display:grid;gap:0}
+      .ut-ramp-total-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:6px 0;border-top:1px solid rgba(48,59,89,.72);font-size:12px;line-height:1.25}
+      .ut-ramp-total-row:first-child{border-top:0}.ut-ramp-total-label{color:#d8dfef;font-weight:800}.ut-ramp-total-value{color:#48d597;font-weight:1000;text-align:right;white-space:nowrap}
+      .ut-ramp-total-row.cc-post .ut-ramp-total-label,.ut-ramp-total-row.cc-post .ut-ramp-total-value{color:#f4c430}
+      @media(max-width:520px){.ut-product-line{grid-template-columns:46px minmax(0,1fr);gap:8px;padding:8px}.ut-product-iconbox{width:43px;height:43px}.ut-product-title{font-size:13px}.ut-product-detail{font-size:11.5px}.ut-ramp-total-panel{padding:9px 10px}.ut-ramp-total-row{font-size:11.5px}}
     `;
     document.head.appendChild(style);
   }
@@ -54,6 +60,24 @@
     return isUk()
       ? `${count} ${count === 1 ? "візок" : "візків"}`
       : `${count} ${count === 1 ? "vogn" : "vogner"}`;
+  }
+
+  function ukWord(value, one, few, many) {
+    const abs = Math.abs(Number(value) || 0);
+    const mod100 = abs % 100;
+    const mod10 = abs % 10;
+    if (mod100 >= 11 && mod100 <= 19) return many;
+    if (mod10 === 1) return one;
+    if (mod10 >= 2 && mod10 <= 4) return few;
+    return many;
+  }
+
+  function cartUnit(value) {
+    return isUk() ? ukWord(value, "візок", "візки", "візків") : (value === 1 ? "vogn" : "vogner");
+  }
+
+  function boxUnit(value) {
+    return isUk() ? ukWord(value, "ящик", "ящики", "ящиків") : (value === 1 ? "eske" : "esker");
   }
 
   function decorateSummary() {
@@ -97,11 +121,75 @@
         .replace(/\s*\+\s*\d+\s+CC Post\s*$/i, "")
       ).join("<br>");
     });
+  }
 
-    document.querySelectorAll("#history .ut-extra-ramp-total").forEach((el) => {
-      el.textContent = (el.textContent || "")
-        .replace(/\s*·\s*\d+\s+CC Post\s*$/i, "")
-        .trim();
+  function extraCount(rampCard, type) {
+    const patterns = {
+      short: ["Forlengere korte", "Подовжувачі короткі"],
+      long: ["Forlengere lange", "Подовжувачі довгі"],
+      plast: ["Forlengere plast", "Подовжувачі пластикові"],
+    }[type] || [];
+    let total = 0;
+    rampCard.querySelectorAll(".ut-extra-history").forEach((box) => {
+      const text = box.textContent || "";
+      patterns.forEach((label) => {
+        const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const match = text.match(new RegExp(`${escaped}:\\s*(\\d+)`, "i"));
+        if (match) total += n(match[1]);
+      });
+    });
+    return total;
+  }
+
+  function decorateRampTotals() {
+    if (typeof orders === "undefined" || !Array.isArray(orders)) return;
+    document.querySelectorAll("#history .ramp-card").forEach((rampCard) => {
+      rampCard.querySelector(".ut-ramp-total-panel")?.remove();
+      rampCard.querySelector(".ut-extra-ramp-total")?.remove();
+
+      const ids = [...rampCard.querySelectorAll("[data-storno]")].map((button) => String(button.dataset.storno));
+      const rampOrders = ids.map((id) => orders.find((order) => String(order.id) === id)).filter(Boolean);
+      if (!rampOrders.length) return;
+
+      const base = rampOrders.reduce((sum, order) => {
+        const stacks = n(order.bunner_stacks);
+        const h30 = n(order.hyller30_sets);
+        const h60 = n(order.hyller60_sets);
+        sum.bunner += stacks * 10 + h30 + h60;
+        sum.hyller += h30 * 30 + h60 * 60;
+        return sum;
+      }, { bunner: 0, hyller: 0 });
+
+      const short = extraCount(rampCard, "short");
+      const long = extraCount(rampCard, "long");
+      const plast = extraCount(rampCard, "plast");
+      const bunner = base.bunner + short + long;
+      const ccPosts = bunner * 4;
+
+      const oldSummary = rampCard.querySelector(".ramp-card-head .field-help");
+      if (oldSummary) oldSummary.textContent = isUk()
+        ? `Всього: ${bunner} Bunner · ${base.hyller} полиць`
+        : `Totalt: ${bunner} Bunner · ${base.hyller} hyller`;
+
+      const labels = isUk()
+        ? { title: "Всього на рампі", bunner: "Bunner", hyller: "Hyller", short: "Подовжувачі короткі", long: "Подовжувачі довгі", plast: "Подовжувачі пластикові", post: "CC Post" }
+        : { title: "Totalt på rampe", bunner: "Bunner", hyller: "Hyller", short: "Forlengere korte", long: "Forlengere lange", plast: "Forlengere plast", post: "CC Post" };
+
+      const rows = [
+        [labels.bunner, String(bunner), ""],
+        [labels.hyller, String(base.hyller), ""],
+        [labels.short, `${short} ${cartUnit(short)}`, ""],
+        [labels.long, `${long} ${cartUnit(long)}`, ""],
+        [labels.plast, `${plast} ${boxUnit(plast)}`, ""],
+        [labels.post, String(ccPosts), "cc-post"],
+      ];
+
+      const panel = document.createElement("div");
+      panel.className = "ut-ramp-total-panel";
+      panel.innerHTML = `<div class="ut-ramp-total-title">${labels.title}</div><div class="ut-ramp-total-grid">${rows.map(([label, value, cls]) => `<div class="ut-ramp-total-row ${cls}"><span class="ut-ramp-total-label">${label}</span><span class="ut-ramp-total-value">${value}</span></div>`).join("")}</div>`;
+      const ordersHost = rampCard.querySelector(".ramp-orders");
+      if (ordersHost) ordersHost.insertAdjacentElement("beforebegin", panel);
+      else rampCard.querySelector(".ramp-card-head")?.insertAdjacentElement("afterend", panel);
     });
   }
 
@@ -130,6 +218,7 @@
     });
 
     decorateForlengereHistory();
+    decorateRampTotals();
   }
 
   function decorate() {
@@ -156,6 +245,6 @@
   });
   document.querySelector(".ramp-products")?.addEventListener("click", () => setTimeout(decorateSummary, 0));
 
-  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.4.0", decorate };
+  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.5.0", decorate };
   decorate();
 })();
