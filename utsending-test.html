@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="nb">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>TEST — UT Lager v27.13</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>TEST — UT Lager v27.14</title>
 <style>
 html,body{margin:0;min-height:100%;background:#0b1020}#utCore{display:block;width:100%;min-height:100vh;border:0;background:#0b1020}#utFloatScan{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px));z-index:99999;min-height:58px;padding:9px 16px;border:2px solid #f4c430;border-radius:999px;background:#f4c430;color:#17130a;font:950 15px Arial,sans-serif;box-shadow:0 14px 34px rgba(0,0,0,.48);touch-action:manipulation}#utHint{position:fixed;right:12px;bottom:82px;z-index:99998;display:none;max-width:min(330px,calc(100vw - 24px));padding:10px 12px;border:1px solid #303b59;border-radius:12px;background:#151c30;color:#f5f7ff;font:700 13px/1.4 Arial,sans-serif}#utHint.show{display:block}#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:100000}
 </style>
 </head>
 <body>
-<div id="loader">Laster TEST — UT Lager v27.13…</div>
+<div id="loader">Laster TEST — UT Lager v27.14…</div>
 <iframe id="utCore" title="TEST — UT Lager og utsending"></iframe>
 <button id="utFloatScan" type="button">📷 <span id="utFloatText">Kamera</span></button><div id="utHint"></div>
 <script>
 "use strict";
-const VERSION="20260808-1737";
+const VERSION="20260808-1828";
 const f=document.getElementById("utCore"),scan=document.getElementById("utFloatScan"),scanText=document.getElementById("utFloatText"),hint=document.getElementById("utHint"),loader=document.getElementById("loader");
 let hintTimer=0,openTries=0,extraOrderId=null;
 function resize(){try{const d=f.contentDocument;f.style.height=Math.max(innerHeight,d.documentElement.scrollHeight,d.body?.scrollHeight||0)+"px"}catch{}}
 function inject(d,src){return new Promise((resolve,reject)=>{const s=d.createElement("script");s.src=`${src}?v=${VERSION}`;s.onload=resolve;s.onerror=reject;d.body.appendChild(s)})}
 function lang(){try{return f.contentWindow.UT_LANG||localStorage.getItem("mottak_ut_language")||"nb"}catch{return"nb"}}
 function tx(){
-  if(lang()==="uk")return{cam:"Камера",open:"Спочатку відкрийте потрібну рампу.",done:"Ця рампа вже завершена.",camera:"📷 Камера / телефон — сканувати на",bulk:"☑ Масове сканування",later:"TEST пізніше",bulkNotConnected:"Масове сканування ще не підключене до TEST.",banner:"🧪 <b>TEST — ІЗОЛЬОВАНО</b> · Той самий робочий процес UT Lager v27.13. Bunner/Hyller скануються як раніше; короткі/довгі/пластикові подовжувачі підтверджуються в окремому TEST-блоці та йдуть разом із рампою до статусу «Відправлено»."};
-  if(lang()==="pl")return{cam:"Aparat",open:"Najpierw otwórz właściwą rampę.",done:"Ta rampa jest już zakończona.",camera:"📷 Aparat / telefon — skanuj do",bulk:"☑ Skanowanie masowe",later:"TEST później",bulkNotConnected:"Skanowanie masowe nie jest jeszcze podłączone do TEST.",banner:"🧪 <b>TEST — IZOLOWANY</b> · Ten sam przebieg pracy UT Lager v27.13. Bunner/Hyller są skanowane jak wcześniej; krótkie/długie/plastikowe przedłużki potwierdza się w osobnym bloku TEST i razem z rampą przechodzą do statusu «Wysłano»."};
-  return{cam:"Kamera",open:"Åpne først riktig rampe.",done:"Denne rampen er allerede avsluttet.",camera:"📷 Kamera / telefon — skann til",bulk:"☑ Masseskanning",later:"TEST senere",bulkNotConnected:"Masseskanning er ikke koblet til TEST ennå.",banner:"🧪 <b>TEST — ISOLERT</b> · Samme UT Lager v27.13-arbeidsflyt. Bunner/Hyller skannes som før; Forlengere korte/lange/plast bekreftes i egen TEST-blokk og følger rampen helt til Sendt."};
+  if(lang()==="uk")return{cam:"Камера",open:"Спочатку відкрийте потрібну рампу.",done:"Ця рампа вже завершена.",camera:"📷 Камера / телефон — сканувати на",bulk:"☑ Масове сканування",later:"TEST пізніше",bulkNotConnected:"Масове сканування ще не підключене до TEST.",banner:"🧪 <b>TEST — ІЗОЛЬОВАНО</b> · UT Lager v27.14. Автооновлення більше не скидає ручний вибір Bunner/Hyller або введені дані нових продуктів."};
+  if(lang()==="pl")return{cam:"Aparat",open:"Najpierw otwórz właściwą rampę.",done:"Ta rampa jest już zakończona.",camera:"📷 Aparat / telefon — skanuj do",bulk:"☑ Skanowanie masowe",later:"TEST później",bulkNotConnected:"Skanowanie masowe nie jest jeszcze podłączone do TEST.",banner:"🧪 <b>TEST — IZOLOWANY</b> · UT Lager v27.14. Automatyczne odświeżanie nie resetuje już ręcznego wyboru Bunner/Hyller ani wpisanych danych nowych produktów."};
+  return{cam:"Kamera",open:"Åpne først riktig rampe.",done:"Denne rampen er allerede avsluttet.",camera:"📷 Kamera / telefon — skann til",bulk:"☑ Masseskanning",later:"TEST senere",bulkNotConnected:"Masseskanning er ikke koblet til TEST ennå.",banner:"🧪 <b>TEST — ISOLERT</b> · UT Lager v27.14. Automatisk oppdatering nullstiller ikke lenger manuelt valg av Bunner/Hyller eller inndata for nye produkter."};
 }
 function order(){try{return typeof f.contentWindow.current==="function"?f.contentWindow.current():null}catch{return null}}
 function note(text){clearTimeout(hintTimer);hint.textContent=text;hint.classList.add("show");hintTimer=setTimeout(()=>hint.classList.remove("show"),2800)}
@@ -48,7 +48,7 @@ function refreshExtra(d,w,force=false){
   }
 }
 function markTest(d){
-  const v=d.querySelector(".version");if(v)v.innerHTML="TEST · UT Lager v27.13 · INPUT FIX<br>Oppdatert 08.08.2026 kl. 17:37";
+  const v=d.querySelector(".version");if(v)v.innerHTML="TEST · UT Lager v27.14 · PICKER FIX<br>Oppdatert 08.08.2026 kl. 18:28";
   let banner=d.getElementById("utTestCloneBanner");
   if(!banner){
     banner=d.createElement("div");banner.id="utTestCloneBanner";
