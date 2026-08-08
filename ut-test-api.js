@@ -11,6 +11,7 @@
     mottak_scans: "ut_test_stock",
     ut_orders: "ut_test_orders",
     ut_order_scans: "ut_test_order_scans",
+    ut_order_items: "ut_test_order_items",
   };
 
   const rpcMap = {
@@ -26,6 +27,7 @@
     office_edit_unsent_ut_order: "ut_test_office_edit_order",
     update_ut_order_before_dispatch: "ut_test_office_edit_order",
     register_ut_scan_only: "ut_test_register_scan_only",
+    save_ut_order_with_items: "ut_test_save_order_with_items",
   };
 
   function requestMethod(input, init) {
@@ -88,7 +90,7 @@
     isolated: true,
     tables: { ...tableMap },
     rpcs: { ...rpcMap },
-    version: "1.1.0",
-    updatedAt: "2026-08-08T10:41:00+02:00",
+    version: "1.2.0",
+    updatedAt: "2026-08-08T11:22:00+02:00",
   };
 })();
