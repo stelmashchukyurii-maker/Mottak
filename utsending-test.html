@@ -17,7 +17,7 @@
   <button id="camera" type="button">📷 Foto TEST</button><div id="hint"></div>
 <script>
 "use strict";
-const VERSION="20260808-1040",frame=document.getElementById("utCore"),loader=document.getElementById("loader"),camera=document.getElementById("camera"),hint=document.getElementById("hint");let hintTimer=0,openTries=0;
+const VERSION="20260808-1046",frame=document.getElementById("utCore"),loader=document.getElementById("loader"),camera=document.getElementById("camera"),hint=document.getElementById("hint");let hintTimer=0,openTries=0;
 function note(text){clearTimeout(hintTimer);hint.textContent=text;hint.classList.add("show");hintTimer=setTimeout(()=>hint.classList.remove("show"),2800)}
 function inject(doc,src){return new Promise((resolve,reject)=>{const s=doc.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;doc.body.appendChild(s)})}
 function resize(){try{const d=frame.contentDocument;frame.style.height=Math.max(innerHeight-55,d.documentElement.scrollHeight,d.body?.scrollHeight||0)+"px"}catch{}}
@@ -36,7 +36,7 @@ frame.addEventListener("load",async()=>{
   try{
     const doc=frame.contentDocument,w=frame.contentWindow;w.BAMA_HOME_TARGET="test-home.html";
     const home=doc.querySelector("a.home");if(home){home.href="test-home.html";home.target="_top"}
-    const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Bekreft v1.0 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:40";
+    const v=doc.querySelector(".version");if(v)v.innerHTML="TEST UT Bekreft v1.1 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:46";
     const notice=doc.createElement("div");notice.style.cssText="margin:10px 0;padding:11px;border:1px solid #48d597;border-radius:12px;background:rgba(72,213,151,.08);color:#48d597;font:900 12px/1.45 Arial,sans-serif;text-align:center";notice.innerHTML="TEST — окремий склад: <b>10 Bunner + 10 Hyller x30 + 10 Hyller x60</b>. Номери взяті з історично відправлених позицій; перетин із поточним production-складом = 0.";doc.querySelector("main")?.prepend(notice);
     try{await inject(doc,`utsending-language.js?v=${VERSION}`)}catch{}
     try{await inject(doc,`utsending-status-colors.js?v=${VERSION}`)}catch{}
