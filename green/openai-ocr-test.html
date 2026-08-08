@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>OpenAI OCR — тест</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #151c30;
+      --dark: #0d1426;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --line: #303b59;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --bad: #ff7373;
+      --info: #75b7ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #11182a);
+      color: var(--text);
+    }
+
+    button, input { font: inherit; }
+
+    .app {
+      width: min(760px, 100%);
+      margin: 0 auto;
+      padding: 14px 14px 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .home {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--dark);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 900;
+    }
+
+    .version {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+      text-align: right;
+    }
+
+    h1 {
+      margin: 4px 0 7px;
+      font-size: clamp(29px, 8vw, 44px);
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .card {
+      margin: 12px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(21, 28, 48, 0.97);
+      box-shadow: 0 12px 28px rgba(0,0,0,.22);
+    }
+
+    .file-label {
+      display: grid;
+      place-items: center;
+      min-height: 64px;
+      padding: 12px;
+      border: 2px dashed var(--info);
+      border-radius: 14px;
+      background: rgba(117,183,255,.07);
+      color: #d8ebff;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    #photoInput { display: none; }
+
+    .preview-wrap {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #050811;
+    }
+
+    .preview-wrap.show { display: block; }
+
+    #preview {
+      display: block;
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 560px) {
+      .actions { grid-template-columns: 1fr .55fr; }
+    }
+
+    button {
+      min-height: 56px;
+      padding: 11px 14px;
+      border: 0;
+      border-radius: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    button:disabled { opacity: .45; cursor: not-allowed; }
+
+    .primary { background: var(--accent); color: #17130a; }
+    .secondary { background: #2c395c; color: var(--text); }
+
+    .status {
+      min-height: 24px;
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      text-align: center;
+      white-space: pre-wrap;
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.bad { color: var(--bad); }
+
+    .result-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    @media (min-width: 560px) {
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      min-height: 58px;
+      padding: 12px 14px;
+      border: 2px solid var(--line);
+      border-radius: 13px;
+      background: var(--dark);
+      color: var(--text);
+      font-family: Consolas, monospace;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      outline: none;
+      text-transform: uppercase;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244,196,48,.13);
+    }
+
+    .confidence {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--dark);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .confidence strong { color: var(--text); }
+
+    .note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <a class="home" href="index.html">← Головна</a>
+      <div class="version">OpenAI OCR test v1<br>03.08.2026</div>
+    </div>
+
+    <h1>OpenAI OCR — тест</h1>
+    <p class="subtitle">Окрема тестова сторінка. Вона ще нічого не записує в базу Mottak.</p>
+
+    <section class="card">
+      <label class="file-label" for="photoInput">📷 Зробити фото або вибрати зображення</label>
+      <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" />
+
+      <div class="preview-wrap" id="previewWrap">
+        <img id="preview" alt="Попередній перегляд етикетки" />
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="recognizeButton" type="button" disabled>Розпізнати через OpenAI</button>
+        <button class="secondary" id="resetButton" type="button">Очистити</button>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <div class="result-grid">
+        <div>
+          <label for="upperNumber">Верхній номер — 6 цифр</label>
+          <input id="upperNumber" type="text" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="000000" />
+        </div>
+        <div>
+          <label for="lowerNumber">Нижній номер — 6 символів</label>
+          <input id="lowerNumber" type="text" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="A1B2C3" />
+        </div>
+      </div>
+
+      <div class="confidence">Впевненість: <strong id="confidence">—</strong></div>
+      <p class="note">Після розпізнавання обов’язково звірте обидва номери з фотографією. На цьому тестовому етапі кнопки збереження немає.</p>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+    const FUNCTION_NAME = "clever-responder";
+
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
+
+    const photoInput = document.getElementById("photoInput");
+    const previewWrap = document.getElementById("previewWrap");
+    const preview = document.getElementById("preview");
+    const recognizeButton = document.getElementById("recognizeButton");
+    const resetButton = document.getElementById("resetButton");
+    const statusElement = document.getElementById("status");
+    const upperNumber = document.getElementById("upperNumber");
+    const lowerNumber = document.getElementById("lowerNumber");
+    const confidence = document.getElementById("confidence");
+
+    let selectedFile = null;
+    let previewUrl = "";
+    let busy = false;
+
+    function setStatus(text, type = "") {
+      statusElement.textContent = text;
+      statusElement.className = `status ${type}`.trim();
+    }
+
+    function cleanUpper(value) {
+      return String(value || "").replace(/\D/g, "").slice(0, 6);
+    }
+
+    function cleanLower(value) {
+      return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    }
+
+    function resetPage() {
+      selectedFile = null;
+      photoInput.value = "";
+      recognizeButton.disabled = true;
+      upperNumber.value = "";
+      lowerNumber.value = "";
+      confidence.textContent = "—";
+      setStatus("");
+
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = "";
+      preview.removeAttribute("src");
+      previewWrap.classList.remove("show");
+    }
+
+    async function imageToDataUrl(file) {
+      const bitmap = await createImageBitmap(file);
+      const maxSide = 1800;
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d", { alpha: false });
+
+      if (!context) throw new Error("Не вдалося підготувати фотографію.");
+
+      context.drawImage(bitmap, 0, 0, width, height);
+      bitmap.close();
+      return canvas.toDataURL("image/jpeg", 0.88);
+    }
+
+    async function recognize() {
+      if (!selectedFile || busy) return;
+
+      busy = true;
+      recognizeButton.disabled = true;
+      photoInput.disabled = true;
+      setStatus("Готуємо фото і надсилаємо в OpenAI…");
+      upperNumber.value = "";
+      lowerNumber.value = "";
+      confidence.textContent = "—";
+
+      try {
+        const image = await imageToDataUrl(selectedFile);
+        const { data, error } = await client.functions.invoke(FUNCTION_NAME, {
+          body: { image }
+        });
+
+        if (error) {
+          let message = error.message || "Помилка Edge Function";
+          try {
+            const details = await error.context?.json?.();
+            if (details?.error) message = details.error;
+          } catch {}
+          throw new Error(message);
+        }
+
+        if (data?.error) throw new Error(data.error);
+
+        upperNumber.value = cleanUpper(data?.upper_number);
+        lowerNumber.value = cleanLower(data?.lower_number);
+
+        const score = Number(data?.confidence);
+        confidence.textContent = Number.isFinite(score)
+          ? `${Math.round(score * 100)}%`
+          : "—";
+
+        if (!upperNumber.value && !lowerNumber.value) {
+          setStatus("OpenAI не зміг надійно прочитати номери. Спробуйте ближче фото або введіть вручну.", "bad");
+        } else {
+          setStatus("Розпізнавання завершено. Звірте номери з фото.", "ok");
+        }
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : String(error), "bad");
+      } finally {
+        busy = false;
+        recognizeButton.disabled = !selectedFile;
+        photoInput.disabled = false;
+      }
+    }
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files?.[0] || null;
+      if (!file) return resetPage();
+
+      selectedFile = file;
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(file);
+      preview.src = previewUrl;
+      previewWrap.classList.add("show");
+      recognizeButton.disabled = false;
+      upperNumber.value = "";
+      lowerNumber.value = "";
+      confidence.textContent = "—";
+      setStatus("Фото готове до тестового розпізнавання.");
+    });
+
+    upperNumber.addEventListener("input", () => {
+      upperNumber.value = cleanUpper(upperNumber.value);
+    });
+
+    lowerNumber.addEventListener("input", () => {
+      lowerNumber.value = cleanLower(lowerNumber.value);
+    });
+
+    recognizeButton.addEventListener("click", recognize);
+    resetButton.addEventListener("click", resetPage);
+  </script>
+</body>
+</html>

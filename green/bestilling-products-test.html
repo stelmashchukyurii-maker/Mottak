@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nb" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="google" content="notranslate" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>TEST — UT Kontor</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
+    body{display:flex;flex-direction:column}.bar{flex:0 0 auto;padding:10px 12px;border-bottom:2px solid var(--accent);background:#10172a;box-shadow:0 4px 16px rgba(0,0,0,.28);z-index:5}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.bar>.row:first-child{align-items:flex-start;flex-wrap:nowrap}.bar>.row:first-child>div:first-child{flex:1 1 auto;min-width:0}.bar>.row:nth-of-type(2){display:block}.title{color:var(--accent);font-weight:1000;font-size:16px;line-height:19px;min-height:38px}.sub{margin-top:3px;color:var(--muted);font-size:11px;line-height:15px;min-height:30px}.nav{display:grid;grid-template-columns:80px minmax(0,1fr) 108px;gap:6px;width:100%}.nav a,.lang button{display:flex;align-items:center;justify-content:center;min-height:38px;padding:6px 8px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--text);text-decoration:none;font-size:10px;font-weight:950;text-align:center;line-height:1.15}.nav a.test{border-color:var(--ok);color:var(--ok)}.lang{display:flex;justify-content:flex-end;gap:4px;flex:0 0 104px;width:104px}.lang button{width:50px;font-size:11px}.lang button.active{border-color:var(--accent);background:var(--accent);color:#17130a}.badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:32px;margin-top:7px}.badge{padding:5px 8px;border:1px solid rgba(72,213,151,.45);border-radius:999px;background:rgba(72,213,151,.08);color:var(--ok);font-size:10px;font-weight:900}.badge.info{border-color:rgba(117,183,255,.45);background:rgba(117,183,255,.08);color:#cce4ff}iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}#loader{position:fixed;inset:0;top:154px;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font-weight:900;z-index:4}@media(max-width:600px){.bar{padding:9px 10px}.title{font-size:15px}.lang{flex-basis:100px;width:100px}.lang button{width:48px}.nav{grid-template-columns:76px minmax(0,1fr) 100px}.nav a{padding:5px 5px;font-size:9.5px}}
+  </style>
+  <script src="./products.js?v=20260808-1427"></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="row">
+      <div><div class="title" id="outerTitle">TEST — UT Kontor · ISOLERT</div><div class="sub" id="outerSub">Kun TEST-data. Production-tabeller er blokkert av ut-test-api.js.</div></div>
+      <div class="lang"><button id="noBtn" type="button">NO</button><button id="uaBtn" type="button">UA</button></div>
+    </div>
+    <div class="row" style="margin-top:7px">
+      <nav class="nav"><a href="test-home.html" id="homeLink">⌂ TEST</a><a class="test" href="utsending-test.html" id="confirmLink">✓ UT Bekreft TEST</a><a href="ut-camera-test.html" id="photoLink">📷 Foto TEST</a></nav>
+      <div class="badges"><span class="badge" id="dbBadge">TEST lager: 10 + 10 + 10</span><span class="badge info" id="productBadge">products.js</span></div>
+    </div>
+  </header>
+  <div id="loader">Laster isolert TEST — UT Kontor…</div>
+  <iframe id="app" title="TEST — UT Kontor"></iframe>
+<script>
+"use strict";
+const VERSION="20260808-1427",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const langKey="mottak_ut_language";
+function language(){return localStorage.getItem(langKey)==="uk"?"uk":"nb"}
+function isUk(){return language()==="uk"}
+function paintLang(){
+  const uk=isUk();
+  document.documentElement.lang=uk?"uk":"nb";
+  document.getElementById("noBtn").classList.toggle("active",!uk);
+  document.getElementById("uaBtn").classList.toggle("active",uk);
+  document.getElementById("outerTitle").textContent=uk?"TEST — UT Офіс · ІЗОЛЬОВАНО":"TEST — UT Kontor · ISOLERT";
+  document.getElementById("outerSub").textContent=uk?"Лише TEST-дані. Production-таблиці заблоковані через ut-test-api.js.":"Kun TEST-data. Production-tabeller er blokkert av ut-test-api.js.";
+  document.getElementById("confirmLink").textContent=uk?"✓ UT Підтв. TEST":"✓ UT Bekreft TEST";
+  document.getElementById("photoLink").textContent=uk?"📷 Фото TEST":"📷 Foto TEST";
+  document.getElementById("dbBadge").textContent=uk?"TEST склад: 10 + 10 + 10":"TEST lager: 10 + 10 + 10";
+}
+async function build(){
+  loader.style.display="flex";
+  loader.textContent=isUk()?"Завантаження ізольованого TEST — UT Офіс…":"Laster isolert TEST — UT Kontor…";
+  try{
+    const res=await fetch(`bestilling.html?v=${VERSION}`,{cache:"no-store"});if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    let html=await res.text();
+    html=html.replace(/<script src="office-home-setting\.js[^\"]*"><\/script>/i,"");
+    html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
+    frame.srcdoc=html;
+  }catch(e){loader.textContent=`${isUk()?"Не вдалося завантажити TEST UT Офіс":"Kunne ikke laste TEST UT Kontor"}: ${e.message||e}`}
+}
+function inject(doc,src){return new Promise((resolve,reject)=>{const s=doc.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;doc.body.appendChild(s)})}
+function registryCopy(){return isUk()?{
+  title:"TEST — Центральний список продуктів",prefix:"Ізольована база",note:"10 Bunner + 10 Hyller x30 + 10 Hyller x60 скопійовано з історично відправлених товарів. CC Post є лише довідковою частиною комплекту без складського лічильника та руху.",active:"UT-замовлення активне в цьому тесті",later:"зареєстровано · поле UT буде пізніше",derived:"компонент комплекту · тільки відображення"
+}:{
+  title:"TEST — Sentral produktliste",prefix:"Isolert database",note:"10 Bunner + 10 Hyller x30 + 10 Hyller x60 er kopiert fra historiske sendte varer. CC Post er kun en visningskomponent uten lagerteller eller egen vareflyt.",active:"UT-bestilling aktiv i denne testen",later:"registrert · UT-felt kommer senere",derived:"komponent i komplett · kun visning"
+}}
+function addTestPanel(doc){
+  if(doc.getElementById("utTestRegistryPanel"))return;
+  const products=window.BAMA_PRODUCTS?.getActiveProducts?.()||[];
+  const supported=new Set(["bunner","hyller30","hyller60","forlengere_korte","forlengere_lange","forlengere_plast"]);
+  const panel=doc.createElement("section");panel.className="card";panel.id="utTestRegistryPanel";
+  panel.innerHTML=`<h2 data-registry-title style="margin-top:0;color:#48d597"></h2><div data-registry-note style="padding:10px;border:1px solid #48d597;border-radius:12px;background:rgba(72,213,151,.07);font-size:12px;line-height:1.5"></div><div data-registry-list style="display:grid;gap:7px;margin-top:10px">${products.map(p=>`<div data-registry-product="${p.id}" data-supported="${supported.has(p.id)?"1":"0"}" style="padding:9px 10px;border:1px solid #303b59;border-radius:11px;background:#0d1426"><b></b><div style="margin-top:3px;color:#aab4ce;font-size:10px"></div></div>`).join("")}</div>`;
+  const form=doc.getElementById("formCard");form?.insertAdjacentElement("beforebegin",panel);
+  patchRegistryLanguage(doc);
+}
+function patchRegistryLanguage(doc){
+  const panel=doc.getElementById("utTestRegistryPanel");if(!panel)return;
+  const copy=registryCopy();
+  const products=window.BAMA_PRODUCTS?.getActiveProducts?.()||[];
+  const map=new Map(products.map(p=>[p.id,p]));
+  const title=panel.querySelector("[data-registry-title]");if(title)title.textContent=copy.title;
+  const note=panel.querySelector("[data-registry-note]");if(note)note.innerHTML=`<b>${copy.prefix}:</b> ${copy.note}`;
+  panel.querySelectorAll("[data-registry-product]").forEach(card=>{
+    const id=card.dataset.registryProduct,p=map.get(id);if(!p)return;
+    const name=card.querySelector("b");if(name)name.textContent=window.BAMA_PRODUCTS.getProductName(p,isUk()?"uk":"no");
+    const meta=card.querySelector("div");
+    if(meta)meta.textContent=`ID: ${id} · ${p.ut?.derivedOnly?copy.derived:(card.dataset.supported==="1"?copy.active:copy.later)}`;
+  });
+  document.getElementById("productBadge").textContent=`products.js v${window.BAMA_PRODUCTS?.meta?.version||"?"} · ${products.length} ${isUk()?"активних":"aktive"}`;
+}
+function patchLabels(doc){
+  const uk=isUk();
+  const ids=[["bunner","bunnerQty"],["hyller30","h30Qty"],["hyller60","h60Qty"]];
+  ids.forEach(([id,input])=>{const p=window.BAMA_PRODUCTS?.getProductById?.(id),el=doc.getElementById(input)?.closest("article")?.querySelector("strong");if(p&&el)el.textContent=window.BAMA_PRODUCTS.getProductName(p,uk?"uk":"no")});
+  const home=doc.querySelector("a.home");if(home)home.href="test-home.html";
+  const v=doc.querySelector(".version");if(v)v.innerHTML=`TEST UT Kontor v2.11 · UNIFIED LAYOUT<br>${uk?"Оновлено":"Oppdatert"} 08.08.2026 kl. 14:27`;
+}
+function patchExtraLanguage(doc){
+  const uk=isUk();
+  const ids=["forlengere_korte","forlengere_lange","forlengere_plast"];
+  ids.forEach(id=>{
+    const card=doc.querySelector(`[data-ut-product-id="${id}"]`);if(!card)return;
+    const p=window.BAMA_PRODUCTS?.getProductById?.(id);
+    const input=doc.getElementById(`${id}Qty`);const value=Number(input?.value)||0;
+    const plast=id==="forlengere_plast";
+    const unit=plast?(uk?(value===1?"ящик":"ящиків"):(value===1?"eske":"esker")):(uk?(value===1?"візок":"візків"):(value===1?"vogn":"vogner"));
+    const note=plast?(uk?"1 одиниця = 1 ящик. Без Bunner і Hyller.":"1 enhet = 1 eske. Ingen Bunner eller Hyller."):(uk?"1 візок = 1 Bunner. Кількість Hyller і Forlengere вводиться окремо при UT-підтвердженні.":"1 vogn = 1 Bunner. Antall Hyller og Forlengere registreres per vogn ved UT-bekreftelse.");
+    const name=card.querySelector("strong");if(name&&p)name.textContent=window.BAMA_PRODUCTS.getProductName(p,uk?"uk":"no");
+    const unitBadge=card.querySelector(".ut-extra-unit");if(unitBadge)unitBadge.textContent=plast?(uk?"ящики":"esker"):(uk?"візки":"vogner");
+    const noteEl=card.querySelector(".ut-extra-note");if(noteEl)noteEl.textContent=note;
+    const out=doc.getElementById(`${id}Output`);if(out)out.textContent=`${value} ${unit}`;
+    const summaryId=id==="forlengere_korte"?"sumForlengereKorte":id==="forlengere_lange"?"sumForlengereLange":"sumForlengerePlast";
+    const summary=doc.getElementById(summaryId)?.closest(".summary-row");
+    if(summary){const span=summary.querySelector("span");if(span&&p)span.textContent=window.BAMA_PRODUCTS.getProductName(p,uk?"uk":"no");const strong=summary.querySelector("strong");if(strong)strong.textContent=`${value} ${unit}`;}
+  });
+}
+function patchTotalLanguage(doc){
+  const labels=isUk()? ["Bunner","Hyller","Подовжувачі короткі","Подовжувачі довгі","Подовжувачі пластикові","CC Post"]:["Bunner","Hyller","Forlengere korte","Forlengere lange","Forlengere plast","CC Post"];
+  doc.querySelectorAll("#sumTotal .ut-total-label").forEach((el,i)=>{if(labels[i])el.textContent=labels[i]});
+}
+function applyLanguageLive(){
+  const doc=frame.contentDocument,win=frame.contentWindow;
+  const scrollY=win?.scrollY||0;
+  paintLang();
+  if(!doc?.body)return;
+  win.UT_TEST_LANG?.apply?.();
+  patchLabels(doc);
+  patchExtraLanguage(doc);
+  patchRegistryLanguage(doc);
+  win.UT_TEST_LANG?.apply?.();
+  patchExtraLanguage(doc);
+  win.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
+  patchTotalLanguage(doc);
+  requestAnimationFrame(()=>win.scrollTo(0,scrollY));
+}
+frame.addEventListener("load",async()=>{
+  try{
+    const doc=frame.contentDocument;
+    patchLabels(doc);addTestPanel(doc);
+    await inject(doc,`ut-kontor-products.js?v=${VERSION}`);
+    await inject(doc,`ut-kontor-history-visuals.js?v=${VERSION}`);
+    await inject(doc,`ut-test-language.js?v=${VERSION}`);
+    applyLanguageLive();
+    setTimeout(applyLanguageLive,350);
+    loader.style.display="none";
+  }catch(e){loader.textContent=`${isUk()?"Помилка запуску TEST":"TEST startfeil"}: ${e.message||e}`}
+});
+[document.getElementById("noBtn"),document.getElementById("uaBtn")].forEach((b,i)=>b.addEventListener("click",()=>{
+  localStorage.setItem(langKey,i===0?"nb":"uk");
+  applyLanguageLive();
+}));
+paintLang();build();
+</script>
+</body>
+</html>

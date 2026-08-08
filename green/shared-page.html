@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <title>BaMavaremottak</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
+    iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
+    #loader{position:fixed;inset:0;display:grid;place-items:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:2}
+  </style>
+</head>
+<body>
+<div id="loader">Laster siden…</div>
+<iframe id="page" title="BaMavaremottak"></iframe>
+<script>
+"use strict";
+const allowed=new Set(["mottak-table-v1.html","review-pages.html","presentasjon.html"]);
+const requested=new URLSearchParams(location.search).get("src")||"";
+const source=allowed.has(requested)?requested:"review-pages.html";
+const frame=document.getElementById("page"),loader=document.getElementById("loader");
+frame.src=`${source}?shared-stock=20260805-1049`;
+frame.addEventListener("load",()=>{
+  try{
+    const doc=frame.contentDocument;
+    doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
+    const script=doc.createElement("script");
+    script.src="shared-stock-status.js?v=20260805-1049";
+    script.onload=()=>loader.style.display="none";
+    script.onerror=()=>{loader.textContent="Siden er åpnet, men lagerstatusen kunne ikke lastes."};
+    doc.body.appendChild(script);
+  }catch(error){loader.textContent=`Feil: ${error.message||error}`}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Знайти доступну Bunner</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--line:#303b59;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff7373}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text);display:grid;place-items:center;padding:18px}.card{width:min(680px,100%);padding:20px;border:1px solid var(--line);border-radius:20px;background:var(--card)}h1{margin:0 0 8px;font-size:32px}.muted{color:var(--muted);line-height:1.45}.result{margin-top:16px;padding:16px;border:2px solid var(--accent);border-radius:16px;background:#0d1426}.label{color:var(--muted);font-size:12px}.code{margin:5px 0 14px;font:700 22px Consolas,monospace;word-break:break-all}.btn{width:100%;min-height:52px;border:0;border-radius:12px;font-weight:900;cursor:pointer}.primary{background:var(--accent);color:#17130a}.secondary{margin-top:10px;background:#2c395c;color:var(--text)}.msg{min-height:24px;margin-top:12px;text-align:center;color:var(--muted);white-space:pre-wrap}.ok{color:var(--ok)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<main class="card">
+<h1>Доступна Bunner</h1>
+<p class="muted">Сторінка бере з Supabase підтверджену Bunner, яка ще перебуває на складі.</p>
+<button class="btn primary" id="load" type="button" onclick="loadBunner()">Знайти номер</button>
+<section class="result" id="result" hidden>
+<div class="label">SCANNER CODE / EPC</div><div class="code" id="scanner">—</div>
+<div class="label">ВЕРХНІЙ НОМЕР</div><div class="code" id="upper">—</div>
+<div class="label">НИЖНІЙ НОМЕР</div><div class="code" id="lower">—</div>
+<button class="btn secondary" id="copy" type="button" onclick="copyCode()">Скопіювати scanner code</button>
+</section>
+<div class="msg" id="msg">Сторінка готова. Натисни «Знайти номер».</div>
+</main>
+<script>
+'use strict';
+const BASE='https://hzjsatehehhpgpskckfi.supabase.co';
+const KEY='sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya';
+let current='';
+const el=id=>document.getElementById(id);
+function show(text,type=''){el('msg').textContent=text;el('msg').className='msg '+type}
+async function loadBunner(){
+  const button=el('load');
+  button.disabled=true;
+  el('result').hidden=true;
+  show('Запит до Supabase…');
+  try{
+    const query='/rest/v1/mottak_scans?select=scanner_code,upper_number,lower_number,stock_status,created_at&product=eq.bunner&status=eq.verified&order=created_at.desc&limit=100';
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    const response=await fetch(BASE+query,{headers:{apikey:KEY,Authorization:'Bearer '+KEY,Accept:'application/json'},signal:controller.signal});
+    clearTimeout(timer);
+    const body=await response.text();
+    if(!response.ok)throw new Error('HTTP '+response.status+': '+body);
+    const rows=JSON.parse(body);
+    const row=rows.find(item=>(item.stock_status||'in_stock')==='in_stock');
+    if(!row)throw new Error('Немає доступної підтвердженої Bunner зі статусом in_stock.');
+    current=row.scanner_code||row.upper_number||row.lower_number||'';
+    if(!current)throw new Error('Bunner знайдена, але всі три номери порожні.');
+    el('scanner').textContent=row.scanner_code||'—';
+    el('upper').textContent=row.upper_number||'—';
+    el('lower').textContent=row.lower_number||'—';
+    el('result').hidden=false;
+    show('Номер знайдено. Для тесту використовуй scanner code / EPC.','ok');
+  }catch(error){
+    const text=error&&error.name==='AbortError'?'Запит тривав понад 15 секунд. Перевір інтернет і спробуй ще раз.':(error.message||String(error));
+    show(text,'bad');
+  }finally{button.disabled=false}
+}
+async function copyCode(){
+  if(!current)return show('Немає номера для копіювання.','bad');
+  try{await navigator.clipboard.writeText(current);show('Scanner code скопійовано.','ok')}
+  catch{show('Не вдалося скопіювати автоматично. Виділи номер мишкою.','bad')}
+}
+window.loadBunner=loadBunner;
+window.copyCode=copyCode;
+</script>
+</body>
+</html>

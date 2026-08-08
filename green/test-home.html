@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="nb" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="google" content="notranslate" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>TEST — BaMavaremottak</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--warn:#f6b94b;--line:#303b59}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}
+    main{width:min(760px,100%);margin:auto;padding:18px 14px 60px}
+    h1{margin:0;color:var(--accent);font-size:clamp(31px,8vw,48px)}
+    .sub{margin:7px 0 0;color:var(--muted);line-height:1.5}
+    .status{margin:17px 0;padding:13px;border:1px solid var(--ok);border-radius:15px;background:rgba(72,213,151,.08);line-height:1.5}
+    .status strong{color:var(--ok)}
+    .section{margin-top:22px}
+    .section-title{display:flex;align-items:center;gap:9px;margin:0 0 10px;font-size:20px;font-weight:950}
+    .section-note{margin:-2px 0 12px;color:var(--muted);font-size:12px;line-height:1.45}
+    .grid{display:grid;gap:11px}
+    .card{display:block;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);text-decoration:none;box-shadow:0 10px 25px rgba(0,0,0,.2)}
+    .card.primary{border:2px solid var(--accent)}
+    .card.ok{border-color:var(--ok)}
+    .card.info{border-color:var(--info)}
+    .card.warn{border-color:var(--warn);background:rgba(246,185,75,.045)}
+    .card h2{margin:0;font-size:22px}
+    .card p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.45}
+    .tag{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px;font-weight:900}
+    .tag.ok{border-color:var(--ok);color:var(--ok)}
+    .tag.accent{border-color:var(--accent);color:var(--accent)}
+    .tag.info{border-color:var(--info);color:var(--info)}
+    .tag.warn{border-color:var(--warn);color:var(--warn)}
+    .flow{display:flex;align-items:center;justify-content:center;padding:2px 0;color:var(--muted);font-weight:900}
+    .aux{padding-top:5px;border-top:1px dashed var(--line)}
+    .protocol{margin-top:11px;padding:14px;border:1px dashed var(--line);border-radius:15px;background:#0d1426}
+    .protocol a{color:var(--info);font-weight:900}
+    .command{margin-top:8px;padding:9px;border-radius:10px;background:#070b14;font-family:Consolas,monospace;color:var(--accent);word-break:break-word}
+    .version{margin-top:20px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
+  </style>
+</head>
+<body>
+<main>
+  <h1>TEST — BaMavaremottak</h1>
+  <p class="sub">Окремий тестовий контур для перевірки всього руху товару без ризику для робочих сторінок і production-складу.</p>
+
+  <section class="status"><strong>UT-TEST-CHAIN активовано.</strong><br>TEST-база містить 10 Bunner + 10 Hyller x30 + 10 Hyller x60, скопійованих з історично відправлених товарів. Перетин їхніх нижніх номерів із поточним production-складом: 0.</section>
+
+  <section class="section">
+    <div class="section-title">🧭 Основний TEST-процес</div>
+    <p class="section-note">Тут залишаємо тільки сторінки, які відповідають реальному робочому процесу.</p>
+    <div class="grid">
+      <a class="card" href="products.html">
+        <h2>📦 Products</h2>
+        <p>Центральний реєстр усіх продуктів і правил їх комплектації. Це джерело даних для тестової системи, а не окрема складська операція.</p>
+        <span class="tag">CENTRAL REGISTRY · READ ONLY</span>
+      </a>
+
+      <div class="flow">↓</div>
+
+      <a class="card warn" href="camera-test-live.html?v=20260808-1326">
+        <h2>📷 TEST — KAMERA CLOUD</h2>
+        <p><b>INN / приймання на TEST-склад.</b> Ізольована копія Camera Cloud v4.14. Показує рух TEST-товару між «на складі», «зарезервовано», «на рампі» та «відправлено». Фото тесту зберігаються окремо.</p>
+        <span class="tag warn">1 · INN · ACTIVE TEST</span>
+      </a>
+
+      <div class="flow">↓ TEST-СКЛАД ↓</div>
+
+      <a class="card primary" href="bestilling-products-test.html">
+        <h2>📋 TEST — UT Kontor</h2>
+        <p>Офіс створює TEST-замовлення на рампу. Читає та змінює лише окремі TEST-таблиці.</p>
+        <span class="tag accent">2 · BESTILLING</span>
+      </a>
+
+      <div class="flow">↓</div>
+
+      <a class="card ok" href="utsending-test.html">
+        <h2>🚚 TEST — UT Lager og utsending</h2>
+        <p>Склад бачить TEST-рампи, комплектує конкретними товарами, ставить на рампу, підтверджує відправку та може повернути товар під час тесту.</p>
+        <span class="tag ok">3 · LAGER / UTSENDING</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="section aux">
+    <div class="section-title">🧰 Додаткові TEST-інструменти</div>
+    <p class="section-note">Ці сторінки допомагають тестувати основний процес, але самі не є окремими головними етапами.</p>
+    <div class="grid">
+      <a class="card info" href="ut-camera-test.html">
+        <h2>📷 UT Foto TEST</h2>
+        <p>Допоміжний фото-сканер для конкретного UT-замовлення. Найкраще відкривати з вибраної TEST-рампи, щоб камера вже знала замовлення і рампу.</p>
+        <span class="tag info">AUX · FOTO / SCAN</span>
+      </a>
+    </div>
+
+    <section class="protocol">
+      <b>🧾 Протокол:</b> <a href="https://github.com/stelmashchukyurii-maker/Mottak/blob/main/docs/UT_TEST_CHAIN_PROTOCOL_2026-08-08.md">UT-TEST-CHAIN</a>
+      <div class="command">«Виконай протокол UT-TEST-CHAIN»</div>
+    </section>
+  </section>
+
+  <div class="version">TEST HOME v2.3 · CAMERA CACHE FIX<br>Oppdatert 08.08.2026 kl. 13:26 · Europe/Oslo</div>
+</main>
+</body>
+</html>

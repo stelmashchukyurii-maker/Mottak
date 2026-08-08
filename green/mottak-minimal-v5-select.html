@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Nordic ID Minimal v5</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{overscroll-behavior-y:none}
+    body{margin:0;min-height:100vh;padding:14px;background:#0b1020;color:#f5f7ff;font-family:Arial,sans-serif}
+    main{max-width:680px;margin:auto}
+    h1{margin:0 0 5px;font-size:29px}
+    h2{margin:20px 0 9px;font-size:23px}
+    .version,.help{color:#aab4ce;line-height:1.45}
+    .version{margin:0 0 12px;font-size:13px}
+    .step{margin:11px 0;padding:13px;border:1px solid #303b59;border-radius:16px;background:#151c30}
+    .step-title{display:block;margin-bottom:7px;font-size:18px;font-weight:900}
+    input,textarea{width:100%;padding:15px;border:4px solid #f4c430;border-radius:16px;outline:none;background:#050811;color:#fff;font:900 22px/1.35 Consolas,monospace}
+    textarea{min-height:126px;resize:none;overflow-wrap:anywhere}
+    input:focus,textarea:focus{border-color:#48d597;box-shadow:0 0 0 4px rgba(72,213,151,.18)}
+    #status{margin:11px 0;padding:13px;border-radius:12px;background:#151c30;color:#75b7ff;font-weight:800;white-space:pre-wrap}
+    #status.ok{color:#48d597}
+    #status.bad{color:#ff8d8d}
+    .parts{display:grid;gap:9px}
+    .part{padding:12px;border:1px solid #303b59;border-radius:13px;background:#151c30}
+    .label{display:block;margin-bottom:4px;color:#aab4ce;font-size:12px}
+    .value{font:900 23px Consolas,monospace;overflow-wrap:anywhere}
+    .counter{margin:13px 0;color:#aab4ce;text-align:center}
+    .table-wrap{overflow:hidden;border:1px solid #303b59;border-radius:14px;background:#151c30}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    th,td{padding:10px 6px;border-bottom:1px solid #303b59;text-align:left;vertical-align:top}
+    th{background:#0d1426;color:#aab4ce;font-size:11px;text-transform:uppercase}
+    td{font:800 13px/1.45 Consolas,monospace;overflow-wrap:anywhere}
+    th:first-child,td:first-child{width:38px;text-align:center}
+    th:last-child,td:last-child{width:82px}
+    tr:last-child td{border-bottom:0}
+    .good{background:rgba(72,213,151,.10)}
+    .bad-row{background:rgba(255,107,107,.10)}
+    .empty{text-align:center!important;color:#aab4ce;font-family:Arial,sans-serif}
+    .small{color:#aab4ce;font-size:11px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Nordic ID — без очищення</h1>
+  <p class="version">Minimal v5 · 02.08.2026 19:56</p>
+  <p class="help">Після відкриття: натисніть поле 1, потім поле 2. Після кожного сканування код залишається виділеним у полі — його не очищаємо.</p>
+
+  <section class="step">
+    <span class="step-title">1. Активація</span>
+    <input id="activateInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="none" placeholder="Натисніть сюди" />
+  </section>
+
+  <section class="step">
+    <span class="step-title">2. Сканування</span>
+    <textarea id="scanInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="none" enterkeyhint="done" placeholder="Потім натисніть сюди"></textarea>
+  </section>
+
+  <div id="status">Очікування активації.</div>
+
+  <div class="parts">
+    <div class="part"><span class="label">Службовий код — 12</span><div id="service" class="value">—</div></div>
+    <div class="part"><span class="label">Верхній номер — 6</span><div id="upper" class="value">—</div></div>
+    <div class="part"><span class="label">Нижній номер — 6</span><div id="lower" class="value">—</div></div>
+  </div>
+
+  <div class="counter">Успішних: <strong id="goodCount">0</strong> · Спроб: <strong id="allCount">0</strong></div>
+
+  <h2>Таблиця сканувань</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>№</th><th>Отримані номери</th><th>Результат</th></tr></thead>
+      <tbody id="attemptTable"><tr id="emptyRow"><td class="empty" colspan="3">Сканувань ще немає</td></tr></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+"use strict";
+
+const activateInput=document.getElementById("activateInput");
+const scanInput=document.getElementById("scanInput");
+const status=document.getElementById("status");
+const service=document.getElementById("service");
+const upper=document.getElementById("upper");
+const lower=document.getElementById("lower");
+const goodCount=document.getElementById("goodCount");
+const allCount=document.getElementById("allCount");
+const attemptTable=document.getElementById("attemptTable");
+let good=0;
+let all=0;
+let pullStartY=null;
+
+function setStatus(text,type=""){
+  status.textContent=text;
+  status.className=type;
+}
+
+function clean(value){
+  return String(value||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+}
+
+function selectScanText(){
+  try{
+    scanInput.focus({preventScroll:true});
+    scanInput.setSelectionRange(0,scanInput.value.length);
+  }catch{
+    scanInput.focus();
+    scanInput.select();
+  }
+}
+
+function addRow(code,ok,message){
+  const empty=document.getElementById("emptyRow");
+  if(empty)empty.remove();
+  all+=1;
+  allCount.textContent=all;
+  const row=document.createElement("tr");
+  row.className=ok?"good":"bad-row";
+  const codeCell=ok
+    ? `${code.slice(0,12)}<br>${code.slice(12,18)} · ${code.slice(18,24)}`
+    : `${code||"—"}<br><span class="small">довжина: ${code.length}</span>`;
+  row.innerHTML=`<td>${all}</td><td>${codeCell}</td><td>${message}<br><span class="small">${new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</span></td>`;
+  attemptTable.prepend(row);
+}
+
+function accept(raw){
+  const code=clean(raw);
+  let ok=false;
+  let message="";
+
+  if(code.length!==24){
+    message=`Помилка ${code.length}`;
+    setStatus(`Не прийнято: ${code.length} символів замість 24.`,"bad");
+  }else if(!/^[A-Z0-9]{12}[0-9]{6}[A-Z0-9]{6}$/.test(code)){
+    message="Формат";
+    setStatus("Не прийнято: неправильний формат.","bad");
+  }else{
+    ok=true;
+    message="Прийнято";
+    service.textContent=code.slice(0,12);
+    upper.textContent=code.slice(12,18);
+    lower.textContent=code.slice(18,24);
+    good+=1;
+    goodCount.textContent=good;
+    setStatus(`Прийнято: ${code}`,"ok");
+  }
+
+  addRow(code,ok,message);
+
+  // Не очищаємо поле. Залишаємо прийнятий код і виділяємо його повністю.
+  scanInput.value=code;
+  setTimeout(selectScanText,20);
+}
+
+activateInput.addEventListener("focus",()=>{
+  setStatus("Поле 1 активне. Тепер натисніть поле 2.");
+});
+
+scanInput.addEventListener("focus",()=>{
+  setStatus("Поле 2 активне. Натисніть курок.");
+});
+
+scanInput.addEventListener("blur",()=>{
+  setStatus("Поле 2 втратило активацію. Натисніть поле 1, потім поле 2.","bad");
+});
+
+scanInput.addEventListener("input",()=>{
+  const value=scanInput.value;
+  const match=value.match(/[\r\n\t]/);
+  if(!match)return;
+  const end=value.search(/[\r\n\t]/);
+  accept(value.slice(0,end));
+});
+
+document.addEventListener("touchstart",event=>{
+  pullStartY=window.scrollY===0&&event.touches.length?event.touches[0].clientY:null;
+},{passive:true});
+
+document.addEventListener("touchmove",event=>{
+  if(pullStartY===null||!event.touches.length)return;
+  if(window.scrollY===0&&event.touches[0].clientY>pullStartY+8)event.preventDefault();
+},{passive:false});
+</script>
+</body>
+</html>

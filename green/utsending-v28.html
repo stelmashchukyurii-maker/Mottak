@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>UT v28 — Ramper</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--ok:#48d597;--bad:#ff7373;--blue:#75b7ff}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html{scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text);touch-action:manipulation}
+    button,a{font:inherit;touch-action:manipulation}
+    button{cursor:pointer}
+    button:disabled{opacity:.42;cursor:not-allowed}
+    .app{width:min(920px,100%);margin:auto;padding:14px 14px calc(36px + env(safe-area-inset-bottom))}
+    .top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .home{display:inline-flex;align-items:center;min-height:46px;padding:9px 12px;border:1px solid var(--line);border-radius:13px;background:var(--dark);color:var(--text);text-decoration:none;font-weight:900}
+    .version{font-size:10px;line-height:1.4;text-align:right;color:var(--muted)}
+    .langs{display:flex;gap:5px;margin:10px 0 0;justify-content:flex-end}
+    .lang{min-width:42px;min-height:36px;border:1px solid var(--line);border-radius:999px;background:var(--dark);color:var(--muted);font-weight:950}
+    .lang.active{border-color:var(--accent);color:#17130a;background:var(--accent)}
+    h1{margin:10px 0 4px;font-size:clamp(34px,9vw,52px);line-height:1.02}
+    .subtitle{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.45}
+    .utility{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 12px;padding:9px 10px;border:1px solid var(--line);border-radius:15px;background:rgba(13,20,38,.85)}
+    .online{display:flex;align-items:center;gap:7px;font-weight:900;color:var(--muted)}
+    .online-dot{width:12px;height:12px;border-radius:50%;background:#f6b94b;box-shadow:0 0 0 4px rgba(246,185,75,.08)}
+    .online-dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(72,213,151,.08)}
+    .online-dot.bad{background:var(--bad);box-shadow:0 0 0 4px rgba(255,115,115,.08)}
+    .refresh{width:48px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);font-size:24px;display:grid;place-items:center}
+    .refresh.spin{animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .stock-card,.ramps-card,.detail{margin:11px 0;padding:13px;border:1px solid var(--line);border-radius:18px;background:rgba(21,28,48,.96);box-shadow:0 10px 24px rgba(0,0,0,.18)}
+    .stock-head,.section-head,.detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .stock-head span:first-child,.section-head h2,.detail-head h2{font-weight:950}
+    .stock-time,.count{font-size:10px;color:var(--muted)}
+    .stock-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}
+    .stock-cell{min-width:0;padding:10px 6px;border:1px solid var(--line);border-radius:12px;background:var(--dark);text-align:center}
+    .stock-cell:first-child{border-color:var(--ok)}
+    .stock-cell span{display:block;font-size:10px;color:var(--muted);font-weight:950}
+    .stock-cell strong{display:block;margin-top:5px;font-size:27px;line-height:1;font-weight:950}
+    .section-head h2,.detail-head h2{margin:0;font-size:24px}
+    .ramps{display:grid;gap:10px;margin-top:10px}
+    .ramp-card{padding:13px;border:2px solid var(--line);border-radius:17px;background:var(--dark)}
+    .ramp-head,.order-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .ramp-title{color:var(--accent);font-size:clamp(30px,9vw,48px);line-height:1;font-weight:950}
+    .ramp-total{margin-top:7px;font-size:14px;font-weight:900}
+    .ramp-count{padding:5px 8px;border-radius:999px;background:#2c395c;font-size:10px;font-weight:950;white-space:nowrap}
+    .ramp-orders{display:grid;gap:8px;margin-top:10px}
+    .order-line{padding:10px;border:1px solid var(--line);border-radius:13px;background:#080d18}
+    .order-no{color:var(--muted);font-size:10px;word-break:break-all}
+    .status{font-size:11px;font-weight:950}.status.staged{color:var(--ok)}.status.problem{color:var(--bad)}
+    .order-products{margin-top:6px;font-size:17px;font-weight:900}
+    .meta{margin-top:5px;color:var(--muted);font-size:10px;line-height:1.4}
+    .btn{min-height:48px;padding:10px 13px;border:0;border-radius:12px;font-weight:950}
+    .wide{width:100%;margin-top:9px}.big{min-height:62px;font-size:18px}
+    .primary{background:var(--accent);color:#17130a}.success{background:var(--ok);color:#062418}.secondary{background:#2c395c;color:var(--text)}.danger{background:rgba(255,115,115,.12);border:1px solid rgba(255,115,115,.38);color:#ffc0c0}.info{background:rgba(117,183,255,.12);border:1px solid rgba(117,183,255,.38);color:#e4f2ff}
+    .empty{padding:17px;border:1px dashed var(--line);border-radius:13px;color:var(--muted);text-align:center}.empty.small{padding:12px}
+    .detail{scroll-margin-top:8px}
+    .detail[hidden]{display:none}
+    .detail-head button{min-height:42px}
+    .detail-hero{margin-top:11px;padding:13px;border:2px solid var(--line);border-radius:15px;background:var(--dark)}
+    .detail-ramp{font-size:clamp(36px,11vw,60px);font-weight:950;color:var(--accent);line-height:1}.detail-no{margin-top:4px;color:var(--muted);font-size:10px}.detail-status{margin-top:7px;font-weight:950}
+    .progress{display:grid;gap:7px;margin-top:10px}.product-row{display:flex;justify-content:space-between;gap:10px;padding:11px;border:1px solid var(--line);border-radius:11px;background:#080d18}.product-row strong.done{color:var(--ok)}
+    .work-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+    .work-buttons .btn{min-height:58px}
+    .scan-list{display:grid;gap:7px;margin-top:11px}.scan-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--dark)}.scan-code{margin-top:4px;color:var(--muted);font:700 11px Consolas,monospace}.icon{width:42px;height:42px;border-radius:10px;font-size:21px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}.actions .btn{flex:1 1 160px}
+    .confirm{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--dark)}.check{display:flex;gap:9px;align-items:flex-start;line-height:1.35}.check input{width:22px;height:22px;margin:0;flex:0 0 auto}
+    .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9999;transform:translate(-50%,18px);max-width:min(520px,calc(100vw - 28px));padding:11px 14px;border:1px solid var(--line);border-radius:13px;background:#151c30;color:var(--text);opacity:0;pointer-events:none;transition:.18s ease;box-shadow:0 14px 34px rgba(0,0,0,.42);font-weight:850}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.ok{border-color:rgba(72,213,151,.55)}.toast.bad{border-color:rgba(255,115,115,.55);color:#ffd0d0}
+    @media(max-width:420px){.app{padding-inline:10px}.home{font-size:14px}.version{font-size:9px}.stock-cell strong{font-size:24px}.work-buttons{grid-template-columns:1fr}.subtitle{font-size:13px}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="top">
+      <a id="homeLink" class="home" href="index.html">← Hovedmeny</a>
+      <div id="version" class="version">UT v28.0 CLEAN<br>07.08.2026 kl. 21:09</div>
+    </div>
+    <div class="langs"><button class="lang" data-lang="nb" type="button">NO</button><button class="lang" data-lang="pl" type="button">PL</button><button class="lang" data-lang="uk" type="button">UK</button></div>
+    <h1 id="pageTitle">UT — Ramper</h1>
+    <p id="subtitle" class="subtitle"></p>
+
+    <div class="utility">
+      <div class="online"><span id="onlineDot" class="online-dot"></span><span id="onlineText">…</span></div>
+      <button id="refreshBtn" class="refresh" type="button" aria-label="Oppdater">↻</button>
+    </div>
+
+    <section class="stock-card">
+      <div class="stock-head"><span id="stockLabel">På lager · uten rampe</span><span id="stockTime" class="stock-time"></span></div>
+      <div class="stock-grid">
+        <div class="stock-cell"><span>B</span><strong id="stockB">—</strong></div>
+        <div class="stock-cell"><span>H×30</span><strong id="stockH30">—</strong></div>
+        <div class="stock-cell"><span>H×60</span><strong id="stockH60">—</strong></div>
+      </div>
+    </section>
+
+    <section id="detail" class="detail" hidden>
+      <div class="detail-head"><h2 id="detailRamp">RAMPE —</h2><button id="closeDetail" class="btn secondary" type="button">Lukk</button></div>
+      <div class="detail-hero"><div id="detailNo" class="detail-no">UT-…</div><div id="detailStatus" class="detail-status">—</div><div id="detailMeta" class="meta"></div></div>
+      <div id="progressRows" class="progress"></div>
+      <div class="work-buttons"><button id="cameraBtn" class="btn primary" type="button">📷 Kamera / telefon</button><button id="bulkBtn" class="btn info" type="button">☑ Massevalg</button></div>
+      <div id="scanList" class="scan-list"></div>
+      <div class="actions"><button id="startBtn" class="btn primary" type="button">Start rampen</button><button id="cancelBtn" class="btn danger" type="button">Storner og frigjør</button></div>
+      <div class="confirm"><label class="check"><input id="confirmCheck" type="checkbox"><span id="confirmText"></span></label><button id="finalBtn" class="btn primary wide big" type="button">✓ Klar på rampe</button></div>
+    </section>
+
+    <section class="ramps-card">
+      <div class="section-head"><h2 id="rampsTitle">Ramper fra kontoret</h2><span id="rampCount" class="count">0</span></div>
+      <div id="ramps" class="ramps"><div class="empty">Laster…</div></div>
+    </section>
+  </main>
+  <div id="toast" class="toast"></div>
+  <script src="utsending-v28.js?v=20260807-2109"></script>
+</body>
+</html>

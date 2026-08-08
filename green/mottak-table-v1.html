@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>INN-tabell — ett synlig nummer</title>
+  <style>html,body{margin:0;min-height:100%;background:#0b1020;color:#f5f7ff;font-family:Arial,sans-serif}#loading{padding:24px;text-align:center;font-weight:800}</style>
+</head>
+<body>
+<div id="loading">Laster INN-tabell…</div>
+<script>
+"use strict";
+(async()=>{
+  try{
+    const response=await fetch("mottak-table-core-v1.html?v=20260806-1544",{cache:"no-store"});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    let html=await response.text();
+    const additions='<script src="upper-number-policy.js?v=20260806-1544"><\/script><script>setTimeout(()=>{const v=document.querySelector(".version");if(v)v.innerHTML="INN Tabell v2 ETT NUMMER<br>Oppdatert 06.08.2026 kl. 15:44"},0)<\/script>';
+    html=html.includes("</body>")?html.replace("</body>",`${additions}</body>`):`${html}${additions}`;
+    document.open();document.write(html);document.close();
+  }catch(error){document.getElementById("loading").textContent=`Kunne ikke laste INN-tabellen: ${error.message||error}`;}
+})();
+</script>
+</body>
+</html>

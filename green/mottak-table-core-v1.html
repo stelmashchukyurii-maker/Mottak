@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>INN — Tabell og historikk</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff7373;--line:#303b59}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}button,input,select{font:inherit}.app{width:min(1180px,100%);margin:auto;padding:14px 14px 48px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.home{display:inline-flex;align-items:center;min-height:44px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);text-decoration:none;font-weight:900}.version{color:var(--muted);font-size:11px;text-align:right}h1{margin:12px 0 5px;font-size:clamp(29px,7vw,44px)}.subtitle{margin:0 0 15px;color:var(--muted);line-height:1.45}.card{margin:12px 0;padding:15px;border:1px solid var(--line);border-radius:18px;background:rgba(21,28,48,.97);box-shadow:0 12px 28px rgba(0,0,0,.2)}h2{margin:0 0 12px;font-size:20px}.form-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:12px;font-weight:800}input,select{width:100%;min-height:47px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--dark);color:var(--text);outline:none}input:focus,select:focus{border-color:var(--accent)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}.btn{flex:1 1 180px;min-height:48px;padding:10px 13px;border:0;border-radius:12px;font-weight:900;cursor:pointer}.primary{background:var(--accent);color:#17130a}.secondary{background:#2c395c;color:var(--text)}.danger{background:rgba(255,115,115,.13);border:1px solid rgba(255,115,115,.4);color:#ffb8b8}.message{min-height:22px;margin-top:9px;color:var(--muted);white-space:pre-wrap}.message.ok{color:var(--ok)}.message.bad{color:var(--bad)}.totals{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.total{padding:10px 6px;border:1px solid var(--line);border-radius:12px;background:var(--dark);text-align:center}.total span{display:block;min-height:28px;color:var(--muted);font-size:10px}.total strong{display:block;margin-top:4px;font-size:clamp(22px,4vw,34px)}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}.toolbar h2{margin:0}.toolbar .actions{margin:0}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px}table{width:100%;min-width:980px;border-collapse:collapse;background:var(--dark)}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}th{position:sticky;top:0;background:#111a31;color:var(--muted);font-size:11px;text-transform:uppercase}.mono{font-family:Consolas,monospace;font-weight:850}.status-select{min-width:170px;min-height:39px;padding:6px 8px}.row-delete{min-height:38px;padding:7px 10px;border:1px solid rgba(255,115,115,.35);border-radius:9px;background:rgba(255,115,115,.12);color:#ffb8b8;font-weight:850}.empty{padding:24px;text-align:center;color:var(--muted)}.note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.45}@media(max-width:900px){.form-grid{grid-template-columns:1fr 1fr}.totals{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.card{padding:13px}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><span class="version">INN Tabell v2<br>Oppdatert 05.08.2026 kl. 10:49</span></div>
+  <h1>INN — Tabell og historikk</h1>
+  <p class="subtitle">Testside for manuell registrering, kontroll og lokal historikk for de tre produkttypene.</p>
+
+  <section class="card">
+    <h2>Legg til registrering</h2>
+    <form id="entryForm">
+      <div class="form-grid">
+        <div class="field"><label for="product">Produkt</label><select id="product" required><option value="bunner">Bunner</option><option value="hyller30">Hyller x30</option><option value="hyller60">Hyller x60</option></select></div>
+        <div class="field"><label for="scannerCode">Skannerkode / første del</label><input id="scannerCode" autocomplete="off" placeholder="For eksempel 33161403D000" required></div>
+        <div class="field"><label for="upperNumber">Øvre nummer — 6 sifre</label><input id="upperNumber" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="078500" required></div>
+        <div class="field"><label for="lowerNumber">Nedre nummer — 6 tegn</label><input id="lowerNumber" maxlength="6" autocomplete="off" placeholder="2CB739" required></div>
+        <div class="field"><label for="status">Status</label><select id="status"><option value="pending">Venter på kontroll</option><option value="verified">Godkjent</option><option value="invalid">Feil / skadet</option></select></div>
+      </div>
+      <div class="actions"><button class="btn primary" type="submit">Legg til i tabellen</button><button class="btn secondary" type="button" id="resetForm">Tøm feltene</button></div>
+      <div id="message" class="message"></div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Tellere</h2>
+    <div class="totals">
+      <div class="total"><span>Bunner</span><strong id="countBunner">0</strong></div>
+      <div class="total"><span>Hyller x30</span><strong id="countHyller30">0</strong></div>
+      <div class="total"><span>Hyller x60</span><strong id="countHyller60">0</strong></div>
+      <div class="total"><span>Totalt</span><strong id="countAll">0</strong></div>
+      <div class="total"><span>Godkjent</span><strong id="countVerified">0</strong></div>
+      <div class="total"><span>Venter</span><strong id="countPending">0</strong></div>
+      <div class="total"><span>Problem</span><strong id="countInvalid">0</strong></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="toolbar"><h2>Registreringer</h2><div class="actions"><button class="btn secondary" id="exportCsv" type="button">Eksporter CSV</button><button class="btn danger" id="clearAll" type="button">Slett alt</button></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Nr.</th><th>Dato og tid</th><th>Produkt</th><th>Skannerkode</th><th>Øvre nummer</th><th>Nedre nummer</th><th>Status</th><th>Handling</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+    <p class="note">Denne testsiden lagrer registreringene lokalt i nettleseren. Den erstatter ikke den felles Supabase-tabellen.</p>
+  </section>
+</main>
+<script>
+"use strict";
+const STORAGE_KEY="mottak_table_v1_entries";
+const PRODUCTS={bunner:"Bunner",hyller30:"Hyller x30",hyller60:"Hyller x60"};
+const STATUSES={pending:"Venter på kontroll",verified:"Godkjent",invalid:"Feil / skadet"};
+const $=id=>document.getElementById(id);
+let entries=loadEntries();
+function loadEntries(){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(value)?value:[]}catch{return[]}}
+function saveEntries(){localStorage.setItem(STORAGE_KEY,JSON.stringify(entries))}
+function makeId(){return crypto?.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(16).slice(2)}`}
+function esc(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c])}
+function normalizeScanner(value){return value.trim().toUpperCase()}
+function normalizeUpper(value){return value.replace(/\D/g,"").slice(0,6)}
+function normalizeLower(value){return value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6)}
+function duplicateKey(item){return`${item.scannerCode}|${item.upperNumber}|${item.lowerNumber}`}
+function setMessage(text,type=""){$("message").textContent=text;$("message").className=`message ${type}`.trim()}
+function formatDate(value){return new Intl.DateTimeFormat("nb-NO",{dateStyle:"short",timeStyle:"medium"}).format(new Date(value))}
+function render(){
+  $("tableBody").innerHTML=entries.length?entries.map((entry,index)=>`<tr><td>${index+1}</td><td>${formatDate(entry.createdAt)}</td><td><strong>${PRODUCTS[entry.product]||esc(entry.product)}</strong></td><td class="mono">${esc(entry.scannerCode)}</td><td class="mono">${esc(entry.upperNumber)}</td><td class="mono">${esc(entry.lowerNumber)}</td><td><select class="status-select" data-status-id="${esc(entry.id)}">${Object.entries(STATUSES).map(([value,label])=>`<option value="${value}" ${entry.status===value?"selected":""}>${label}</option>`).join("")}</select></td><td><button class="row-delete" type="button" data-delete-id="${esc(entry.id)}">Slett</button></td></tr>`).join(""):'<tr><td class="empty" colspan="8">Ingen registreringer ennå.</td></tr>';
+  $("countBunner").textContent=entries.filter(e=>e.product==="bunner").length;
+  $("countHyller30").textContent=entries.filter(e=>e.product==="hyller30").length;
+  $("countHyller60").textContent=entries.filter(e=>e.product==="hyller60").length;
+  $("countAll").textContent=entries.length;
+  $("countVerified").textContent=entries.filter(e=>e.status==="verified").length;
+  $("countPending").textContent=entries.filter(e=>e.status==="pending").length;
+  $("countInvalid").textContent=entries.filter(e=>e.status==="invalid").length;
+  document.querySelectorAll("[data-status-id]").forEach(select=>select.addEventListener("change",()=>{const item=entries.find(e=>String(e.id)===String(select.dataset.statusId));if(item){item.status=select.value;saveEntries();render()}}));
+  document.querySelectorAll("[data-delete-id]").forEach(button=>button.addEventListener("click",()=>{entries=entries.filter(e=>String(e.id)!==String(button.dataset.deleteId));saveEntries();render();setMessage("Registreringen er slettet.","ok")}));
+}
+$("upperNumber").addEventListener("input",()=>$("upperNumber").value=normalizeUpper($("upperNumber").value));
+$("lowerNumber").addEventListener("input",()=>$("lowerNumber").value=normalizeLower($("lowerNumber").value));
+$("scannerCode").addEventListener("input",()=>$("scannerCode").value=$("scannerCode").value.toUpperCase());
+$("entryForm").addEventListener("submit",event=>{event.preventDefault();const item={id:makeId(),createdAt:new Date().toISOString(),product:$("product").value,scannerCode:normalizeScanner($("scannerCode").value),upperNumber:normalizeUpper($("upperNumber").value),lowerNumber:normalizeLower($("lowerNumber").value),status:$("status").value};if(!item.scannerCode){setMessage("Skannerkoden mangler.","bad");return}if(!/^\d{6}$/.test(item.upperNumber)){setMessage("Øvre nummer må inneholde nøyaktig 6 sifre.","bad");return}if(!/^[A-Z0-9]{6}$/.test(item.lowerNumber)){setMessage("Nedre nummer må inneholde nøyaktig 6 store bokstaver eller sifre.","bad");return}if(entries.some(entry=>duplicateKey(entry)===duplicateKey(item))){setMessage("Denne kombinasjonen finnes allerede.","bad");return}entries.unshift(item);saveEntries();render();$("entryForm").reset();$("product").value="bunner";$("status").value="pending";setMessage("Registreringen er lagt til.","ok")});
+$("resetForm").addEventListener("click",()=>{$("entryForm").reset();$("product").value="bunner";$("status").value="pending";setMessage("")});
+$("clearAll").addEventListener("click",()=>{if(!entries.length)return;if(!confirm("Slette alle lokale registreringer?"))return;entries=[];saveEntries();render();setMessage("Alle lokale registreringer er slettet.","ok")});
+$("exportCsv").addEventListener("click",()=>{if(!entries.length){setMessage("Det finnes ingen registreringer å eksportere.","bad");return}const rows=[["created_at","product","scanner_code","upper_number","lower_number","status"],...entries.map(e=>[e.createdAt,e.product,e.scannerCode,e.upperNumber,e.lowerNumber,e.status])];const csv=rows.map(row=>row.map(value=>`"${String(value).replaceAll('"','""')}"`).join(",")).join("\n");const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=`mottak-tabell-${new Date().toISOString().slice(0,10)}.csv`;link.click();URL.revokeObjectURL(url);setMessage("CSV-filen er eksportert.","ok")});
+render();
+</script>
+<script src="shared-stock-status.js?v=20260805-1049"></script>
+</body>
+</html>

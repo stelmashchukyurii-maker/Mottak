@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Nordic ID Kiosk Test</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020;overscroll-behavior:none}
+    #frame{display:block;width:100%;height:100%;border:0;background:#0b1020}
+    #badge{position:fixed;z-index:5;top:6px;right:8px;padding:6px 9px;border-radius:999px;background:#48d597;color:#062418;font:800 12px Arial,sans-serif;pointer-events:none}
+  </style>
+</head>
+<body>
+  <div id="badge">KIOSK TEST</div>
+  <iframe id="frame" src="scanner-test.html?kiosk=20260802-1902" title="Nordic ID scanner test"></iframe>
+  <script>
+    "use strict";
+    const frame=document.getElementById("frame");
+    function prepare(){
+      try{
+        const d=frame.contentDocument;
+        const w=frame.contentWindow;
+        if(!d||!w)return;
+        const hide=[
+          ".language-grid",".button-grid",".stats-grid",".scan-list",
+          "#clearHistoryBtn","details","#clearEventsBtn",".note",
+          ".live-label",".char-stream",".small-label",".char-list",".escaped-code"
+        ];
+        hide.forEach(sel=>d.querySelectorAll(sel).forEach(el=>el.style.display="none"));
+        const input=d.getElementById("scanInput");
+        if(!input)return;
+        d.documentElement.style.overscrollBehavior="none";
+        d.body.style.overscrollBehavior="none";
+        const focus=()=>{try{input.focus({preventScroll:true});const n=input.value.length;input.setSelectionRange(n,n)}catch(e){input.focus()}};
+        d.addEventListener("pointerdown",e=>{if(e.target!==input){e.preventDefault();focus()}},true);
+        d.addEventListener("touchstart",e=>{if(e.target!==input){e.preventDefault();focus()}},{capture:true,passive:false});
+        w.addEventListener("focus",()=>setTimeout(focus,50));
+        d.addEventListener("visibilitychange",()=>{if(!d.hidden)setTimeout(focus,50)});
+        focus();setTimeout(focus,120);setTimeout(focus,500);
+      }catch(e){}
+    }
+    frame.addEventListener("load",prepare);
+    window.addEventListener("focus",prepare);
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden)prepare()});
+  </script>
+</body>
+</html>

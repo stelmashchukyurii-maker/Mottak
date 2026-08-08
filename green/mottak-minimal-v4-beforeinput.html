@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Nordic ID Minimal v4</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{overscroll-behavior-y:none}
+    body{margin:0;min-height:100vh;padding:14px;background:#0b1020;color:#f5f7ff;font-family:Arial,sans-serif}
+    main{max-width:760px;margin:auto}
+    h1{margin:0 0 6px;font-size:30px}
+    h2{margin:22px 0 10px;font-size:22px}
+    .version,.help{color:#aab4ce;line-height:1.45}
+    .version{margin:0 0 14px;font-size:13px}
+    .step{margin:12px 0;padding:14px;border:1px solid #303b59;border-radius:16px;background:#151c30}
+    .step-title{display:block;margin-bottom:8px;font-weight:900;font-size:18px}
+    input,textarea{width:100%;padding:16px;border:4px solid #f4c430;border-radius:16px;outline:none;background:#050811;color:#fff;font:900 22px/1.35 Consolas,monospace}
+    textarea{min-height:130px;resize:none;overflow-wrap:anywhere}
+    input:focus,textarea:focus{border-color:#48d597;box-shadow:0 0 0 4px rgba(72,213,151,.18)}
+    #status{margin:12px 0;padding:13px;border-radius:12px;background:#151c30;color:#aab4ce;font-weight:800;white-space:pre-wrap}
+    #status.ok{color:#48d597}
+    #status.bad{color:#ff8d8d}
+    #status.info{color:#75b7ff}
+    .parts{display:grid;gap:10px;margin-top:12px}
+    .part{padding:13px;border:1px solid #303b59;border-radius:13px;background:#151c30}
+    .label{display:block;margin-bottom:5px;color:#aab4ce;font-size:12px}
+    .value{font:900 23px Consolas,monospace;overflow-wrap:anywhere}
+    .table-wrap{overflow-x:auto;border:1px solid #303b59;border-radius:14px;background:#151c30}
+    table{width:100%;min-width:900px;border-collapse:collapse}
+    th,td{padding:10px 8px;border-bottom:1px solid #303b59;text-align:left;white-space:nowrap}
+    th{background:#0d1426;color:#aab4ce;font-size:11px;text-transform:uppercase}
+    td{font:800 14px Consolas,monospace}
+    tr:last-child td{border-bottom:0}
+    .good{background:rgba(72,213,151,.10)}
+    .bad-row{background:rgba(255,107,107,.10)}
+    .empty{text-align:center;color:#aab4ce;font-family:Arial,sans-serif}
+    .counter{margin:14px 0;color:#aab4ce;text-align:center}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Nordic ID — beforeinput</h1>
+  <p class="version">Minimal v4 · 02.08.2026 19:47</p>
+  <p class="help">Після відкриття або оновлення: натисніть поле 1, потім поле 2. Далі кожне окреме натискання курка має давати один рядок.</p>
+
+  <section class="step">
+    <span class="step-title">1. Активація</span>
+    <input id="activateInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="none" placeholder="Натисніть сюди один раз" />
+  </section>
+
+  <section class="step">
+    <span class="step-title">2. Сканування</span>
+    <textarea id="scanInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="none" placeholder="Після поля 1 натисніть сюди"></textarea>
+  </section>
+
+  <div id="status" class="info">Очікування активації.</div>
+
+  <div class="parts">
+    <div class="part"><span class="label">Службовий код — 12</span><div id="service" class="value">—</div></div>
+    <div class="part"><span class="label">Верхній номер — 6</span><div id="upper" class="value">—</div></div>
+    <div class="part"><span class="label">Нижній номер — 6</span><div id="lower" class="value">—</div></div>
+  </div>
+
+  <div class="counter">Успішних: <strong id="goodCount">0</strong> · Усього спроб: <strong id="allCount">0</strong></div>
+
+  <h2>Таблиця спроб</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>№</th>
+          <th>Повний текст</th>
+          <th>Довжина</th>
+          <th>Службовий</th>
+          <th>Верхній</th>
+          <th>Нижній</th>
+          <th>Метод</th>
+          <th>Результат</th>
+          <th>Час</th>
+        </tr>
+      </thead>
+      <tbody id="attemptTable">
+        <tr id="emptyRow"><td class="empty" colspan="9">Спроб ще немає.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+"use strict";
+
+const activateInput = document.getElementById("activateInput");
+const scanInput = document.getElementById("scanInput");
+const status = document.getElementById("status");
+const service = document.getElementById("service");
+const upper = document.getElementById("upper");
+const lower = document.getElementById("lower");
+const goodCount = document.getElementById("goodCount");
+const allCount = document.getElementById("allCount");
+const attemptTable = document.getElementById("attemptTable");
+
+let good = 0;
+let all = 0;
+let pullStartY = null;
+let lastAccepted = "";
+let lastAcceptedAt = 0;
+let beforeInputHandledAt = 0;
+
+function setStatus(text, type="info") {
+  status.textContent = text;
+  status.className = type;
+}
+
+function clean(value) {
+  return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function safe(value) {
+  return String(value || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function addAttempt(raw, code, method, ok, message) {
+  const emptyRow = document.getElementById("emptyRow");
+  if (emptyRow) emptyRow.remove();
+
+  all += 1;
+  allCount.textContent = all;
+
+  const row = document.createElement("tr");
+  row.className = ok ? "good" : "bad-row";
+  row.innerHTML = `
+    <td>${all}</td>
+    <td>${safe(raw) || "—"}</td>
+    <td>${code.length}</td>
+    <td>${ok ? code.slice(0,12) : "—"}</td>
+    <td>${ok ? code.slice(12,18) : "—"}</td>
+    <td>${ok ? code.slice(18,24) : "—"}</td>
+    <td>${method}</td>
+    <td>${message}</td>
+    <td>${new Date().toLocaleTimeString("uk-UA", {hour:"2-digit",minute:"2-digit",second:"2-digit"})}</td>
+  `;
+  attemptTable.prepend(row);
+}
+
+function accept(raw, method) {
+  const code = clean(raw);
+  const now = performance.now();
+
+  if (code && code === lastAccepted && now - lastAcceptedAt < 300) return;
+  lastAccepted = code;
+  lastAcceptedAt = now;
+
+  let ok = false;
+  let message = "";
+
+  if (code.length !== 24) {
+    message = `Помилка: ${code.length} символів`;
+    setStatus(`Не прийнято: ${code.length} символів замість 24.`, "bad");
+  } else if (!/^[A-Z0-9]{12}[0-9]{6}[A-Z0-9]{6}$/.test(code)) {
+    message = "Помилка формату";
+    setStatus("Не прийнято: неправильний формат коду.", "bad");
+  } else {
+    ok = true;
+    message = "Прийнято";
+    service.textContent = code.slice(0,12);
+    upper.textContent = code.slice(12,18);
+    lower.textContent = code.slice(18,24);
+    good += 1;
+    goodCount.textContent = good;
+    setStatus(`Прийнято: ${code}`, "ok");
+  }
+
+  addAttempt(raw, code, method, ok, message);
+}
+
+activateInput.addEventListener("focus", () => {
+  activateInput.value = "";
+  setStatus("Поле 1 активне. Тепер натисніть поле 2.", "info");
+});
+
+scanInput.addEventListener("focus", () => {
+  setStatus("Поле 2 активне. Натисніть курок один раз.", "info");
+});
+
+scanInput.addEventListener("blur", () => {
+  setStatus("Поле сканування не активне. Натисніть поле 1, потім поле 2.", "bad");
+});
+
+scanInput.addEventListener("beforeinput", event => {
+  const data = typeof event.data === "string" ? event.data : "";
+  if (!data) return;
+
+  const end = data.search(/[\r\n\t]/);
+  if (end === -1) return;
+
+  event.preventDefault();
+  beforeInputHandledAt = performance.now();
+  accept(data.slice(0, end), "beforeinput");
+});
+
+scanInput.addEventListener("input", () => {
+  if (performance.now() - beforeInputHandledAt < 150) {
+    scanInput.value = "";
+    return;
+  }
+
+  const value = scanInput.value;
+  const end = value.search(/[\r\n\t]/);
+  if (end === -1) return;
+
+  accept(value.slice(0, end), "input fallback");
+  scanInput.value = "";
+});
+
+document.addEventListener("touchstart", event => {
+  pullStartY = window.scrollY === 0 && event.touches.length ? event.touches[0].clientY : null;
+}, {passive:true});
+
+document.addEventListener("touchmove", event => {
+  if (pullStartY === null || !event.touches.length) return;
+  const currentY = event.touches[0].clientY;
+  if (window.scrollY === 0 && currentY > pullStartY + 8) event.preventDefault();
+}, {passive:false});
+</script>
+</body>
+</html>
