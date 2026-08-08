@@ -42,7 +42,7 @@
 </head>
 <body class="notranslate">
 <main class="app">
-  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v28 SALDO-RAMPER<br>Oppdatert 07.08.2026 kl. 15:11</div></div>
+  <div class="top"><a class="home" href="index.html">← Hovedmeny</a><div class="version">UT Kontor v29 COMPACT STOCK<br>Oppdatert 09.08.2026 kl. 01:03</div></div>
   <h1>UT — Kontor</h1>
   <div class="top-stock-line loading" id="topStockLine" aria-label="Tilgjengelig lager og aktive ramper">
     <div class="top-stock-item" id="topStockBunner">Laster lagerstatus…</div>
@@ -112,10 +112,11 @@
 </main>
 <script>(()=>{const nativeSetInterval=window.setInterval.bind(window);window.setInterval=(callback,delay,...args)=>{if(Number(delay)<=15000)return 0;return nativeSetInterval(callback,delay,...args)}})();</script>
 <script src="bestilling-v11.js?v=20260807-1112"></script>
-<script src="bestilling-party-fields.js?v=20260807-1112"></script>
+<script src="bestilling-party-fields.js?v=20260809-0103"></script>
+<script src="compact-stock-counter.js?v=20260809-0103"></script>
 <script src="bestilling-stock-balance.js?v=20260807-1024"></script>
 <script src="bestilling-history-lines.js?v=20260807-1024"></script>
-<script src="bestilling-top-stock.js?v=20260807-1024"></script>
+<script src="bestilling-top-stock.js?v=20260809-0103"></script>
 <script src="bestilling-warehouse-model.js?v=20260807-1346"></script>
 <script src="office-home-setting.js?v=20260807-1024"></script>
 <script src="bestilling-edit-unsent.js?v=20260807-1346"></script>
@@ -160,27 +161,9 @@
         hyller60: verified.filter((row) => row.product === "hyller60" && (row.stock_status || "in_stock") === "in_stock").length,
       };
 
-      const linked = new Map();
-      verified.forEach((row) => {
-        if (!row.ut_order_id || !["reserved", "staged"].includes(row.stock_status || "in_stock")) return;
-        const id = String(row.ut_order_id);
-        if (!linked.has(id)) linked.set(id, { bunner: 0, hyller30: 0, hyller60: 0 });
-        if (Object.prototype.hasOwnProperty.call(linked.get(id), row.product)) linked.get(id)[row.product] += 1;
-      });
-
-      const stillToAllocate = { bunner: 0, hyller30: 0, hyller60: 0 };
-      activeOrders.forEach((order) => {
-        const used = linked.get(String(order.id)) || { bunner: 0, hyller30: 0, hyller60: 0 };
-        stillToAllocate.bunner += Math.max(0, qty(order, "bunner") - used.bunner);
-        stillToAllocate.hyller30 += Math.max(0, qty(order, "hyller30") - used.hyller30);
-        stillToAllocate.hyller60 += Math.max(0, qty(order, "hyller60") - used.hyller60);
-      });
-
-      const available = {
-        bunner: Math.max(0, free.bunner - stillToAllocate.bunner),
-        hyller30: Math.max(0, free.hyller30 - stillToAllocate.hyller30),
-        hyller60: Math.max(0, free.hyller60 - stillToAllocate.hyller60),
-      };
+      // No reservation state: creating an order does not remove stock.
+      // Only a scanned item moved to staged leaves the in_stock balance.
+      const available = { ...free };
 
       const byRamp = new Map();
       activeOrders.forEach((order) => {
@@ -221,15 +204,20 @@
     loadUt = async function loadUtWithOfficeBoard(...args) {
       const result = await baseLoadUt(...args);
       await refreshOfficeStockBoard();
+      window.BAMA_COMPACT_STOCK_REFRESH?.();
       return result;
     };
   }
 
-  document.getElementById("refresh")?.addEventListener("click", () => setTimeout(refreshOfficeStockBoard, 250));
+  document.getElementById("refresh")?.addEventListener("click", () => setTimeout(() => {
+    refreshOfficeStockBoard();
+    window.BAMA_COMPACT_STOCK_REFRESH?.();
+  }, 250));
   setTimeout(refreshOfficeStockBoard, 500);
   (function loop() {
     setTimeout(async () => {
       await refreshOfficeStockBoard();
+      window.BAMA_COMPACT_STOCK_REFRESH?.();
       loop();
     }, 20000);
   })();
