@@ -1,9 +1,9 @@
 "use strict";
 
 // BaMavaremottak — TEST UT Kontor history visuals
-// Version 1.3.0
-// Updated: 2026-08-08 13:50 Europe/Oslo
-// CSS-only pictograms: no image files, no extra network requests.
+// Version 1.4.0
+// Updated: 2026-08-08 14:04 Europe/Oslo
+// Bundled Bunner/CC Post are counted in Totalt only.
 (() => {
   if (window.__UT_KONTOR_HISTORY_VISUALS__) return;
   window.__UT_KONTOR_HISTORY_VISUALS__ = true;
@@ -27,7 +27,6 @@
       .ut-product-mark.rack{border:2px solid currentColor;border-top-width:2px;border-bottom-width:3px;border-radius:1px}
       .ut-product-mark.rack::before{content:"";position:absolute;inset:3px 4px;background:repeating-linear-gradient(to bottom,currentColor 0 1.4px,transparent 1.4px 5px)}
       .ut-product-mark.rack60::before{background:repeating-linear-gradient(to bottom,currentColor 0 1.2px,transparent 1.2px 3px)}
-      .ut-post-inline{color:#f4c430;font-weight:1000}
       @media(max-width:520px){.ut-product-line{grid-template-columns:46px minmax(0,1fr);gap:8px;padding:8px}.ut-product-iconbox{width:43px;height:43px}.ut-product-title{font-size:13px}.ut-product-detail{font-size:11.5px}}
     `;
     document.head.appendChild(style);
@@ -39,24 +38,22 @@
 
   function detailBunner(count) {
     const total = count * 10;
-    const posts = total * 4;
     return isUk()
-      ? `${count} ${count === 1 ? "стопка" : "стопок"} = <strong>${total} Bunner + ${posts} CC Post</strong>`
-      : `${count} ${count === 1 ? "stabel" : "stabler"} = <strong>${total} Bunner + ${posts} CC Post</strong>`;
+      ? `${count} ${count === 1 ? "стопка" : "стопок"} = <strong>${total} Bunner</strong>`
+      : `${count} ${count === 1 ? "stabel" : "stabler"} = <strong>${total} Bunner</strong>`;
   }
 
   function detailHyller(count, size) {
     const hyller = count * size;
-    const posts = count * 4;
     return isUk()
-      ? `${count} ${count === 1 ? "комплект" : "комплектів"} = <strong>${count} Bunner + ${hyller} полиць + ${posts} CC Post</strong>`
-      : `${count} sett = <strong>${count} Bunner + ${hyller} hyller + ${posts} CC Post</strong>`;
+      ? `${count} ${count === 1 ? "комплект" : "комплектів"} = <strong>${hyller} полиць</strong>`
+      : `${count} sett = <strong>${hyller} hyller</strong>`;
   }
 
   function forlengereSummaryText(count) {
     return isUk()
-      ? `${count} ${count === 1 ? "візок" : "візків"} = ${count} Bunner`
-      : `${count} ${count === 1 ? "vogn" : "vogner"} = ${count} Bunner`;
+      ? `${count} ${count === 1 ? "візок" : "візків"}`
+      : `${count} ${count === 1 ? "vogn" : "vogner"}`;
   }
 
   function decorateSummary() {
@@ -79,13 +76,13 @@
     }
     if (sum30) {
       sum30.textContent = isUk()
-        ? `${h30} комплектів = ${h30} Bunner + ${h30 * 30} полиць`
-        : `${h30} sett = ${h30} Bunner + ${h30 * 30} hyller`;
+        ? `${h30} ${h30 === 1 ? "комплект" : "комплектів"} = ${h30 * 30} полиць`
+        : `${h30} sett = ${h30 * 30} hyller`;
     }
     if (sum60) {
       sum60.textContent = isUk()
-        ? `${h60} комплектів = ${h60} Bunner + ${h60 * 60} полиць`
-        : `${h60} sett = ${h60} Bunner + ${h60 * 60} hyller`;
+        ? `${h60} ${h60 === 1 ? "комплект" : "комплектів"} = ${h60 * 60} полиць`
+        : `${h60} sett = ${h60 * 60} hyller`;
     }
     if (sumShort) sumShort.textContent = forlengereSummaryText(short);
     if (sumLong) sumLong.textContent = forlengereSummaryText(long);
@@ -95,25 +92,16 @@
     document.querySelectorAll("#history .ut-extra-history").forEach((box) => {
       const lines = (box.innerText || "").split(/\n+/).map((line) => line.trim()).filter(Boolean);
       if (!lines.length) return;
-      box.innerHTML = lines.map((line) => {
-        const clean = line.replace(/\s*=\s*\d+\s+Bunner\s*\+\s*\d+\s+CC Post\s*$/i, "");
-        const isMetal = /Forlengere\s+(korte|lange)|Подовжувачі\s+(короткі|довгі)/i.test(clean);
-        if (!isMetal) return clean;
-        const match = clean.match(/:\s*(\d+)/);
-        const count = match ? n(match[1]) : 0;
-        return `${clean} = ${count} Bunner + ${count * 4} CC Post`;
-      }).join("<br>");
+      box.innerHTML = lines.map((line) => line
+        .replace(/\s*=\s*\d+\s+Bunner(?:\s*\+\s*\d+\s+CC Post)?\s*$/i, "")
+        .replace(/\s*\+\s*\d+\s+CC Post\s*$/i, "")
+      ).join("<br>");
     });
 
     document.querySelectorAll("#history .ut-extra-ramp-total").forEach((el) => {
-      const clean = (el.textContent || "").replace(/\s*·\s*\d+\s+CC Post\s*$/i, "");
-      if (!/Forlengere/i.test(clean)) {
-        el.textContent = clean;
-        return;
-      }
-      const match = clean.match(/^(\d+)/);
-      const carts = match ? n(match[1]) : 0;
-      el.textContent = carts ? `${clean} · ${carts * 4} CC Post` : clean;
+      el.textContent = (el.textContent || "")
+        .replace(/\s*·\s*\d+\s+CC Post\s*$/i, "")
+        .trim();
     });
   }
 
@@ -156,7 +144,7 @@
   };
 
   const previousRenderForm = window.renderForm;
-  window.renderForm = function renderFormWithCcPosts() {
+  window.renderForm = function renderFormWithCleanBundleDisplay() {
     if (typeof previousRenderForm === "function") previousRenderForm();
     decorateSummary();
   };
@@ -168,6 +156,6 @@
   });
   document.querySelector(".ramp-products")?.addEventListener("click", () => setTimeout(decorateSummary, 0));
 
-  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.3.0", decorate };
+  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.4.0", decorate };
   decorate();
 })();
