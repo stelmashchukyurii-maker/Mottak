@@ -33,7 +33,7 @@
 
   <iframe id="appFrame" src="./bestilling-products-test-base.html?v=20260808-0843" title="UT Kontor produkttest"></iframe>
 
-  <script src="./products.js?v=20260808-0843"></script>
+  <script src="./products.js?v=20260808-0936"></script>
   <script>
   "use strict";
   (() => {
@@ -48,11 +48,6 @@
     function productName(api, id) {
       const product = api.getProductById(id);
       return product ? api.getProductName(product, "no") : "";
-    }
-
-    function setText(doc, selector, text) {
-      const el = doc.querySelector(selector);
-      if (el && text) el.textContent = text;
     }
 
     function injectProductRegistry() {
@@ -88,7 +83,7 @@
       // Synlig versjonsmerking inne i kopien.
       const version = doc.querySelector(".version");
       if (version) {
-        version.innerHTML = `UT Kontor PRODUKTTEST v1.0<br>Oppdatert 08.08.2026 kl. 08:43`;
+        version.innerHTML = `UT Kontor PRODUKTTEST v1.1<br>Oppdatert 08.08.2026 kl. 09:36`;
       }
 
       // Tydelig sikkerhetsmelding inne i selve kontorsiden.
@@ -107,7 +102,6 @@
       const h30 = productName(api, "hyller30");
       const h60 = productName(api, "hyller60");
 
-      setText(doc, "#bunnerQty.closest-does-not-exist", bunner); // no-op; kept intentionally harmless
       const bunnerCard = doc.getElementById("bunnerQty")?.closest("article");
       const h30Card = doc.getElementById("h30Qty")?.closest("article");
       const h60Card = doc.getElementById("h60Qty")?.closest("article");
