@@ -1,6 +1,6 @@
 // BaMavaremottak — central product registry
-// Version 1.1.0
-// Updated: 2026-08-08 09:36 Europe/Oslo
+// Version 1.1.1
+// Updated: 2026-08-08 09:47 Europe/Oslo
 //
 // IMPORTANT:
 // - This registry is used by the standalone product/test pages.
@@ -13,9 +13,9 @@
 
   const meta = {
     registry: "BaMavaremottak products",
-    schemaVersion: 2,
-    version: "1.1.0",
-    updatedAt: "2026-08-08T09:36:00+02:00",
+    schemaVersion: 3,
+    version: "1.1.1",
+    updatedAt: "2026-08-08T09:47:00+02:00",
     defaultLanguage: "no",
     languages: ["no", "pl", "uk"]
   };
@@ -149,21 +149,22 @@
         pl: "Przedłużki plastikowe",
         uk: "Подовжувачі пластикові"
       },
-      unit: "vogn",
+      unit: "eske",
       stackSize: null,
       shipment: {
-        orderUnit: "vogn",
-        confirmation: "per_vogn",
-        components: {
-          bunner: { quantity: 1, mode: "fixed" },
-          hyller: { quantity: null, mode: "ut_confirmation" },
-          forlengere: { quantity: null, mode: "ut_confirmation" }
-        }
+        orderUnit: "eske",
+        confirmation: "count_only"
+      },
+      package: {
+        type: "box",
+        internalQuantity: null,
+        weightKg: null,
+        detailsPending: true
       },
       notes: {
-        no: "Én vogn har alltid 1 bunner. Antall hyller og plastforlengere registreres separat per vogn ved UT-bekreftelse.",
-        pl: "Każdy wózek ma zawsze 1 podstawę. Liczbę półek i plastikowych przedłużek wpisuje się osobno dla każdego wózka przy potwierdzeniu UT.",
-        uk: "Кожний візок завжди має 1 основу. Кількість полиць і пластикових подовжувачів вводиться окремо для кожного візка при UT-підтвердженні."
+        no: "Én enhet = 1 eske. Ingen bunner eller hyller inngår. Vekt og antall plastforlengere i esken er ikke fastsatt ennå.",
+        pl: "Jedna jednostka = 1 pudełko. Bez podstawy i półek. Waga i liczba plastikowych przedłużek w pudełku nie są jeszcze ustalone.",
+        uk: "Одна одиниця = 1 ящик. Без основи та полиць. Вага і кількість пластикових подовжувачів у ящику поки не визначені."
       }
     }
   ];
