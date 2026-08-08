@@ -16,25 +16,22 @@
   <iframe id="app" title="TEST — UT Foto"></iframe>
 <script>
 "use strict";
-const VERSION="20260808-1038",params=new URLSearchParams(location.search),ORDER=params.get("order")||"",RAMP=params.get("ramp")||"",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const VERSION="20260808-1039",params=new URLSearchParams(location.search),ORDER=params.get("order")||"",RAMP=params.get("ramp")||"",frame=document.getElementById("app"),loader=document.getElementById("loader");
 function inject(doc,src){return new Promise((resolve,reject)=>{const s=doc.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;doc.body.appendChild(s)})}
 async function build(){
   try{
     const res=await fetch(`ut-camera.html?v=${VERSION}`,{cache:"no-store"});if(!res.ok)throw new Error(`HTTP ${res.status}`);
     let html=await res.text();
+    html=html.replace("new URLSearchParams(location.search)",`new URLSearchParams(${JSON.stringify(location.search)})`);
     html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
     frame.srcdoc=html;
   }catch(e){loader.textContent=`Kunne ikke laste TEST Foto: ${e.message||e}`}
 }
 frame.addEventListener("load",async()=>{
   try{
-    const doc=frame.contentDocument,w=frame.contentWindow;
-    const childUrl=new URL(frame.src||location.href);
-    if(ORDER||RAMP){
-      // srcdoc shares parent URL, so the original page reads the parent's query string automatically.
-    }
+    const doc=frame.contentDocument;
     doc.querySelector('[data-lang="pl"]')?.remove();
-    const version=doc.querySelector(".version");if(version)version.innerHTML="TEST UT Kamera v1.0 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:38";
+    const version=doc.querySelector(".version");if(version)version.innerHTML="TEST UT Kamera v1.1 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:39";
     const back=doc.getElementById("backLink");if(back){back.href=`utsending-test.html?open=${encodeURIComponent(ORDER)}`;back.addEventListener("click",e=>{e.preventDefault();location.href=`utsending-test.html?open=${encodeURIComponent(ORDER)}`},{capture:true})}
     try{await inject(doc,`ut-camera-register-flow-v2.js?v=${VERSION}`)}catch{}
     try{await inject(doc,`ut-camera-floating-workflow.js?v=${VERSION}`)}catch{}
