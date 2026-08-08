@@ -15,11 +15,15 @@
     .testbar-main{min-width:0}
     .testbar strong{display:block;font-size:15px;color:var(--accent);letter-spacing:.02em}
     .testbar small{display:block;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.35}
-    .registry-state{flex:0 0 auto;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
+    .testbar-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+    .lang-switch{display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+    .lang-btn{min-width:42px;border:0;border-radius:999px;padding:6px 9px;background:transparent;color:var(--muted);font-size:11px;font-weight:950;cursor:pointer}
+    .lang-btn.active{background:var(--accent);color:#111827}
+    .registry-state{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
     .registry-state.ok{border-color:rgba(72,213,151,.5);color:var(--ok)}
     .registry-state.bad{border-color:rgba(255,115,115,.55);color:var(--bad)}
     iframe{display:block;width:100%;flex:1 1 auto;min-height:0;border:0;background:var(--bg)}
-    @media(max-width:640px){.testbar{align-items:flex-start;padding:8px 10px}.testbar small{max-width:235px}.registry-state{padding:6px 8px;font-size:10px}}
+    @media(max-width:640px){.testbar{align-items:flex-start;padding:8px 10px}.testbar small{max-width:210px}.testbar-tools{flex-direction:column;align-items:flex-end;gap:5px}.registry-state{padding:5px 7px;font-size:9px}.lang-btn{min-width:38px;padding:5px 7px;font-size:10px}}
   </style>
 </head>
 <body class="notranslate">
@@ -28,12 +32,19 @@
       <strong>UT Kontor — PRODUKTTEST</strong>
       <small>Isolert testkopi · sentral produktliste · skriving til databasen er blokkert</small>
     </div>
-    <div class="registry-state" id="registryState">Laster products.js…</div>
+    <div class="testbar-tools">
+      <div class="lang-switch" aria-label="Språk / Мова">
+        <button class="lang-btn" type="button" data-lang-choice="no" aria-pressed="true">NO</button>
+        <button class="lang-btn" type="button" data-lang-choice="uk" aria-pressed="false">UA</button>
+      </div>
+      <div class="registry-state" id="registryState">Laster products.js…</div>
+    </div>
   </header>
 
   <iframe id="appFrame" src="./bestilling-products-test-base.html?v=20260808-0843" title="UT Kontor produkttest"></iframe>
 
   <script src="./products.js?v=20260808-0947"></script>
+  <script src="./ut-test-language.js?v=20260808-0949"></script>
   <script>
   "use strict";
   (() => {
@@ -47,7 +58,8 @@
 
     function productName(api, id) {
       const product = api.getProductById(id);
-      return product ? api.getProductName(product, "no") : "";
+      const lang = window.UT_TEST_LANG?.getLang?.() || "no";
+      return product ? api.getProductName(product, lang) : "";
     }
 
     function injectProductRegistry() {
@@ -62,7 +74,6 @@
       const win = frame.contentWindow;
       if (!doc || !win) return;
 
-      // TEST-SIKKERHET: tillat lesing, men blokker POST/PATCH/PUT/DELETE fra testkopien.
       if (!win.__UT_PRODUCT_TEST_READ_ONLY__) {
         const originalFetch = win.fetch.bind(win);
         win.fetch = (input, init = {}) => {
@@ -77,16 +88,17 @@
 
       const all = api.getAllProducts();
       const active = api.getActiveProducts();
-      state.textContent = `products.js v${api.meta.version} · ${active.length} aktive`;
+      const lang = window.UT_TEST_LANG?.getLang?.() || "no";
+      state.textContent = lang === "uk"
+        ? `products.js v${api.meta.version} · ${active.length} активних`
+        : `products.js v${api.meta.version} · ${active.length} aktive`;
       state.className = "registry-state ok";
 
-      // Synlig versjonsmerking inne i kopien.
       const version = doc.querySelector(".version");
       if (version) {
-        version.innerHTML = `UT Kontor PRODUKTTEST v1.2<br>Oppdatert 08.08.2026 kl. 09:47`;
+        version.innerHTML = `UT Kontor PRODUKTTEST v1.3<br>${lang === "uk" ? "Оновлено" : "Oppdatert"} 08.08.2026 kl. 09:49`;
       }
 
-      // Tydelig sikkerhetsmelding inne i selve kontorsiden.
       if (!doc.getElementById("productTestNotice")) {
         const notice = doc.createElement("div");
         notice.id = "productTestNotice";
@@ -96,8 +108,6 @@
         if (subtitle) subtitle.insertAdjacentElement("afterend", notice);
       }
 
-      // De tre eksisterende UT-feltene beholder samme tekniske ID-er,
-      // men de synlige navnene kommer nå fra det sentrale registeret.
       const bunner = productName(api, "bunner");
       const h30 = productName(api, "hyller30");
       const h60 = productName(api, "hyller60");
@@ -127,21 +137,20 @@
         if (name && label) name.textContent = label;
       });
 
-      // Окремий блок показує весь центральний список.
-      // Новий продукт з products.js з'явиться тут автоматично,
-      // навіть якщо для нього ще не створене поле в UT/Supabase.
       doc.getElementById("centralProductTestPanel")?.remove();
       const panel = doc.createElement("section");
       panel.className = "card";
       panel.id = "centralProductTestPanel";
       panel.innerHTML = `
-        <h2>Sentral produktliste <span style="font-size:12px;color:#aab4ce">products.js v${esc(api.meta.version)}</span></h2>
+        <h2>${lang === "uk" ? "Центральний список продуктів" : "Sentral produktliste"} <span style="font-size:12px;color:#aab4ce">products.js v${esc(api.meta.version)}</span></h2>
         <div style="display:grid;gap:8px">
           ${all.map((product) => {
-            const name = api.getProductName(product, "no");
+            const name = api.getProductName(product, lang);
             const connected = supported.has(product.id);
-            const statusText = product.active ? "Aktiv" : "Inaktiv";
-            const connectionText = connected ? "Koblet til eksisterende UT-felt" : "Registrert · UT-felt ikke opprettet ennå";
+            const statusText = product.active ? (lang === "uk" ? "Активний" : "Aktiv") : (lang === "uk" ? "Неактивний" : "Inaktiv");
+            const connectionText = connected
+              ? (lang === "uk" ? "Підключено до наявного поля UT" : "Koblet til eksisterende UT-felt")
+              : (lang === "uk" ? "Зареєстровано · поле UT ще не створено" : "Registrert · UT-felt ikke opprettet ennå");
             return `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 12px;border:1px solid #303b59;border-radius:12px;background:#0b1020">
               <div><strong>${esc(name)}</strong><div style="margin-top:3px;color:#aab4ce;font-size:11px">ID: ${esc(product.id)}</div></div>
               <div style="text-align:right;font-size:11px;font-weight:850;color:${product.active ? "#48d597" : "#aab4ce"}">${esc(statusText)}<div style="margin-top:3px;color:${connected ? "#f4c430" : "#aab4ce"}">${esc(connectionText)}</div></div>
@@ -152,15 +161,16 @@
       const form = doc.getElementById("formCard");
       if (form) form.insertAdjacentElement("beforebegin", panel);
 
-      // Головну кнопку запису вимикаємо; додатково всі write-запити вже блокуються fetch-guard вище.
       const send = doc.getElementById("send");
       if (send) {
         send.disabled = true;
-        send.textContent = "TEST — sending deaktivert";
-        send.title = "Denne testkopien kan ikke skrive til databasen";
+        send.textContent = lang === "uk" ? "TEST — відправлення вимкнено" : "TEST — sending deaktivert";
+        send.title = lang === "uk" ? "Ця тестова копія не може записувати в базу" : "Denne testkopien kan ikke skrive til databasen";
         send.style.opacity = ".55";
         send.style.cursor = "not-allowed";
       }
+
+      window.UT_TEST_LANG?.apply?.();
     }
 
     frame.addEventListener("load", () => {
@@ -171,6 +181,10 @@
         state.textContent = "Feil i produkttest";
         state.className = "registry-state bad";
       }
+    });
+
+    window.addEventListener("ut-test-language-change", () => {
+      try { injectProductRegistry(); } catch (error) { console.error(error); }
     });
   })();
   </script>
