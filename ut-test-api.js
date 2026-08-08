@@ -28,6 +28,9 @@
     update_ut_order_before_dispatch: "ut_test_office_edit_order",
     register_ut_scan_only: "ut_test_register_scan_only",
     save_ut_order_with_items: "ut_test_save_order_with_items",
+    ut_extra_progress: "ut_test_extra_progress",
+    confirm_ut_extra_unit: "ut_test_confirm_extra_unit",
+    clear_ut_extra_unit: "ut_test_clear_extra_unit",
   };
 
   function requestMethod(input, init) {
@@ -90,7 +93,7 @@
     isolated: true,
     tables: { ...tableMap },
     rpcs: { ...rpcMap },
-    version: "1.2.0",
-    updatedAt: "2026-08-08T11:22:00+02:00",
+    version: "1.3.0",
+    updatedAt: "2026-08-08T16:58:00+02:00",
   };
 })();
