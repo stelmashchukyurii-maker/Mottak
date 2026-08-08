@@ -16,10 +16,10 @@
 </head>
 <body>
   <div id="loader">Laster GREEN — Camera Cloud v4.18…</div>
-  <iframe id="app" title="GREEN — Camera Cloud v4.18" src="camera-live.html?base=green-418-20260809-0004"></iframe>
+  <iframe id="app" title="GREEN — Camera Cloud v4.18" src="camera-live.html?base=green-418-20260809-0004b"></iframe>
   <script>
     "use strict";
-    const VERSION = "20260809-0004";
+    const VERSION = "20260809-0004b";
     const frame = document.getElementById("app");
     const loader = document.getElementById("loader");
 
@@ -44,7 +44,7 @@
         await injectScript(doc, `green-ut-api.js?v=${VERSION}`);
         await injectScript(doc, `camera-live-v4-source-fix.js?v=${VERSION}`);
         await injectScript(doc, "camera-live-v4-server-ocr.js?v=414-newurl-20260807-1834");
-        await injectScript(doc, "camera-live-v4-stock-filters.js?v=414-newurl-20260807-1834");
+        await injectScript(doc, `camera-live-v4-stock-filters.js?v=${VERSION}`);
         await injectScript(doc, `upper-number-policy.js?v=${VERSION}`);
         await injectScript(doc, `shared-stock-status.js?v=${VERSION}`);
         await injectScript(doc, "camera-live-v4-floating-camera.js?v=414-newurl-20260807-1834");
