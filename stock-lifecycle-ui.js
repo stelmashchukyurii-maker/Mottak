@@ -45,8 +45,14 @@
   function applySharedCard() {
     const card = document.getElementById("bamaSharedStock");
     if (!card) return;
-    document.getElementById("bssPhysical")?.closest(".bss-cell")?.remove();
-    document.getElementById("bssReserved")?.closest(".bss-cell")?.remove();
+
+    // Keep legacy nodes in the DOM because shared-stock-status.js refreshes them every 5s.
+    // Hide them instead of removing them, otherwise refresh throws "Cannot set properties of null".
+    const physicalCell = document.getElementById("bssPhysical")?.closest(".bss-cell");
+    const reservedCell = document.getElementById("bssReserved")?.closest(".bss-cell");
+    if (physicalCell) physicalCell.style.display = "none";
+    if (reservedCell) reservedCell.style.display = "none";
+
     const grid = card.querySelector(".bss-grid");
     if (grid) grid.style.gridTemplateColumns = "repeat(3,minmax(0,1fr))";
     const c = labels();
