@@ -1,5 +1,5 @@
 // BaMavaremottak — UT TEST language helper
-// Version 1.0.0
+// Version 1.0.1
 // Updated: 2026-08-08 09:49 Europe/Oslo
 (function(){
   "use strict";
@@ -12,6 +12,7 @@
   const exactUk = new Map(Object.entries({
     "← Hovedmeny":"← Головне меню",
     "UT — Kontor":"UT — Офіс",
+    "Én rampe = ett samlet oppdrag med alle varetyper.":"Одна рампа = одне спільне завдання з усіма типами товарів.",
     "Ny rampe":"Нова рампа",
     "Rampe":"Рампа",
     "Velg rampe":"Виберіть рампу",
@@ -20,6 +21,9 @@
     "Dato":"Дата",
     "legges til senere":"буде додано пізніше",
     "Varer på rampen":"Товари на рампі",
+    "Bunner":"Основи",
+    "Hyller x30":"Полиці x30",
+    "Hyller x60":"Полиці x60",
     "Kommentar til lageret":"Коментар для складу",
     "Ikke valgt":"Не вибрано",
     "Totalt":"Всього",
@@ -47,6 +51,9 @@
     if (currentLang !== "uk") return value;
     if (exactUk.has(value.trim())) return value.replace(value.trim(), exactUk.get(value.trim()));
     return value
+      .replace(/Velg rampe 28, 29, 30, 31, 32, 33 eller 34\. Det kan bare finnes ett aktivt oppdrag per rampe\./g,"Виберіть рампу 28, 29, 30, 31, 32, 33 або 34. На одній рампі може бути лише одне активне завдання.")
+      .replace(/Produktnavn hentes fra /g,"Назви продуктів беруться з ")
+      .replace(/Lesing av lagerdata er tillatt, men lagring\/endring i databasen er blokkert\./g,"Читання складських даних дозволено, але запис/зміни в базі заблоковані.")
       .replace(/Laster lagerstatus…/g,"Завантаження стану складу…")
       .replace(/Laster ramper…/g,"Завантаження рамп…")
       .replace(/Lagerstatus…/g,"Стан складу…")
@@ -65,9 +72,7 @@
     if (!node || !node.nodeValue || !node.nodeValue.trim()) return;
     const parent = node.parentElement;
     if (!parent || ["SCRIPT","STYLE","CODE"].includes(parent.tagName)) return;
-    if (!Object.prototype.hasOwnProperty.call(parent.dataset,"langNoText")) {
-      parent.dataset.langNoText = node.nodeValue;
-    }
+    if (!Object.prototype.hasOwnProperty.call(parent.dataset,"langNoText")) parent.dataset.langNoText = node.nodeValue;
     const source = parent.dataset.langNoText;
     node.nodeValue = currentLang === "uk" ? translateDynamic(source) : source;
   }
