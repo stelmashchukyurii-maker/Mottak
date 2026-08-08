@@ -1,6 +1,6 @@
 // BaMavaremottak — central product registry
-// Version 1.1.1
-// Updated: 2026-08-08 09:47 Europe/Oslo
+// Version 1.2.0
+// Updated: 2026-08-08 12:53 Europe/Oslo
 //
 // IMPORTANT:
 // - This registry is used by the standalone product/test pages.
@@ -13,9 +13,9 @@
 
   const meta = {
     registry: "BaMavaremottak products",
-    schemaVersion: 3,
-    version: "1.1.1",
-    updatedAt: "2026-08-08T09:47:00+02:00",
+    schemaVersion: 4,
+    version: "1.2.0",
+    updatedAt: "2026-08-08T12:53:00+02:00",
     defaultLanguage: "no",
     languages: ["no", "pl", "uk"]
   };
@@ -32,10 +32,18 @@
       },
       unit: "stk",
       stackSize: 10,
+      shipment: {
+        orderUnit: "stabel",
+        confirmation: "bundle",
+        components: {
+          bunner: { quantity: 10, mode: "fixed" },
+          cc_post: { quantity: 40, mode: "fixed" }
+        }
+      },
       notes: {
-        no: "Én full stabel = 10 bunner.",
-        pl: "Jeden pełny stos = 10 podstaw.",
-        uk: "Одна повна стопка = 10 основ."
+        no: "Én full stabel = 10 Bunner + 40 CC Post (4 per Bunner).",
+        pl: "Jeden pełny stos = 10 podstaw + 40 CC Post (4 na podstawę).",
+        uk: "Одна повна стопка = 10 Bunner + 40 CC Post (по 4 на кожний Bunner)."
       }
     },
     {
@@ -54,13 +62,14 @@
         confirmation: "per_vogn",
         components: {
           bunner: { quantity: 1, mode: "fixed" },
-          hyller: { quantity: 30, mode: "fixed" }
+          hyller: { quantity: 30, mode: "fixed" },
+          cc_post: { quantity: 4, mode: "fixed" }
         }
       },
       notes: {
-        no: "Én vogn = 1 bunner + 30 hyller.",
-        pl: "Jeden wózek = 1 podstawa + 30 półek.",
-        uk: "Один візок = 1 основа + 30 полиць."
+        no: "Én vogn = 1 Bunner + 30 Hyller + 4 CC Post.",
+        pl: "Jeden wózek = 1 podstawa + 30 półek + 4 CC Post.",
+        uk: "Один візок = 1 Bunner + 30 полиць + 4 CC Post."
       }
     },
     {
@@ -79,13 +88,39 @@
         confirmation: "per_vogn",
         components: {
           bunner: { quantity: 1, mode: "fixed" },
-          hyller: { quantity: 60, mode: "fixed" }
+          hyller: { quantity: 60, mode: "fixed" },
+          cc_post: { quantity: 4, mode: "fixed" }
         }
       },
       notes: {
-        no: "Én vogn = 1 bunner + 60 hyller.",
-        pl: "Jeden wózek = 1 podstawa + 60 półek.",
-        uk: "Один візок = 1 основа + 60 полиць."
+        no: "Én vogn = 1 Bunner + 60 Hyller + 4 CC Post.",
+        pl: "Jeden wózek = 1 podstawa + 60 półek + 4 CC Post.",
+        uk: "Один візок = 1 Bunner + 60 полиць + 4 CC Post."
+      }
+    },
+    {
+      id: "cc_post",
+      sortOrder: 35,
+      active: true,
+      name: {
+        no: "CC Post",
+        pl: "CC Post (słupek)",
+        uk: "CC Post (стійка)"
+      },
+      unit: "stk",
+      stackSize: null,
+      manufacturer: {
+        name: "Container Centralen",
+        officialName: "CC Post"
+      },
+      ut: {
+        manualOrder: false,
+        derivedOnly: true
+      },
+      notes: {
+        no: "Offisiell CC-betegnelse. Bestilles ikke manuelt i UT Kontor; antallet beregnes automatisk som del av Bunner/Hyller-kompletten.",
+        pl: "Oficjalna nazwa CC. Nie zamawia się ręcznie w UT Kontor; ilość jest liczona automatycznie jako część kompletu Bunner/Hyller.",
+        uk: "Офіційна назва CC. У UT Kontor вручну не замовляється; кількість автоматично рахується як частина комплекту Bunner/Hyller."
       }
     },
     {
