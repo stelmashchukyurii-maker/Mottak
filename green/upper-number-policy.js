@@ -1,19 +1,14 @@
 "use strict";
 
 (() => {
-  const SYSTEM_UPPER = "078500";
-  window.BAMA_SYSTEM_UPPER_NUMBER = SYSTEM_UPPER;
+  if (window.__BAMA_UPPER_NUMBER_REMOVED__) return;
+  window.__BAMA_UPPER_NUMBER_REMOVED__ = true;
+  window.BAMA_SYSTEM_UPPER_NUMBER = "";
 
   const style = document.createElement("style");
   style.textContent = `
     .bama-upper-hidden{display:none!important}
     table .bama-upper-column{display:none!important}
-    #scanInput.bama-system-protected{
-      -webkit-text-security:disc;
-      color:transparent!important;
-      caret-color:#f4c430!important;
-      text-shadow:0 0 0 transparent!important;
-    }
   `;
   document.head.appendChild(style);
 
@@ -22,6 +17,7 @@
   let applyQueued = false;
 
   function hideContainer(input) {
+    if (!input) return;
     const container = input.closest(".result-box,.part,.field,.edit-cell,.form-group,.input-group");
     if (container) container.classList.add("bama-upper-hidden");
     const label = input.id
@@ -30,16 +26,14 @@
     if (label) label.classList.add("bama-upper-hidden");
   }
 
-  function forceUpper(input) {
+  function clearUpper(input) {
     if (!input) return;
-    const changed = input.value !== SYSTEM_UPPER;
-    input.value = SYSTEM_UPPER;
-    input.defaultValue = SYSTEM_UPPER;
+    input.value = "";
+    input.defaultValue = "";
     input.readOnly = true;
     input.tabIndex = -1;
     input.setAttribute("aria-hidden", "true");
     hideContainer(input);
-    if (changed) input.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   function hideTableColumns() {
@@ -58,69 +52,19 @@
     });
   }
 
-  function maskRawCodes() {
+  function maskLegacyMiddleSegment() {
     document.querySelectorAll("#rawPreview,.raw-preview,.scan-codes").forEach(element => {
       const text = element.textContent || "";
-      const masked = text.replace(/([A-Z0-9]{12})078500([A-Z0-9]{6})/g, "$1••••••$2");
+      const masked = text.replace(/([A-Z0-9]{12})[A-Z0-9]{6}([A-Z0-9]{6})/g, "$1••••••$2");
       if (masked !== text) element.textContent = masked;
     });
   }
 
-  function showNordicStructureError() {
-    const message = document.getElementById("message");
-    if (message) {
-      message.textContent = "Ukjent RFID-struktur: systemdelen stemmer ikke. Skann etiketten på nytt.";
-      message.className = "message bad";
-    }
-    const save = document.getElementById("saveScanButton");
-    if (save) save.disabled = true;
-  }
-
-  function rawNordicCode(input) {
-    const raw = String(input?.value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-    return raw.length >= 24 ? raw.slice(-24) : "";
-  }
-
-  function hasValidSystemPart(input) {
-    const code = rawNordicCode(input);
-    return !code || code.slice(12, 18) === SYSTEM_UPPER;
-  }
-
-  function protectNordicInput() {
-    const scanInput = document.getElementById("scanInput");
-    if (!scanInput || scanInput.dataset.upperPolicyBound) return;
-    scanInput.dataset.upperPolicyBound = "1";
-    scanInput.classList.add("bama-system-protected");
-
-    scanInput.addEventListener("input", event => {
-      if (hasValidSystemPart(scanInput)) return;
-      event.stopImmediatePropagation();
-      showNordicStructureError();
-    }, true);
-
-    scanInput.addEventListener("keydown", event => {
-      if (event.key !== "Enter" && event.key !== "Tab") return;
-      if (hasValidSystemPart(scanInput)) return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      showNordicStructureError();
-    }, true);
-
-    const splitButton = document.getElementById("splitButton");
-    splitButton?.addEventListener("click", event => {
-      if (hasValidSystemPart(scanInput)) return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      showNordicStructureError();
-    }, true);
-  }
-
   function apply() {
-    upperIds.forEach(id => forceUpper(document.getElementById(id)));
-    document.querySelectorAll('input[name*="upper" i],input[id*="upper" i]').forEach(forceUpper);
+    upperIds.forEach(id => clearUpper(document.getElementById(id)));
+    document.querySelectorAll('input[name*="upper" i],input[id*="upper" i],[data-edit-field="upper_number"]').forEach(clearUpper);
     hideTableColumns();
-    maskRawCodes();
-    protectNordicInput();
+    maskLegacyMiddleSegment();
   }
 
   function queueApply() {
