@@ -1,15 +1,15 @@
 "use strict";
 
 (() => {
-  const VERSION = "UT Lager v27.12 AVBRYT<br>Oppdatert 07.08.2026 kl. 22:37";
+  const VERSION = "UT Lager v27.13 · 3 STATUS<br>Oppdatert 09.08.2026 kl. 00:04";
   const nb = {
     statusNew:"Ny",statusWork:"I arbeid",statusRamp:"På rampe",statusSent:"Sendt",statusStorno:"Stornert",unknown:"Ukjent",
     readyRampButton:"Klar på rampe",sendButton:"Send fra rampe",
     confirmCheck:"Jeg bekrefter at alle varer er kontrollert og står på riktig rampe.",
     departCheck:"Jeg bekrefter at hele rampen sendes ut fra lageret nå.",
-    completeFirst:"Alle bestilte varer må være registrert før rampen kan markeres som klar.",
+    completeFirst:"Alle bestilte varer må være skannet på rampen før rampen kan markeres som klar.",
     confirmRampFirst:"Bekreft først at alle varer er kontrollert og står på riktig rampe.",
-    staging:"Markerer hele rampen som klar…",rampReadyBefore:"RAMPE",rampReadyAfter:"er klar og står På rampe.",
+    staging:"Bekrefter at hele rampen er komplett…",rampReadyBefore:"RAMPE",rampReadyAfter:"er kontrollert og klar På rampe.",
     rampFirst:"Rampen må først være ferdig kontrollert og markert På rampe.",confirmFirst:"Bekreft først at rampen sendes ut fra lageret nå.",
     sendConfirmBefore:"Send hele RAMPE",sendConfirmAfter:"Etter dette flyttes varene til Sendt.",sending:"Sender rampen…",sentAlertBefore:"RAMPE",sentAlertAfter:"er sendt."
   };
@@ -19,29 +19,29 @@
     const l = window.UT_LANG || localStorage.getItem("mottak_ut_language") || "nb";
     if (l === "uk") return {
       button:"❌ Скасувати замовлення",
-      confirm:ramp=>`Скасувати замовлення RAMPE ${ramp}?\n\nТІЛЬКИ товари, які ще зарезервовані / стоять на рампі, повернуться на склад. Уже списані (dispatched) товари НЕ змінюються.`,
+      confirm:ramp=>`Скасувати замовлення RAMPE ${ramp}?\n\nТовари, які зараз стоять на рампі, повернуться у статус «На складі». Уже відправлені товари НЕ змінюються.`,
       reason:"Причина скасування:",
       defaultReason:"Скасовано користувачем — товар з рампи повернути на склад",
-      working:"Скасовую замовлення і повертаю залишок з рампи на склад…",
-      done:ramp=>`RAMPE ${ramp} скасовано. Товар, який ще був на рампі, повернуто на склад. Уже списаний товар не змінено.`,
+      working:"Скасовую замовлення і повертаю товар з рампи на склад…",
+      done:ramp=>`RAMPE ${ramp} скасовано. Товар, який стояв на рампі, повернуто на склад. Уже відправлений товар не змінено.`,
       error:"Не вдалося скасувати замовлення."
     };
     if (l === "pl") return {
       button:"❌ Anuluj zamówienie",
-      confirm:ramp=>`Anulować zamówienie RAMPA ${ramp}?\n\nTYLKO towary nadal zarezerwowane / stojące na rampie wrócą na magazyn. Towary już wysłane (dispatched) NIE zostaną zmienione.`,
+      confirm:ramp=>`Anulować zamówienie RAMPA ${ramp}?\n\nTowary, które obecnie stoją na rampie, wrócą do statusu „Na magazynie”. Towary już wysłane NIE zostaną zmienione.`,
       reason:"Powód anulowania:",
       defaultReason:"Anulowane przez użytkownika — zwrot z rampy na magazyn",
-      working:"Anuluję zamówienie i zwracam pozostałe towary z rampy…",
-      done:ramp=>`RAMPA ${ramp} anulowana. Towary, które nadal były na rampie, wróciły na magazyn. Wysłane towary nie zostały zmienione.`,
+      working:"Anuluję zamówienie i zwracam towar z rampy na magazyn…",
+      done:ramp=>`RAMPA ${ramp} anulowana. Towary stojące na rampie wróciły na magazyn. Wysłane towary nie zostały zmienione.`,
       error:"Nie udało się anulować zamówienia."
     };
     return {
       button:"❌ Avbryt bestilling",
-      confirm:ramp=>`Avbryte bestillingen for RAMPE ${ramp}?\n\nBARE varer som fortsatt er reservert / står på rampen returneres til lager. Varer som allerede er sendt (dispatched) endres IKKE.`,
+      confirm:ramp=>`Avbryte bestillingen for RAMPE ${ramp}?\n\nVarer som står på rampen returneres til status «På lager». Varer som allerede er sendt endres IKKE.`,
       reason:"Årsak til avbrytelse:",
       defaultReason:"Avbrutt av bruker — varer på rampen returneres til lager",
-      working:"Avbryter bestillingen og returnerer resterende varer fra rampen…",
-      done:ramp=>`RAMPE ${ramp} er avbrutt. Varer som fortsatt sto på rampen er returnert til lager. Sendte varer er ikke endret.`,
+      working:"Avbryter bestillingen og returnerer varer fra rampen til lager…",
+      done:ramp=>`RAMPE ${ramp} er avbrutt. Varer som sto på rampen er returnert til lager. Sendte varer er ikke endret.`,
       error:"Bestillingen kunne ikke avbrytes."
     };
   };
