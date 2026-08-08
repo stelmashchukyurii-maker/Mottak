@@ -1,47 +1,119 @@
 <!DOCTYPE html>
 <html lang="nb" translate="no">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
-<meta name="google" content="notranslate">
-<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-<title>TEST — Camera Cloud</title>
-<style>
-:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--ok:#48d597;--bad:#ff7373;--info:#75b7ff;--warn:#f6b94b}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}button,input{font:inherit}.app{width:min(760px,100%);margin:auto;padding:12px 12px 50px}.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.home{display:inline-flex;align-items:center;min-height:42px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);text-decoration:none;font-weight:900}.version{color:var(--muted);font-size:11px;text-align:right}h1{margin:16px 0 4px;font-size:clamp(30px,8vw,46px)}.sub{margin:0 0 12px;color:var(--muted);line-height:1.45}.card{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--card)}.card.test{border:2px solid var(--ok);background:linear-gradient(180deg,rgba(72,213,151,.08),rgba(117,183,255,.035))}.card h2{margin:0 0 10px;font-size:20px}.note{color:var(--muted);font-size:12px;line-height:1.45}.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.choice{min-height:48px;padding:10px;border:2px solid var(--line);border-radius:12px;background:var(--dark);color:var(--text);font-weight:900}.choice.active{background:var(--accent);border-color:var(--accent);color:#17130a}.flow{display:grid;gap:9px}.prod{padding:10px;border:1px solid var(--line);border-radius:13px;background:var(--dark)}.prod>strong{display:block;margin-bottom:7px;font-size:17px}.states{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.state{padding:7px 4px;border:1px solid var(--line);border-radius:9px;background:#070b14;text-align:center}.state span{display:block;color:var(--muted);font-size:9px}.state b{display:block;margin-top:3px;font-size:21px}.free b{color:var(--ok)}.res b{color:var(--info)}.ramp b{color:var(--accent)}.sent b{color:#ff9d72}.btn{min-height:46px;padding:10px 13px;border:0;border-radius:12px;font-weight:950}.primary{background:var(--accent);color:#17130a}.secondary{background:#2c395c;color:var(--text)}.success{background:var(--ok);color:#062418}.danger{background:rgba(255,115,115,.16);color:#ffd5d9;border:1px solid rgba(255,115,115,.35)}.field{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#070b14;color:var(--text)}.file{display:flex;align-items:center;justify-content:center;min-height:54px;padding:11px;border-radius:12px;background:var(--accent);color:#17130a;font-weight:950;cursor:pointer}.file input{display:none}.preview{display:none;margin-top:10px;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#070b14}.preview img{display:block;width:100%;max-height:52vh;object-fit:contain}.result{display:grid;grid-template-columns:1fr 1fr;gap:8px}.result label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}.result input{width:100%;padding:10px;border:1px solid var(--line);border-radius:11px;background:#070b14;color:var(--text);font:900 28px Consolas,monospace;letter-spacing:.06em;text-transform:uppercase}.msg{min-height:24px;margin-top:8px;color:var(--muted);white-space:pre-wrap}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}.recent{display:grid;gap:8px}.entry{padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--dark)}.entrytop{display:flex;justify-content:space-between;gap:8px}.code{font:900 16px Consolas,monospace}.pill{display:inline-flex;height:max-content;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:950;background:#27324f;color:var(--muted)}.pill.pending{background:rgba(246,185,75,.16);color:var(--warn)}.pill.verified{background:rgba(72,213,151,.14);color:var(--ok)}.entry small{color:var(--muted)}.actions{display:flex;gap:7px;margin-top:8px}.actions button{flex:1;min-height:38px;border-radius:9px;font-weight:900}.empty{padding:14px;text-align:center;color:var(--muted)}@media(max-width:560px){.states{grid-template-columns:repeat(2,1fr)}.grid3,.result{grid-template-columns:1fr}.version{text-align:left}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="google" content="notranslate" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>TEST — Camera Cloud v4.14</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
+    iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
+    #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:99999}
+  </style>
 </head>
 <body>
-<main class="app">
-<div class="top"><a class="home" href="test-home.html">⌂ TEST</a><div class="version">TEST Camera Cloud v1.1 DIRECT<br>Oppdatert 08.08.2026 kl. 13:23</div></div>
-<h1>TEST — INN Kamera</h1><p class="sub">Kun isolert TEST-lager. Ingen production-data skrives.</p>
-<section class="card test"><div class="row"><h2>🧪 TEST — Lagerbevegelse</h2><button class="btn secondary" id="refresh">Oppdater</button></div><p class="note">På lager → Reservert → På rampe → Sendt. Tallene hentes direkte fra TEST-tabellen.</p><div class="flow" id="flow"></div><div class="note" id="flowInfo">Laster…</div></section>
-<section class="card"><h2>1. Velg produkt</h2><div class="grid3"><button class="choice" data-product="bunner">Bunner</button><button class="choice" data-product="hyller30">Hyller x30</button><button class="choice" data-product="hyller60">Hyller x60</button></div></section>
-<section class="card"><h2>2. Gemini API-nøkkel</h2><input class="field" id="apiKey" type="password" autocomplete="off" placeholder="Lim inn Gemini API-nøkkelen"><p class="note">Nøkkelen lagres bare i denne nettleserfanen.</p></section>
-<section class="card"><h2>3. Ta bilde</h2><label class="file" for="photo"><span>📷 Ta bilde</span><input id="photo" type="file" accept="image/*" capture="environment"></label><div class="preview" id="previewWrap"><img id="preview" alt="preview"></div><div class="row" style="margin-top:9px"><button class="btn primary" id="recognize" disabled>Les av nummer</button><button class="btn secondary" id="newPhoto" disabled>Nytt bilde</button></div><div class="msg" id="msg"></div></section>
-<section class="card"><h2>4. Kontroller og lagre</h2><div class="result"><div><label>Øvre nummer</label><input id="upper" inputmode="numeric" maxlength="6" placeholder="------"></div><div><label>Nedre nummer</label><input id="lower" maxlength="6" placeholder="------"></div></div><button class="btn success" id="save" style="width:100%;margin-top:10px">Lagre som pending i TEST</button></section>
-<section class="card"><div class="row"><h2>Siste TEST-registreringer</h2><span class="pill" id="count">0</span></div><div class="recent" id="recent"></div></section>
-</main><canvas id="canvas" hidden></canvas>
-<script>
-"use strict";
-const URL0="https://hzjsatehehhpgpskckfi.supabase.co",KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya",TABLE="ut_test_stock",BUCKET="ut-test-photos",GURL="https://generativelanguage.googleapis.com/v1beta/interactions",MODEL="gemini-3.6-flash";const $=id=>document.getElementById(id);let product=localStorage.getItem("test_camera_product")||"bunner",image=null,busy=false;
-function H(extra={}){return{apikey:KEY,Authorization:`Bearer ${KEY}`,Accept:"application/json","Content-Type":"application/json",...extra}}
-async function rest(path,opt={}){const r=await fetch(`${URL0}/rest/v1/${path}`,{...opt,headers:{...H(),...(opt.headers||{})}}),txt=await r.text();if(!r.ok)throw new Error(txt||`HTTP ${r.status}`);return txt?JSON.parse(txt):null}
-async function rows(){return await rest(`${TABLE}?select=id,created_at,product,upper_number,lower_number,status,stock_status,photo_url&order=created_at.desc&limit=5000`)}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function say(text,cls=""){const e=$("msg");e.className=`msg ${cls}`;e.textContent=text}
-function paintChoice(){document.querySelectorAll("[data-product]").forEach(b=>b.classList.toggle("active",b.dataset.product===product))}
-function renderFlow(all){const verified=all.filter(r=>r.status==="verified"),ids=["bunner","hyller30","hyller60"],names={bunner:"Bunner",hyller30:"Hyller x30",hyller60:"Hyller x60"},states=[["in_stock","På lager","free"],["reserved","Reservert","res"],["staged","På rampe","ramp"],["dispatched","Sendt","sent"]];$("flow").innerHTML=ids.map(id=>{const list=verified.filter(r=>r.product===id);return `<div class="prod"><strong>${names[id]}</strong><div class="states">${states.map(([s,label,cls])=>`<div class="state ${cls}"><span>${label}</span><b>${list.filter(r=>(r.stock_status||"in_stock")===s).length}</b></div>`).join("")}</div></div>`}).join("");const pending=all.filter(r=>r.status==="pending").length;$("flowInfo").textContent=`${verified.length} verified${pending?` · ${pending} pending`:""} · ${new Date().toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}`}
-function renderRecent(all){const list=all.slice(0,25);$("count").textContent=String(list.length);if(!list.length){$("recent").innerHTML='<div class="empty">Ingen TEST-registreringer.</div>';return}$("recent").innerHTML=list.map(r=>`<div class="entry"><div class="entrytop"><div><b>${esc(r.product)}</b><div class="code">${esc(r.upper_number)} · ${esc(r.lower_number)}</div><small>${new Date(r.created_at).toLocaleString("nb-NO")}</small></div><span class="pill ${esc(r.status)}">${esc(r.status)}</span></div><div class="actions">${r.status!=="verified"?`<button class="btn success" data-ok="${r.id}">Godkjenn</button>`:""}<button class="btn danger" data-del="${r.id}">Slett</button></div></div>`).join("");document.querySelectorAll("[data-ok]").forEach(b=>b.onclick=()=>approve(b.dataset.ok));document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>removeRow(b.dataset.del))}
-async function refresh(){try{const all=await rows();renderFlow(all);renderRecent(all)}catch(e){$("flowInfo").textContent=`TEST-feil: ${e.message||e}`}}
-async function compress(file){const u=URL.createObjectURL(file);try{const im=await new Promise((a,b)=>{const x=new Image();x.onload=()=>a(x);x.onerror=b;x.src=u}),m=1600,s=Math.min(1,m/Math.max(im.width,im.height)),w=Math.max(1,Math.round(im.width*s)),h=Math.max(1,Math.round(im.height*s)),c=$("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);const blob=await new Promise((a,b)=>c.toBlob(v=>v?a(v):b(new Error("JPEG-feil")),"image/jpeg",.85)),data=await new Promise((a,b)=>{const f=new FileReader();f.onload=()=>a(f.result);f.onerror=b;f.readAsDataURL(blob)});return{blob,data,base64:String(data).split(",")[1]}}finally{URL.revokeObjectURL(u)}}
-function outText(d){if(typeof d.output_text==="string"&&d.output_text.trim())return d.output_text.trim();const a=[];for(const s of d.steps||[])for(const c of s.content||[])if(c.type==="text"&&typeof c.text==="string")a.push(c.text);return a.join("").trim()}
-async function recognize(){const key=$("apiKey").value.trim();if(!key){say("Lim inn Gemini API-nøkkelen.","bad");return}if(!image||busy)return;busy=true;say("Gemini analyserer…");try{const body={model:MODEL,store:false,input:[{type:"text",text:"Find the yellow warehouse tag and the grey sticker directly above the QR code. Read exactly two printed lines. line1 must be exactly 6 digits. line2 must be exactly 6 uppercase A-Z or 0-9 characters. Ignore and do not decode the QR code. Return only JSON."},{type:"image",data:image.base64,mime_type:"image/jpeg"}],response_format:{type:"text",mime_type:"application/json",schema:{type:"object",properties:{line1:{type:"string"},line2:{type:"string"},confidence:{type:"number"}},required:["line1","line2","confidence"],additionalProperties:false}},generation_config:{max_output_tokens:120,thinking_level:"minimal"}};const r=await fetch(GURL,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify(body)}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d?.error?.message||`HTTP ${r.status}`);const o=JSON.parse(outText(d));$("upper").value=String(o.line1||"").replace(/\D/g,"").slice(0,6);$("lower").value=String(o.line2||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);say("Numrene er lest. Kontroller dem.","ok")}catch(e){say(e.message||String(e),"bad")}finally{busy=false}}
-async function upload(){if(!image)return{url:"",path:""};const name=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`)+".jpg",path=`camera/${new Date().toISOString().slice(0,10)}/${name}`,r=await fetch(`${URL0}/storage/v1/object/${BUCKET}/${path}`,{method:"POST",headers:{apikey:KEY,Authorization:`Bearer ${KEY}`,"Content-Type":"image/jpeg","x-upsert":"false"},body:image.blob}),txt=await r.text();if(!r.ok)throw new Error(txt||`Photo HTTP ${r.status}`);return{path,url:`${URL0}/storage/v1/object/public/${BUCKET}/${path}`}}
-async function save(){const up=$("upper").value.replace(/\D/g,"").slice(0,6),lo=$("lower").value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);$("upper").value=up;$("lower").value=lo;if(!/^\d{6}$/.test(up)||!/^[A-Z0-9]{6}$/.test(lo)){say("Format: 6 sifre + 6 tegn A-Z/0-9.","bad");return}if(busy)return;busy=true;say("Lagrer bare i TEST…");try{const dup=await rest(`${TABLE}?select=id&upper_number=eq.${encodeURIComponent(up)}&lower_number=eq.${encodeURIComponent(lo)}&limit=1`);if(dup?.length)throw new Error("Denne etiketten finnes allerede i TEST-lageret.");const p=await upload();await rest(TABLE,{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify({product,scanner_code:"",upper_number:up,lower_number:lo,status:"pending",source:"test-camera",device_id:"test-camera-direct",raw_data:"test-camera-direct",photo_url:p.url,photo_path:p.path,stock_status:"in_stock",is_test:true})});say("Lagret som pending i TEST.","ok");$("upper").value="";$("lower").value="";resetPhoto();await refresh()}catch(e){say(e.message||String(e),"bad")}finally{busy=false}}
-async function approve(id){try{await rest(`${TABLE}?id=eq.${encodeURIComponent(id)}`,{method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify({status:"verified",verified_at:new Date().toISOString(),stock_status:"in_stock",is_test:true})});say("Godkjent og lagt på TEST-lager.","ok");await refresh()}catch(e){say(e.message||String(e),"bad")}}
-async function removeRow(id){try{await rest(`${TABLE}?id=eq.${encodeURIComponent(id)}`,{method:"DELETE",headers:{Prefer:"return=representation"}});await refresh()}catch(e){say(e.message||String(e),"bad")}}
-function resetPhoto(){image=null;$("photo").value="";$("preview").src="";$("previewWrap").style.display="none";$("recognize").disabled=true;$("newPhoto").disabled=true}
-$("apiKey").value=sessionStorage.getItem("gemini_api_key")||"";$("apiKey").oninput=()=>sessionStorage.setItem("gemini_api_key",$("apiKey").value.trim());$("photo").onchange=async()=>{const f=$("photo").files?.[0];if(!f)return;try{image=await compress(f);$("preview").src=image.data;$("previewWrap").style.display="block";$("recognize").disabled=false;$("newPhoto").disabled=false;say("Bildet er klart.","ok")}catch(e){say(e.message||String(e),"bad")}};$("recognize").onclick=recognize;$("newPhoto").onclick=resetPhoto;$("save").onclick=save;$("refresh").onclick=refresh;document.querySelectorAll("[data-product]").forEach(b=>b.onclick=()=>{product=b.dataset.product;localStorage.setItem("test_camera_product",product);paintChoice()});paintChoice();refresh();setInterval(()=>{if(!document.hidden)refresh()},7000);
-</script>
-</body></html>
+  <div id="loader">Laster TEST — Camera Cloud v4.14…</div>
+  <iframe id="app" title="TEST — Camera Cloud v4.14"></iframe>
+  <script>
+    "use strict";
+    const VERSION="20260808-1641";
+    const frame=document.getElementById("app");
+    const loader=document.getElementById("loader");
+
+    function injectScript(doc,src){
+      return new Promise((resolve,reject)=>{
+        const script=doc.createElement("script");
+        script.src=src;
+        script.onload=resolve;
+        script.onerror=reject;
+        doc.body.appendChild(script);
+      });
+    }
+
+    function installTestMarker(doc,win){
+      win.BAMA_HOME_TARGET="camera-test-live.html";
+
+      const back=doc.querySelector(".back");
+      if(back){
+        back.href="index.html";
+        back.target="_top";
+        back.addEventListener("click",event=>{
+          event.preventDefault();
+          window.top.location.href="test-home.html";
+        },{capture:true});
+      }
+
+      let banner=doc.getElementById("cameraTestCloneBanner");
+      if(!banner){
+        banner=doc.createElement("div");
+        banner.id="cameraTestCloneBanner";
+        banner.style.cssText="margin:10px 0 12px;padding:11px 13px;border:2px solid #48d597;border-radius:14px;background:rgba(72,213,151,.09);color:#eafff6;font:900 13px/1.45 Arial,sans-serif;text-align:center";
+        banner.innerHTML="🧪 <b>TEST — ISOLERT</b> · Samme Camera Cloud v4.14-arbeidsflyt, men REST-data går kun til TEST-tabeller og bilder lagres kun i <b>ut-test-photos</b>.";
+        const main=doc.querySelector("main.app,main,.app");
+        const title=doc.querySelector("h1");
+        if(title?.parentElement) title.insertAdjacentElement("beforebegin",banner);
+        else main?.prepend(banner);
+      }
+
+      const version=doc.querySelector(".version");
+      if(version) version.innerHTML="TEST · Kamera Cloud v4.14 MOBIL WORKFLOW<br>Oppdatert 08.08.2026 kl. 16:41";
+
+      const nordic=doc.querySelector('[data-t="openNordic"]');
+      if(nordic){
+        nordic.hidden=true;
+        nordic.setAttribute("aria-hidden","true");
+      }
+
+      doc.getElementById("bamaHomeReturn")?.remove();
+    }
+
+    async function build(){
+      try{
+        const response=await fetch(`camera-live.html?base=${VERSION}`,{cache:"no-store"});
+        if(!response.ok) throw new Error(`HTTP ${response.status}`);
+        let html=await response.text();
+
+        // Keep the working Camera Cloud code intact, but isolate its data and photo storage.
+        html=html.replace('BUCKET="mottak-photos"','BUCKET="ut-test-photos"');
+        html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
+        frame.srcdoc=html;
+      }catch(error){
+        loader.textContent=`Kunne ikke laste TEST Camera Cloud v4.14: ${error.message||error}`;
+      }
+    }
+
+    frame.addEventListener("load",async()=>{
+      try{
+        const doc=frame.contentDocument;
+        const win=frame.contentWindow;
+        installTestMarker(doc,win);
+
+        // Exact enhancement chain from the working Camera Cloud v4.14 wrapper.
+        await injectScript(doc,`camera-live-v4-source-fix.js?v=${VERSION}`);
+        await injectScript(doc,`camera-live-v4-server-ocr.js?v=${VERSION}`);
+        await injectScript(doc,`camera-live-v4-stock-filters.js?v=${VERSION}`);
+        await injectScript(doc,`upper-number-policy.js?v=${VERSION}`);
+        await injectScript(doc,`shared-stock-status.js?v=${VERSION}`);
+        await injectScript(doc,`camera-live-v4-floating-camera.js?v=${VERSION}`);
+        await injectScript(doc,`camera-live-v4-floating-workflow.js?v=${VERSION}`);
+        await injectScript(doc,`camera-live-v4-compact-language.js?v=${VERSION}`);
+        await injectScript(doc,`camera-live-v4-mobile-ui.js?v=${VERSION}`);
+
+        installTestMarker(doc,win);
+        [doc.getElementById("languages"),doc.getElementById("products")].forEach(element=>{
+          element?.addEventListener("click",()=>setTimeout(()=>win.refreshBamaStock?.().catch(()=>{}),80));
+        });
+        loader.style.display="none";
+      }catch(error){
+        loader.textContent=`TEST Camera Cloud startfeil: ${error.message||error}`;
+      }
+    });
+
+    build();
+  </script>
+</body>
+</html>
