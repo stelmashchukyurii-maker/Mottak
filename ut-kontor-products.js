@@ -10,8 +10,8 @@
     return;
   }
 
-  const VERSION = "1.0.0";
-  const UPDATED_AT = "2026-08-08T11:22:00+02:00";
+  const VERSION = "1.1.0";
+  const UPDATED_AT = "2026-08-08T13:50:00+02:00";
   const EXTRA_IDS = ["forlengere_korte", "forlengere_lange", "forlengere_plast"];
   const extState = {
     forlengere_korte: 0,
@@ -40,6 +40,14 @@
       .ut-extra-summary{color:#cce4ff}
       .ut-extra-history{margin-top:7px;padding:8px 10px;border:1px solid rgba(117,183,255,.38);border-radius:10px;background:rgba(117,183,255,.055);color:#ddecff;font-size:12px;font-weight:850;line-height:1.5}
       .ut-extra-ramp-total{margin-top:4px;color:#cce4ff;font-size:11px;font-weight:850}
+      .compact-summary .total-line.ut-total-line{display:block!important;padding-top:12px!important}
+      .compact-summary .total-line.ut-total-line>span{display:block;margin-bottom:9px;font-weight:900}
+      #sumTotal.ut-total-stack{display:grid!important;width:100%;gap:0;color:#48d597;text-align:left;font-size:13px;line-height:1.25}
+      #sumTotal .ut-total-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:7px 0;border-top:1px solid rgba(48,59,89,.72)}
+      #sumTotal .ut-total-row:first-child{border-top:0}
+      #sumTotal .ut-total-label{color:#d8dfef;font-weight:800}
+      #sumTotal .ut-total-value{color:#48d597;font-weight:1000;text-align:right;white-space:nowrap}
+      #sumTotal .ut-total-row.cc-post .ut-total-label,#sumTotal .ut-total-row.cc-post .ut-total-value{color:#f4c430}
     `;
     document.head.appendChild(style);
   }
@@ -121,6 +129,7 @@
       row.innerHTML = `<span>${esc(productName(id))}</span><strong id="${outputId}">0</strong>`;
       summary.insertBefore(row, total);
     });
+    total.classList.add("ut-total-line");
   }
 
   function setExtra(id, value, rerender = true) {
@@ -133,6 +142,30 @@
   function resetExtra() {
     EXTRA_IDS.forEach((id) => setExtra(id, 0, false));
     renderExtra();
+  }
+
+  function unitText(value, singularNo, pluralNo, singularUk, pluralUk) {
+    if (isUk()) return value === 1 ? singularUk : pluralUk;
+    return value === 1 ? singularNo : pluralNo;
+  }
+
+  function renderTotal(total, knownBunners, hyller, short, long, plast) {
+    const ccPosts = knownBunners * 4;
+    const shortUnit = unitText(short, "vogn", "vogner", "візок", "візків");
+    const longUnit = unitText(long, "vogn", "vogner", "візок", "візків");
+    const plastUnit = unitText(plast, "eske", "esker", "ящик", "ящиків");
+    const labels = isUk()
+      ? { bunner: "Bunner", hyller: "Hyller", short: "Подовжувачі короткі", long: "Подовжувачі довгі", plast: "Подовжувачі пластикові", posts: "CC Post" }
+      : { bunner: "Bunner", hyller: "Hyller", short: "Forlengere korte", long: "Forlengere lange", plast: "Forlengere plast", posts: "CC Post" };
+    total.classList.add("ut-total-stack");
+    total.innerHTML = [
+      [labels.bunner, String(knownBunners), ""],
+      [labels.hyller, String(hyller), ""],
+      [labels.short, `${short} ${shortUnit}`, ""],
+      [labels.long, `${long} ${longUnit}`, ""],
+      [labels.plast, `${plast} ${plastUnit}`, ""],
+      [labels.posts, String(ccPosts), "cc-post"],
+    ].map(([label, value, cls]) => `<span class="ut-total-row ${cls}"><span class="ut-total-label">${label}</span><span class="ut-total-value">${value}</span></span>`).join("");
   }
 
   function renderExtra() {
@@ -151,18 +184,15 @@
     const sumShort = document.getElementById("sumForlengereKorte");
     const sumLong = document.getElementById("sumForlengereLange");
     const sumPlast = document.getElementById("sumForlengerePlast");
-    if (sumShort) sumShort.textContent = `${short} ${isUk() ? "візків" : "vogner"}`;
-    if (sumLong) sumLong.textContent = `${long} ${isUk() ? "візків" : "vogner"}`;
-    if (sumPlast) sumPlast.textContent = `${plast} ${isUk() ? "ящиків" : "esker"}`;
+    if (sumShort) sumShort.textContent = `${short} ${unitText(short, "vogn", "vogner", "візок", "візків")}`;
+    if (sumLong) sumLong.textContent = `${long} ${unitText(long, "vogn", "vogner", "візок", "візків")}`;
+    if (sumPlast) sumPlast.textContent = `${plast} ${unitText(plast, "eske", "esker", "ящик", "ящиків")}`;
 
     const total = document.getElementById("sumTotal");
     if (total && typeof totals === "function") {
       const old = totals();
       const knownBunners = old.bunner + fixedBunners;
-      const extra = [];
-      if (short + long) extra.push(`${short + long} ${isUk() ? "візків Forlengere" : "Forlengere-vogner"}`);
-      if (plast) extra.push(`${plast} ${isUk() ? "ящиків" : "esker"}`);
-      total.textContent = `${knownBunners} Bunner · ${old.hyller} Hyller${extra.length ? ` · ${extra.join(" · ")}` : ""}`;
+      renderTotal(total, knownBunners, old.hyller, short, long, plast);
     }
   }
 
@@ -393,7 +423,7 @@
     decorateHistory();
 
     const version = document.querySelector(".version");
-    if (version) version.innerHTML = "TEST UT Kontor v2.2 · 6 PRODUKTER<br>Oppdatert 08.08.2026 kl. 11:22";
+    if (version) version.innerHTML = "TEST UT Kontor v2.8 · TOTAL COLUMN<br>Oppdatert 08.08.2026 kl. 13:50";
 
     window.BAMA_UT_KONTOR_PRODUCTS = {
       version: VERSION,
