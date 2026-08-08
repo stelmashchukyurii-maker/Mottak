@@ -8,7 +8,7 @@
     document.body.appendChild(homeSetting);
   }
 
-  const TARGET_VERSION = "UT Kontor v23 STABIL<br>Oppdatert 06.08.2026 kl. 07:22";
+  const TARGET_VERSION = "UT Kontor v29 COMPACT STOCK<br>Oppdatert 09.08.2026 kl. 01:03";
   const version = document.querySelector(".version");
   const applyVersion = () => {
     const node = document.querySelector(".version");
