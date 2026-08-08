@@ -1,6 +1,6 @@
 // BaMavaremottak — central product registry
-// Version 1.2.1
-// Updated: 2026-08-08 12:56 Europe/Oslo
+// Version 1.2.2
+// Updated: 2026-08-08 13:40 Europe/Oslo
 //
 // IMPORTANT:
 // - This registry is used by the standalone product/test pages.
@@ -14,8 +14,8 @@
   const meta = {
     registry: "BaMavaremottak products",
     schemaVersion: 5,
-    version: "1.2.1",
-    updatedAt: "2026-08-08T12:56:00+02:00",
+    version: "1.2.2",
+    updatedAt: "2026-08-08T13:40:00+02:00",
     defaultLanguage: "no",
     languages: ["no", "pl", "uk"]
   };
@@ -104,9 +104,9 @@
       process: { inn: false, utConfirmation: false, ramp: false, dispatch: false },
       ut: { manualOrder: false, derivedOnly: true },
       notes: {
-        no: "Offisiell CC-betegnelse. Ingen lagerbeholdning eller teller. Ikke INN, ikke UT-bekreftelse, ikke egen rampebevegelse og ikke egen utsending. Vises bare automatisk som del av Bunner/Hyller-kompletten i UT Kontor.",
-        pl: "Oficjalna nazwa CC. Bez stanu magazynowego i licznika. Nie przechodzi przez INN, potwierdzenie UT, rampę ani osobną wysyłkę. Jest tylko automatycznie pokazywany jako część kompletu Bunner/Hyller w UT Kontor.",
-        uk: "Офіційна назва CC. Без складського залишку та лічильника. Не проходить INN, UT-підтвердження, рампу чи окреме відправлення. Лише автоматично показується як частина комплекту Bunner/Hyller у UT Kontor."
+        no: "Offisiell CC-betegnelse. Ingen lagerbeholdning eller teller. Ikke INN, ikke UT-bekreftelse, ikke egen rampebevegelse og ikke egen utsending. Vises bare automatisk som del av Bunner/Hyller/Forlengere-kompletten i UT Kontor.",
+        pl: "Oficjalna nazwa CC. Bez stanu magazynowego i licznika. Nie przechodzi przez INN, potwierdzenie UT, rampę ani osobną wysyłkę. Jest tylko automatycznie pokazywany jako część kompletu Bunner/Hyller/Forlengere w UT Kontor.",
+        uk: "Офіційна назва CC. Без складського залишку та лічильника. Не проходить INN, UT-підтвердження, рампу чи окреме відправлення. Лише автоматично показується як частина комплекту Bunner/Hyller/Forlengere у UT Kontor."
       }
     },
     {
@@ -125,10 +125,13 @@
           forlengere: { quantity: null, mode: "ut_confirmation" }
         }
       },
+      displayComponents: {
+        cc_post: { quantity: 4, mode: "derived", tracked: false }
+      },
       notes: {
-        no: "Én vogn har alltid 1 bunner. Antall hyller og korte forlengere registreres separat per vogn ved UT-bekreftelse.",
-        pl: "Każdy wózek ma zawsze 1 podstawę. Liczbę półek i krótkich przedłużek wpisuje się osobno dla każdego wózka przy potwierdzeniu UT.",
-        uk: "Кожний візок завжди має 1 основу. Кількість полиць і коротких подовжувачів вводиться окремо для кожного візка при UT-підтвердженні."
+        no: "Én vogn = 1 Bunner + 4 CC Post. Antall hyller og korte forlengere registreres separat per vogn ved UT-bekreftelse. CC Post vises kun som del av kompletten.",
+        pl: "Jeden wózek = 1 podstawa + 4 CC Post. Liczbę półek i krótkich przedłużek wpisuje się osobno dla każdego wózka przy potwierdzeniu UT. CC Post jest tylko elementem wyświetlanego kompletu.",
+        uk: "Один візок = 1 Bunner + 4 CC Post. Кількість полиць і коротких подовжувачів вводиться окремо для кожного візка при UT-підтвердженні. CC Post лише відображається як частина комплекту."
       }
     },
     {
@@ -147,10 +150,13 @@
           forlengere: { quantity: null, mode: "ut_confirmation" }
         }
       },
+      displayComponents: {
+        cc_post: { quantity: 4, mode: "derived", tracked: false }
+      },
       notes: {
-        no: "Én vogn har alltid 1 bunner. Antall hyller og lange forlengere registreres separat per vogn ved UT-bekreftelse.",
-        pl: "Każdy wózek ma zawsze 1 podstawę. Liczbę półek i długich przedłużek wpisuje się osobno dla każdego wózka przy potwierdzeniu UT.",
-        uk: "Кожний візок завжди має 1 основу. Кількість полиць і довгих подовжувачів вводиться окремо для кожного візка при UT-підтвердженні."
+        no: "Én vogn = 1 Bunner + 4 CC Post. Antall hyller og lange forlengere registreres separat per vogn ved UT-bekreftelse. CC Post vises kun som del av kompletten.",
+        pl: "Jeden wózek = 1 podstawa + 4 CC Post. Liczbę półek i długich przedłużek wpisuje się osobno dla każdego wózka przy potwierdzeniu UT. CC Post jest tylko elementem wyświetlanego kompletu.",
+        uk: "Один візок = 1 Bunner + 4 CC Post. Кількість полиць і довгих подовжувачів вводиться окремо для кожного візка при UT-підтвердженні. CC Post лише відображається як частина комплекту."
       }
     },
     {
@@ -163,9 +169,9 @@
       shipment: { orderUnit: "eske", confirmation: "count_only" },
       package: { type: "box", internalQuantity: null, weightKg: null, detailsPending: true },
       notes: {
-        no: "Én enhet = 1 eske. Ingen bunner eller hyller inngår. Vekt og antall plastforlengere i esken er ikke fastsatt ennå.",
-        pl: "Jedna jednostka = 1 pudełko. Bez podstawy i półek. Waga i liczba plastikowych przedłużek w pudełku nie są jeszcze ustalone.",
-        uk: "Одна одиниця = 1 ящик. Без основи та полиць. Вага і кількість пластикових подовжувачів у ящику поки не визначені."
+        no: "Én enhet = 1 eske. Ingen Bunner, Hyller eller CC Post inngår. Vekt og antall plastforlengere i esken er ikke fastsatt ennå.",
+        pl: "Jedna jednostka = 1 pudełko. Bez podstawy, półek i CC Post. Waga i liczba plastikowych przedłużek w pudełku nie są jeszcze ustalone.",
+        uk: "Одна одиниця = 1 ящик. Без Bunner, полиць і CC Post. Вага і кількість пластикових подовжувачів у ящику поки не визначені."
       }
     }
   ];
