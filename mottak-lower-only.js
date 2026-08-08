@@ -6,6 +6,24 @@
 
   const lowerValid = value => /^[A-Z0-9]{6}$/.test(String(value || ""));
   const serviceValid = value => /^[A-Z0-9]{12}$/.test(String(value || ""));
+  const STOCK_BUCKET = "mottak-photos";
+
+  function currentLanguage() {
+    try { return typeof language !== "undefined" ? language : (localStorage.getItem("mottak_cloud_v4_language") || "nb"); }
+    catch { return "nb"; }
+  }
+
+  function stockMessage(status) {
+    const l = currentLanguage();
+    if (status === "staged") {
+      if (l === "uk") return "Бірка вже знаходиться на рампі.";
+      if (l === "pl") return "Etykieta znajduje się już na rampie.";
+      return "Etiketten står allerede på en rampe.";
+    }
+    if (l === "uk") return "Бірка вже знаходиться на складі.";
+    if (l === "pl") return "Etykieta znajduje się już na magazynie.";
+    return "Etiketten er allerede på lager.";
+  }
 
   function clearUpperUi() {
     const upper = document.getElementById("upperNumber");
@@ -95,6 +113,36 @@
     focusScanner(20);
   };
 
+  async function reuseDispatchedRow(row, parts, rawData) {
+    const oldPhotoPath = row.photo_path || "";
+    const result = await client.from(TABLE).update({
+      product,
+      scanner_code: parts.scannerCode,
+      upper_number: "",
+      lower_number: parts.lowerNumber,
+      status: "pending",
+      source: "nordic_id",
+      device_id: deviceId,
+      raw_data: rawData,
+      photo_url: "",
+      photo_path: "",
+      confidence: null,
+      verified_at: null,
+      stock_status: "in_stock",
+      ut_order_id: null,
+      reserved_at: null,
+      staged_at: null,
+      dispatched_at: null,
+      created_at: new Date().toISOString()
+    }).eq("id", row.id).select("id").maybeSingle();
+    if (result.error) throw result.error;
+    if (!result.data?.id) throw new Error("Database did not confirm the write");
+    if (oldPhotoPath) {
+      try { await client.storage.from(STOCK_BUCKET).remove([oldPhotoPath]); } catch {}
+    }
+    return result;
+  }
+
   async function saveLowerOnlyPending() {
     if (saving) return;
     const parts = currentParts();
@@ -111,7 +159,7 @@
 
     try {
       const query = await client.from(TABLE)
-        .select("id,scanner_code,photo_url,source,status,stock_status,device_id,raw_data")
+        .select("id,scanner_code,photo_url,photo_path,source,status,stock_status,device_id,raw_data")
         .eq("lower_number", parts.lowerNumber)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -119,8 +167,18 @@
 
       const matches = query.data || [];
       const exactRow = matches.find(row => compact(row.scanner_code) === parts.scannerCode);
+      const rawData = parsedCode || `${parts.scannerCode}${parts.lowerNumber}`;
+
       if (exactRow) {
-        show(t().duplicate, "warn");
+        const stock = exactRow.stock_status || "in_stock";
+        if (stock === "dispatched") {
+          await reuseDispatchedRow(exactRow, parts, rawData);
+          show(t().saved, "ok");
+          await loadCloud();
+          clearForm();
+          return;
+        }
+        show(stockMessage(stock), stock === "staged" ? "bad" : "warn");
         return;
       }
 
@@ -131,19 +189,27 @@
       }
 
       const cameraRow = matches.find(row => !compact(row.scanner_code));
-      const rawData = parsedCode || `${parts.scannerCode}${parts.lowerNumber}`;
       let dbResult;
 
       if (cameraRow) {
-        dbResult = await client.from(TABLE).update({
-          product,
-          scanner_code: parts.scannerCode,
-          upper_number: "",
-          status: "pending",
-          source: cameraRow.source || (cameraRow.photo_url ? "camera" : "nordic_id"),
-          device_id: cameraRow.device_id || deviceId,
-          raw_data: rawData
-        }).eq("id", cameraRow.id).select("id").maybeSingle();
+        const stock = cameraRow.stock_status || "in_stock";
+        if (stock === "staged") {
+          show(stockMessage("staged"), "bad");
+          return;
+        }
+        if (stock === "dispatched") {
+          dbResult = await reuseDispatchedRow(cameraRow, parts, rawData);
+        } else {
+          dbResult = await client.from(TABLE).update({
+            product,
+            scanner_code: parts.scannerCode,
+            upper_number: "",
+            status: "pending",
+            source: cameraRow.source || (cameraRow.photo_url ? "camera" : "nordic_id"),
+            device_id: cameraRow.device_id || deviceId,
+            raw_data: rawData
+          }).eq("id", cameraRow.id).select("id").maybeSingle();
+        }
       } else {
         dbResult = await client.from(TABLE).insert({
           product,
@@ -155,7 +221,8 @@
           device_id: deviceId,
           raw_data: rawData,
           photo_url: "",
-          photo_path: ""
+          photo_path: "",
+          stock_status: "in_stock"
         }).select("id").maybeSingle();
       }
 
@@ -182,5 +249,5 @@
 
   clearUpperUi();
   renderPartState();
-  console.info("Nordic lower-number-only mode active: middle/upper segment is ignored and not stored.");
+  console.info("Nordic lower-number-only mode active: dispatched tags can be received again as the current product.");
 })();
