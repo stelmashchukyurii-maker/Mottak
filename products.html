@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Produkter — BaMavaremottak</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #151c30;
+      --text: #f5f7ff;
+      --muted: #aab4ce;
+      --accent: #f4c430;
+      --ok: #48d597;
+      --line: #303b59;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #10172a 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      width: min(920px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(28px, 6vw, 44px);
+    }
+
+    .subtitle, .meta, .empty {
+      color: var(--muted);
+    }
+
+    .badge {
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
+    .notice {
+      border: 1px solid rgba(244, 196, 48, 0.45);
+      background: rgba(244, 196, 48, 0.08);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      color: #ffe88a;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: var(--ok);
+      margin-bottom: 12px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    dl {
+      margin: 0;
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 8px 10px;
+      font-size: 14px;
+    }
+
+    dt { color: var(--muted); }
+    dd { margin: 0; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      margin-top: 24px;
+      padding-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 620px) {
+      .top { flex-direction: column; }
+      .badge { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <div>
+        <h1>Produkter</h1>
+        <div class="subtitle">Sentral produktliste for BaMavaremottak</div>
+      </div>
+      <div class="badge" id="versionBadge">Laster register …</div>
+    </div>
+
+    <div class="notice">
+      Denne siden er foreløpig kun for visning. Eksisterende arbeidsider er ikke koblet til produktregisteret ennå.
+    </div>
+
+    <section class="grid" id="productGrid" aria-live="polite"></section>
+
+    <footer>
+      <div id="footerVersion"></div>
+      <div>Oppdatert: 08.08.2026 kl. 08:28 (Europe/Oslo)</div>
+    </footer>
+  </main>
+
+  <script src="./products.js"></script>
+  <script>
+    (function () {
+      const api = window.BAMA_PRODUCTS;
+      const grid = document.getElementById("productGrid");
+      const versionBadge = document.getElementById("versionBadge");
+      const footerVersion = document.getElementById("footerVersion");
+
+      if (!api) {
+        grid.innerHTML = '<div class="empty">Produktregisteret kunne ikke lastes.</div>';
+        versionBadge.textContent = "Register ikke tilgjengelig";
+        return;
+      }
+
+      versionBadge.textContent = `Register v${api.meta.version}`;
+      footerVersion.textContent = `Produktregister v${api.meta.version} · schema ${api.meta.schemaVersion}`;
+
+      const products = api.getAllProducts();
+      if (!products.length) {
+        grid.innerHTML = '<div class="empty">Ingen produkter i registeret.</div>';
+        return;
+      }
+
+      grid.innerHTML = products.map((product) => {
+        const stack = product.stackSize == null ? "Ikke fastsatt" : `${product.stackSize} stk`;
+        return `
+          <article class="card">
+            <h2>${product.name.no}</h2>
+            <div class="status"><span class="dot"></span>${product.active ? "Aktiv" : "Inaktiv"}</div>
+            <dl>
+              <dt>ID</dt><dd>${product.id}</dd>
+              <dt>Norsk</dt><dd>${product.name.no}</dd>
+              <dt>Polski</dt><dd>${product.name.pl}</dd>
+              <dt>Українська</dt><dd>${product.name.uk}</dd>
+              <dt>Enhet</dt><dd>${product.unit}</dd>
+              <dt>Stabel</dt><dd>${stack}</dd>
+              <dt>Rekkefølge</dt><dd>${product.sortOrder}</dd>
+            </dl>
+          </article>`;
+      }).join("");
+    })();
+  </script>
+</body>
+</html>
