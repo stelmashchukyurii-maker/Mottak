@@ -1,13 +1,18 @@
 // BaMavaremottak — UT TEST language helper
-// Version 1.0.1
-// Updated: 2026-08-08 09:49 Europe/Oslo
+// Version 1.0.2
+// Updated: 2026-08-08 10:07 Europe/Oslo
+//
+// Stability fix:
+// - No live MutationObserver. It could repeatedly react to page updates and freeze mobile input fields.
+// - Translation now runs only on page load, explicit language change and explicit wrapper refresh.
 (function(){
   "use strict";
 
   const STORAGE_KEY = "bama_ut_test_lang";
   let currentLang = localStorage.getItem(STORAGE_KEY) === "uk" ? "uk" : "no";
-  let observer = null;
   let translating = false;
+  const originalText = new WeakMap();
+  const originalPlaceholder = new WeakMap();
 
   const exactUk = new Map(Object.entries({
     "← Hovedmeny":"← Головне меню",
@@ -68,12 +73,13 @@
       .replace(/Sendte og stornert oppdrag ligger i historikken og vises ikke her\./g,"Відправлені та скасовані завдання зберігаються в історії й тут не показуються.");
   }
 
-  function rememberAndTranslateTextNode(node){
+  function translateTextNode(node){
     if (!node || !node.nodeValue || !node.nodeValue.trim()) return;
     const parent = node.parentElement;
-    if (!parent || ["SCRIPT","STYLE","CODE"].includes(parent.tagName)) return;
-    if (!Object.prototype.hasOwnProperty.call(parent.dataset,"langNoText")) parent.dataset.langNoText = node.nodeValue;
-    const source = parent.dataset.langNoText;
+    if (!parent || ["SCRIPT","STYLE","CODE","INPUT","TEXTAREA","SELECT","OPTION"].includes(parent.tagName)) return;
+
+    if (!originalText.has(node)) originalText.set(node, node.nodeValue);
+    const source = originalText.get(node);
     node.nodeValue = currentLang === "uk" ? translateDynamic(source) : source;
   }
 
@@ -81,31 +87,21 @@
     if (!root || translating) return;
     translating = true;
     try {
-      const walker = root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const doc = root.ownerDocument;
+      const walker = doc.createTreeWalker(root, 4); // NodeFilter.SHOW_TEXT
       const nodes = [];
       while (walker.nextNode()) nodes.push(walker.currentNode);
-      nodes.forEach(rememberAndTranslateTextNode);
+      nodes.forEach(translateTextNode);
 
       root.querySelectorAll?.("input[placeholder],textarea[placeholder]").forEach((el)=>{
-        if (!el.dataset.langNoPlaceholder) el.dataset.langNoPlaceholder = el.getAttribute("placeholder") || "";
-        const no = el.dataset.langNoPlaceholder;
+        if (!originalPlaceholder.has(el)) originalPlaceholder.set(el, el.getAttribute("placeholder") || "");
+        const no = originalPlaceholder.get(el);
         let uk = no;
         if (no === "Skriv mottaker") uk = "Введіть отримувача";
         if (no === "Skriv transportør") uk = "Введіть перевізника";
         if (no === "Valgfri kommentar til lageret") uk = "Необов’язковий коментар для складу";
         el.setAttribute("placeholder", currentLang === "uk" ? uk : no);
       });
-
-      const api = window.BAMA_PRODUCTS;
-      if (api) {
-        root.querySelectorAll?.("#centralProductTestPanel > div > div").forEach((row)=>{
-          const idText = Array.from(row.querySelectorAll("div")).map(x=>x.textContent).find(t=>t?.startsWith("ID: "));
-          const id = idText?.slice(4).trim();
-          const product = id ? api.getProductById(id) : null;
-          const strong = row.querySelector("strong");
-          if (product && strong) strong.textContent = api.getProductName(product,currentLang);
-        });
-      }
     } finally {
       translating = false;
     }
@@ -124,6 +120,7 @@
         ? `products.js v${window.BAMA_PRODUCTS.meta.version} · ${active} активних`
         : `products.js v${window.BAMA_PRODUCTS.meta.version} · ${active} aktive`;
     }
+
     document.documentElement.lang = currentLang === "uk" ? "uk" : "nb";
     document.querySelectorAll("[data-lang-choice]").forEach((btn)=>{
       btn.classList.toggle("active",btn.dataset.langChoice === currentLang);
@@ -135,13 +132,9 @@
     translateWrapper();
     const frame = document.getElementById("appFrame");
     const doc = frame?.contentDocument;
-    if (!doc) return;
+    if (!doc?.body) return;
     doc.documentElement.lang = currentLang === "uk" ? "uk" : "nb";
     translateTree(doc.body);
-
-    if (observer) observer.disconnect();
-    observer = new MutationObserver(()=>translateTree(doc.body));
-    observer.observe(doc.body,{subtree:true,childList:true,characterData:true,attributes:false});
   }
 
   function setLang(lang){
