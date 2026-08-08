@@ -1,65 +1,60 @@
 "use strict";
 
-// BaMavaremottak — TEST UT Kontor history visuals
-// Version 1.5.0
-// Updated: 2026-08-08 14:12 Europe/Oslo
-// Bundled Bunner/CC Post are counted in Totalt only, including ramp totals.
+// BaMavaremottak — TEST UT Kontor unified order summary
+// Version 1.6.0
+// Updated: 2026-08-08 14:27 Europe/Oslo
+// Same visual structure is used while ordering and after the order is created.
 (() => {
   if (window.__UT_KONTOR_HISTORY_VISUALS__) return;
   window.__UT_KONTOR_HISTORY_VISUALS__ = true;
 
   const isUk = () => localStorage.getItem("mottak_ut_language") === "uk";
   const n = (value) => Number(value) || 0;
+  const html = (value) => String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 
   function installStyle() {
     if (document.getElementById("utHistoryVisualStyle")) return;
     const style = document.createElement("style");
     style.id = "utHistoryVisualStyle";
     style.textContent = `
-      #history .amount.ut-visual-amount{display:grid;gap:8px;margin-top:9px;color:inherit;font-weight:inherit}
-      .ut-product-line{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;align-items:center;padding:9px 10px;border:1px solid #303b59;border-radius:12px;background:#0d1426}
-      .ut-product-copy{min-width:0}.ut-product-title{font-size:14px;font-weight:1000;line-height:1.2;color:#f5f7ff}.ut-product-detail{margin-top:4px;font-size:12px;font-weight:850;line-height:1.35;color:#d8dfef}.ut-product-detail strong{color:#f4c430;font-weight:1000}
-      .ut-product-iconbox{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:1px solid #303b59;border-radius:50%;background:#0a1120;position:relative;overflow:visible}
-      .ut-product-mark{position:relative;display:block;width:31px;height:34px;color:#cbd4e4}
-      .ut-product-mark::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:5px;height:9px;border-radius:2px;background:#f4c430;box-shadow:0 0 0 1px rgba(244,196,48,.35)}
-      .ut-product-mark.bunner{height:27px;width:33px;border-left:2px solid currentColor;border-right:2px solid currentColor;background:repeating-linear-gradient(to bottom,transparent 0 3px,currentColor 3px 5px,transparent 5px 7px)}
-      .ut-product-mark.bunner::before{content:"";position:absolute;left:3px;right:3px;bottom:-2px;height:5px;background:radial-gradient(circle at 3px 2px,#a78348 0 2px,transparent 2.5px),radial-gradient(circle at calc(100% - 3px) 2px,#a78348 0 2px,transparent 2.5px)}
-      .ut-product-mark.rack{border:2px solid currentColor;border-top-width:2px;border-bottom-width:3px;border-radius:1px}
-      .ut-product-mark.rack::before{content:"";position:absolute;inset:3px 4px;background:repeating-linear-gradient(to bottom,currentColor 0 1.4px,transparent 1.4px 5px)}
-      .ut-product-mark.rack60::before{background:repeating-linear-gradient(to bottom,currentColor 0 1.2px,transparent 1.2px 3px)}
-      .ut-ramp-total-panel{margin:10px 0 12px;padding:10px 12px;border:1px solid rgba(72,213,151,.42);border-radius:12px;background:rgba(72,213,151,.055)}
+      #history .amount.ut-visual-amount{display:block;margin-top:9px;color:inherit;font-weight:inherit}
+      #history .ut-extra-history{display:none!important}
+      #history .ut-extra-ramp-total{display:none!important}
+
+      .ut-unified-summary{margin-top:8px;padding:8px 10px;border:1px solid #303b59;border-radius:13px;background:#0d1426}
+      .ut-unified-row{display:grid;grid-template-columns:minmax(110px,42%) minmax(0,1fr);gap:12px;align-items:start;padding:8px 0;border-top:1px solid rgba(48,59,89,.82);font-size:13px;line-height:1.3}
+      .ut-unified-row:first-child{border-top:0}
+      .ut-unified-label{color:#aab4ce;font-weight:700}
+      .ut-unified-value{color:#f5f7ff;font-weight:900;text-align:right;overflow-wrap:anywhere}
+      .ut-unified-section{padding-top:10px;margin-top:2px;border-top:1px solid #303b59}
+      .ut-unified-section-title{margin-bottom:5px;color:#d8dfef;font-size:13px;font-weight:1000}
+      .ut-unified-total-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:7px 0;border-top:1px solid rgba(48,59,89,.72);font-size:12px;line-height:1.25}
+      .ut-unified-total-row:first-of-type{border-top:0}
+      .ut-unified-total-label{color:#d8dfef;font-weight:800}
+      .ut-unified-total-value{color:#48d597;font-weight:1000;text-align:right;white-space:nowrap}
+      .ut-unified-total-row.cc-post .ut-unified-total-label,.ut-unified-total-row.cc-post .ut-unified-total-value{color:#f4c430}
+
+      .ut-ramp-total-panel{margin:10px 0 12px;padding:10px 12px;border:1px solid rgba(72,213,151,.42);border-radius:13px;background:rgba(72,213,151,.055)}
       .ut-ramp-total-title{margin-bottom:5px;color:#f5f7ff;font-size:13px;font-weight:1000}
-      .ut-ramp-total-grid{display:grid;gap:0}
       .ut-ramp-total-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:6px 0;border-top:1px solid rgba(48,59,89,.72);font-size:12px;line-height:1.25}
-      .ut-ramp-total-row:first-child{border-top:0}.ut-ramp-total-label{color:#d8dfef;font-weight:800}.ut-ramp-total-value{color:#48d597;font-weight:1000;text-align:right;white-space:nowrap}
+      .ut-ramp-total-row:first-child{border-top:0}
+      .ut-ramp-total-label{color:#d8dfef;font-weight:800}
+      .ut-ramp-total-value{color:#48d597;font-weight:1000;text-align:right;white-space:nowrap}
       .ut-ramp-total-row.cc-post .ut-ramp-total-label,.ut-ramp-total-row.cc-post .ut-ramp-total-value{color:#f4c430}
-      @media(max-width:520px){.ut-product-line{grid-template-columns:46px minmax(0,1fr);gap:8px;padding:8px}.ut-product-iconbox{width:43px;height:43px}.ut-product-title{font-size:13px}.ut-product-detail{font-size:11.5px}.ut-ramp-total-panel{padding:9px 10px}.ut-ramp-total-row{font-size:11.5px}}
+
+      @media(max-width:520px){
+        .ut-unified-summary{padding:7px 9px}
+        .ut-unified-row{grid-template-columns:minmax(105px,41%) minmax(0,1fr);gap:9px;padding:7px 0;font-size:12.5px}
+        .ut-unified-total-row,.ut-ramp-total-row{font-size:11.5px}
+        .ut-ramp-total-panel{padding:9px 10px}
+      }
     `;
     document.head.appendChild(style);
-  }
-
-  function row(type, title, detailHtml) {
-    return `<div class="ut-product-line"><span class="ut-product-iconbox" aria-hidden="true"><span class="ut-product-mark ${type}"></span></span><div class="ut-product-copy"><div class="ut-product-title">${title}</div><div class="ut-product-detail">${detailHtml}</div></div></div>`;
-  }
-
-  function detailBunner(count) {
-    const total = count * 10;
-    return isUk()
-      ? `${count} ${count === 1 ? "стопка" : "стопок"} = <strong>${total} Bunner</strong>`
-      : `${count} ${count === 1 ? "stabel" : "stabler"} = <strong>${total} Bunner</strong>`;
-  }
-
-  function detailHyller(count, size) {
-    const hyller = count * size;
-    return isUk()
-      ? `${count} ${count === 1 ? "комплект" : "комплектів"} = <strong>${hyller} полиць</strong>`
-      : `${count} sett = <strong>${hyller} hyller</strong>`;
-  }
-
-  function forlengereSummaryText(count) {
-    return isUk()
-      ? `${count} ${count === 1 ? "візок" : "візків"}`
-      : `${count} ${count === 1 ? "vogn" : "vogner"}`;
   }
 
   function ukWord(value, one, few, many) {
@@ -72,12 +67,96 @@
     return many;
   }
 
+  function stackUnit(value) {
+    return isUk() ? ukWord(value, "стопка", "стопки", "стопок") : (value === 1 ? "stabel" : "stabler");
+  }
+  function setUnit(value) {
+    return isUk() ? ukWord(value, "комплект", "комплекти", "комплектів") : "sett";
+  }
   function cartUnit(value) {
     return isUk() ? ukWord(value, "візок", "візки", "візків") : (value === 1 ? "vogn" : "vogner");
   }
-
   function boxUnit(value) {
     return isUk() ? ukWord(value, "ящик", "ящики", "ящиків") : (value === 1 ? "eske" : "esker");
+  }
+
+  function labels() {
+    return isUk() ? {
+      ramp: "Рампа", bunner: "Основи", h30: "Полиці x30", h60: "Полиці x60",
+      short: "Подовжувачі короткі", long: "Подовжувачі довгі", plast: "Подовжувачі пластикові",
+      total: "Всього", totalRamp: "Всього на рампі", hyller: "Hyller", post: "CC Post"
+    } : {
+      ramp: "Rampe", bunner: "Bunner", h30: "Hyller x30", h60: "Hyller x60",
+      short: "Forlengere korte", long: "Forlengere lange", plast: "Forlengere plast",
+      total: "Totalt", totalRamp: "Totalt på rampe", hyller: "Hyller", post: "CC Post"
+    };
+  }
+
+  function bunnerText(stacks) {
+    return `${stacks} ${stackUnit(stacks)} = ${stacks * 10} Bunner`;
+  }
+  function hyllerText(count, size) {
+    return isUk()
+      ? `${count} ${setUnit(count)} = ${count * size} полиць`
+      : `${count} sett = ${count * size} hyller`;
+  }
+
+  function parseExtraBox(card) {
+    const result = { short: 0, long: 0, plast: 0 };
+    const text = card.querySelector(".ut-extra-history")?.textContent || "";
+    const patterns = {
+      short: ["Forlengere korte", "Подовжувачі короткі"],
+      long: ["Forlengere lange", "Подовжувачі довгі"],
+      plast: ["Forlengere plast", "Подовжувачі пластикові"],
+    };
+    Object.entries(patterns).forEach(([key, names]) => {
+      names.some((name) => {
+        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const match = text.match(new RegExp(`${escaped}:\\s*(\\d+)`, "i"));
+        if (!match) return false;
+        result[key] = n(match[1]);
+        return true;
+      });
+    });
+    return result;
+  }
+
+  function totalRows(totalBunner, totalHyller, short, long, plast) {
+    const l = labels();
+    const rows = [
+      ["Bunner", totalBunner, ""],
+      [l.hyller, totalHyller, ""],
+      [l.short, `${short} ${cartUnit(short)}`, ""],
+      [l.long, `${long} ${cartUnit(long)}`, ""],
+      [l.plast, `${plast} ${boxUnit(plast)}`, ""],
+      [l.post, totalBunner * 4, "cc-post"],
+    ];
+    return rows.map(([label, value, cls]) => `<div class="ut-unified-total-row ${cls}"><span class="ut-unified-total-label">${html(label)}</span><span class="ut-unified-total-value">${html(value)}</span></div>`).join("");
+  }
+
+  function orderSummary(order, extras) {
+    const l = labels();
+    const b = n(order.bunner_stacks);
+    const h30 = n(order.hyller30_sets);
+    const h60 = n(order.hyller60_sets);
+    const short = n(extras.short);
+    const long = n(extras.long);
+    const plast = n(extras.plast);
+    const totalBunner = b * 10 + h30 + h60 + short + long;
+    const totalHyller = h30 * 30 + h60 * 60;
+    const ramp = String(order.ramp || "—").trim() || "—";
+
+    const rows = [
+      [l.ramp, ramp],
+      [l.bunner, bunnerText(b)],
+      [l.h30, hyllerText(h30, 30)],
+      [l.h60, hyllerText(h60, 60)],
+      [l.short, `${short} ${cartUnit(short)}`],
+      [l.long, `${long} ${cartUnit(long)}`],
+      [l.plast, `${plast} ${boxUnit(plast)}`],
+    ];
+
+    return `<div class="ut-unified-summary">${rows.map(([label, value]) => `<div class="ut-unified-row"><span class="ut-unified-label">${html(label)}</span><span class="ut-unified-value">${html(value)}</span></div>`).join("")}<div class="ut-unified-section"><div class="ut-unified-section-title">${html(l.total)}</div>${totalRows(totalBunner, totalHyller, short, long, plast)}</div></div>`;
   }
 
   function decorateSummary() {
@@ -92,104 +171,40 @@
     const sumShort = document.getElementById("sumForlengereKorte");
     const sumLong = document.getElementById("sumForlengereLange");
 
-    if (sumB) {
-      const bases = b * 10;
-      sumB.textContent = isUk()
-        ? `${b} ${b === 1 ? "стопка" : "стопок"} = ${bases} Bunner`
-        : `${b} ${b === 1 ? "stabel" : "stabler"} = ${bases} Bunner`;
-    }
-    if (sum30) {
-      sum30.textContent = isUk()
-        ? `${h30} ${h30 === 1 ? "комплект" : "комплектів"} = ${h30 * 30} полиць`
-        : `${h30} sett = ${h30 * 30} hyller`;
-    }
-    if (sum60) {
-      sum60.textContent = isUk()
-        ? `${h60} ${h60 === 1 ? "комплект" : "комплектів"} = ${h60 * 60} полиць`
-        : `${h60} sett = ${h60 * 60} hyller`;
-    }
-    if (sumShort) sumShort.textContent = forlengereSummaryText(short);
-    if (sumLong) sumLong.textContent = forlengereSummaryText(long);
-  }
-
-  function decorateForlengereHistory() {
-    document.querySelectorAll("#history .ut-extra-history").forEach((box) => {
-      const lines = (box.innerText || "").split(/\n+/).map((line) => line.trim()).filter(Boolean);
-      if (!lines.length) return;
-      box.innerHTML = lines.map((line) => line
-        .replace(/\s*=\s*\d+\s+Bunner(?:\s*\+\s*\d+\s+CC Post)?\s*$/i, "")
-        .replace(/\s*\+\s*\d+\s+CC Post\s*$/i, "")
-      ).join("<br>");
-    });
-  }
-
-  function extraCount(rampCard, type) {
-    const patterns = {
-      short: ["Forlengere korte", "Подовжувачі короткі"],
-      long: ["Forlengere lange", "Подовжувачі довгі"],
-      plast: ["Forlengere plast", "Подовжувачі пластикові"],
-    }[type] || [];
-    let total = 0;
-    rampCard.querySelectorAll(".ut-extra-history").forEach((box) => {
-      const text = box.textContent || "";
-      patterns.forEach((label) => {
-        const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const match = text.match(new RegExp(`${escaped}:\\s*(\\d+)`, "i"));
-        if (match) total += n(match[1]);
-      });
-    });
-    return total;
+    if (sumB) sumB.textContent = bunnerText(b);
+    if (sum30) sum30.textContent = hyllerText(h30, 30);
+    if (sum60) sum60.textContent = hyllerText(h60, 60);
+    if (sumShort) sumShort.textContent = `${short} ${cartUnit(short)}`;
+    if (sumLong) sumLong.textContent = `${long} ${cartUnit(long)}`;
   }
 
   function decorateRampTotals() {
     if (typeof orders === "undefined" || !Array.isArray(orders)) return;
+    const l = labels();
+
     document.querySelectorAll("#history .ramp-card").forEach((rampCard) => {
       rampCard.querySelector(".ut-ramp-total-panel")?.remove();
       rampCard.querySelector(".ut-extra-ramp-total")?.remove();
 
-      const ids = [...rampCard.querySelectorAll("[data-storno]")].map((button) => String(button.dataset.storno));
-      const rampOrders = ids.map((id) => orders.find((order) => String(order.id) === id)).filter(Boolean);
-      if (!rampOrders.length) return;
+      const cards = [...rampCard.querySelectorAll(".order")];
+      if (cards.length <= 1) return;
 
-      const base = rampOrders.reduce((sum, order) => {
-        const stacks = n(order.bunner_stacks);
-        const h30 = n(order.hyller30_sets);
-        const h60 = n(order.hyller60_sets);
-        sum.bunner += stacks * 10 + h30 + h60;
-        sum.hyller += h30 * 30 + h60 * 60;
-        return sum;
-      }, { bunner: 0, hyller: 0 });
-
-      const short = extraCount(rampCard, "short");
-      const long = extraCount(rampCard, "long");
-      const plast = extraCount(rampCard, "plast");
-      const bunner = base.bunner + short + long;
-      const ccPosts = bunner * 4;
-
-      const oldSummary = rampCard.querySelector(".ramp-card-head .field-help");
-      if (oldSummary) oldSummary.textContent = isUk()
-        ? `Всього: ${bunner} Bunner · ${base.hyller} полиць`
-        : `Totalt: ${bunner} Bunner · ${base.hyller} hyller`;
-
-      const labels = isUk()
-        ? { title: "Всього на рампі", bunner: "Bunner", hyller: "Hyller", short: "Подовжувачі короткі", long: "Подовжувачі довгі", plast: "Подовжувачі пластикові", post: "CC Post" }
-        : { title: "Totalt på rampe", bunner: "Bunner", hyller: "Hyller", short: "Forlengere korte", long: "Forlengere lange", plast: "Forlengere plast", post: "CC Post" };
-
-      const rows = [
-        [labels.bunner, String(bunner), ""],
-        [labels.hyller, String(base.hyller), ""],
-        [labels.short, `${short} ${cartUnit(short)}`, ""],
-        [labels.long, `${long} ${cartUnit(long)}`, ""],
-        [labels.plast, `${plast} ${boxUnit(plast)}`, ""],
-        [labels.post, String(ccPosts), "cc-post"],
-      ];
+      let bunner = 0, hyller = 0, short = 0, long = 0, plast = 0;
+      cards.forEach((card) => {
+        const id = card.querySelector("[data-storno]")?.dataset.storno || card.querySelector("[data-edit]")?.dataset.edit;
+        const order = orders.find((item) => String(item.id) === String(id));
+        if (!order) return;
+        const ext = parseExtraBox(card);
+        const b = n(order.bunner_stacks), h30 = n(order.hyller30_sets), h60 = n(order.hyller60_sets);
+        bunner += b * 10 + h30 + h60 + ext.short + ext.long;
+        hyller += h30 * 30 + h60 * 60;
+        short += ext.short; long += ext.long; plast += ext.plast;
+      });
 
       const panel = document.createElement("div");
       panel.className = "ut-ramp-total-panel";
-      panel.innerHTML = `<div class="ut-ramp-total-title">${labels.title}</div><div class="ut-ramp-total-grid">${rows.map(([label, value, cls]) => `<div class="ut-ramp-total-row ${cls}"><span class="ut-ramp-total-label">${label}</span><span class="ut-ramp-total-value">${value}</span></div>`).join("")}</div>`;
-      const ordersHost = rampCard.querySelector(".ramp-orders");
-      if (ordersHost) ordersHost.insertAdjacentElement("beforebegin", panel);
-      else rampCard.querySelector(".ramp-card-head")?.insertAdjacentElement("afterend", panel);
+      panel.innerHTML = `<div class="ut-ramp-total-title">${html(l.totalRamp)}</div>${totalRows(bunner, hyller, short, long, plast).replaceAll("ut-unified-total-row", "ut-ramp-total-row").replaceAll("ut-unified-total-label", "ut-ramp-total-label").replaceAll("ut-unified-total-value", "ut-ramp-total-value")}`;
+      rampCard.querySelector(".ramp-orders")?.insertAdjacentElement("beforebegin", panel);
     });
   }
 
@@ -204,20 +219,11 @@
       if (!order) return;
       const amount = card.querySelector(".amount");
       if (!amount) return;
-
-      const b = n(order.bunner_stacks);
-      const h30 = n(order.hyller30_sets);
-      const h60 = n(order.hyller60_sets);
-      const rows = [];
-      if (b) rows.push(row("bunner", "Bunner", detailBunner(b)));
-      if (h30) rows.push(row("rack rack30", "Hyller x30", detailHyller(h30, 30)));
-      if (h60) rows.push(row("rack rack60", "Hyller x60", detailHyller(h60, 60)));
-      if (!rows.length) rows.push(`<div class="ut-product-detail">${isUk() ? "Немає товарів" : "Ingen varer"}</div>`);
+      const extras = parseExtraBox(card);
       amount.classList.add("ut-visual-amount");
-      amount.innerHTML = rows.join("");
+      amount.innerHTML = orderSummary(order, extras);
     });
 
-    decorateForlengereHistory();
     decorateRampTotals();
   }
 
@@ -227,24 +233,24 @@
   }
 
   const previousRenderHistory = window.renderHistory;
-  window.renderHistory = function renderHistoryWithVisuals() {
+  window.renderHistory = function renderHistoryUnified() {
     if (typeof previousRenderHistory === "function") previousRenderHistory();
     decorate();
   };
 
   const previousRenderForm = window.renderForm;
-  window.renderForm = function renderFormWithCleanBundleDisplay() {
+  window.renderForm = function renderFormUnified() {
     if (typeof previousRenderForm === "function") previousRenderForm();
     decorateSummary();
   };
 
-  ["bunnerQty", "h30Qty", "h60Qty", "forlengere_korteQty", "forlengere_langeQty"].forEach((id) => {
+  ["bunnerQty", "h30Qty", "h60Qty", "forlengere_korteQty", "forlengere_langeQty", "forlengere_plastQty"].forEach((id) => {
     const input = document.getElementById(id);
     input?.addEventListener("input", () => setTimeout(decorateSummary, 0));
     input?.addEventListener("change", () => setTimeout(decorateSummary, 0));
   });
   document.querySelector(".ramp-products")?.addEventListener("click", () => setTimeout(decorateSummary, 0));
 
-  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.5.0", decorate };
+  window.UT_KONTOR_HISTORY_VISUALS = { version: "1.6.0", decorate };
   decorate();
 })();
