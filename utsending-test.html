@@ -12,7 +12,7 @@ html,body{margin:0;min-height:100%;background:#0b1020}#utCore{display:block;widt
 <button id="utFloatScan" type="button">📷 <span id="utFloatText">Kamera</span></button><div id="utHint"></div>
 <script>
 "use strict";
-const VERSION="20260808-1641";
+const VERSION="20260808-1658";
 const f=document.getElementById("utCore"),scan=document.getElementById("utFloatScan"),scanText=document.getElementById("utFloatText"),hint=document.getElementById("utHint"),loader=document.getElementById("loader");
 let hintTimer=0,openTries=0;
 function resize(){try{const d=f.contentDocument;f.style.height=Math.max(innerHeight,d.documentElement.scrollHeight,d.body?.scrollHeight||0)+"px"}catch{}}
@@ -25,12 +25,12 @@ function cameraUrl(o){return`ut-camera-test.html?order=${encodeURIComponent(o.id
 function goCamera(){const o=order();if(!o)return note(tx().open);if(["completed","cancelled"].includes(o.status))return note(tx().done);location.href=cameraUrl(o)}
 function hideOldStock(d){let s=d.getElementById("utHideOldStock");if(!s){s=d.createElement("style");s.id="utHideOldStock";s.textContent=".stock-card{display:none!important}";d.head.appendChild(s)}}
 function markTest(d){
-  const v=d.querySelector(".version");if(v)v.innerHTML="TEST · UT Lager v27.12 AVBRYT<br>Oppdatert 08.08.2026 kl. 16:41";
+  const v=d.querySelector(".version");if(v)v.innerHTML="TEST · UT Lager v27.12 · NYE PRODUKTER<br>Oppdatert 08.08.2026 kl. 16:58";
   let banner=d.getElementById("utTestCloneBanner");
   if(!banner){
     banner=d.createElement("div");banner.id="utTestCloneBanner";
     banner.style.cssText="margin:10px 0 12px;padding:11px 13px;border:2px solid #48d597;border-radius:14px;background:rgba(72,213,151,.09);color:#eafff6;font:900 13px/1.45 Arial,sans-serif;text-align:center";
-    banner.innerHTML="🧪 <b>TEST — ISOLERT</b> · Samme UT Lager v27.12-arbeidsflyt. Ordre, lagerbevegelser og utsending går kun mot TEST-tabellene.";
+    banner.innerHTML="🧪 <b>TEST — ISOLERT</b> · Samme UT Lager v27.12-arbeidsflyt. Bunner/Hyller skannes som før; Forlengere korte/lange/plast bekreftes i egen TEST-blokk og følger rampen helt til Sendt.";
     const main=d.querySelector("main.app,main,.app");
     const title=d.querySelector("h1");
     if(title?.parentElement) title.insertAdjacentElement("beforebegin",banner);else main?.prepend(banner);
@@ -40,7 +40,7 @@ function markTest(d){
 }
 function tools(d){const box=d.getElementById("scanBox"),o=order();if(!box)return;d.querySelector('[data-mode="photo"]')?.classList.add("hidden");d.getElementById("photoPanel")?.classList.add("hidden");let wrap=d.getElementById("utFastTools");if(!wrap){wrap=d.createElement("div");wrap.id="utFastTools";wrap.style.cssText="display:grid;gap:9px;margin:0 0 13px";wrap.innerHTML='<button id="utDedicatedCameraButton" type="button"></button><button id="utBulkButton" type="button"></button>';box.insertAdjacentElement("beforebegin",wrap)}const c=d.getElementById("utDedicatedCameraButton"),b=d.getElementById("utBulkButton"),r=o?.ramp||"—",disabled=!o||["completed","cancelled"].includes(o.status);c.style.cssText="width:100%;min-height:64px;border:0;border-radius:14px;background:#f4c430;color:#17130a;font-weight:950;font-size:18px;touch-action:manipulation";b.style.cssText="width:100%;min-height:60px;border:2px solid #303b59;border-radius:14px;background:#0d1426;color:#aab4ce;font-weight:950;font-size:17px;touch-action:manipulation";c.textContent=`${tx().camera} RAMPE ${r}`;b.textContent=`${tx().bulk} · TEST senere`;c.disabled=disabled;b.disabled=true;c.onclick=goCamera;b.onclick=()=>note("Masseskanning er ikke koblet til TEST ennå.")}
 function scrollToOpenedRamp(){try{resize();const d=f.contentDocument,w=f.contentWindow,detail=d.getElementById("detail");if(!detail||!detail.classList.contains("show"))return;requestAnimationFrame(()=>requestAnimationFrame(()=>{try{resize();const frameTop=f.getBoundingClientRect().top+window.scrollY;const innerTop=detail.getBoundingClientRect().top+(w.scrollY||0);window.scrollTo({top:Math.max(0,frameTop+innerTop-10),behavior:"smooth"})}catch{}}))}catch{}}
-function afterRender(){try{const d=f.contentDocument,w=f.contentWindow;hideOldStock(d);tools(d);w.UT_LANGUAGE_APPLY?.();w.UT_PRODUCTION_ENHANCE?.();w.UT_COMPACT_CONNECTION_REFRESH?.();w.UT_STATUS_COLORS_APPLY?.();markTest(d);scanText.textContent=tx().cam;resize()}catch{}}
+function afterRender(){try{const d=f.contentDocument,w=f.contentWindow;hideOldStock(d);tools(d);w.UT_LANGUAGE_APPLY?.();w.UT_PRODUCTION_ENHANCE?.();w.UT_COMPACT_CONNECTION_REFRESH?.();w.UT_STATUS_COLORS_APPLY?.();w.UT_EXTRA_PRODUCTS_REFRESH?.();markTest(d);scanText.textContent=tx().cam;resize();setTimeout(resize,80)}catch{}}
 function patchCore(){const w=f.contentWindow;if(w.__BAMA_TEST_CLONE_PATCH__)return;w.__BAMA_TEST_CLONE_PATCH__=true;
   if(typeof w.openOrder==="function"){const original=w.openOrder;w.openOrder=async function(id){const result=await original.call(w,id,false);afterRender();setTimeout(scrollToOpenedRamp,60);return result}}
   if(typeof w.renderDetail==="function"){const original=w.renderDetail;w.renderDetail=function(...args){const result=original.apply(w,args);queueMicrotask(afterRender);return result}}
@@ -66,6 +66,7 @@ async function enhance(){const d=f.contentDocument;if(!d)return;try{
   await inject(d,"utsending-status-colors.js");
   await inject(d,"utsending-product-stock-v273.js");
   await inject(d,"utsending-compact-connection-v275.js");
+  await inject(d,"utsending-test-extra-products.js");
   patchCore();
   hideOldStock(d);
   d.querySelector("#utLanguageSwitch")?.addEventListener("click",()=>setTimeout(()=>{scanText.textContent=tx().cam;afterRender()},0));
