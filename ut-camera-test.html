@@ -16,7 +16,7 @@
   <iframe id="app" title="TEST — UT Foto"></iframe>
 <script>
 "use strict";
-const VERSION="20260808-1039",params=new URLSearchParams(location.search),ORDER=params.get("order")||"",RAMP=params.get("ramp")||"",frame=document.getElementById("app"),loader=document.getElementById("loader");
+const VERSION="20260808-1046",params=new URLSearchParams(location.search),ORDER=params.get("order")||"",RAMP=params.get("ramp")||"",frame=document.getElementById("app"),loader=document.getElementById("loader");
 function inject(doc,src){return new Promise((resolve,reject)=>{const s=doc.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;doc.body.appendChild(s)})}
 async function build(){
   try{
@@ -31,7 +31,7 @@ frame.addEventListener("load",async()=>{
   try{
     const doc=frame.contentDocument;
     doc.querySelector('[data-lang="pl"]')?.remove();
-    const version=doc.querySelector(".version");if(version)version.innerHTML="TEST UT Kamera v1.1 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:39";
+    const version=doc.querySelector(".version");if(version)version.innerHTML="TEST UT Kamera v1.2 ISOLERT<br>Oppdatert 08.08.2026 kl. 10:46";
     const back=doc.getElementById("backLink");if(back){back.href=`utsending-test.html?open=${encodeURIComponent(ORDER)}`;back.addEventListener("click",e=>{e.preventDefault();location.href=`utsending-test.html?open=${encodeURIComponent(ORDER)}`},{capture:true})}
     try{await inject(doc,`ut-camera-register-flow-v2.js?v=${VERSION}`)}catch{}
     try{await inject(doc,`ut-camera-floating-workflow.js?v=${VERSION}`)}catch{}
