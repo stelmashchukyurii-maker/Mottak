@@ -1,6 +1,15 @@
 "use strict";
 
 (() => {
+  // Disable any cached v1 compact counter that may still be referenced by bestilling.html.
+  window.__BAMA_COMPACT_STOCK_COUNTER__ = true;
+  if (!document.querySelector('script[data-bama-compact-stock-v2]')) {
+    const safeCounter = document.createElement("script");
+    safeCounter.src = "compact-stock-counter-v2.js?v=20260809-0116";
+    safeCounter.dataset.bamaCompactStockV2 = "true";
+    document.body.appendChild(safeCounter);
+  }
+
   const get = (id) => document.getElementById(id);
 
   if (typeof payload === "function") {
@@ -17,9 +26,7 @@
     const baseStartEdit = startEdit;
     startEdit = function startEditWithPartyFields(id) {
       baseStartEdit(id);
-      const order = Array.isArray(orders)
-        ? orders.find((item) => String(item.id) === String(id))
-        : null;
+      const order = Array.isArray(orders) ? orders.find((item) => String(item.id) === String(id)) : null;
       if (get("mottaker")) get("mottaker").value = order?.recipient || "";
       if (get("transporter")) get("transporter").value = order?.transporter || "";
     };
