@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v34</title>
+<title>UT Kontor WORKING v35</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--text:#f5f7ff}
 *{box-sizing:border-box}
@@ -17,14 +17,14 @@ body{display:flex;flex-direction:column}
 iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}
 #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font:900 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
 </style>
-<script src="products.js?v=20260809-1106"></script>
+<script src="products.js?v=20260809-1117"></script>
 </head>
 <body class="notranslate">
-<div id="loader">Laster UT Kontor WORKING v34…</div>
-<iframe id="app" title="UT Kontor WORKING v34"></iframe>
+<div id="loader">Laster UT Kontor WORKING v35…</div>
+<iframe id="app" title="UT Kontor WORKING v35"></iframe>
 <script>
 "use strict";
-const BUILD="20260809-1106";
+const BUILD="20260809-1117";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 
 function inject(doc,src,mark){
@@ -46,7 +46,7 @@ function applyWorkingBrand(){
     const home=d.querySelector("a.home");
     if(home)home.remove();
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v34 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 11:06";
+    if(version)version.innerHTML="UT Kontor WORKING v35 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 11:17";
   }catch{}
 }
 
@@ -59,10 +59,11 @@ frame.addEventListener("load",async()=>{
     await inject(d,"ut-kontor-history-visuals.js","history");
     await inject(d,"ut-test-language.js","language");
     w.UT_TEST_LANG?.apply?.();
+    await w.UT_KONTOR_HISTORY_VISUALS?.refreshProgress?.();
     w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
     w.BAMA_COMPACT_STOCK_REFRESH?.();
     applyWorkingBrand();
-    setTimeout(()=>{w.UT_TEST_LANG?.apply?.();w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();w.BAMA_COMPACT_STOCK_REFRESH?.();applyWorkingBrand()},300);
+    setTimeout(async()=>{w.UT_TEST_LANG?.apply?.();await w.UT_KONTOR_HISTORY_VISUALS?.refreshProgress?.();w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();w.BAMA_COMPACT_STOCK_REFRESH?.();applyWorkingBrand()},300);
     setTimeout(applyWorkingBrand,1200);
   }catch(e){
     console.error(e);
