@@ -16,29 +16,29 @@
 <body>
 <main>
 <h1>📡 Nordic ID — SCANNER</h1>
-<p class="sub">На головній завжди три Nordic-форми: поточна тестова зверху, остання стабільна посередині і незмінна RFID-діагностика внизу.</p>
-<div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — її переписуємо під час доробок. 2) STABLE — остання повністю підтверджена версія. Коли CURRENT TEST підтверджена, вона стає новою STABLE. 3) RFID TEST BASE внизу — не переписуємо; вона потрібна, щоб у будь-який момент перевірити чисте читання EPC/FOCUS/ACCEPTED/BLOCKED.</div>
+<p class="sub">На головній завжди три Nordic-форми: робоча тестова зверху, остання стабільна посередині і незмінна RFID-діагностика внизу.</p>
+<div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — робоча копія для наступних доробок. 2) STABLE — остання повністю підтверджена версія, її не переписуємо. 3) RFID TEST BASE внизу — незмінна діагностика чистого EPC/FOCUS/ACCEPTED/BLOCKED.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
-<div class="sectionLabel">Поточний тест · нестабільна</div>
+<div class="sectionLabel">Поточний тест · робоче місце</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 Nordic ID V2.3.4</h2>
-<p>PRODUCT MENU KEYBOARD FIX · повернуто після невдалої V2.3.5. Бірки читаються; поля Hyller + Forlengere показуються тільки для Forlengere korte/lange. V2.3.5 з inputmode=none відкинута.</p>
-<span class="tag">CURRENT TEST · ROLLBACK 21:37</span>
+<h2>🧪 NEXT CURRENT TEST</h2>
+<p>Робоча копія зараз базується на підтвердженій V2.3.4. Наступні зміни робимо тільки тут; stable-файл V2.3.4 вже заморожений окремо.</p>
+<span class="tag">READY FOR NEXT CHANGE</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
-<a class="link stable fresh" href="nordic-id-v22-product-test.html">
-<h2>✅ Nordic ID V2.2.1</h2>
-<p>PRODUCT TEST · KEYBOARD GUARD · підтверджений стабільний крок. Залишається недоторканим, поки верхня V2.3.x не буде повністю підтверджена.</p>
-<span class="tag">STABLE · CONFIRMED</span>
+<a class="link stable fresh" href="nordic-id-v234-stable.html">
+<h2>✅ Nordic ID V2.3.4</h2>
+<p>CONFIRM & SAVE + PRODUCT MENU + Forlengere counts. Підтверджена користувачем як нова стабільна версія 09.08.2026. Цей файл не переписуємо.</p>
+<span class="tag">STABLE · CONFIRMED 21:43</span>
 </a>
 <div class="sectionLabel">RFID діагностика · незмінна тестова база</div>
 <a class="link diagnostic fresh" href="nordic-id-v20-focus.html">
 <h2>🛟 Nordic ID V2.1</h2>
-<p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Використовуємо як контрольну точку, якщо нова версія раптом перестає читати EPC: тут видно FOCUS, Reader, ACCEPTED/BLOCKED і сам повний номер.</p>
+<p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Якщо нова версія перестає читати EPC — перевіряємо тут Reader, FOCUS, ACCEPTED/BLOCKED і повний номер.</p>
 <span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
 </a>
-<div class="plan">Поточний тест знову V2.3.4. V2.3.5 не використовуємо: inputmode=none зупинив читання бірок і дав порожню білу IME-панель. Якщо після повернення з Nordic-сторінки Android лишає IME-панель, scanner-home при відкритті примусово її закриває.</div>
-<div class="footer">SCANNER HOME v3.10<br>Oppdatert 09.08.2026 kl. 21:37 · Europe/Oslo</div>
+<div class="plan">V2.3.4 тепер є останньою STABLE. Верхній файл лишається робочою копією для наступної зміни. Старі V2.2.1 та інші rollback-файли залишаються в GitHub.</div>
+<div class="footer">SCANNER HOME v3.11<br>Oppdatert 09.08.2026 kl. 21:43 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";
