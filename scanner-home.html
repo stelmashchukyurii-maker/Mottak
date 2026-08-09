@@ -31,21 +31,21 @@
 <body>
 <main>
   <h1>📡 Nordic ID — SCANNER</h1>
-  <p class="sub">Одна робоча лінія Nordic ID. Нові версії нарощуємо тільки від тієї, яка реально працює на сканері.</p>
+  <p class="sub">Одна робоча лінія Nordic ID. Нові зміни перевіряємо від останньої реально успішної поведінки.</p>
 
-  <div class="fixed"><strong>ПОТОЧНА БАЗА: v1.7 — SCAN TABLE.</strong><br>Час кожного скану тепер показується до мілісекунд. Поле працює без екранної клавіатури та автоматично повертається у готовність після відправки журналу.</div>
+  <div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: v1.8 — WORKING INPUT RESTORE.</strong><br>Повернули механізм введення з успішної v1.4, де Nordic ID реально передав два повних 24-символьних RFID-коди. Мілісекунди й компактну таблицю збережено.</div>
 
   <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 
   <a class="link fresh" href="nordic-id-v1-journal.html">
-    <h2>🧪 Nordic ID v1.7 — SCAN TABLE</h2>
-    <p>Поточний тест: повторне сканування тих самих RFID. Таблиця: №, час до мілісекунд і повний 24-символьний номер.</p>
-    <span class="tag">CURRENT BASE · 15:20</span>
+    <h2>🧪 Nordic ID v1.8 — WORKING INPUT RESTORE</h2>
+    <p>Перевіряємо, чи після повернення звичайного текстового input знову почнуть приходити повні RFID-коди. Журнал прихований і передається автоматично.</p>
+    <span class="tag">CURRENT TEST · 15:44</span>
   </a>
 
-  <div class="plan">Мілісекунди допоможуть побачити, чи Nordic ID віддає кілька бірок майже одночасно та з якими інтервалами приходять повтори.</div>
+  <div class="plan">Якщо номер знову з'явиться — це буде сильним доказом, що inputmode="none" заважав Nordic ID Wedge передавати код у браузер.</div>
 
-  <div class="footer">SCANNER HOME v2.5<br>Oppdatert 09.08.2026 kl. 15:20 · Europe/Oslo</div>
+  <div class="footer">SCANNER HOME v2.6<br>Oppdatert 09.08.2026 kl. 15:44 · Europe/Oslo</div>
 </main>
 <script>
   "use strict";
