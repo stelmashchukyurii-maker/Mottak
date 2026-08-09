@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uk" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="google" content="notranslate" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Nordic ID — SCANNER HOME</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff6b6b;--info:#75b7ff;--line:#303b59}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}
+    main{width:min(760px,100%);margin:auto;padding:16px 12px 56px}
+    h1{margin:2px 0 6px;color:var(--accent);font-size:clamp(29px,8vw,44px)}
+    .sub{margin:0;color:var(--muted);line-height:1.45}
+    .fixed{margin:14px 0;padding:13px;border:1px solid var(--ok);border-radius:16px;background:rgba(72,213,151,.07);line-height:1.45}
+    .fixed strong{color:var(--ok)}
+    .refresh{width:100%;min-height:56px;margin:0 0 14px;border:2px solid var(--accent);border-radius:16px;background:var(--accent);color:#17130a;font-size:18px;font-weight:950;cursor:pointer}
+    .section{margin-top:20px}
+    .section h2{margin:0 0 5px;font-size:21px}
+    .note{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.45}
+    .grid{display:grid;gap:9px}
+    .link{display:block;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);text-decoration:none;box-shadow:0 8px 20px rgba(0,0,0,.16)}
+    .link:active{transform:scale(.99)}
+    .link.primary{border:2px solid var(--ok)}
+    .link.warn{border-color:#f6b94b}
+    .link.bad{border-color:rgba(255,107,107,.7)}
+    .link h3{margin:0;font-size:19px}
+    .link p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+    .tag{display:inline-block;margin-top:8px;padding:4px 7px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px;font-weight:900}
+    .tag.ok{border-color:var(--ok);color:var(--ok)}
+    .tag.warn{border-color:#f6b94b;color:#f6b94b}
+    .tag.bad{border-color:var(--bad);color:#ff9c9c}
+    details{margin-top:20px;border:1px solid var(--line);border-radius:16px;background:var(--dark)}
+    summary{padding:15px;font-weight:950;cursor:pointer}
+    details .inside{padding:0 10px 11px}
+    .footer{margin-top:22px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
+  </style>
+</head>
+<body>
+<main>
+  <h1>📡 Nordic ID — SCANNER HOME</h1>
+  <p class="sub">Одна постійна сторінка для всіх тестів фірмового Nordic ID. Нові тестові версії надалі додаються сюди.</p>
+
+  <div class="fixed"><strong>ЦЕ ПОСТІЙНЕ ПОСИЛАННЯ.</strong><br>Його достатньо один раз відкрити на сканері. Коли я додам новий тест — натисни кнопку «Оновити список».</div>
+  <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СПИСОК</button>
+
+  <section class="section">
+    <h2>🧪 Основні тести Nordic ID</h2>
+    <p class="note">Починати краще з простих тестів. При відкритті кожного пункту автоматично додається свіжий параметр проти кешу.</p>
+    <div class="grid">
+      <a class="link primary fresh" href="scanner-repeat-test.html">
+        <h3>1. Repeat Test</h3>
+        <p>Старий тест Nordic ID, де однакову бірку можна сканувати багато разів.</p>
+        <span class="tag ok">DUPLICATES OK</span>
+      </a>
+      <a class="link fresh" href="scanner-test.html">
+        <h3>2. CC Scanner Wedge Test</h3>
+        <p>Найдетальніший діагностичний тест: сирий ввід, довжина, спосіб завершення та журнал подій.</p>
+        <span class="tag">DETAILED RAW</span>
+      </a>
+      <a class="link fresh" href="scanner-repeat-exact.html">
+        <h3>3. Exact Repeat Test</h3>
+        <p>Стара точна версія тесту повторного зчитування.</p>
+        <span class="tag">REPEAT</span>
+      </a>
+      <a class="link fresh" href="scanner-kiosk-wrapper.html">
+        <h3>4. Kiosk Test</h3>
+        <p>Тест scanner-test у повноекранній оболонці.</p>
+        <span class="tag">KIOSK</span>
+      </a>
+      <a class="link bad fresh" href="nordic-id-test.html">
+        <h3>5. RAW Table Test — 09.08</h3>
+        <p>Сьогоднішній новий простий тест з таблицею. Під час першої перевірки на сканері не спрацював.</p>
+        <span class="tag bad">CURRENTLY NOT WORKING</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>📶 Nordic ID — інші режими</h2>
+    <div class="grid">
+      <a class="link fresh" href="nordic-id.html">
+        <h3>Nordic ID Scanner</h3>
+        <p>Окрема рання сторінка Nordic ID.</p>
+      </a>
+      <a class="link warn fresh" href="nordic-id-bulk-scanner.html">
+        <h3>Bulk Scanner v1</h3>
+        <p>Ранній тест масового зчитування кількох міток.</p>
+        <span class="tag warn">BULK</span>
+      </a>
+      <a class="link warn fresh" href="nordic-id-bulk-scanner-v2.html">
+        <h3>Bulk Scanner v2</h3>
+        <p>Друга версія тесту масового зчитування.</p>
+        <span class="tag warn">BULK v2</span>
+      </a>
+      <a class="link fresh" href="scanner-test-second.html">
+        <h3>Scanner Test — друга копія</h3>
+        <p>Стара друга адреса, яка перекидає на основний Wedge Test.</p>
+      </a>
+      <a class="link fresh" href="scanner-test-uploaded.html">
+        <h3>Scanner Test — uploaded link</h3>
+        <p>Стара допоміжна адреса, яка відкриває основний Wedge Test.</p>
+      </a>
+    </div>
+  </section>
+
+  <details>
+    <summary>🗃️ Старі minimal-експерименти</summary>
+    <div class="inside grid">
+      <a class="link fresh" href="mottak-minimal.html"><h3>Minimal v1</h3><p>Початковий мінімальний Nordic ID тест.</p></a>
+      <a class="link fresh" href="mottak-minimal-v2.html"><h3>Minimal v2</h3></a>
+      <a class="link fresh" href="mottak-minimal-v3-activate.html"><h3>Minimal v3 — Activate</h3></a>
+      <a class="link fresh" href="mottak-minimal-v4-beforeinput.html"><h3>Minimal v4 — BeforeInput</h3></a>
+      <a class="link fresh" href="mottak-minimal-v5-select.html"><h3>Minimal v5 — Select</h3></a>
+      <a class="link fresh" href="mottak-minimal-v6-alternate.html"><h3>Minimal v6 — Alternate / 20 scans</h3></a>
+    </div>
+  </details>
+
+  <div class="footer">SCANNER HOME v1.0<br>Oppdatert 09.08.2026 kl. 14:29 · Europe/Oslo</div>
+</main>
+<script>
+  "use strict";
+  document.getElementById("refreshBtn").addEventListener("click", function(){
+    var base = location.pathname;
+    location.replace(base + "?refresh=" + Date.now());
+  });
+  document.querySelectorAll("a.fresh").forEach(function(a){
+    a.addEventListener("click", function(e){
+      e.preventDefault();
+      var href = a.getAttribute("href");
+      var join = href.indexOf("?") >= 0 ? "&" : "?";
+      location.href = href + join + "from=scanner-home&v=" + Date.now();
+    });
+  });
+</script>
+</body>
+</html>
