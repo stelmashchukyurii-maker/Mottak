@@ -1,51 +1,72 @@
-NID-HANDOFF-2026-08-09-V24-STABLE-WRITEOFF-NEXT
+NID-HANDOFF-2026-08-09-V25-UT-ONE-TAG-SIM
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 21:59 Europe/Oslo
+Оновлено: 09.08.2026 22:15 Europe/Oslo
 
 ОБОВ'ЯЗКОВО У НОВІЙ РОЗМОВІ:
 1. Прочитай NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md.
-2. Production public.mottak_scans не чіпати без окремої команди користувача.
-3. TEST DB = public.nordic_id_mottak_test; TEST log = public.nordic_id_test_log.
+2. Production public.mottak_scans / public.ut_orders не чіпати без окремої команди користувача.
+3. Nordic TEST DB = public.nordic_id_mottak_test; Nordic TEST log = public.nordic_id_test_log.
+4. UT isolated contour = public.ut_test_orders / ut_test_order_items / ut_test_order_scans / ut_test_stock / ut_test_extra_confirmations.
 
 SCANNER HOME — ЗАВЖДИ 3 КАРТКИ:
-1) ВЕРХНЯ = CURRENT TEST / робоча копія для наступних змін.
-2) СЕРЕДНЯ = STABLE / остання підтверджена продуктова версія.
-3) НИЖНЯ = V2.1 FIRST TAG LOCK / RFID TEST BASE — незмінна діагностика.
+1) ВЕРХНЯ = CURRENT TEST.
+2) СЕРЕДНЯ = STABLE.
+3) НИЖНЯ = V2.1 FIRST TAG LOCK / RFID TEST BASE.
 
 ПОТОЧНИЙ СТАН:
-- НОВА STABLE: V2.4 HIDDEN RFID INPUT TEST.
-- Заморожений stable-файл: nordic-id-v24-stable.html. НЕ ПЕРЕПИСУВАТИ.
-- Робочий current-файл: nordic-id-v23-confirm-test.html; він лишається копією V2.4 і буде використовуватись для наступного етапу — логіки СПИСАННЯ/РУХУ ТОВАРУ.
-- Попередня V2.3.4 лишається в GitHub як rollback: nordic-id-v234-stable.html.
-- RFID TEST BASE: nordic-id-v20-focus.html = V2.1 FIRST TAG LOCK. НЕ ПЕРЕПИСУВАТИ І НЕ ПРИБИРАТИ З ГОЛОВНОЇ.
+- STABLE = V2.4 HIDDEN RFID INPUT TEST.
+- Stable-файл: nordic-id-v24-stable.html. НЕ ПЕРЕПИСУВАТИ.
+- CURRENT TEST = V2.5 UT ONE TAG SIM.
+- Current-файл: nordic-id-ut-simulator.html.
+- RFID TEST BASE: nordic-id-v20-focus.html. НЕ ПЕРЕПИСУВАТИ.
 
-ЩО ПІДТВЕРДЖЕНО У V2.4 STABLE:
-- Nordic RFID читає бірку;
-- видиме технічне поле RFID EPC прибране з інтерфейсу;
-- технічний scanInput лишається прихованим і активується апаратним Nordic trigger;
-- Android-клавіатура не потрібна для Bunner / Hyller x30 / Hyller x60;
-- видимими ручними input лишаються тільки hyller_count + forlengere_count для Forlengere korte/lange;
-- scan → велике підтвердження product + lower_number;
-- ручне підтвердження → INSERT у TEST DB;
-- зелений екран «ЗАПИСАНО» → OK → наступний цикл;
-- scanner_code = весь 24-char EPC;
-- lower_number = останні 6 символів;
-- 078500 / upper_number не використовуємо як робочий номер;
-- кнопка очищення очищає тільки екран; Supabase history залишається.
+V2.5 CURRENT TEST — МЕТА:
+- одна реальна фізична Nordic RFID-бірка використовується як trigger для багатьох різних TEST-одиниць;
+- користувач вибирає TEST-замовлення/рампу, потім товар із цього замовлення;
+- Bunner/Hyller30/Hyller60: кожний скан тієї самої фізичної бірки створює нову віртуальну TEST-одиницю у ut_test_stock і одразу резервує/stage її на вибране TEST-замовлення;
+- фізичний EPC зберігається у scanner_code/raw_data тестової одиниці, а virtual lower_number генерується окремо, тому одна фізична бірка не конфліктує з дублями;
+- Forlengere korte/lange: після скану відкриваються тільки Hyller + Forlengere; підтверджується наступний непідтверджений візок через ut_test_confirm_extra_unit;
+- після запису є кнопка відкрити utsending-test.html?open=<order_id> і продовжити staged → Sendt;
+- production не використовується.
 
-НАСТУПНИЙ ЕТАП:
-- користувач прямо сказав: після промоції V2.4 у STABLE у верхній CURRENT TEST будемо розбирати логіку списання всього цього;
-- не вигадувати правила списання наперед;
-- спочатку звірити існуючу робочу логіку/UT Kontor/production lifecycle і разом визначити: що саме списується, у який момент, який статус/кількість змінюється і як поводитися з Forlengere counts;
-- production не змінювати, поки правило не узгоджене.
+НОВА TEST RPC:
+public.ut_test_nordic_simulate_scan(
+  p_order_id uuid,
+  p_product text,
+  p_physical_epc text,
+  p_hyller_count integer default null,
+  p_forlengere_count integer default null
+)
+Migration: add_ut_test_nordic_rfid_simulator_rpc.
+Anon EXECUTE підтверджено; anon SELECT/INSERT/UPDATE на потрібних ut_test_* також підтверджено.
+
+ШТУЧНІ ЗАМОВЛЕННЯ:
+Створено 12 активних TEST-замовлень:
+NID-SIM-20260809-01 ... NID-SIM-20260809-12
+Рампи 41 ... 52.
+Вони мають різні комбінації Bunner, Hyller x30, Hyller x60, Forlengere korte, Forlengere lange.
+Усі створені тільки в ut_test_orders + ut_test_order_items, status=new, test_state=active.
+
+ЩО ТЕСТУВАТИ ФІЗИЧНО:
+1. scanner-home.html → V2.5 CURRENT TEST.
+2. Вибрати одну з рамп 41–52.
+3. Вибрати товар.
+4. Коротко просканувати нашу одну фізичну RFID-бірку.
+5. Bunner/H30/H60: підтвердити TEST → має з'явитися staged/virtual TEST lower.
+6. Forlengere korte/lange: ввести Hyller + Forlengere → TEST підтвердження.
+7. Натиснути «ВІДКРИТИ ЦЮ РАМПУ В UTSENDING TEST».
+8. Перевірити, що прогрес/товари видно на тій самій рампі, далі Klar på rampe → Sendt.
+9. Після фізичного тесту перевірити SQL: ut_test_order_scans, ut_test_stock, ut_test_extra_confirmations, статус ut_test_orders.
 
 ВАЖЛИВО:
-- V2.3.5 з inputmode=none не використовувати як основу — Nordic переставав читати бірки.
+- V2.5 ще НЕ STABLE і НЕ записувати у NORDIC_ID_PROGRESS_LOG.md до фізичного підтвердження користувача.
+- V2.4 лишається останньою STABLE.
+- V2.3.5 inputmode=none не використовувати: ламав читання Nordic.
 - Довготривалий progress log містить тільки підтверджені кроки.
 
 ПРАВИЛО ПРОМОЦІЇ:
-Коли верхній CURRENT TEST підтверджений користувачем — заморозити його окремим stable-файлом, поставити в середню STABLE-картку, а верхній робочий файл лишити для наступних змін.
+Коли V2.5 підтверджений користувачем — заморозити окремим stable-файлом, поставити в середню STABLE-картку; V2.4 лишити rollback у GitHub; нижня V2.1 лишається незмінною діагностикою.
 
 СТАРТОВА КОМАНДА:
-«Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. Остання STABLE = V2.4 у nordic-id-v24-stable.html. Верхній current = робоча копія для етапу списання. Нижня V2.1 = незмінна RFID TEST BASE. Production не чіпай без окремої команди.»
+«Прочитай NEXT_CHAT_NORDIC_ID.txt. STABLE = V2.4. CURRENT TEST = V2.5 UT ONE TAG SIM у nordic-id-ut-simulator.html. Є 12 штучних TEST-замовлень на рампах 41–52. Production не чіпай.»
