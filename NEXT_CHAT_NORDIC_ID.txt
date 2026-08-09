@@ -1,0 +1,18 @@
+NID-HANDOFF-2026-08-09-FIRST-TAG-LOCK
+
+Проєкт: BaMavaremottak / AI Scanner Mottak
+
+У НОВІЙ РОЗМОВІ:
+1. Спочатку прочитай у GitHub repo stelmashchukyurii-maker/Mottak файл NORDIC_ID_RFID_PROTOCOL.md.
+2. Не повторюй уже виконані RFID/Wedge тести.
+3. Не чіпай production Scanner/Camera/Working без прямої команди користувача.
+4. Поточна стабільна діагностична база: nordic-id-v20-focus.html (V2.0 FOCUS GUARD).
+5. Наступний етап: зробити окрему V2.1 FIRST TAG LOCK.
+6. Логіка: перший валідний 24-char EPC = ACCEPT; наступні EPC того самого короткого scan-cycle = BLOCK/IGNORE для робочої операції, але залишати в TEST-журналі як blocked.
+7. Після короткого TEST accepted EPC підключити до загальної бази Mottak.
+8. Практична мета: Nordic ID має бути придатний до роботи замість фотографування бірок.
+9. Android/NUR API рішення відкладене на пізніше; зараз працюємо через RFID Wedge + веб-сторінку.
+10. Wedge і CC4Scanner не використовувати одночасно: CC4Scanner напряму використовує NurApi.connect(), а Wedge займає той самий reader.
+
+СТАРТОВА КОМАНДА ДЛЯ ПРОДОВЖЕННЯ:
+"Прочитай NORDIC_ID_RFID_PROTOCOL.md і продовжуй з V2.1 FIRST TAG LOCK → TEST → accepted EPC → загальна база Mottak."
