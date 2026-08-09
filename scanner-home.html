@@ -19,17 +19,17 @@
 <p class="sub">На головній завжди три Nordic-форми: робоча тестова зверху, остання стабільна посередині і незмінна RFID-діагностика внизу.</p>
 <div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — робоча копія для наступних доробок. 2) STABLE — остання повністю підтверджена версія, її не переписуємо. 3) RFID TEST BASE внизу — незмінна діагностика чистого EPC/FOCUS/ACCEPTED/BLOCKED.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
-<div class="sectionLabel">Поточний тест · робоче місце</div>
+<div class="sectionLabel">Поточний тест · нестабільна</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 NEXT CURRENT TEST</h2>
-<p>Робоча копія зараз базується на підтвердженій V2.3.4. Наступні зміни робимо тільки тут; stable-файл V2.3.4 вже заморожений окремо.</p>
-<span class="tag">READY FOR NEXT CHANGE</span>
+<h2>🧪 Nordic ID V2.4</h2>
+<p>HIDDEN RFID INPUT TEST · технічне RFID-поле прибране з екрана і за замовчуванням закрите. Воно коротко активується тільки від апаратного trigger Nordic. Видимі поля введення залишаються лише Hyller + Forlengere для Forlengere korte/lange.</p>
+<span class="tag">CURRENT TEST · 21:54</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v234-stable.html">
 <h2>✅ Nordic ID V2.3.4</h2>
-<p>CONFIRM & SAVE + PRODUCT MENU + Forlengere counts. Підтверджена користувачем як нова стабільна версія 09.08.2026. Цей файл не переписуємо.</p>
-<span class="tag">STABLE · CONFIRMED 21:43</span>
+<p>CONFIRM & SAVE + PRODUCT MENU + Forlengere counts. Підтверджена користувачем як стабільна версія. Заморожена окремим файлом і не переписується.</p>
+<span class="tag">STABLE · CONFIRMED</span>
 </a>
 <div class="sectionLabel">RFID діагностика · незмінна тестова база</div>
 <a class="link diagnostic fresh" href="nordic-id-v20-focus.html">
@@ -37,8 +37,8 @@
 <p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Якщо нова версія перестає читати EPC — перевіряємо тут Reader, FOCUS, ACCEPTED/BLOCKED і повний номер.</p>
 <span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
 </a>
-<div class="plan">V2.3.4 тепер є останньою STABLE. Верхній файл лишається робочою копією для наступної зміни. Старі V2.2.1 та інші rollback-файли залишаються в GitHub.</div>
-<div class="footer">SCANNER HOME v3.11<br>Oppdatert 09.08.2026 kl. 21:43 · Europe/Oslo</div>
+<div class="plan">Тест V2.4: Bunner/H30/H60 — жодного видимого текстового поля і жодної Android-клавіатури. Для Forlengere korte/lange числова клавіатура дозволена тільки після ручного натискання Hyller або Forlengere. Якщо V2.4 не читає EPC — одразу повертаємося до середньої V2.3.4 STABLE.</div>
+<div class="footer">SCANNER HOME v3.12<br>Oppdatert 09.08.2026 kl. 21:54 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";
