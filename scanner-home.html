@@ -21,9 +21,9 @@
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест · нестабільна</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 Nordic ID V2.3.3</h2>
-<p>EXTENSION COUNTS · KEYBOARD GUARD · scan → велике підтвердження → запис у TEST DB. Для Forlengere korte/lange перед записом вводяться Hyller + Forlengere. Клавіатура повинна відкриватися тільки при ручному натисканні числового поля, не після SAVE/OK.</p>
-<span class="tag">CURRENT TEST · 21:09</span>
+<h2>🧪 Nordic ID V2.3.4</h2>
+<p>PRODUCT MENU KEYBOARD FIX · scan → підтвердження → TEST DB. Поля Hyller + Forlengere показуються тільки для Forlengere korte/lange. Меню продуктів не повинно відкривати клавіатуру; числова клавіатура дозволена тільки при ручному натисканні поля Hyller/Forlengere.</p>
+<span class="tag">CURRENT TEST · 21:19</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v22-product-test.html">
@@ -31,8 +31,8 @@
 <p>PRODUCT TEST · KEYBOARD GUARD · підтверджений стабільний крок. Залишається недоторканим, поки V2.3.x не буде повністю підтверджена.</p>
 <span class="tag">STABLE · CONFIRMED</span>
 </a>
-<div class="plan">Зараз тестуємо тільки верхню V2.3.3. Перевір: звичайний продукт → SAVE → OK без клавіатури; Forlengere → два поля Hyller/Forlengere → SAVE → зелений «ЗАПИСАНО» → OK без повторного відкриття клавіатури.</div>
-<div class="footer">SCANNER HOME v3.6<br>Oppdatert 09.08.2026 kl. 21:09:33 · Europe/Oslo</div>
+<div class="plan">Зараз тестуємо тільки верхню V2.3.4. Перевір: відкриття/вибір продукту без клавіатури; Bunner/H30/H60 без полів Hyller/Forlengere; Forlengere korte/lange з двома полями до SAVE; після SAVE поля зникають і лишається зелений підсумок.</div>
+<div class="footer">SCANNER HOME v3.7<br>Oppdatert 09.08.2026 kl. 21:19:10 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();location.href=a.getAttribute("href")+"?from=scanner-home&v="+Date.now()})});
