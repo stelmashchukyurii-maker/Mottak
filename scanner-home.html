@@ -17,13 +17,13 @@
 <main>
 <h1>📡 Nordic ID — SCANNER</h1>
 <p class="sub">Нові кроки тестуємо окремою версією. Підтверджена RFID-база V2.1 залишається нижче й не перезаписується.</p>
-<div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: V2.2 — PRODUCT TEST.</strong><br>V2.1 FIRST TAG LOCK збережено. V2.2 додає вибір продукту, розбір EPC на поля Mottak і запис тільки в окрему TEST-таблицю.</div>
+<div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: V2.2 — PRODUCT TEST.</strong><br>V2.1 FIRST TAG LOCK збережено. V2.2 додає вибір продукту, весь 24-char EPC у scanner_code і тільки останні 6 символів у lower_number. Старий 078500 не переносимо.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест</div>
 <a class="link current fresh" href="nordic-id-v22-product-test.html">
 <h2>🧪 Nordic ID V2.2</h2>
-<p>PRODUCT TEST · плаваючий вибір продукту · RFID scanner_code → upper_number + lower_number · окрема TEST DB. Production Mottak не змінюється.</p>
-<span class="tag">CURRENT TEST · 20:11</span>
+<p>PRODUCT TEST · плаваючий вибір продукту · весь EPC → scanner_code · останні 6 символів → lower_number · окрема TEST DB. Production Mottak не змінюється.</p>
+<span class="tag">CURRENT TEST · 20:14</span>
 </a>
 <div class="sectionLabel">Підтверджена RFID-база</div>
 <a class="link stable fresh" href="nordic-id-v20-focus.html">
@@ -31,8 +31,8 @@
 <p>FIRST TAG LOCK · LOCK 600 ms · стабільний підтверджений крок зчитування. Залишений окремо як база/rollback.</p>
 <span class="tag">STABLE RFID BASE</span>
 </a>
-<div class="plan">Для V2.2 спочатку вибери продукт у плаваючому вікні внизу, потім зроби короткий фізичний trigger Nordic ID. На сторінці мають з’явитися <strong>scanner_code</strong>, <strong>upper_number</strong>, <strong>lower_number</strong> і новий рядок у TEST-таблиці.</div>
-<div class="footer">SCANNER HOME v3.1<br>Oppdatert 09.08.2026 kl. 20:11 · Europe/Oslo</div>
+<div class="plan">Для V2.2 вибери продукт у плаваючому вікні внизу і зроби короткий фізичний trigger Nordic ID. Має з’явитися <strong>весь EPC</strong>, окремо <strong>lower_number</strong> (наприклад 0E3103), а в TEST-таблиці — новий рядок із вибраним продуктом.</div>
+<div class="footer">SCANNER HOME v3.1<br>Oppdatert 09.08.2026 kl. 20:14 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();var href=a.getAttribute("href");location.href=href+"?from=scanner-home&v="+Date.now()})});
