@@ -16,29 +16,29 @@
 <body>
 <main>
 <h1>📡 Nordic ID — SCANNER</h1>
-<p class="sub">На головній завжди три Nordic-форми: робоча тестова зверху, остання стабільна посередині і незмінна RFID-діагностика внизу.</p>
-<div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — робоча копія для наступних доробок. 2) STABLE — остання повністю підтверджена версія, її не переписуємо. 3) RFID TEST BASE внизу — незмінна діагностика чистого EPC/FOCUS/ACCEPTED/BLOCKED.</div>
+<p class="sub">На головній завжди три Nordic-форми: поточна робоча зверху, остання стабільна посередині і незмінна RFID-діагностика внизу.</p>
+<div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — тут робимо наступні зміни. 2) STABLE — остання повністю підтверджена версія, її не переписуємо. 3) RFID TEST BASE — незмінна діагностика чистого EPC/FOCUS/ACCEPTED/BLOCKED.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
-<div class="sectionLabel">Поточний тест · нестабільна</div>
+<div class="sectionLabel">Поточний тест · наступний етап</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 Nordic ID V2.4</h2>
-<p>HIDDEN RFID INPUT TEST · технічне RFID-поле прибране з екрана і за замовчуванням закрите. Воно коротко активується тільки від апаратного trigger Nordic. Видимі поля введення залишаються лише Hyller + Forlengere для Forlengere korte/lange.</p>
-<span class="tag">CURRENT TEST · 21:54</span>
+<h2>🧪 NEXT CURRENT TEST · СПИСАННЯ</h2>
+<p>Робоча копія базується на підтвердженій V2.4. Тут наступним етапом розбираємо логіку списання/руху товару. Поки нова логіка ще не внесена, поведінка лишається базою V2.4.</p>
+<span class="tag">READY FOR WRITE-OFF DESIGN</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
-<a class="link stable fresh" href="nordic-id-v234-stable.html">
-<h2>✅ Nordic ID V2.3.4</h2>
-<p>CONFIRM & SAVE + PRODUCT MENU + Forlengere counts. Підтверджена користувачем як стабільна версія. Заморожена окремим файлом і не переписується.</p>
-<span class="tag">STABLE · CONFIRMED</span>
+<a class="link stable fresh" href="nordic-id-v24-stable.html">
+<h2>✅ Nordic ID V2.4</h2>
+<p>HIDDEN RFID INPUT · технічне RFID-поле прибране з екрана; Nordic читає EPC; клавіатура потрібна тільки в Hyller + Forlengere для Forlengere korte/lange. Заморожена окремо.</p>
+<span class="tag">STABLE · CONFIRMED 21:59</span>
 </a>
 <div class="sectionLabel">RFID діагностика · незмінна тестова база</div>
 <a class="link diagnostic fresh" href="nordic-id-v20-focus.html">
 <h2>🛟 Nordic ID V2.1</h2>
-<p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Якщо нова версія перестає читати EPC — перевіряємо тут Reader, FOCUS, ACCEPTED/BLOCKED і повний номер.</p>
+<p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Якщо нова версія перестає читати EPC — перевіряємо Reader, FOCUS, ACCEPTED/BLOCKED і повний номер тут.</p>
 <span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
 </a>
-<div class="plan">Тест V2.4: Bunner/H30/H60 — жодного видимого текстового поля і жодної Android-клавіатури. Для Forlengere korte/lange числова клавіатура дозволена тільки після ручного натискання Hyller або Forlengere. Якщо V2.4 не читає EPC — одразу повертаємося до середньої V2.3.4 STABLE.</div>
-<div class="footer">SCANNER HOME v3.12<br>Oppdatert 09.08.2026 kl. 21:54 · Europe/Oslo</div>
+<div class="plan">V2.4 тепер STABLE. Наступний CURRENT TEST присвячуємо списанню. Production не змінюємо, доки окремо не узгодимо правила списання і момент, коли запис має переходити зі складу/у статус списано.</div>
+<div class="footer">SCANNER HOME v3.13<br>Oppdatert 09.08.2026 kl. 21:59 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";
