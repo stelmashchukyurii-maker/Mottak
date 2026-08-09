@@ -7,24 +7,26 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v30</title>
+<title>UT Kontor WORKING v31</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
 #app{display:block;width:100%;height:100%;border:0;background:#0b1020}
 #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
 </style>
-<script src="products.js?v=20260809-0920"></script>
+<script src="products.js?v=20260809-1015"></script>
 </head>
 <body>
-<div id="loader">Laster UT Kontor WORKING v30…</div>
-<iframe id="app" title="UT Kontor WORKING v30" src="bestilling-core-v29.html?v=20260809-0920"></iframe>
+<div id="loader">Laster UT Kontor WORKING v31…</div>
+<iframe id="app" title="UT Kontor WORKING v31"></iframe>
 <script>
 "use strict";
-const BUILD="20260809-0920";
+const BUILD="20260809-1015";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
-function inject(doc,src,mark){return new Promise((ok,bad)=>{if(mark&&doc.querySelector(`script[data-working-module="${mark}"]`))return ok();const s=doc.createElement("script");s.src=`${src}?v=${BUILD}`;if(mark)s.dataset.workingModule=mark;s.onload=ok;s.onerror=bad;doc.body.appendChild(s)})}
-function scrub(){try{const d=frame.contentDocument;if(!d?.body)return;const v=d.querySelector(".version");if(v)v.innerHTML="UT Kontor WORKING v30 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 09:20";const walker=d.createTreeWalker(d.body,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);for(const n of nodes){if(n.nodeValue?.includes("TEST"))n.nodeValue=n.nodeValue.replaceAll("TEST","WORKING")}}catch{}}
-frame.addEventListener("load",async()=>{try{const d=frame.contentDocument,w=frame.contentWindow;w.BAMA_HOME_TARGET="bestilling.html";await inject(d,"ut-kontor-products.js","products");scrub();new MutationObserver(scrub).observe(d.body,{childList:true,subtree:true,characterData:true});setTimeout(scrub,250);setTimeout(scrub,900);loader.style.display="none"}catch(e){loader.textContent=`UT Kontor startfeil: ${e.message||e}`}});
+function inject(doc,src,mark){return new Promise((ok,bad)=>{if(mark&&doc.querySelector(`script[data-working-module="${mark}"]`))return ok();const s=doc.createElement("script");s.src=`${src}?v=${BUILD}`;if(mark)s.dataset.workingModule=mark;s.onload=ok;s.onerror=()=>bad(new Error(`Kunne ikke laste ${src}`));doc.body.appendChild(s)})}
+function scrub(){try{const d=frame.contentDocument;if(!d?.body)return;const v=d.querySelector(".version");if(v)v.innerHTML="UT Kontor WORKING v31 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 10:15";const walker=d.createTreeWalker(d.body,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);for(const n of nodes){if(n.nodeValue?.includes("TEST"))n.nodeValue=n.nodeValue.replaceAll("TEST","WORKING")}}catch{}}
+frame.addEventListener("load",async()=>{loader.style.display="none";try{const d=frame.contentDocument,w=frame.contentWindow;w.BAMA_HOME_TARGET="bestilling.html";await inject(d,"ut-kontor-products.js","products");scrub();new MutationObserver(scrub).observe(d.body,{childList:true,subtree:true,characterData:true});setTimeout(scrub,250);setTimeout(scrub,900)}catch(e){console.error(e);loader.style.display="flex";loader.textContent=`UT Kontor startfeil: ${e.message||e}`}});
+setTimeout(()=>{if(loader.style.display!=="none")loader.textContent="Laster UT Kontor WORKING v31…"},1500);
+frame.src=`bestilling-core-v29.html?v=${BUILD}`;
 </script>
 </body>
 </html>
