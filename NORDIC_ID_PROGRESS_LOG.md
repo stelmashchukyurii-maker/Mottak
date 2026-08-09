@@ -64,7 +64,7 @@ GitHub commits:
 ## PASS — scanner-home синхронізована з поточною Nordic ID версією
 
 **Файл:** `scanner-home.html`  
-**Поточний напис:** `Nordic ID V2.1 — FIRST TAG LOCK`  
+**Поточний напис на цьому етапі:** `Nordic ID V2.1 — FIRST TAG LOCK`  
 **SCANNER HOME:** `v3.0`  
 **Видимий update:** 09.08.2026 19:33 Europe/Oslo
 
@@ -144,19 +144,61 @@ EPC у session:
 
 ---
 
-# ПОТОЧНА ТОЧКА ПРОДОВЖЕННЯ
+## PASS — V2.2 PRODUCT TEST пише Nordic ID у окрему TEST-базу
 
-**Поточна версія:** `V2.1 FIRST TAG LOCK`  
-**Постійний файл:** `nordic-id-v20-focus.html`
+**Версія:** `V2.2 PRODUCT TEST`  
+**Файл:** `nordic-id-v22-product-test.html`  
+**TEST table:** `public.nordic_id_mottak_test`
 
-На даному етапі головна практична мета:
+За прямою вказівкою користувача V2.1 збережена окремо як стабільна RFID-база/rollback, а новий продуктово-базовий етап винесено у V2.2.
 
-> **одне коротке натискання Nordic ID = максимум одна accepted бірка, навіть коли поруч є дві RFID-бірки.**
+Підтверджено фактичним тестом:
 
-Поточний тест цю поведінку показав: 12 accepted, жодної близької подвійної пари.
+- вибір продукту працює;
+- весь 24-char EPC записується у `scanner_code`;
+- старий `078500` / `upper_number` більше не використовується як робочий номер;
+- останні 6 символів EPC записуються у `lower_number`;
+- production `public.mottak_scans` на цьому етапі не змінюється;
+- V2.2 записала 17 тестових рядків: 16 × `0E3103`, 1 × `2CB739`, продукт `hyller30`.
 
-Наступні тести продовжувати без зміни V2.1 коду. Якщо колись Wedge знову віддасть другий EPC усередині 600 ms, він повинен піти в `RFID_BLOCKED`, а accepted counter не повинен збільшитися вдруге.
+Поля TEST-потоку:
 
-Після достатнього підтвердження стабільної поведінки `one press → one accepted tag` наступний етап:
+- `scanner_code` = весь EPC, наприклад `33161403D0000785000E3103`;
+- `lower_number` = `0E3103` / `2CB739`;
+- `upper_number` = порожній технічний compatibility-field.
 
-`accepted EPC → правильний робочий номер → public.mottak_scans`.
+---
+
+## PASS — V2.2.1 KEYBOARD GUARD
+
+**Підтверджено:** 09.08.2026 20:31 Europe/Oslo  
+**Версія:** `V2.2.1 PRODUCT TEST KEYBOARD GUARD`  
+**Файл:** `nordic-id-v22-product-test.html`  
+**GitHub commit:** `b80db614ff6b18f699e4c095076a5813a0de32f1`  
+**Supabase session:** `nid-20260809182759942-z7p199`
+
+Результат:
+
+- Android екранна клавіатура **не відкривається** при роботі з кнопками/вибором продукту — фізично підтверджено користувачем на Nordic ID;
+- у відповідній V2.2.1 session журнал бачить 4 `PRODUCT_SELECTED` і 16 `UI_KEYBOARD_GUARD` подій;
+- кнопковий UI більше не вважаємо причиною появи клавіатури;
+- RFID input лишився `type=text`, щоб не ламати RFID Wedge;
+- V2.1 FIRST TAG LOCK логіка не переписувалась;
+- користувач продовжує тестувати V2.2.1 далі без нової зміни коду.
+
+**Що від цього моменту вважаємо доведеним:** V2.2.1 вирішує практичну проблему появи Android-клавіатури під час вибору продукту.
+
+---
+
+# АКТУАЛЬНА ТОЧКА ПРОДОВЖЕННЯ — 09.08.2026 20:31 Europe/Oslo
+
+**Поточний тест:** `V2.2.1 PRODUCT TEST KEYBOARD GUARD`  
+**Поточний TEST-файл:** `nordic-id-v22-product-test.html`  
+**Стабільна RFID-база/rollback:** `nordic-id-v20-focus.html` = `V2.1 FIRST TAG LOCK`  
+**Головна:** `scanner-home.html` показує V2.2.1 зверху і V2.1 нижче як stable base.
+
+Поточна структура тесту:
+
+`короткий trigger → V2.1 one-tag RFID logic → accepted EPC → вибраний product → scanner_code = весь EPC → lower_number = останні 6 → public.nordic_id_mottak_test`
+
+Поки користувач тестує V2.2.1, **код не змінювати без нового завдання**. Наступні фізичні результати звіряти з Supabase і, за потреби, з новим відео у постійній Google Drive папці.
