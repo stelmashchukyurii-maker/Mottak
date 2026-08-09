@@ -1,7 +1,7 @@
-NID-HANDOFF-2026-08-09-V24-CURRENT-V234-STABLE
+NID-HANDOFF-2026-08-09-V24-STABLE-WRITEOFF-NEXT
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 21:54 Europe/Oslo
+Оновлено: 09.08.2026 21:59 Europe/Oslo
 
 ОБОВ'ЯЗКОВО У НОВІЙ РОЗМОВІ:
 1. Прочитай NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md.
@@ -9,43 +9,43 @@ NID-HANDOFF-2026-08-09-V24-CURRENT-V234-STABLE
 3. TEST DB = public.nordic_id_mottak_test; TEST log = public.nordic_id_test_log.
 
 SCANNER HOME — ЗАВЖДИ 3 КАРТКИ:
-1) ВЕРХНЯ = CURRENT TEST / нестабільна робоча версія.
+1) ВЕРХНЯ = CURRENT TEST / робоча копія для наступних змін.
 2) СЕРЕДНЯ = STABLE / остання підтверджена продуктова версія.
 3) НИЖНЯ = V2.1 FIRST TAG LOCK / RFID TEST BASE — незмінна діагностика.
 
 ПОТОЧНИЙ СТАН:
-- CURRENT TEST: V2.4 HIDDEN RFID INPUT TEST — nordic-id-v23-confirm-test.html.
-- V2.4 ПОКИ НЕ PASS: це експеримент, треба фізично перевірити Nordic.
-- STABLE: V2.3.4 PRODUCT MENU KEYBOARD FIX — nordic-id-v234-stable.html. НЕ ПЕРЕПИСУВАТИ.
+- НОВА STABLE: V2.4 HIDDEN RFID INPUT TEST.
+- Заморожений stable-файл: nordic-id-v24-stable.html. НЕ ПЕРЕПИСУВАТИ.
+- Робочий current-файл: nordic-id-v23-confirm-test.html; він лишається копією V2.4 і буде використовуватись для наступного етапу — логіки СПИСАННЯ/РУХУ ТОВАРУ.
+- Попередня V2.3.4 лишається в GitHub як rollback: nordic-id-v234-stable.html.
 - RFID TEST BASE: nordic-id-v20-focus.html = V2.1 FIRST TAG LOCK. НЕ ПЕРЕПИСУВАТИ І НЕ ПРИБИРАТИ З ГОЛОВНОЇ.
-- Попередня V2.2.1 лишається в GitHub як rollback.
 
-ЩО ПІДТВЕРДЖЕНО У V2.3.4 STABLE:
+ЩО ПІДТВЕРДЖЕНО У V2.4 STABLE:
 - Nordic RFID читає бірку;
+- видиме технічне поле RFID EPC прибране з інтерфейсу;
+- технічний scanInput лишається прихованим і активується апаратним Nordic trigger;
+- Android-клавіатура не потрібна для Bunner / Hyller x30 / Hyller x60;
+- видимими ручними input лишаються тільки hyller_count + forlengere_count для Forlengere korte/lange;
 - scan → велике підтвердження product + lower_number;
 - ручне підтвердження → INSERT у TEST DB;
 - зелений екран «ЗАПИСАНО» → OK → наступний цикл;
 - scanner_code = весь 24-char EPC;
 - lower_number = останні 6 символів;
 - 078500 / upper_number не використовуємо як робочий номер;
-- Bunner / Hyller x30 / Hyller x60 не мають полів кількості;
-- Forlengere korte / lange мають два TEST-поля: hyller_count і forlengere_count;
-- кнопка очищення очищає тільки екран, Supabase history залишається.
+- кнопка очищення очищає тільки екран; Supabase history залишається.
 
-ЩО ТЕСТУЄ V2.4:
-- видиме технічне поле RFID EPC прибране з інтерфейсу;
-- технічний scanInput лишився в коді, але схований і за замовчуванням readonly;
-- при апаратному Nordic keydown Unidentified він коротко активується, отримує EPC і знову закривається;
-- мета: не тримати Android text input постійно активним і не викликати soft keyboard;
-- видимими ручними input залишаються ТІЛЬКИ hyller_count + forlengere_count для Forlengere korte/lange;
-- якщо V2.4 не читає EPC — не ремонтувати навмання, одразу повернутися до V2.3.4 STABLE або перевірити V2.1 RFID TEST BASE.
+НАСТУПНИЙ ЕТАП:
+- користувач прямо сказав: після промоції V2.4 у STABLE у верхній CURRENT TEST будемо розбирати логіку списання всього цього;
+- не вигадувати правила списання наперед;
+- спочатку звірити існуючу робочу логіку/UT Kontor/production lifecycle і разом визначити: що саме списується, у який момент, який статус/кількість змінюється і як поводитися з Forlengere counts;
+- production не змінювати, поки правило не узгоджене.
 
 ВАЖЛИВО:
-- Спроба V2.3.5 з inputmode=none відкинута, бо Nordic перестав читати бірки; її не використовувати як основу.
-- Довготривалий progress log містить тільки підтверджені кроки; V2.4 не записувати туди до фізичного PASS.
+- V2.3.5 з inputmode=none не використовувати як основу — Nordic переставав читати бірки.
+- Довготривалий progress log містить тільки підтверджені кроки.
 
 ПРАВИЛО ПРОМОЦІЇ:
 Коли верхній CURRENT TEST підтверджений користувачем — заморозити його окремим stable-файлом, поставити в середню STABLE-картку, а верхній робочий файл лишити для наступних змін.
 
 СТАРТОВА КОМАНДА:
-«Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. CURRENT TEST = V2.4 hidden RFID input, ще не PASS. STABLE = V2.3.4 у nordic-id-v234-stable.html. Нижня V2.1 — незмінна RFID TEST BASE. Production не чіпай без окремої команди.»
+«Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. Остання STABLE = V2.4 у nordic-id-v24-stable.html. Верхній current = робоча копія для етапу списання. Нижня V2.1 = незмінна RFID TEST BASE. Production не чіпай без окремої команди.»
