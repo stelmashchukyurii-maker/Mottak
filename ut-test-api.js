@@ -32,10 +32,92 @@
     confirm_ut_extra_unit: "ut_test_confirm_extra_unit",
     clear_ut_extra_unit: "ut_test_clear_extra_unit",
     nordic_auto_scan: "ut_test_nordic_auto_scan",
+    nordic_preview: "ut_test_nordic_preview",
+  };
+
+  const PRODUCT_NAMES = {
+    bunner: "Bunner",
+    hyller30: "Hyller x30",
+    hyller60: "Hyller x60",
+    forlengere_korte: "Forlengere korte",
+    forlengere_lange: "Forlengere lange",
   };
 
   function requestMethod(input, init) {
     return String(init?.method || input?.method || "GET").toUpperCase();
+  }
+
+  function originalUrl(input) {
+    return typeof input === "string" || input instanceof URL ? String(input) : input.url;
+  }
+
+  async function requestPayload(input, init) {
+    try {
+      if (typeof init?.body === "string") return JSON.parse(init.body);
+      if (input instanceof Request) return await input.clone().json();
+    } catch (_) {}
+    return null;
+  }
+
+  function requestHeaders(input, init) {
+    if (init?.headers) return new Headers(init.headers);
+    if (input instanceof Request) return new Headers(input.headers);
+    return new Headers();
+  }
+
+  async function confirmNordicBeforeWrite(input, init, rawUrl) {
+    let url;
+    try { url = new URL(rawUrl, location.href); } catch (_) { return null; }
+    if (url.origin !== SUPABASE_ORIGIN || url.pathname !== "/rest/v1/rpc/nordic_auto_scan") return null;
+    if (requestMethod(input, init) !== "POST") return null;
+
+    const payload = await requestPayload(input, init);
+    if (!payload?.p_order_id || !payload?.p_epc) return null;
+
+    const previewUrl = new URL(rawUrl, location.href);
+    previewUrl.pathname = "/rest/v1/rpc/ut_test_nordic_preview";
+    const previewResponse = await nativeFetch(previewUrl.toString(), {
+      method: "POST",
+      headers: requestHeaders(input, init),
+      body: JSON.stringify({ p_order_id: payload.p_order_id, p_epc: payload.p_epc }),
+      cache: "no-store",
+    });
+
+    const previewText = await previewResponse.text();
+    let preview = null;
+    try { preview = previewText ? JSON.parse(previewText) : null; } catch (_) {}
+    if (!previewResponse.ok) {
+      return new Response(previewText || JSON.stringify({ message: "Не вдалося визначити товар перед підтвердженням." }), {
+        status: previewResponse.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (!preview?.ok) {
+      return new Response(JSON.stringify({ message: "Не вдалося визначити товар перед підтвердженням." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (preview.kind === "complete") return null;
+
+    const product = PRODUCT_NAMES[preview.product] || preview.product || "Невідомий товар";
+    const lower = preview.physical_lower || String(payload.p_epc).slice(-6);
+    const unitInfo = preview.kind === "counts" && preview.unit_index
+      ? `\nВізок: ${preview.unit_index} з ${preview.ordered || "—"}`
+      : "";
+    const ok = window.confirm(
+      `Nordic ID знайшов товар:\n\n${product}\nБірка: ${lower}${unitInfo}\n\nЦЕ ДІЙСНО ЦЕЙ ТОВАР?\n\nOK — підтвердити\nCancel — НЕ додавати`
+    );
+
+    if (!ok) {
+      return new Response(JSON.stringify({ message: `СКАСОВАНО — ${product} не додано на рампу.` }), {
+        status: 409,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return null;
   }
 
   function rewrittenUrl(rawUrl) {
@@ -67,8 +149,12 @@
     return url.toString();
   }
 
-  window.fetch = function bamaUtTestFetch(input, init = {}) {
-    const rawUrl = typeof input === "string" || input instanceof URL ? String(input) : input.url;
+  window.fetch = async function bamaUtTestFetch(input, init = {}) {
+    const rawUrl = originalUrl(input);
+
+    const confirmationResponse = await confirmNordicBeforeWrite(input, init, rawUrl);
+    if (confirmationResponse) return confirmationResponse;
+
     let nextUrl;
     try {
       nextUrl = rewrittenUrl(rawUrl);
@@ -94,7 +180,8 @@
     isolated: true,
     tables: { ...tableMap },
     rpcs: { ...rpcMap },
-    version: "1.4.0",
-    updatedAt: "2026-08-09T22:34:00+02:00",
+    nordicPreSaveConfirm: true,
+    version: "1.5.0",
+    updatedAt: "2026-08-09T22:42:00+02:00",
   };
 })();
