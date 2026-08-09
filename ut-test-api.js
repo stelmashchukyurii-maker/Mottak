@@ -36,21 +36,37 @@
   };
 
   const PRODUCT_NAMES = {
-    bunner: "Bunner",
-    hyller30: "Hyller x30",
-    hyller60: "Hyller x60",
-    forlengere_korte: "Forlengere korte",
-    forlengere_lange: "Forlengere lange",
+    nb: { bunner:"Bunner", hyller30:"Hyller x30", hyller60:"Hyller x60", forlengere_korte:"Forlengere korte", forlengere_lange:"Forlengere lange" },
+    pl: { bunner:"Bunner", hyller30:"Hyller x30", hyller60:"Hyller x60", forlengere_korte:"Przedłużki krótkie", forlengere_lange:"Przedłużki długie" },
+    uk: { bunner:"Bunner", hyller30:"Hyller x30", hyller60:"Hyller x60", forlengere_korte:"Подовжувачі короткі", forlengere_lange:"Подовжувачі довгі" },
   };
 
-  function requestMethod(input, init) {
-    return String(init?.method || input?.method || "GET").toUpperCase();
-  }
+  const COPY = {
+    nb: {
+      found:"Nordic ID fant varen:", tag:"Brikke", question:"ER DETTE RIKTIG VARE?", ok:"OK — bekreft", cancel:"Cancel — IKKE legg til",
+      previewError:"Kunne ikke identifisere varen før bekreftelse.", cancelled:p=>`AVBRUTT — ${p} ble ikke lagt til på rampen.`,
+      needExtras:"Registrer først Hyller og Forlengere for korte/lange forlengere før «Klar på rampe»."
+    },
+    pl: {
+      found:"Nordic ID znalazł produkt:", tag:"Etykieta", question:"CZY TO NA PEWNO TEN PRODUKT?", ok:"OK — potwierdź", cancel:"Cancel — NIE dodawaj",
+      previewError:"Nie udało się rozpoznać produktu przed potwierdzeniem.", cancelled:p=>`ANULOWANO — ${p} nie został dodany do rampy.`,
+      needExtras:"Najpierw wpisz liczbę półek i przedłużek dla krótkich/długich przedłużek przed «Gotowe na rampie»."
+    },
+    uk: {
+      found:"Nordic ID знайшов товар:", tag:"Бірка", question:"ЦЕ ДІЙСНО ЦЕЙ ТОВАР?", ok:"OK — підтвердити", cancel:"Cancel — НЕ додавати",
+      previewError:"Не вдалося визначити товар перед підтвердженням.", cancelled:p=>`СКАСОВАНО — ${p} не додано на рампу.`,
+      needExtras:"Спочатку введіть Hyller і Forlengere для коротких/довгих продовжувачів перед «Готово на рампі»."
+    }
+  };
 
-  function originalUrl(input) {
-    return typeof input === "string" || input instanceof URL ? String(input) : input.url;
+  function lang() {
+    const v = window.UT_LANG || localStorage.getItem("mottak_ut_language") || "nb";
+    return v === "pl" || v === "uk" ? v : "nb";
   }
-
+  function copy(){ return COPY[lang()] || COPY.nb; }
+  function productName(id){ return (PRODUCT_NAMES[lang()] || PRODUCT_NAMES.nb)[id] || id || "—"; }
+  function requestMethod(input, init) { return String(init?.method || input?.method || "GET").toUpperCase(); }
+  function originalUrl(input) { return typeof input === "string" || input instanceof URL ? String(input) : input.url; }
   async function requestPayload(input, init) {
     try {
       if (typeof init?.body === "string") return JSON.parse(init.body);
@@ -58,11 +74,13 @@
     } catch (_) {}
     return null;
   }
-
   function requestHeaders(input, init) {
     if (init?.headers) return new Headers(init.headers);
     if (input instanceof Request) return new Headers(input.headers);
     return new Headers();
+  }
+  function jsonResponse(message,status=409){
+    return new Response(JSON.stringify({message}),{status,headers:{"Content-Type":"application/json"}});
   }
 
   async function confirmNordicBeforeWrite(input, init, rawUrl) {
@@ -86,65 +104,46 @@
     const previewText = await previewResponse.text();
     let preview = null;
     try { preview = previewText ? JSON.parse(previewText) : null; } catch (_) {}
-    if (!previewResponse.ok) {
-      return new Response(previewText || JSON.stringify({ message: "Не вдалося визначити товар перед підтвердженням." }), {
-        status: previewResponse.status,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    if (!preview?.ok) {
-      return new Response(JSON.stringify({ message: "Не вдалося визначити товар перед підтвердженням." }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    if (!previewResponse.ok || !preview?.ok) return jsonResponse(copy().previewError, previewResponse.ok ? 400 : previewResponse.status);
 
     if (preview.kind === "complete") return null;
 
-    const product = PRODUCT_NAMES[preview.product] || preview.product || "Невідомий товар";
-    const lower = preview.physical_lower || String(payload.p_epc).slice(-6);
-    const unitInfo = preview.kind === "counts" && preview.unit_index
-      ? `\nВізок: ${preview.unit_index} з ${preview.ordered || "—"}`
-      : "";
-    const ok = window.confirm(
-      `Nordic ID знайшов товар:\n\n${product}\nБірка: ${lower}${unitInfo}\n\nЦЕ ДІЙСНО ЦЕЙ ТОВАР?\n\nOK — підтвердити\nCancel — НЕ додавати`
-    );
+    // Forlengere: no browser confirmation here. The Nordic page opens the dedicated
+    // Hyller + Forlengere modal; saving those fields is the user's confirmation.
+    if (preview.kind === "counts") return null;
 
-    if (!ok) {
-      return new Response(JSON.stringify({ message: `СКАСОВАНО — ${product} не додано на рампу.` }), {
-        status: 409,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    const c = copy();
+    const product = productName(preview.product);
+    const lower = preview.physical_lower || String(payload.p_epc).slice(-6);
+    const ok = window.confirm(`${c.found}\n\n${product}\n${c.tag}: ${lower}\n\n${c.question}\n\n${c.ok}\n${c.cancel}`);
+    if (!ok) return jsonResponse(c.cancelled(product));
+    return null;
+  }
+
+  async function guardStageBeforeWrite(input, init, rawUrl) {
+    let url;
+    try { url = new URL(rawUrl, location.href); } catch (_) { return null; }
+    if (url.origin !== SUPABASE_ORIGIN || url.pathname !== "/rest/v1/rpc/stage_ut_order") return null;
+    if (requestMethod(input, init) !== "POST") return null;
+    if (window.UT_EXTRA_PRODUCTS_COMPLETE === false) return jsonResponse(copy().needExtras);
     return null;
   }
 
   function rewrittenUrl(rawUrl) {
     const url = new URL(rawUrl, location.href);
-    if (url.origin !== SUPABASE_ORIGIN || !url.pathname.startsWith("/rest/v1/")) {
-      return url.toString();
-    }
-
+    if (url.origin !== SUPABASE_ORIGIN || !url.pathname.startsWith("/rest/v1/")) return url.toString();
     const restPath = url.pathname.slice("/rest/v1/".length);
     const slash = restPath.indexOf("/");
     const first = slash === -1 ? restPath : restPath.slice(0, slash);
-
     if (first === "rpc") {
       const rpcName = restPath.slice(4);
       const mapped = rpcMap[rpcName];
-      if (!mapped) {
-        throw new Error(`TEST SAFETY: Supabase RPC '${rpcName}' is not allowed in the isolated test contour.`);
-      }
+      if (!mapped) throw new Error(`TEST SAFETY: Supabase RPC '${rpcName}' is not allowed in the isolated test contour.`);
       url.pathname = `/rest/v1/rpc/${mapped}`;
       return url.toString();
     }
-
     const mappedTable = tableMap[first];
-    if (!mappedTable) {
-      throw new Error(`TEST SAFETY: Supabase table '${first}' is not allowed in the isolated test contour.`);
-    }
-
+    if (!mappedTable) throw new Error(`TEST SAFETY: Supabase table '${first}' is not allowed in the isolated test contour.`);
     url.pathname = `/rest/v1/${mappedTable}${slash === -1 ? "" : restPath.slice(slash)}`;
     return url.toString();
   }
@@ -155,11 +154,10 @@
       if (card && !document.getElementById("nidPreSaveConfirmBadge")) {
         const badge = document.createElement("div");
         badge.id = "nidPreSaveConfirmBadge";
-        badge.textContent = "V2.6.1 · PRE-SAVE CONFIRM · 09.08.2026 22:42";
+        badge.textContent = "V2.6.2 · LANG + EXTENDER FIELDS + RAMP GUARD · 09.08.2026 22:52";
         badge.style.cssText = "margin:8px 0 0;padding:7px 9px;border:1px solid #f4c430;border-radius:10px;background:rgba(244,196,48,.08);color:#fff1a8;font:900 10px/1.35 Arial,sans-serif;text-align:center";
         card.querySelector(".nid-head")?.insertAdjacentElement("afterend", badge);
       }
-
       const action = document.getElementById("testDispatchButton");
       if (action) {
         const text = String(action.textContent || "").trim();
@@ -168,52 +166,36 @@
       }
     } catch (_) {}
   }
-
   function startUiEnhancer() {
     enhanceNordicTestUi();
-    try {
-      const observer = new MutationObserver(enhanceNordicTestUi);
-      observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
-    } catch (_) {}
-    setInterval(enhanceNordicTestUi, 700);
+    try { new MutationObserver(enhanceNordicTestUi).observe(document.documentElement,{childList:true,subtree:true,characterData:true}); } catch (_) {}
+    setInterval(enhanceNordicTestUi,700);
   }
 
   window.fetch = async function bamaUtTestFetch(input, init = {}) {
     const rawUrl = originalUrl(input);
-
     const confirmationResponse = await confirmNordicBeforeWrite(input, init, rawUrl);
     if (confirmationResponse) return confirmationResponse;
+    const stageGuardResponse = await guardStageBeforeWrite(input, init, rawUrl);
+    if (stageGuardResponse) return stageGuardResponse;
 
     let nextUrl;
-    try {
-      nextUrl = rewrittenUrl(rawUrl);
-    } catch (error) {
+    try { nextUrl = rewrittenUrl(rawUrl); }
+    catch (error) {
       console.error("[UT-TEST-CHAIN] blocked", requestMethod(input, init), rawUrl, error);
       return Promise.reject(error);
     }
-
     if (nextUrl === rawUrl) return nativeFetch(input, init);
-
     console.info("[UT-TEST-CHAIN]", requestMethod(input, init), rawUrl, "→", nextUrl);
-
-    if (typeof input === "string" || input instanceof URL) {
-      return nativeFetch(nextUrl, init);
-    }
-
-    const replacement = new Request(nextUrl, input);
-    return nativeFetch(replacement, init);
+    if (typeof input === "string" || input instanceof URL) return nativeFetch(nextUrl, init);
+    return nativeFetch(new Request(nextUrl, input), init);
   };
 
   window.BAMA_UT_TEST_API = {
-    mode: "test",
-    isolated: true,
-    tables: { ...tableMap },
-    rpcs: { ...rpcMap },
-    nordicPreSaveConfirm: true,
-    version: "1.5.1",
-    updatedAt: "2026-08-09T22:42:00+02:00",
+    mode:"test", isolated:true, tables:{...tableMap}, rpcs:{...rpcMap}, nordicPreSaveConfirm:true,
+    version:"1.6.0", updatedAt:"2026-08-09T22:52:00+02:00"
   };
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startUiEnhancer, { once: true });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startUiEnhancer, {once:true});
   else startUiEnhancer();
 })();
