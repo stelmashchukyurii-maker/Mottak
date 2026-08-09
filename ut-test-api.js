@@ -31,6 +31,7 @@
     ut_extra_progress: "ut_test_extra_progress",
     confirm_ut_extra_unit: "ut_test_confirm_extra_unit",
     clear_ut_extra_unit: "ut_test_clear_extra_unit",
+    nordic_auto_scan: "ut_test_nordic_auto_scan",
   };
 
   function requestMethod(input, init) {
@@ -93,7 +94,7 @@
     isolated: true,
     tables: { ...tableMap },
     rpcs: { ...rpcMap },
-    version: "1.3.0",
-    updatedAt: "2026-08-08T16:58:00+02:00",
+    version: "1.4.0",
+    updatedAt: "2026-08-09T22:34:00+02:00",
   };
 })();
