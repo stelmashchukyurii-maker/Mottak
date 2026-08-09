@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Nordic ID v1.7 — Scan Table</title>
+  <title>Nordic ID v1.8 — Working Input Restore</title>
   <style>
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;padding:8px;font-family:Arial,Helvetica,sans-serif;color:#f5f7ff;background:#0b1020}
@@ -20,7 +20,7 @@
     label{display:block;margin:9px 0 5px;font-weight:900;font-size:13px}
     input{width:100%;min-height:60px;padding:9px 11px;border:3px solid #f4c430;border-radius:12px;background:#070b14;color:#f5f7ff;font:700 20px ui-monospace,Consolas,monospace;outline:none;caret-color:#fff}
     .buttons{display:grid;grid-template-columns:1fr;gap:6px;margin-top:7px}
-    button{min-height:41px;padding:7px 5px;border:1px solid #303b59;border-radius:10px;background:#202a45;color:#f5f7ff;font-weight:900;font-size:12px}
+    button{min-height:41px;padding:7px 5px;border:1px solid #303b59;border-radius:10px;background:#202a45;color:#f5f7ff;font-weight:900;font-size:12px;touch-action:manipulation}
     button.primary{border-color:#48d597;background:#17372c}
     .counter{margin:9px 0 4px;font-size:14px;font-weight:900}
     .tableWrap{overflow:hidden;border:1px solid #303b59;border-radius:10px;background:#0d1426}
@@ -42,12 +42,12 @@
 <body>
 <main>
   <h1>Nordic ID — SCAN TABLE</h1>
-  <div class="version"><strong>Test v1.7</strong> · Updated 09.08.2026 15:20 (Europe/Oslo)</div>
+  <div class="version"><strong>Test v1.8 — WORKING INPUT RESTORE</strong> · Updated 09.08.2026 15:44 (Europe/Oslo)</div>
 
   <div class="status" id="remoteStatus">Журнал: запускається…</div>
 
   <label for="scanInput">Scan code</label>
-  <input id="scanInput" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Waiting for scan…" />
+  <input id="scanInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Waiting for scan…" />
 
   <div class="buttons">
     <button class="primary" id="sendBtn" type="button">☁ ВІДПРАВИТИ ЖУРНАЛ</button>
@@ -63,7 +63,7 @@
     <div class="empty" id="emptyState">Ще немає просканованих номерів</div>
   </div>
 
-  <div class="footer">NORDIC ID TEST v1.7 · час скану показується до мілісекунд · технічний журнал автоматично передається в TEST</div>
+  <div class="footer">NORDIC ID TEST v1.8 · механізм вводу повернутий до успішної v1.4 · час до мілісекунд</div>
 </main>
 <script>
 (function(){
@@ -77,6 +77,7 @@
   var scanRows=document.getElementById("scanRows");
   var scanCount=document.getElementById("scanCount");
   var emptyState=document.getElementById("emptyState");
+  var sendBtn=document.getElementById("sendBtn");
 
   var queue=[];
   var eventNo=0;
@@ -175,19 +176,21 @@
   scanInput.addEventListener("focus",function(){logEvent("INPUT_FOCUS",{})});
   scanInput.addEventListener("blur",function(){logEvent("INPUT_BLUR",{})});
   document.addEventListener("visibilitychange",function(){logEvent("VISIBILITY",{state:document.visibilityState})});
-  window.addEventListener("focus",function(){logEvent("WINDOW_FOCUS",{});setTimeout(focusScan,60)});
+  window.addEventListener("focus",function(){logEvent("WINDOW_FOCUS",{})});
   window.addEventListener("blur",function(){logEvent("WINDOW_BLUR",{})});
   window.addEventListener("pagehide",function(){logEvent("PAGE_HIDE",{});flush(true)});
 
-  document.getElementById("sendBtn").addEventListener("click",function(){
-    logEvent("MANUAL_SEND",{});
+  function manualSend(e){
+    if(e)e.preventDefault();
+    logEvent("MANUAL_SEND",{kept_focus:document.activeElement===scanInput});
     flush(true);
-    setTimeout(focusScan,120);
-  });
+  }
+  sendBtn.addEventListener("pointerdown",manualSend);
+  sendBtn.addEventListener("click",function(e){e.preventDefault()});
 
   window.addEventListener("load",function(){
     focusScan();
-    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.7"});
+    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.8",input_mode:"restored-v1.4"});
     setTimeout(function(){logEvent("READY",{});flush(true)},150);
   });
 })();
