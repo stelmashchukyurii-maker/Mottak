@@ -1,66 +1,77 @@
 <!DOCTYPE html>
-<html lang="nb">
+<html lang="nb" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
+<meta name="google" content="notranslate">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v33</title>
+<title>UT Kontor WORKING v34</title>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
-#app{display:block;width:100%;height:100%;border:0;background:#0b1020}
-#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
+:root{color-scheme:dark;--bg:#0b1020;--text:#f5f7ff}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
+body{display:flex;flex-direction:column}
+iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}
+#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font:900 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
 </style>
-<script src="products.js?v=20260809-1035"></script>
+<script src="products.js?v=20260809-1106"></script>
 </head>
-<body>
-<div id="loader">Laster UT Kontor WORKING v33…</div>
-<iframe id="app" title="UT Kontor WORKING v33"></iframe>
+<body class="notranslate">
+<div id="loader">Laster UT Kontor WORKING v34…</div>
+<iframe id="app" title="UT Kontor WORKING v34"></iframe>
 <script>
 "use strict";
-const BUILD="20260809-1035";
+const BUILD="20260809-1106";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
-function inject(doc,src,mark){return new Promise((ok,bad)=>{if(mark&&doc.querySelector(`script[data-working-module="${mark}"]`))return ok();const s=doc.createElement("script");s.src=`${src}?v=${BUILD}`;if(mark)s.dataset.workingModule=mark;s.onload=ok;s.onerror=()=>bad(new Error(`Kunne ikke laste ${src}`));doc.body.appendChild(s)})}
-function scrub(){
+
+function inject(doc,src,mark){
+  return new Promise((ok,bad)=>{
+    if(mark&&doc.querySelector(`script[data-working-module="${mark}"]`))return ok();
+    const s=doc.createElement("script");
+    s.src=`${src}?v=${BUILD}`;
+    if(mark)s.dataset.workingModule=mark;
+    s.onload=ok;
+    s.onerror=()=>bad(new Error(`Kunne ikke laste ${src}`));
+    doc.body.appendChild(s);
+  });
+}
+
+function applyWorkingBrand(){
   try{
-    const d=frame.contentDocument;if(!d?.body)return;
-    const v=d.querySelector(".version");
-    const target="UT Kontor WORKING v33 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 10:35";
-    if(v&&v.innerHTML!==target)v.innerHTML=target;
-    const walker=d.createTreeWalker(d.body,NodeFilter.SHOW_TEXT),nodes=[];
-    while(walker.nextNode())nodes.push(walker.currentNode);
-    for(const n of nodes){if(n.nodeValue?.includes("TEST"))n.nodeValue=n.nodeValue.replaceAll("TEST","WORKING")}
+    const d=frame.contentDocument;
+    if(!d?.body)return;
+    const home=d.querySelector("a.home");
+    if(home)home.remove();
+    const version=d.querySelector(".version");
+    if(version)version.innerHTML="UT Kontor WORKING v34 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 11:06";
   }catch{}
 }
-async function build(){
-  try{
-    const r=await fetch(`bestilling-core-v29.html?v=${BUILD}`,{cache:"no-store"});
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    let html=await r.text();
-    html=html.replace(/<script src="compact-stock-counter\.js[^\"]*"><\/script>/i,`<script src="compact-stock-counter-v2.js?v=${BUILD}"><\/script>`);
-    html=html.replace(/bestilling-party-fields\.js\?v=[^\"]+/i,`bestilling-party-fields.js?v=${BUILD}`);
-    frame.srcdoc=html;
-  }catch(e){loader.textContent=`UT Kontor startfeil: ${e.message||e}`}
-}
+
 frame.addEventListener("load",async()=>{
   loader.style.display="none";
   try{
     const d=frame.contentDocument,w=frame.contentWindow;
-    w.BAMA_HOME_TARGET="bestilling.html";
+    w.BAMA_HOME_TARGET="";
     await inject(d,"ut-kontor-products.js","products");
-    scrub();
-    setTimeout(scrub,250);
-    setTimeout(scrub,900);
-    setTimeout(scrub,2000);
+    await inject(d,"ut-kontor-history-visuals.js","history");
+    await inject(d,"ut-test-language.js","language");
+    w.UT_TEST_LANG?.apply?.();
+    w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
+    w.BAMA_COMPACT_STOCK_REFRESH?.();
+    applyWorkingBrand();
+    setTimeout(()=>{w.UT_TEST_LANG?.apply?.();w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();w.BAMA_COMPACT_STOCK_REFRESH?.();applyWorkingBrand()},300);
+    setTimeout(applyWorkingBrand,1200);
   }catch(e){
     console.error(e);
     loader.style.display="flex";
     loader.textContent=`UT Kontor startfeil: ${e.message||e}`;
   }
 });
-build();
+
+frame.src=`bestilling-core-v29.html?v=${BUILD}`;
 </script>
 </body>
 </html>
