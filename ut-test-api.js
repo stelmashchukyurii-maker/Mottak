@@ -149,6 +149,35 @@
     return url.toString();
   }
 
+  function enhanceNordicTestUi() {
+    try {
+      const card = document.getElementById("nidScannerCard");
+      if (card && !document.getElementById("nidPreSaveConfirmBadge")) {
+        const badge = document.createElement("div");
+        badge.id = "nidPreSaveConfirmBadge";
+        badge.textContent = "V2.6.1 · PRE-SAVE CONFIRM · 09.08.2026 22:42";
+        badge.style.cssText = "margin:8px 0 0;padding:7px 9px;border:1px solid #f4c430;border-radius:10px;background:rgba(244,196,48,.08);color:#fff1a8;font:900 10px/1.35 Arial,sans-serif;text-align:center";
+        card.querySelector(".nid-head")?.insertAdjacentElement("afterend", badge);
+      }
+
+      const action = document.getElementById("testDispatchButton");
+      if (action) {
+        const text = String(action.textContent || "").trim();
+        if (text === "readyRampButton") action.textContent = "Klar på rampe";
+        if (text === "sendButton") action.textContent = "Send fra rampe";
+      }
+    } catch (_) {}
+  }
+
+  function startUiEnhancer() {
+    enhanceNordicTestUi();
+    try {
+      const observer = new MutationObserver(enhanceNordicTestUi);
+      observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+    } catch (_) {}
+    setInterval(enhanceNordicTestUi, 700);
+  }
+
   window.fetch = async function bamaUtTestFetch(input, init = {}) {
     const rawUrl = originalUrl(input);
 
@@ -181,7 +210,10 @@
     tables: { ...tableMap },
     rpcs: { ...rpcMap },
     nordicPreSaveConfirm: true,
-    version: "1.5.0",
+    version: "1.5.1",
     updatedAt: "2026-08-09T22:42:00+02:00",
   };
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startUiEnhancer, { once: true });
+  else startUiEnhancer();
 })();
