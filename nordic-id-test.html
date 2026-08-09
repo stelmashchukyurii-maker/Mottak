@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="uk" translate="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="google" content="notranslate" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>TEST — Nordic ID</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--dark:#080d19;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff6b6b;--info:#75b7ff;--line:#303b59}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}
+    main{width:min(820px,100%);margin:auto;padding:16px 12px 48px}
+    h1{margin:2px 0 6px;color:var(--accent);font-size:clamp(30px,8vw,44px)}
+    .sub{margin:0 0 14px;color:var(--muted);line-height:1.45}
+    .card{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:0 10px 24px rgba(0,0,0,.2)}
+    .test-badge{display:inline-block;margin-bottom:10px;padding:5px 9px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);font-size:11px;font-weight:900}
+    .known{padding:11px;border:1px dashed var(--line);border-radius:13px;background:var(--dark);color:var(--muted);font-size:12px;line-height:1.45}
+    .known code{display:block;margin-top:5px;color:var(--text);font:900 clamp(17px,5vw,24px) Consolas,monospace;overflow-wrap:anywhere}
+    .focus{margin-bottom:9px;padding:10px 12px;border:1px solid rgba(255,107,107,.45);border-radius:12px;background:rgba(255,107,107,.07);color:#ffb0b0;font-weight:800}
+    .focus.ok{border-color:rgba(72,213,151,.5);background:rgba(72,213,151,.07);color:var(--ok)}
+    #scanInput{width:100%;min-height:105px;padding:14px;border:3px solid var(--accent);border-radius:16px;outline:none;resize:none;background:#050811;color:var(--text);caret-color:var(--accent);font:900 clamp(20px,6vw,32px) Consolas,monospace;letter-spacing:.035em;overflow-wrap:anywhere}
+    #scanInput:focus{box-shadow:0 0 0 4px rgba(244,196,48,.15)}
+    .hint{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    button{min-height:48px;border:0;border-radius:13px;font:800 15px Arial,sans-serif;cursor:pointer;touch-action:manipulation}
+    .secondary{background:#2c395c;color:var(--text)}
+    .danger{background:rgba(255,107,107,.16);color:#ffb0b0;border:1px solid rgba(255,107,107,.35)}
+    .status{min-height:24px;margin-top:9px;color:var(--muted);line-height:1.4;overflow-wrap:anywhere}
+    .status.ok{color:var(--ok)}
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+    table{width:100%;border-collapse:collapse;min-width:560px;background:#0d1426}
+    th,td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+    th{position:sticky;top:0;background:#111a2e;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    tr:last-child td{border-bottom:0}
+    td.num{width:48px;color:var(--muted)}
+    td.time{width:95px;color:var(--muted);font-size:12px}
+    td.code{font:900 17px Consolas,monospace;overflow-wrap:anywhere;word-break:break-all}
+    td.len{width:80px;font:800 13px Consolas,monospace;color:var(--muted)}
+    .empty{padding:22px;text-align:center;color:var(--muted)}
+    .footer{margin-top:16px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
+    .back{display:inline-block;margin-bottom:10px;color:var(--info);text-decoration:none;font-weight:800}
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="test-home.html">← TEST home</a>
+  <h1>Nordic ID — TEST</h1>
+  <p class="sub">Початковий тест фірмового сканера. Приймаємо те, що сканер передає, як один сирий код. Нічого не розбиваємо і не записуємо в базу.</p>
+
+  <section class="card">
+    <span class="test-badge">FIRM SCANNER · RAW TEST</span>
+    <div class="known">Відомий контрольний код з попереднього тесту:<code>33161403D0000785002CB739</code></div>
+  </section>
+
+  <section class="card">
+    <div id="focusBox" class="focus">Поле сканера не у фокусі</div>
+    <textarea id="scanInput" rows="3" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="none" placeholder="Натисни кнопку на Nordic ID…"></textarea>
+    <p class="hint">Однакові коди дозволені. Кожне завершене зчитування додається новим рядком у таблицю.</p>
+    <div class="actions">
+      <button id="clearFieldBtn" class="secondary" type="button">Очистити поле</button>
+      <button id="clearTableBtn" class="danger" type="button">Очистити таблицю</button>
+    </div>
+    <div id="status" class="status" aria-live="polite">Готово до першого сканування.</div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0 0 10px">Зчитані номери — <span id="count">0</span></h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>№</th><th>Час</th><th>Повний сирий номер</th><th>Символів</th></tr></thead>
+        <tbody id="scanRows"></tbody>
+      </table>
+      <div id="emptyState" class="empty">Ще нічого не зчитано.</div>
+    </div>
+  </section>
+
+  <div class="footer">Nordic ID TEST v1.0<br>Oppdatert 09.08.2026 kl. 13:29 · Europe/Oslo</div>
+</main>
+<script>
+"use strict";
+
+const input = document.getElementById("scanInput");
+const focusBox = document.getElementById("focusBox");
+const rows = document.getElementById("scanRows");
+const emptyState = document.getElementById("emptyState");
+const count = document.getElementById("count");
+const statusEl = document.getElementById("status");
+
+const scans = [];
+let idleTimer = null;
+const IDLE_MS = 700;
+
+function clock(){
+  return new Date().toLocaleTimeString("uk-UA", {hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false});
+}
+
+function keepFocus(delay=40){
+  setTimeout(() => {
+    input.focus({preventScroll:true});
+    try{input.setSelectionRange(input.value.length,input.value.length)}catch(_e){}
+    updateFocus();
+  }, delay);
+}
+
+function updateFocus(){
+  const active = document.activeElement === input;
+  focusBox.className = "focus" + (active ? " ok" : "");
+  focusBox.textContent = active ? "Поле сканера у фокусі — готово" : "Поле сканера не у фокусі";
+}
+
+function render(){
+  rows.innerHTML = "";
+  count.textContent = String(scans.length);
+  emptyState.style.display = scans.length ? "none" : "block";
+
+  scans.forEach((scan, index) => {
+    const tr = document.createElement("tr");
+
+    const tdNum = document.createElement("td");
+    tdNum.className = "num";
+    tdNum.textContent = String(index + 1);
+
+    const tdTime = document.createElement("td");
+    tdTime.className = "time";
+    tdTime.textContent = scan.time;
+
+    const tdCode = document.createElement("td");
+    tdCode.className = "code";
+    tdCode.textContent = scan.raw;
+
+    const tdLen = document.createElement("td");
+    tdLen.className = "len";
+    tdLen.textContent = String(Array.from(scan.raw).length);
+
+    tr.append(tdNum, tdTime, tdCode, tdLen);
+    rows.appendChild(tr);
+  });
+}
+
+function finishScan(reason){
+  if(idleTimer){clearTimeout(idleTimer);idleTimer=null;}
+  const raw = input.value.replace(/[\r\n\t]+$/g, "");
+  if(!raw){input.value="";keepFocus();return;}
+
+  scans.unshift({raw, time:clock(), reason});
+  render();
+  statusEl.className = "status ok";
+  statusEl.textContent = `Зчитано: ${raw} · ${Array.from(raw).length} символів`;
+  input.value = "";
+  keepFocus(25);
+}
+
+input.addEventListener("focus", updateFocus);
+input.addEventListener("blur", () => { updateFocus(); keepFocus(180); });
+
+input.addEventListener("input", () => {
+  if(idleTimer) clearTimeout(idleTimer);
+  if(!input.value) return;
+
+  const controlIndex = input.value.search(/[\r\n\t]/);
+  if(controlIndex >= 0){
+    const before = input.value.slice(0, controlIndex);
+    input.value = before;
+    finishScan("control");
+    return;
+  }
+
+  idleTimer = setTimeout(() => finishScan("timeout"), IDLE_MS);
+});
+
+document.addEventListener("keydown", (event) => {
+  if(document.activeElement !== input) return;
+  if((event.key === "Enter" || event.key === "Tab") && input.value){
+    event.preventDefault();
+    finishScan(event.key);
+  }
+}, true);
+
+document.getElementById("clearFieldBtn").addEventListener("click", () => {
+  if(idleTimer){clearTimeout(idleTimer);idleTimer=null;}
+  input.value = "";
+  statusEl.className = "status";
+  statusEl.textContent = "Поле очищено. Готово до нового сканування.";
+  keepFocus();
+});
+
+document.getElementById("clearTableBtn").addEventListener("click", () => {
+  scans.length = 0;
+  render();
+  statusEl.className = "status";
+  statusEl.textContent = "Таблицю очищено. Готово до нового сканування.";
+  keepFocus();
+});
+
+window.addEventListener("pageshow", () => keepFocus(100));
+window.addEventListener("focus", () => keepFocus(80));
+document.addEventListener("visibilitychange", () => { if(!document.hidden) keepFocus(80); });
+
+render();
+keepFocus(100);
+</script>
+</body>
+</html>
