@@ -8,37 +8,41 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Nordic ID v1.3 — Scan Table</title>
+  <title>Nordic ID v1.4 — Scan Table</title>
   <style>
     *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;padding:10px;font-family:Arial,Helvetica,sans-serif;color:#f5f7ff;background:#0b1020}
-    main{width:min(720px,100%);margin:0 auto;padding:13px;border:1px solid #303b59;border-radius:16px;background:#151c30}
-    h1{margin:0 0 4px;font-size:22px}
-    .version{color:#aab4ce;font-size:11px;line-height:1.4}
-    .status{margin:9px 0;padding:8px 10px;border:1px solid #48d597;border-radius:10px;background:rgba(72,213,151,.08);color:#bdf5da;font-size:12px;font-weight:800;line-height:1.35}
+    body{margin:0;min-height:100vh;padding:8px;font-family:Arial,Helvetica,sans-serif;color:#f5f7ff;background:#0b1020}
+    main{width:min(720px,100%);margin:0 auto;padding:11px;border:1px solid #303b59;border-radius:15px;background:#151c30}
+    h1{margin:0 0 3px;font-size:21px}
+    .version{color:#aab4ce;font-size:10.5px;line-height:1.35}
+    .status{margin:8px 0;padding:7px 9px;border:1px solid #48d597;border-radius:9px;background:rgba(72,213,151,.08);color:#bdf5da;font-size:11.5px;font-weight:800;line-height:1.25}
     .status.bad{border-color:#ff6b6b;color:#ffc1c1;background:rgba(255,107,107,.08)}
-    label{display:block;margin:11px 0 6px;font-weight:900;font-size:14px}
-    input{width:100%;min-height:64px;padding:10px 12px;border:3px solid #f4c430;border-radius:13px;background:#070b14;color:#f5f7ff;font:700 21px ui-monospace,Consolas,monospace;outline:none;caret-color:#fff}
-    .buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
-    button{min-height:44px;padding:8px;border:1px solid #303b59;border-radius:11px;background:#202a45;color:#f5f7ff;font-weight:900;font-size:13px}
+    label{display:block;margin:9px 0 5px;font-weight:900;font-size:13px}
+    input{width:100%;min-height:60px;padding:9px 11px;border:3px solid #f4c430;border-radius:12px;background:#070b14;color:#f5f7ff;font:700 20px ui-monospace,Consolas,monospace;outline:none;caret-color:#fff}
+    .buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}
+    button{min-height:41px;padding:7px 5px;border:1px solid #303b59;border-radius:10px;background:#202a45;color:#f5f7ff;font-weight:900;font-size:12px}
     button.primary{border-color:#48d597;background:#17372c}
-    .counter{margin:12px 0 5px;font-size:16px;font-weight:900}
-    .tableWrap{overflow-x:auto;border:1px solid #303b59;border-radius:11px;background:#0d1426}
-    table{width:100%;border-collapse:collapse;table-layout:auto}
-    th,td{padding:9px 7px;border-bottom:1px solid #303b59;text-align:left;font-size:12px}
-    th{color:#aab4ce;background:#111a2d;position:sticky;top:0}
-    td.no{width:38px;text-align:center;font-weight:900;color:#f4c430}
-    td.time{width:72px;white-space:nowrap;color:#b9c5df;font-family:ui-monospace,Consolas,monospace}
-    td.code{font:700 13px ui-monospace,Consolas,monospace;overflow-wrap:anywhere;color:#fff}
+    .counter{margin:9px 0 4px;font-size:14px;font-weight:900}
+    .tableWrap{overflow:hidden;border:1px solid #303b59;border-radius:10px;background:#0d1426}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    col.c-no{width:25px}
+    col.c-time{width:51px}
+    col.c-code{width:auto}
+    th,td{padding:7px 3px;border-bottom:1px solid #303b59;text-align:left}
+    th{color:#aab4ce;background:#111a2d;font-size:10px}
+    th.no,td.no{text-align:center}
+    td.no{font-size:10px;font-weight:900;color:#f4c430}
+    td.time{white-space:nowrap;color:#b9c5df;font:700 9.5px ui-monospace,Consolas,monospace}
+    td.code{white-space:nowrap;overflow:hidden;text-overflow:clip;color:#fff;font:700 10.5px ui-monospace,Consolas,monospace;letter-spacing:-.35px}
     tr:last-child td{border-bottom:0}
-    .empty{padding:18px 10px;text-align:center;color:#7683a4;font-size:12px}
-    .footer{margin-top:10px;text-align:center;color:#7683a4;font-size:9px;line-height:1.4}
+    .empty{padding:15px 8px;text-align:center;color:#7683a4;font-size:11px}
+    .footer{margin-top:8px;text-align:center;color:#7683a4;font-size:8.5px;line-height:1.3}
   </style>
 </head>
 <body>
 <main>
   <h1>Nordic ID — SCAN TABLE</h1>
-  <div class="version"><strong>Test v1.3</strong> · Updated 09.08.2026 15:10 (Europe/Oslo)</div>
+  <div class="version"><strong>Test v1.4</strong> · Updated 09.08.2026 15:15 (Europe/Oslo)</div>
 
   <div class="status" id="remoteStatus">Журнал: запускається…</div>
 
@@ -53,22 +57,21 @@
   <div class="counter">Проскановано: <span id="scanCount">0</span></div>
   <div class="tableWrap">
     <table>
-      <thead><tr><th>№</th><th>Час</th><th>Номер</th></tr></thead>
+      <colgroup><col class="c-no"><col class="c-time"><col class="c-code"></colgroup>
+      <thead><tr><th class="no">№</th><th>Час</th><th>Номер</th></tr></thead>
       <tbody id="scanRows"></tbody>
     </table>
     <div class="empty" id="emptyState">Ще немає просканованих номерів</div>
   </div>
 
-  <div class="footer">NORDIC ID TEST v1.3 · технічний журнал прихований і автоматично передається в TEST</div>
+  <div class="footer">NORDIC ID TEST v1.4 · технічний журнал прихований і автоматично передається в TEST</div>
 </main>
 <script>
 (function(){
   "use strict";
 
   var SUPABASE_URL="https://hzjsatehehhpgpskckfi.supabase.co";
-  var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiJ9";
-  // Runtime key is replaced below with the actual public anon key used by this TEST page.
-  SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6anNhdGVoZWhocGdwc2tja2ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1OTkyNTMsImV4cCI6MjEwMTE3NTI1M30.sti5fzcHsfhlve3GR-wrF_RCecRZysv12qpTBvL11-U";
+  var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6anNhdGVoZWhocGdwc2tja2ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1OTkyNTMsImV4cCI6MjEwMTE3NTI1M30.sti5fzcHsfhlve3GR-wrF_RCecRZysv12qpTBvL11-U";
 
   var scanInput=document.getElementById("scanInput");
   var remoteStatus=document.getElementById("remoteStatus");
@@ -82,7 +85,6 @@
   var idleTimer=null;
   var sending=false;
   var scans=[];
-  var lastCommitted="";
   var sessionId="nid-"+new Date().toISOString().replace(/[-:.TZ]/g,"")+"-"+Math.random().toString(36).slice(2,8);
 
   function activeName(){var a=document.activeElement;return a?((a.tagName||"?")+(a.id?"#"+a.id:"")):"none"}
@@ -147,13 +149,9 @@
   function commitCurrent(reason){
     var code=scanInput.value;
     if(!code)return;
-    if(code===lastCommitted){
-      // Duplicates are valid scans; allow them after the field was cleared and filled again.
-    }
     var when=new Date();
     renderScan(code,when);
     logEvent("SCAN_COMMIT",{reason:reason,scan_no:scans.length,scan_code:code,value:code,length:code.length,scan_time_iso:when.toISOString()});
-    lastCommitted=code;
     scanInput.value="";
     setTimeout(function(){scanInput.focus()},20);
   }
@@ -179,12 +177,14 @@
   scanInput.addEventListener("focus",function(){logEvent("INPUT_FOCUS",{})});
   scanInput.addEventListener("blur",function(){logEvent("INPUT_BLUR",{})});
   document.addEventListener("visibilitychange",function(){logEvent("VISIBILITY",{state:document.visibilityState})});
-  window.addEventListener("focus",function(){logEvent("WINDOW_FOCUS",{});setTimeout(function(){scanInput.focus()},50)});
+  window.addEventListener("focus",function(){logEvent("WINDOW_FOCUS",{})});
   window.addEventListener("blur",function(){logEvent("WINDOW_BLUR",{})});
   window.addEventListener("pagehide",function(){logEvent("PAGE_HIDE",{});flush(true)});
 
   document.getElementById("sendBtn").addEventListener("click",function(){
-    logEvent("MANUAL_SEND",{});flush(true);setTimeout(function(){scanInput.focus()},100);
+    scanInput.blur();
+    logEvent("MANUAL_SEND",{});
+    flush(true);
   });
   document.getElementById("focusBtn").addEventListener("click",function(){
     scanInput.focus();logEvent("MANUAL_FOCUS",{});
@@ -192,7 +192,7 @@
 
   window.addEventListener("load",function(){
     scanInput.focus();
-    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.3"});
+    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.4"});
     setTimeout(function(){logEvent("READY",{});flush(true)},150);
   });
 })();
