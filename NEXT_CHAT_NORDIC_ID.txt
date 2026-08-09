@@ -1,7 +1,7 @@
-NID-HANDOFF-2026-08-09-V26-GREEN-BASE-AUTO-RFID
+NID-HANDOFF-2026-08-09-V261-PRE-SAVE-CONFIRM
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 22:39 Europe/Oslo
+Оновлено: 09.08.2026 22:42 Europe/Oslo
 
 ОБОВ'ЯЗКОВО У НОВІЙ РОЗМОВІ:
 1. Прочитай NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md.
@@ -17,58 +17,51 @@ SCANNER HOME — ЗАВЖДИ 3 КАРТКИ:
 ПОТОЧНИЙ СТАН:
 - STABLE = V2.4 HIDDEN RFID INPUT TEST.
 - Stable-файл: nordic-id-v24-stable.html. НЕ ПЕРЕПИСУВАТИ.
-- CURRENT TEST = V2.6 GREEN BASE · PROFESSIONAL RFID ONLY.
+- CURRENT TEST = V2.6.1 GREEN BASE · PRE-SAVE CONFIRM.
 - Current-файл: utsending-nordic-test.html.
 - Основа UI = utsending-green.html / utsending-core-v7.html.
 - RFID TEST BASE: nordic-id-v20-focus.html. НЕ ПЕРЕПИСУВАТИ.
-- Старий V2.5 simulator файл nordic-id-ut-simulator.html лишається в GitHub як проміжний експеримент, але scanner-home на нього більше не веде.
 
-V2.6 CURRENT TEST — МЕТА І UI:
-- це окрема сторінка для професійного Nordic ID на телефоні;
-- копія робочого GREEN UT UI, але дані повністю ізольовано перенаправляються через ut-test-api.js у ut_test_*;
-- Photo / AI / Manual scan-box прихований повністю;
-- manual product picker не підключається;
-- відкриваємо потрібну RAMPE, далі тільки короткий trigger Nordic;
-- Bunner/Hyller30/Hyller60 визначаються автоматично через TEST RPC;
-- одна фізична тестова бірка може імітувати багато TEST-одиниць; через те що історично EPC тестувався як різні продукти, TEST fallback бере наступну невиконану позицію замовлення без ручного вибору;
-- у майбутньому production нормальний шлях = EPC/lower_number → одна складська бірка → її реальний product;
-- Forlengere korte/lange: тільки коли система сама доходить до такого товару, відкривається modal з двома ручними полями Hyller + Forlengere; тільки тут потрібна цифрова клавіатура;
-- після сканів на цій же GREEN-based формі лишаються робочі кнопки Klar på rampe → Send fra rampe;
-- production не використовується.
+V2.6.1 CURRENT TEST:
+- Photo / AI / Manual scan-box прихований повністю.
+- відкриваємо RAMPE і скануємо тільки Nordic ID;
+- перед будь-яким реальним записом викликається read-only RPC ut_test_nordic_preview;
+- preview визначає наступний товар + physical lower_number, але НІЧОГО НЕ ЗАПИСУЄ;
+- користувач отримує ручне підтвердження: товар + номер бірки → OK / Cancel;
+- тільки OK пропускає реальний nordic_auto_scan → ut_test_nordic_auto_scan;
+- Cancel повертає «СКАСОВАНО» і не додає товар на рампу;
+- Forlengere korte/lange після підтвердження товару переходять до ручних Hyller + Forlengere;
+- технічний readyRampButton у TEST UI автоматично нормалізується у «Klar på rampe», sendButton → «Send fra rampe»;
+- у Nordic card додається видима позначка V2.6.1 · PRE-SAVE CONFIRM · 09.08.2026 22:42.
 
 TEST API:
-- ut-test-api.js оновлено до v1.4.0.
-- Доданий safe map: nordic_auto_scan → ut_test_nordic_auto_scan.
-- Нова RPC public.ut_test_nordic_auto_scan(p_order_id uuid,p_epc text) створена migration ut_test_nordic_auto_scan.
-- RPC спочатку намагається знайти однозначну складську TEST-бірку по EPC/lower_number; для one-tag simulation fallback автоматично бере наступну невиконану Bunner/H30/H60 позицію; коли вони закінчені, повертає наступну Forlengere korte/lange одиницю для вводу counts.
-- SQL smoke test на RAMPE 52 виконано всередині BEGIN/ROLLBACK: RPC повернула Bunner 1/1, жодних змін у рампі після перевірки не залишено.
+- ut-test-api.js = v1.5.1.
+- safe map: nordic_auto_scan → ut_test_nordic_auto_scan; nordic_preview → ut_test_nordic_preview.
+- migration add_ut_test_nordic_preview_confirm створила public.ut_test_nordic_preview(uuid,text).
+- preview smoke test на RAMPE 52 повернув Bunner / 0E3103 без запису.
+
+ФІЗИЧНО ВЖЕ ПІДТВЕРДЖЕНО ДО V2.6.1:
+- На RAMPE 31 Nordic зробив 3/3 scan accepted.
+- У TEST DB реально стоять active staged-позиції: bunner, hyller30, hyller60.
+- order status RAMPE 31 = in_progress.
+- Це підтверджує, що V2.6 scan → TEST ramp pipeline працює до етапу manual pre-save confirm.
 
 ШТУЧНІ ЗАМОВЛЕННЯ:
-Створено 12 активних TEST-замовлень:
-NID-SIM-20260809-01 ... NID-SIM-20260809-12
-RAMPE 41 ... 52.
-Вони мають різні комбінації Bunner, Hyller x30, Hyller x60, Forlengere korte, Forlengere lange.
-Усі тільки в ut_test_orders + ut_test_order_items, status=new, test_state=active.
+- 12 активних TEST-замовлень NID-SIM-20260809-01 ... 12 на RAMPE 41 ... 52.
+- різні комбінації Bunner, H30, H60, Forlengere korte/lange.
 
-ЩО ТЕСТУВАТИ ФІЗИЧНО:
-1. scanner-home.html → V2.6 CURRENT TEST.
-2. На GREEN-подібній сторінці відкрити RAMPE 52 (або іншу 41–52).
-3. НЕ вибирати product — такого вибору більше немає.
-4. Коротко просканувати фізичну Nordic RFID-бірку.
-5. Перевірити: Photo/AI/Manual відсутні, Nordic READY видно, продукт автоматично додається на рампу.
-6. Для Forlengere korte/lange мають з'явитися тільки Hyller + Forlengere.
-7. Коли все виконано, поставити checkbox і протестувати Klar på rampe → Send fra rampe.
-8. Після тесту за командою «дивись базу/журнал» перевірити ut_test_order_scans, ut_test_stock, ut_test_extra_confirmations, ut_test_orders.
+ЩО ТЕСТУВАТИ ДАЛІ:
+1. Відкрити свіжу TEST RAMPE, краще одну з 41–52.
+2. Просканувати Nordic.
+3. Має з'явитися підтвердження з product + lower_number.
+4. Натиснути Cancel → перевірити, що прогрес/DB НЕ змінився.
+5. Просканувати ще раз → OK → товар має додатися.
+6. Дійти до Forlengere → спочатку confirm product, потім Hyller + Forlengere.
+7. Після комплектності checkbox → Klar på rampe → потім Send fra rampe.
+8. За командою «дивись базу/журнал» перевірити ut_test_order_scans, ut_test_stock, ut_test_extra_confirmations, ut_test_orders.
 
 ВАЖЛИВО:
-- V2.6 ще НЕ STABLE і НЕ записувати в NORDIC_ID_PROGRESS_LOG.md до фізичного підтвердження користувача.
+- V2.6.1 ще НЕ STABLE і НЕ записувати у NORDIC_ID_PROGRESS_LOG.md до фізичного підтвердження користувача.
 - V2.4 лишається останньою STABLE.
-- V2.1 лишається незмінною RFID diagnostic base.
-- V2.3.5 inputmode=none не використовувати: ламав читання Nordic.
+- V2.1 лишається незмінною diagnostic base.
 - Production не змінено.
-
-ПРАВИЛО ПРОМОЦІЇ:
-Коли V2.6 підтверджений користувачем — заморозити окремим stable-файлом і поставити в середню STABLE-картку. V2.4 лишити rollback у GitHub; V2.1 лишити нижньою діагностикою.
-
-СТАРТОВА КОМАНДА:
-«Прочитай NEXT_CHAT_NORDIC_ID.txt. STABLE = V2.4. CURRENT TEST = V2.6 GREEN BASE у utsending-nordic-test.html. Є 12 TEST-замовлень на RAMPE 41–52. Photo/AI/Manual прибрані; Nordic визначає товар автоматично. Production не чіпай.»
