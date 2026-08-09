@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Nordic ID v1.6 — Scan Table</title>
+  <title>Nordic ID v1.7 — Scan Table</title>
   <style>
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;padding:8px;font-family:Arial,Helvetica,sans-serif;color:#f5f7ff;background:#0b1020}
@@ -25,15 +25,15 @@
     .counter{margin:9px 0 4px;font-size:14px;font-weight:900}
     .tableWrap{overflow:hidden;border:1px solid #303b59;border-radius:10px;background:#0d1426}
     table{width:100%;border-collapse:collapse;table-layout:fixed}
-    col.c-no{width:25px}
-    col.c-time{width:51px}
+    col.c-no{width:24px}
+    col.c-time{width:73px}
     col.c-code{width:auto}
-    th,td{padding:7px 3px;border-bottom:1px solid #303b59;text-align:left}
-    th{color:#aab4ce;background:#111a2d;font-size:10px}
+    th,td{padding:7px 2px;border-bottom:1px solid #303b59;text-align:left}
+    th{color:#aab4ce;background:#111a2d;font-size:9.5px}
     th.no,td.no{text-align:center}
-    td.no{font-size:10px;font-weight:900;color:#f4c430}
-    td.time{white-space:nowrap;color:#b9c5df;font:700 9.5px ui-monospace,Consolas,monospace}
-    td.code{white-space:nowrap;overflow:hidden;text-overflow:clip;color:#fff;font:700 10.5px ui-monospace,Consolas,monospace;letter-spacing:-.35px}
+    td.no{font-size:9.5px;font-weight:900;color:#f4c430}
+    td.time{white-space:nowrap;color:#b9c5df;font:700 8.6px ui-monospace,Consolas,monospace;letter-spacing:-.2px}
+    td.code{white-space:nowrap;overflow:hidden;text-overflow:clip;color:#fff;font:700 10px ui-monospace,Consolas,monospace;letter-spacing:-.45px}
     tr:last-child td{border-bottom:0}
     .empty{padding:15px 8px;text-align:center;color:#7683a4;font-size:11px}
     .footer{margin-top:8px;text-align:center;color:#7683a4;font-size:8.5px;line-height:1.3}
@@ -42,7 +42,7 @@
 <body>
 <main>
   <h1>Nordic ID — SCAN TABLE</h1>
-  <div class="version"><strong>Test v1.6</strong> · Updated 09.08.2026 15:20 (Europe/Oslo)</div>
+  <div class="version"><strong>Test v1.7</strong> · Updated 09.08.2026 15:20 (Europe/Oslo)</div>
 
   <div class="status" id="remoteStatus">Журнал: запускається…</div>
 
@@ -63,7 +63,7 @@
     <div class="empty" id="emptyState">Ще немає просканованих номерів</div>
   </div>
 
-  <div class="footer">NORDIC ID TEST v1.6 · технічний журнал прихований і автоматично передається в TEST</div>
+  <div class="footer">NORDIC ID TEST v1.7 · час скану показується до мілісекунд · технічний журнал автоматично передається в TEST</div>
 </main>
 <script>
 (function(){
@@ -90,10 +90,7 @@
   function setStatus(text,bad){remoteStatus.className=bad?"status bad":"status";remoteStatus.textContent=text}
   function focusScan(){try{scanInput.focus({preventScroll:true})}catch(_){scanInput.focus()}}
 
-  function scheduleFlush(){
-    if(flushTimer)return;
-    flushTimer=setTimeout(function(){flushTimer=null;flush(false)},350);
-  }
+  function scheduleFlush(){if(flushTimer)return;flushTimer=setTimeout(function(){flushTimer=null;flush(false)},350)}
 
   function logEvent(type,extra){
     eventNo+=1;
@@ -130,8 +127,9 @@
     }
   }
 
-  function hms(d){
-    return d.toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
+  function hmsMs(d){
+    var base=d.toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
+    return base+"."+String(d.getMilliseconds()).padStart(3,"0");
   }
 
   function renderScan(code,when){
@@ -140,7 +138,7 @@
     emptyState.style.display="none";
     var tr=document.createElement("tr");
     var tdNo=document.createElement("td"); tdNo.className="no"; tdNo.textContent=String(scans.length);
-    var tdTime=document.createElement("td"); tdTime.className="time"; tdTime.textContent=hms(when);
+    var tdTime=document.createElement("td"); tdTime.className="time"; tdTime.textContent=hmsMs(when);
     var tdCode=document.createElement("td"); tdCode.className="code"; tdCode.textContent=code;
     tr.appendChild(tdNo);tr.appendChild(tdTime);tr.appendChild(tdCode);
     scanRows.insertBefore(tr,scanRows.firstChild);
@@ -151,7 +149,7 @@
     if(!code)return;
     var when=new Date();
     renderScan(code,when);
-    logEvent("SCAN_COMMIT",{reason:reason,scan_no:scans.length,scan_code:code,value:code,length:code.length,scan_time_iso:when.toISOString()});
+    logEvent("SCAN_COMMIT",{reason:reason,scan_no:scans.length,scan_code:code,value:code,length:code.length,scan_time_iso:when.toISOString(),scan_time_ms:when.getTime(),scan_millisecond:when.getMilliseconds()});
     scanInput.value="";
     setTimeout(focusScan,20);
   }
@@ -189,7 +187,7 @@
 
   window.addEventListener("load",function(){
     focusScan();
-    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.6"});
+    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.7"});
     setTimeout(function(){logEvent("READY",{});flush(true)},150);
   });
 })();
