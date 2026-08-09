@@ -17,7 +17,7 @@
 <main>
 <div class="bigVersion">V2.1</div>
 <h1>Nordic ID — FIRST TAG LOCK</h1>
-<div class="version"><strong>Test V2.1 — FIRST TAG LOCK</strong> · ОНОВЛЕНО 09.08.2026 19:21:56 (Europe/Oslo)</div>
+<div class="version"><strong>Test V2.1 — FIRST TAG LOCK</strong> · ОНОВЛЕНО 09.08.2026 19:23:00 (Europe/Oslo)</div>
 <div class="workState" id="workState">READY</div>
 <div class="statusGrid">
 <div class="status" id="remoteStatus">Журнал: запускається… · Reader: <span id="readerCount">0</span></div>
@@ -36,7 +36,7 @@
 var PAGE_VERSION="V2.1 FIRST TAG LOCK";
 var LOCK_MS=600;
 var SUPABASE_URL="https://hzjsatehehhpgpskckfi.supabase.co";
-var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhc2UiLCJyZWYiOiJoempzYXRlaGVoaHBncHNra2NmaSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg1NTk5MjUzLCJleHAiOjIxMDExNzUyNTN9.sti5fzcHsfhlve3GR-wrF_RCecRZysv12qpTBvL11-U";
+var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6anNhdGVoZWhocGdwc2tja2ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1OTkyNTMsImV4cCI6MjEwMTE3NTI1M30.sti5fzcHsfhlve3GR-wrF_RCecRZysv12qpTBvL11-U";
 var scanInput=document.getElementById("scanInput"),remoteStatus=document.getElementById("remoteStatus"),readerCount=document.getElementById("readerCount"),focusState=document.getElementById("focusState"),workState=document.getElementById("workState"),scanRows=document.getElementById("scanRows"),scanCount=document.getElementById("scanCount"),blockedCount=document.getElementById("blockedCount"),emptyState=document.getElementById("emptyState");
 var queue=[],eventNo=0,flushTimer=null,idleTimer=null,sending=false,scans=[],readerEvents=0,lastFocusText="",blockedTotal=0;
 var lockedUntilPerf=0,lastAcceptedPerf=-1,lastAcceptedCode="",lockTimer=null;
