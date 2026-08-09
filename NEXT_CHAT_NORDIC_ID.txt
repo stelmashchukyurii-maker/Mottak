@@ -1,67 +1,74 @@
-NID-HANDOFF-2026-08-09-V261-PRE-SAVE-CONFIRM
+NID-HANDOFF-2026-08-09-V27-THREE-DEVICE-PARALLEL
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 22:42 Europe/Oslo
+Оновлено: 09.08.2026 22:59 Europe/Oslo
 
-ОБОВ'ЯЗКОВО У НОВІЙ РОЗМОВІ:
-1. Прочитай NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md.
-2. Production public.mottak_scans / public.ut_orders не чіпати без окремої команди користувача.
-3. Nordic TEST DB = public.nordic_id_mottak_test; Nordic TEST log = public.nordic_id_test_log.
-4. UT isolated contour = public.ut_test_orders / ut_test_order_items / ut_test_order_scans / ut_test_stock / ut_test_extra_confirmations.
+ГОЛОВНЕ ПРАВИЛО:
+- Production public.mottak_scans / public.ut_orders не чіпати без окремої команди користувача.
+- UT isolated contour = ut_test_stock / ut_test_orders / ut_test_order_items / ut_test_order_scans / ut_test_extra_confirmations.
+- NORDIC_ID_PROGRESS_LOG.md містить тільки фізично підтверджені PASS. V2.7 туди ще НЕ додавати.
 
-SCANNER HOME — ЗАВЖДИ 3 КАРТКИ:
-1) ВЕРХНЯ = CURRENT TEST.
-2) СЕРЕДНЯ = STABLE.
-3) НИЖНЯ = V2.1 FIRST TAG LOCK / RFID TEST BASE.
+SCANNER HOME ЗАВЖДИ 3 КАРТКИ:
+1) CURRENT TEST зверху.
+2) STABLE посередині.
+3) V2.1 FIRST TAG LOCK / RFID TEST BASE внизу назавжди.
 
-ПОТОЧНИЙ СТАН:
-- STABLE = V2.4 HIDDEN RFID INPUT TEST.
-- Stable-файл: nordic-id-v24-stable.html. НЕ ПЕРЕПИСУВАТИ.
-- CURRENT TEST = V2.6.1 GREEN BASE · PRE-SAVE CONFIRM.
-- Current-файл: utsending-nordic-test.html.
-- Основа UI = utsending-green.html / utsending-core-v7.html.
-- RFID TEST BASE: nordic-id-v20-focus.html. НЕ ПЕРЕПИСУВАТИ.
+STABLE:
+- V2.4 HIDDEN RFID INPUT TEST = nordic-id-v24-stable.html. НЕ ПЕРЕПИСУВАТИ.
+- V2.1 diagnostic = nordic-id-v20-focus.html. НЕ ПЕРЕПИСУВАТИ.
 
-V2.6.1 CURRENT TEST:
-- Photo / AI / Manual scan-box прихований повністю.
-- відкриваємо RAMPE і скануємо тільки Nordic ID;
-- перед будь-яким реальним записом викликається read-only RPC ut_test_nordic_preview;
-- preview визначає наступний товар + physical lower_number, але НІЧОГО НЕ ЗАПИСУЄ;
-- користувач отримує ручне підтвердження: товар + номер бірки → OK / Cancel;
-- тільки OK пропускає реальний nordic_auto_scan → ut_test_nordic_auto_scan;
-- Cancel повертає «СКАСОВАНО» і не додає товар на рампу;
-- Forlengere korte/lange після підтвердження товару переходять до ручних Hyller + Forlengere;
-- технічний readyRampButton у TEST UI автоматично нормалізується у «Klar på rampe», sendButton → «Send fra rampe»;
-- у Nordic card додається видима позначка V2.6.1 · PRE-SAVE CONFIRM · 09.08.2026 22:42.
+CURRENT TEST:
+- V2.7 PARALLEL MIRROR.
+- Nordic Utsending = utsending-nordic-test.html.
+- Це вже не Green-experiment: wrapper перебазований на актуальний utsending-core-v7 + ті самі production-flow/language/status/stock modules, але через ut-test-api.js у TEST.
+- RFID-логіка винесена в nordic-ut-test-scanner.js.
+
+ПОВНИЙ TEST-ЛАНЦЮЖОК НА 3 ГАДЖЕТАХ:
+A) camera-live-v414-test.html — дзеркало актуальної Camera Cloud v4.24. Дані → ut_test_stock, фото → ut-test-photos. Підключені lower-only/lifecycle/current-stock modules як у WORKING.
+B) bestilling-test.html — дзеркало актуального bestilling-core-v29 / UT Kontor WORKING. ut-test-api.js вставлений усередину core ДО його DB-скриптів; створює/читає тільки ut_test_orders/items і TEST-склад.
+C) utsending-nordic-test.html — дзеркало актуального Utsending UI, але Photo/AI/Manual scan приховані; Nordic RFID → preview → власний localized confirm → TEST rampe → Klar på rampe → Send fra rampe.
+Головна для трьох форм: test-home.html (TEST HOME v3.0).
 
 TEST API:
-- ut-test-api.js = v1.5.1.
-- safe map: nordic_auto_scan → ut_test_nordic_auto_scan; nordic_preview → ut_test_nordic_preview.
-- migration add_ut_test_nordic_preview_confirm створила public.ut_test_nordic_preview(uuid,text).
-- preview smoke test на RAMPE 52 повернув Bunner / 0E3103 без запису.
+- ut-test-api.js v1.8.0.
+- table map: mottak_scans→ut_test_stock; ut_orders→ut_test_orders; ut_order_items→ut_test_order_items; ut_order_scans→ut_test_order_scans.
+- unknown production REST/RPC у TEST-контурі блокується помилкою.
+- RPC map включає stage/dispatch/return/cancel/edit/save/order items + nordic_preview/nordic_auto_scan/nordic_confirm_extra.
+- custom Nordic module ставить __NORDIC_CUSTOM_CONFIRM__, тому системний about:srcdoc confirm не використовується.
 
-ФІЗИЧНО ВЖЕ ПІДТВЕРДЖЕНО ДО V2.6.1:
-- На RAMPE 31 Nordic зробив 3/3 scan accepted.
-- У TEST DB реально стоять active staged-позиції: bunner, hyller30, hyller60.
-- order status RAMPE 31 = in_progress.
-- Це підтверджує, що V2.6 scan → TEST ramp pipeline працює до етапу manual pre-save confirm.
+FLEXIBLE FORLENGERE COUNTS — АВТОРИТЕТНЕ ПРАВИЛО:
+- тільки forlengere_korte / forlengere_lange мають Hyller + Forlengere counts.
+- counts належать складській одиниці/бірці.
+- на прийманні можна внести обидва, тільки одне або нічого.
+- Utsending підтягує те, що вже є; просить відсутні дані.
+- перед Klar på rampe обидва значення повинні бути відомі.
+- при списанні snapshot counts зберігається в ut_test_order_scans.
+- TEST schema вже має nullable integer hyller_count / forlengere_count у ut_test_stock і ut_test_order_scans + nonnegative checks.
+- Camera TEST має optional extension camera-test-extender-counts.js для Forlengere korte/lange; введені непорожні counts домішуються в TEST stock insert/update через ut-test-api.js.
+
+NORDIC EXTENDER FLOW:
+- ut_test_nordic_preview read-only повертає stock/counts/complete.
+- для Forlengere preview повертає already-known hyller_count / forlengere_count з matching TEST stock, якщо вони є.
+- ut_test_nordic_confirm_extra_scan зберігає/доповнює counts у ut_test_stock, ставить stock unit staged, робить ut_test_extra_confirmation і додає ut_test_order_scans зі snapshot counts.
+- dispatch function уже універсальна: переводить усі staged ut_test_stock цієї рампи в dispatched і ставить dispatched_at усім order scans; окремого фільтра по 3 старих продуктах немає.
+
+RAMPE 42 СТАН ПЕРЕД НОВИМ ТЕСТОМ:
+- order NID-SIM-20260809-02, id 72836fe5-1c74-4e70-852d-9ff1c0a07c2f.
+- H60 = 2/2 already scanned.
+- Forlengere korte = 0/1.
+- status = in_progress; нічого не staged/dispatched після старого timeout.
+- новий read-only preview для EPC 33161403D0000785000E3103 правильно повернув forlengere_korte, unit 1/1, hyller_count=null, forlengere_count=null.
 
 ШТУЧНІ ЗАМОВЛЕННЯ:
-- 12 активних TEST-замовлень NID-SIM-20260809-01 ... 12 на RAMPE 41 ... 52.
-- різні комбінації Bunner, H30, H60, Forlengere korte/lange.
+- NID-SIM-20260809-01 ... 12, RAMPE 41 ... 52, active TEST only.
 
-ЩО ТЕСТУВАТИ ДАЛІ:
-1. Відкрити свіжу TEST RAMPE, краще одну з 41–52.
-2. Просканувати Nordic.
-3. Має з'явитися підтвердження з product + lower_number.
-4. Натиснути Cancel → перевірити, що прогрес/DB НЕ змінився.
-5. Просканувати ще раз → OK → товар має додатися.
-6. Дійти до Forlengere → спочатку confirm product, потім Hyller + Forlengere.
-7. Після комплектності checkbox → Klar på rampe → потім Send fra rampe.
-8. За командою «дивись базу/журнал» перевірити ut_test_order_scans, ut_test_stock, ut_test_extra_confirmations, ut_test_orders.
+НАСТУПНИЙ ФІЗИЧНИЙ ТЕСТ:
+1. Відкрити test-home.html на потрібних гаджетах.
+2. Camera TEST: за бажанням додати TEST-stock; для Forlengere можна лишити counts частково/порожньо.
+3. Bestilling TEST: створити/відкрити TEST order.
+4. Utsending Nordic TEST: відкрити рампу, scan RFID. Має бути велике підтвердження мовою NO/PL/UK.
+5. Forlengere: поля мають бути prefilled тим, що вже відомо, або порожні; до RAMPE потрібно заповнити обидва.
+6. Після комплектності checkbox → Klar på rampe → Send fra rampe.
+7. За «дивись базу/журнал» перевірити ut_test_stock, ut_test_order_scans, ut_test_extra_confirmations, ut_test_orders.
 
-ВАЖЛИВО:
-- V2.6.1 ще НЕ STABLE і НЕ записувати у NORDIC_ID_PROGRESS_LOG.md до фізичного підтвердження користувача.
-- V2.4 лишається останньою STABLE.
-- V2.1 лишається незмінною diagnostic base.
-- Production не змінено.
+НЕ НАЗИВАТИ V2.7 STABLE ДО ФІЗИЧНОГО ПІДТВЕРДЖЕННЯ.
