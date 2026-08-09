@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Nordic ID v1.5 — Scan Table</title>
+  <title>Nordic ID v1.6 — Scan Table</title>
   <style>
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;padding:8px;font-family:Arial,Helvetica,sans-serif;color:#f5f7ff;background:#0b1020}
@@ -42,12 +42,12 @@
 <body>
 <main>
   <h1>Nordic ID — SCAN TABLE</h1>
-  <div class="version"><strong>Test v1.5</strong> · Updated 09.08.2026 15:18 (Europe/Oslo)</div>
+  <div class="version"><strong>Test v1.6</strong> · Updated 09.08.2026 15:20 (Europe/Oslo)</div>
 
   <div class="status" id="remoteStatus">Журнал: запускається…</div>
 
   <label for="scanInput">Scan code</label>
-  <input id="scanInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Waiting for scan…" />
+  <input id="scanInput" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Waiting for scan…" />
 
   <div class="buttons">
     <button class="primary" id="sendBtn" type="button">☁ ВІДПРАВИТИ ЖУРНАЛ</button>
@@ -63,7 +63,7 @@
     <div class="empty" id="emptyState">Ще немає просканованих номерів</div>
   </div>
 
-  <div class="footer">NORDIC ID TEST v1.5 · технічний журнал прихований і автоматично передається в TEST</div>
+  <div class="footer">NORDIC ID TEST v1.6 · технічний журнал прихований і автоматично передається в TEST</div>
 </main>
 <script>
 (function(){
@@ -88,6 +88,7 @@
 
   function activeName(){var a=document.activeElement;return a?((a.tagName||"?")+(a.id?"#"+a.id:"")):"none"}
   function setStatus(text,bad){remoteStatus.className=bad?"status bad":"status";remoteStatus.textContent=text}
+  function focusScan(){try{scanInput.focus({preventScroll:true})}catch(_){scanInput.focus()}}
 
   function scheduleFlush(){
     if(flushTimer)return;
@@ -152,7 +153,7 @@
     renderScan(code,when);
     logEvent("SCAN_COMMIT",{reason:reason,scan_no:scans.length,scan_code:code,value:code,length:code.length,scan_time_iso:when.toISOString()});
     scanInput.value="";
-    setTimeout(function(){scanInput.focus()},20);
+    setTimeout(focusScan,20);
   }
 
   function eventDetail(e){return{key:e.key,code:e.code,keyCode:e.keyCode,which:e.which,repeat:e.repeat,ctrlKey:e.ctrlKey,altKey:e.altKey,shiftKey:e.shiftKey,metaKey:e.metaKey,inputType:e.inputType,data:e.data,isComposing:e.isComposing,value:scanInput.value,length:scanInput.value.length,active:activeName()}}
@@ -176,19 +177,19 @@
   scanInput.addEventListener("focus",function(){logEvent("INPUT_FOCUS",{})});
   scanInput.addEventListener("blur",function(){logEvent("INPUT_BLUR",{})});
   document.addEventListener("visibilitychange",function(){logEvent("VISIBILITY",{state:document.visibilityState})});
-  window.addEventListener("focus",function(){logEvent("WINDOW_FOCUS",{})});
+  window.addEventListener("focus",function(){logEvent("WINDOW_FOCUS",{});setTimeout(focusScan,60)});
   window.addEventListener("blur",function(){logEvent("WINDOW_BLUR",{})});
   window.addEventListener("pagehide",function(){logEvent("PAGE_HIDE",{});flush(true)});
 
   document.getElementById("sendBtn").addEventListener("click",function(){
-    scanInput.blur();
     logEvent("MANUAL_SEND",{});
     flush(true);
+    setTimeout(focusScan,120);
   });
 
   window.addEventListener("load",function(){
-    scanInput.focus();
-    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.5"});
+    focusScan();
+    logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.6"});
     setTimeout(function(){logEvent("READY",{});flush(true)},150);
   });
 })();
