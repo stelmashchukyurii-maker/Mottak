@@ -1,18 +1,25 @@
 NID-HANDOFF-2026-08-09-FIRST-TAG-LOCK
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
+Оновлено: 09.08.2026 19:14 Europe/Oslo
 
-У НОВІЙ РОЗМОВІ:
-1. Спочатку прочитай у GitHub repo stelmashchukyurii-maker/Mottak файл NORDIC_ID_RFID_PROTOCOL.md.
-2. Не повторюй уже виконані RFID/Wedge тести.
-3. Не чіпай production Scanner/Camera/Working без прямої команди користувача.
-4. Поточна стабільна діагностична база: nordic-id-v20-focus.html (V2.0 FOCUS GUARD).
-5. Наступний етап: зробити окрему V2.1 FIRST TAG LOCK.
-6. Логіка: перший валідний 24-char EPC = ACCEPT; наступні EPC того самого короткого scan-cycle = BLOCK/IGNORE для робочої операції, але залишати в TEST-журналі як blocked.
-7. Після короткого TEST accepted EPC підключити до загальної бази Mottak.
-8. Практична мета: Nordic ID має бути придатний до роботи замість фотографування бірок.
-9. Android/NUR API рішення відкладене на пізніше; зараз працюємо через RFID Wedge + веб-сторінку.
-10. Wedge і CC4Scanner не використовувати одночасно: CC4Scanner напряму використовує NurApi.connect(), а Wedge займає той самий reader.
+У НОВІЙ РОЗМОВІ ОБОВ'ЯЗКОВО:
+1. Прочитай у GitHub repo stelmashchukyurii-maker/Mottak файл NORDIC_ID_RFID_PROTOCOL.md ПОВНІСТЮ.
+2. Потім прочитай найновішу версію nordic-id-v20-focus.html з GitHub перед будь-якою зміною.
+3. НЕ проси користувача щоразу знову надсилати HTML-код сторінки, якщо файл доступний у GitHub.
+4. НЕ створюй окремий nordic-id-v21.html / v22.html для кожної дрібної зміни.
+5. nordic-id-v20-focus.html відтепер є ПОСТІЙНОЮ WORK-сторінкою Nordic ID: URL залишається той самий, змінюються код, видима версія і час оновлення.
+6. Наступна видима версія на ЦЬОМУ САМОМУ файлі: V2.1 FIRST TAG LOCK.
+7. Логіка V2.1: перший валідний 24-char EPC = RFID_ACCEPTED; додаткові EPC короткого burst = RFID_BLOCKED для робочої операції, але залишаються у TEST-журналі.
+8. Початковий lock window близько 600 ms; після тесту коригувати за журналом.
+9. Користувач робить короткі trigger presses. Коли пише "дивись журнал" — одразу дивитися останню session у Supabase public.nordic_id_test_log і коротко підсумовувати accepted/blocked/timing.
+10. Після успішного TEST accepted EPC підключити до загальної бази Mottak; blocked у production не писати.
+11. Не чіпай production Scanner/Camera/Working без прямого етапу інтеграції.
+12. Зберігати як fallback: nordic-id-v19-clean.html і nordic-id.html; не перезаписувати їх.
+13. Android/NUR API рішення відкладене на пізніше; зараз працюємо через RFID Wedge + браузер.
+14. Wedge і CC4Scanner не використовувати одночасно: CC4Scanner напряму викликає NurApi.connect(), а Wedge може займати той самий reader.
+15. Не повторювати без нової причини вже виконані тести Restart/Cancel, timeout 0/1, Maximum tags 0/1, довгий hold і focus experiments.
+16. Після КОЖНОЇ зміни Nordic ID сторінки повідомляти: СТОРІНКА / ВЕРСІЯ / ОНОВЛЕНО точним Europe/Oslo часом; те саме має бути видно на сторінці.
 
-СТАРТОВА КОМАНДА ДЛЯ ПРОДОВЖЕННЯ:
-"Прочитай NORDIC_ID_RFID_PROTOCOL.md і продовжуй з V2.1 FIRST TAG LOCK → TEST → accepted EPC → загальна база Mottak."
+СТАРТОВА КОМАНДА:
+"Прочитай NEXT_CHAT_NORDIC_ID.txt і NORDIC_ID_RFID_PROTOCOL.md. Продовжуй на тій самій сторінці nordic-id-v20-focus.html: V2.1 FIRST TAG LOCK → TEST → accepted EPC → загальна база Mottak. Не створюй новий HTML-файл."
