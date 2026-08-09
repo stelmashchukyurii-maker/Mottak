@@ -31,21 +31,21 @@
 <body>
 <main>
   <h1>📡 Nordic ID — SCANNER</h1>
-  <p class="sub">Одна робоча лінія Nordic ID. Нові зміни перевіряємо від останньої реально успішної поведінки.</p>
+  <p class="sub">Одна робоча лінія Nordic ID. Стару адресу більше не використовуємо, щоб браузер не підсовував кешовану версію.</p>
 
-  <div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: v1.8 — WORKING INPUT RESTORE.</strong><br>Повернули механізм введення з успішної v1.4, де Nordic ID реально передав два повних 24-символьних RFID-коди. Мілісекунди й компактну таблицю збережено.</div>
+  <div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: v1.8C — CACHE BYPASS.</strong><br>Це нове ім'я файлу, тому Nordic ID не зможе відкрити стару v1.7 з кешу. Механізм вводу — як у успішній v1.4.</div>
 
   <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 
-  <a class="link fresh" href="nordic-id-v1-journal.html">
-    <h2>🧪 Nordic ID v1.8 — WORKING INPUT RESTORE</h2>
-    <p>Перевіряємо, чи після повернення звичайного текстового input знову почнуть приходити повні RFID-коди. Журнал прихований і передається автоматично.</p>
-    <span class="tag">CURRENT TEST · 15:44</span>
+  <a class="link fresh" href="nordic-id-v18-working.html">
+    <h2>🧪 Nordic ID v1.8C — CACHE BYPASS</h2>
+    <p>Новий файл без старого кешу. Звичайний текстовий input, компактна таблиця, час до мілісекунд і автоматичний TEST-журнал.</p>
+    <span class="tag">CURRENT TEST · 15:48</span>
   </a>
 
-  <div class="plan">Якщо номер знову з'явиться — це буде сильним доказом, що inputmode="none" заважав Nordic ID Wedge передавати код у браузер.</div>
+  <div class="plan">На самій сторінці зверху має бути видно: <strong>Test v1.8C — CACHE BYPASS · 15:48</strong>. Якщо бачиш інше — це не наш поточний тест.</div>
 
-  <div class="footer">SCANNER HOME v2.6<br>Oppdatert 09.08.2026 kl. 15:44 · Europe/Oslo</div>
+  <div class="footer">SCANNER HOME v2.7<br>Oppdatert 09.08.2026 kl. 15:48 · Europe/Oslo</div>
 </main>
 <script>
   "use strict";
