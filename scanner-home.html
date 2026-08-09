@@ -10,25 +10,25 @@
 <meta http-equiv="Expires" content="0" />
 <title>Nordic ID — SCANNER HOME</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}main{width:min(720px,100%);margin:auto;padding:18px 12px 56px}h1{margin:2px 0 8px;color:var(--accent);font-size:clamp(29px,8vw,44px)}.sub{margin:0;color:var(--muted);line-height:1.5}.fixed{margin:16px 0;padding:14px;border:1px solid var(--info);border-radius:16px;background:rgba(117,183,255,.07);line-height:1.5}.fixed strong{color:var(--info)}.refresh{width:100%;min-height:56px;margin:0 0 16px;border:2px solid var(--accent);border-radius:16px;background:var(--accent);color:#17130a;font-size:18px;font-weight:950;cursor:pointer}.link{display:block;margin-bottom:14px;padding:18px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.18)}.link.current{border-color:var(--info)}.link.previous{border-color:var(--ok)}.link.stable{border-color:var(--line);margin-top:24px}.link:active{transform:scale(.99)}.link h2{margin:0;font-size:28px}.link p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.5}.tag{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid currentColor;border-radius:999px;font-size:11px;font-weight:900}.current .tag{color:var(--info)}.previous .tag{color:var(--ok)}.stable .tag{color:var(--muted)}.sectionLabel{margin:23px 0 8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.plan{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0d1426;color:var(--muted);font-size:13px;line-height:1.5}.footer{margin-top:22px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
+:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}main{width:min(720px,100%);margin:auto;padding:18px 12px 56px}h1{margin:2px 0 8px;color:var(--accent);font-size:clamp(29px,8vw,44px)}.sub{margin:0;color:var(--muted);line-height:1.5}.fixed{margin:16px 0;padding:14px;border:1px solid var(--info);border-radius:16px;background:rgba(117,183,255,.07);line-height:1.5}.fixed strong{color:var(--info)}.refresh{width:100%;min-height:56px;margin:0 0 16px;border:2px solid var(--accent);border-radius:16px;background:var(--accent);color:#17130a;font-size:18px;font-weight:950}.link{display:block;margin-bottom:14px;padding:18px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);text-decoration:none}.link.current{border-color:var(--info)}.link.previous{border-color:var(--ok)}.link.stable{border-color:var(--line);margin-top:24px}.link h2{margin:0;font-size:28px}.link p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.5}.tag{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid currentColor;border-radius:999px;font-size:11px;font-weight:900}.current .tag{color:var(--info)}.previous .tag{color:var(--ok)}.stable .tag{color:var(--muted)}.sectionLabel{margin:23px 0 8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.plan{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0d1426;color:var(--muted);font-size:13px;line-height:1.5}.footer{margin-top:22px;color:var(--muted);font-size:10px;text-align:center}
 </style>
 </head>
 <body>
 <main>
 <h1>📡 Nordic ID — SCANNER</h1>
-<p class="sub">Нові кроки тестуємо окремою версією. Підтверджені попередні версії залишаються нижче й не перезаписуються.</p>
-<div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: V2.3 — CONFIRM & SAVE.</strong><br>Скан → велике підтвердження продукту й lower_number → кнопка «Внести в TEST-базу» → зелений екран «ЗАПИСАНО · МОЖНА ДАЛІ». Кнопка очищення прибирає тільки рядки з екрана; історія Supabase і Nordic-журнал залишаються.</div>
+<p class="sub">Нові кроки тестуємо окремою версією. Підтверджені попередні версії залишаються нижче.</p>
+<div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: V2.3.1 — RFID INPUT FIX.</strong><br>Повернуто normal RFID input. Кнопки не забирають focus у RFID-поля. Скан → велике підтвердження продукту й lower_number → «Внести в TEST-базу» → «ЗАПИСАНО · МОЖНА ДАЛІ».</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 Nordic ID V2.3</h2>
-<p>CONFIRM & SAVE · вибір продукту · ручне підтвердження кожного скану · весь EPC → scanner_code · останні 6 символів → lower_number · 🧹 очищення тільки екрана.</p>
-<span class="tag">CURRENT TEST · 20:35</span>
+<h2>🧪 Nordic ID V2.3.1</h2>
+<p>CONFIRM & SAVE · RFID INPUT FIX · нормальний Wedge input · кнопки без перехоплення focus · очищення тільки екрана.</p>
+<span class="tag">CURRENT TEST · 20:44</span>
 </a>
 <div class="sectionLabel">Підтверджений попередній крок</div>
 <a class="link previous fresh" href="nordic-id-v22-product-test.html">
 <h2>✅ Nordic ID V2.2.1</h2>
-<p>PRODUCT TEST · KEYBOARD GUARD · клавіатура при кнопках продуктів не відкривається. Збережена окремо як підтверджений rollback.</p>
+<p>PRODUCT TEST · KEYBOARD GUARD · попередня версія збережена окремо.</p>
 <span class="tag">CONFIRMED · KEYBOARD GUARD</span>
 </a>
 <div class="sectionLabel">RFID-база</div>
@@ -37,11 +37,11 @@
 <p>FIRST TAG LOCK · LOCK 600 ms · підтверджена база зчитування RFID.</p>
 <span class="tag">STABLE RFID BASE</span>
 </a>
-<div class="plan">У V2.3: вибери продукт → скануй одну бірку → перевір велике вікно → натисни <strong>«ВНЕСТИ В TEST-БАЗУ»</strong> → дочекайся зеленого <strong>«ЗАПИСАНО»</strong> → <strong>«OK — ДАЛІ»</strong>. Для чистого тесту натисни <strong>🧹 ОЧИСТИТИ ТАБЛИЦЮ НА ЕКРАНІ</strong>.</div>
-<div class="footer">SCANNER HOME v3.3<br>Oppdatert 09.08.2026 kl. 20:35 · Europe/Oslo</div>
+<div class="plan">Відкрий V2.3.1 і зроби один короткий RFID-скан. Якщо все добре, одразу має з'явитися велике вікно з продуктом і <strong>lower_number</strong>. Клавіатура при кнопках не повинна відкриватися.</div>
+<div class="footer">SCANNER HOME v3.4<br>Oppdatert 09.08.2026 kl. 20:44:55 · Europe/Oslo</div>
 </main>
 <script>
-"use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();var href=a.getAttribute("href");location.href=href+"?from=scanner-home&v="+Date.now()})});
+"use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();location.href=a.getAttribute("href")+"?from=scanner-home&v="+Date.now()})});
 </script>
 </body>
 </html>
