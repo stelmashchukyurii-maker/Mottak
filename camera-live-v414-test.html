@@ -1,119 +1,41 @@
 <!DOCTYPE html>
 <html lang="nb" translate="no">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1020" />
-  <meta name="google" content="notranslate" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>TEST — Camera Cloud v4.14</title>
-  <style>
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
-    iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
-    #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:99999}
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><meta name="google" content="notranslate"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<title>TEST — Camera Cloud v4.24</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:99999}</style>
 </head>
 <body>
-  <div id="loader">Laster TEST — Camera Cloud v4.14…</div>
-  <iframe id="app" title="TEST — Camera Cloud v4.14"></iframe>
-  <script>
-    "use strict";
-    const VERSION="20260808-1641";
-    const frame=document.getElementById("app");
-    const loader=document.getElementById("loader");
-
-    function injectScript(doc,src){
-      return new Promise((resolve,reject)=>{
-        const script=doc.createElement("script");
-        script.src=src;
-        script.onload=resolve;
-        script.onerror=reject;
-        doc.body.appendChild(script);
-      });
-    }
-
-    function installTestMarker(doc,win){
-      win.BAMA_HOME_TARGET="camera-test-live.html";
-
-      const back=doc.querySelector(".back");
-      if(back){
-        back.href="index.html";
-        back.target="_top";
-        back.addEventListener("click",event=>{
-          event.preventDefault();
-          window.top.location.href="test-home.html";
-        },{capture:true});
-      }
-
-      let banner=doc.getElementById("cameraTestCloneBanner");
-      if(!banner){
-        banner=doc.createElement("div");
-        banner.id="cameraTestCloneBanner";
-        banner.style.cssText="margin:10px 0 12px;padding:11px 13px;border:2px solid #48d597;border-radius:14px;background:rgba(72,213,151,.09);color:#eafff6;font:900 13px/1.45 Arial,sans-serif;text-align:center";
-        banner.innerHTML="🧪 <b>TEST — ISOLERT</b> · Samme Camera Cloud v4.14-arbeidsflyt, men REST-data går kun til TEST-tabeller og bilder lagres kun i <b>ut-test-photos</b>.";
-        const main=doc.querySelector("main.app,main,.app");
-        const title=doc.querySelector("h1");
-        if(title?.parentElement) title.insertAdjacentElement("beforebegin",banner);
-        else main?.prepend(banner);
-      }
-
-      const version=doc.querySelector(".version");
-      if(version) version.innerHTML="TEST · Kamera Cloud v4.14 MOBIL WORKFLOW<br>Oppdatert 08.08.2026 kl. 16:41";
-
-      const nordic=doc.querySelector('[data-t="openNordic"]');
-      if(nordic){
-        nordic.hidden=true;
-        nordic.setAttribute("aria-hidden","true");
-      }
-
-      doc.getElementById("bamaHomeReturn")?.remove();
-    }
-
-    async function build(){
-      try{
-        const response=await fetch(`camera-live.html?base=${VERSION}`,{cache:"no-store"});
-        if(!response.ok) throw new Error(`HTTP ${response.status}`);
-        let html=await response.text();
-
-        // Keep the working Camera Cloud code intact, but isolate its data and photo storage.
-        html=html.replace('BUCKET="mottak-photos"','BUCKET="ut-test-photos"');
-        html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);
-        frame.srcdoc=html;
-      }catch(error){
-        loader.textContent=`Kunne ikke laste TEST Camera Cloud v4.14: ${error.message||error}`;
-      }
-    }
-
-    frame.addEventListener("load",async()=>{
-      try{
-        const doc=frame.contentDocument;
-        const win=frame.contentWindow;
-        installTestMarker(doc,win);
-
-        // Exact enhancement chain from the working Camera Cloud v4.14 wrapper.
-        await injectScript(doc,`camera-live-v4-source-fix.js?v=${VERSION}`);
-        await injectScript(doc,`camera-live-v4-server-ocr.js?v=${VERSION}`);
-        await injectScript(doc,`camera-live-v4-stock-filters.js?v=${VERSION}`);
-        await injectScript(doc,`upper-number-policy.js?v=${VERSION}`);
-        await injectScript(doc,`shared-stock-status.js?v=${VERSION}`);
-        await injectScript(doc,`camera-live-v4-floating-camera.js?v=${VERSION}`);
-        await injectScript(doc,`camera-live-v4-floating-workflow.js?v=${VERSION}`);
-        await injectScript(doc,`camera-live-v4-compact-language.js?v=${VERSION}`);
-        await injectScript(doc,`camera-live-v4-mobile-ui.js?v=${VERSION}`);
-
-        installTestMarker(doc,win);
-        [doc.getElementById("languages"),doc.getElementById("products")].forEach(element=>{
-          element?.addEventListener("click",()=>setTimeout(()=>win.refreshBamaStock?.().catch(()=>{}),80));
-        });
-        loader.style.display="none";
-      }catch(error){
-        loader.textContent=`TEST Camera Cloud startfeil: ${error.message||error}`;
-      }
-    });
-
-    build();
-  </script>
-</body>
-</html>
+<div id="loader">Laster TEST — Camera Cloud v4.24…</div><iframe id="app" title="TEST — Camera Cloud v4.24"></iframe>
+<script>
+"use strict";
+const VERSION="20260809-2259",BASE="424-stock-minus-ramp-20260809-0121";
+const frame=document.getElementById("app"),loader=document.getElementById("loader");
+function inject(doc,src){return new Promise((ok,bad)=>{const s=doc.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>bad(new Error(`Kunne ikke laste ${src}`));doc.body.appendChild(s)})}
+function mark(doc,win){
+ win.BAMA_HOME_TARGET="camera-live-v414-test.html";
+ let b=doc.getElementById("cameraTestCloneBanner");if(!b){b=doc.createElement("div");b.id="cameraTestCloneBanner";b.style.cssText="margin:10px 0 12px;padding:11px 13px;border:2px solid #48d597;border-radius:14px;background:rgba(72,213,151,.09);color:#eafff6;font:900 13px/1.45 Arial,sans-serif;text-align:center";const t=doc.querySelector("h1");if(t?.parentElement)t.insertAdjacentElement("beforebegin",b);else doc.querySelector("main,.app")?.prepend(b)}
+ b.innerHTML="🧪 <b>TEST — ISOLERT</b> · Samme Camera Cloud v4.24 som WORKING, men lagerdata går bare til <b>ut_test_stock</b> og bilder bare til <b>ut-test-photos</b>.";
+ const v=doc.querySelector(".version");if(v)v.innerHTML="TEST · Kamera Cloud v4.24 · STOCK − RAMP<br>Oppdatert 09.08.2026 kl. 22:59";
+ const back=doc.querySelector(".back,a.home");if(back&&!back.dataset.testHome){back.dataset.testHome="1";back.href="test-home.html";back.target="_top";back.addEventListener("click",e=>{e.preventDefault();top.location.href="test-home.html"},{capture:true})}
+ doc.querySelector('[data-t="openNordic"]')?.setAttribute("hidden","");
+}
+async function build(){try{const r=await fetch(`camera-live.html?base=${BASE}&v=${VERSION}`,{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);let html=await r.text();html=html.replace('BUCKET="mottak-photos"','BUCKET="ut-test-photos"');html=html.replace("</head>",`<script src="./ut-test-api.js?v=${VERSION}"><\/script></head>`);frame.srcdoc=html}catch(e){loader.textContent=`Kunne ikke laste TEST Camera Cloud v4.24: ${e.message||e}`}}
+frame.addEventListener("load",async()=>{try{const d=frame.contentDocument,w=frame.contentWindow;mark(d,w);
+ await inject(d,`camera-live-v4-source-fix.js?v=${VERSION}`);
+ await inject(d,"camera-live-v4-server-ocr.js?v=414-newurl-20260807-1834");
+ await inject(d,`camera-live-v4-stock-filters.js?v=${VERSION}`);
+ await inject(d,`upper-number-policy.js?v=${VERSION}`);
+ await inject(d,`shared-stock-status.js?v=${VERSION}`);
+ await inject(d,"camera-live-v4-floating-camera.js?v=414-newurl-20260807-1834");
+ await inject(d,"camera-live-v4-floating-workflow.js?v=414-newurl-20260807-1834");
+ await inject(d,"camera-live-v4-compact-language.js?v=414-newurl-20260807-1834");
+ await inject(d,"camera-live-v4-mobile-ui.js?v=414-newurl-20260807-1834");
+ await inject(d,`camera-lower-only.js?v=${VERSION}`);
+ await inject(d,`stock-lifecycle-ui.js?v=${VERSION}`);
+ await inject(d,`camera-current-stock-only.js?v=${VERSION}`);
+ w.__BAMA_COMPACT_STOCK_COUNTER__=true;inject(d,`compact-stock-counter-v2.js?v=${VERSION}`).catch(()=>{});
+ mark(d,w);[d.getElementById("languages"),d.getElementById("products")].forEach(el=>el?.addEventListener("click",()=>setTimeout(()=>{w.refreshBamaStock?.().catch(()=>{});w.BAMA_COMPACT_STOCK_REFRESH?.()},80)));loader.style.display="none"}catch(e){loader.textContent=`TEST Camera Cloud startfeil: ${e.message||e}`}});
+build();
+</script>
+</body></html>
