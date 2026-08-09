@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk" translate="no">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#111827" />
+<meta name="google" content="notranslate" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Nordic ID V2.4 — HIDDEN RFID INPUT TEST</title>
+<style>
+html,body{margin:0;min-height:100%;background:#0b1020;color:#f5f7ff;font-family:Arial,Helvetica,sans-serif}.boot{max-width:720px;margin:30px auto;padding:20px;color:#b8dcff}.bad{color:#ffc1c1}
+</style>
+</head>
+<body>
+<div class="boot" id="boot">V2.4 STABLE · завантажую заморожену V2.3.4 основу…</div>
+<script>
+(async function(){
+  "use strict";
+  var boot=document.getElementById("boot");
+  try{
+    var r=await fetch("nordic-id-v234-stable.html?v=stable24",{cache:"no-store"});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    var html=await r.text();
+
+    html=html.replace("<title>Nordic ID V2.3.4 — PRODUCT MENU KEYBOARD FIX</title>","<title>Nordic ID V2.4 — HIDDEN RFID INPUT TEST</title>");
+    html=html.replace('<div class="bigVersion">V2.3.4</div>','<div class="bigVersion">V2.4</div>');
+    html=html.replace('<div class="version"><strong>V2.3.4 PRODUCT MENU KEYBOARD FIX</strong> · ОНОВЛЕНО 09.08.2026 21:19:10 (Europe/Oslo)</div>','<div class="version"><strong>V2.4 HIDDEN RFID INPUT TEST · STABLE</strong> · ПІДТВЕРДЖЕНО 09.08.2026 21:59 (Europe/Oslo)</div>');
+    html=html.replace('<div class="testOnly">TEST ONLY · V2.2.1 лишається STABLE · поля Hyller/Forlengere показуються тільки для коротких/довгих Forlengere · меню продуктів не повинно відкривати клавіатуру · production Mottak не змінюється</div>','<div class="testOnly">STABLE · технічне RFID-поле сховане й активується тільки апаратним trigger Nordic · клавіатура дозволена тільки в Hyller/Forlengere для коротких/довгих Forlengere · production не змінюється</div>');
+
+    html=html.replace('<label for="scanInput">RFID EPC</label>\n<input id="scanInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Waiting for RFID…" />\n<div class="hint">Скан → підтвердження продукту + lower_number. Для Forlengere додатково вводяться кількість Hyller і Forlengere.</div>','<input id="scanInput" type="text" readonly autocomplete="off" autocapitalize="off" spellcheck="false" tabindex="-1" aria-hidden="true" />\n<div class="hint">📡 RFID READY · технічне поле не показується. Nordic trigger коротко активує прийом EPC. Для Forlengere клавіатура відкривається тільки після ручного натискання Hyller або Forlengere.</div>');
+    html=html.replace('</style>','#scanInput{position:fixed!important;left:-10000px!important;top:-10000px!important;width:1px!important;height:1px!important;min-height:0!important;opacity:0!important;padding:0!important;border:0!important;pointer-events:none!important}\n</style>');
+    html=html.replace('СТОРІНКА: nordic-id-v23-confirm-test.html · ВЕРСІЯ: V2.3.4 PRODUCT MENU KEYBOARD FIX · STABLE BELOW: V2.2.1 · TEST DB','СТОРІНКА: nordic-id-v24-stable.html · ВЕРСІЯ: V2.4 HIDDEN RFID INPUT TEST · STABLE · TEST DB');
+    html=html.replace('var PAGE_VERSION="V2.3.4 PRODUCT MENU KEYBOARD FIX",LOCK_MS=600,TEST_TABLE="nordic_id_mottak_test";','var PAGE_VERSION="V2.4 HIDDEN RFID INPUT TEST STABLE",LOCK_MS=600,TEST_TABLE="nordic_id_mottak_test";');
+
+    html=html.replace('function hideSoftKeyboard(){try{if(navigator.virtualKeyboard&&typeof navigator.virtualKeyboard.hide==="function")navigator.virtualKeyboard.hide()}catch(_){}}','function hideSoftKeyboard(){try{if(navigator.virtualKeyboard&&typeof navigator.virtualKeyboard.hide==="function")navigator.virtualKeyboard.hide()}catch(_){}}\nvar hardwareArmTimer=null;\nfunction armHardwareScan(reason){if(modalMode||pendingScan)return;clearTimeout(hardwareArmTimer);scanInput.readOnly=false;try{scanInput.focus({preventScroll:true})}catch(_){scanInput.focus()}hideSoftKeyboard();hardwareArmTimer=setTimeout(function(){if(!scanInput.value&&!modalMode){scanInput.readOnly=true;try{scanInput.blur()}catch(_){}hideSoftKeyboard();paintFocus("arm_timeout")}},1600);logEvent("RFID_HARDWARE_ARM",{reason:reason||"reader_key"})}');
+
+    html=html.replace('function resumeScannerAfterUi(reason){clearTimeout(resumeTimer);blurUiInput();scanInput.readOnly=false;uiGuardUntil=Math.max(uiGuardUntil,performance.now()+900);resumeTimer=setTimeout(function(){hideSoftKeyboard();focusScan(reason||"ui_resume");hideSoftKeyboard();logEvent("RFID_INPUT_RESUMED",{reason:reason||"ui_resume"})},960)}','function resumeScannerAfterUi(reason){clearTimeout(resumeTimer);blurUiInput();scanInput.readOnly=true;uiGuardUntil=Math.max(uiGuardUntil,performance.now()+500);resumeTimer=setTimeout(function(){hideSoftKeyboard();paintFocus(reason||"ui_resume");logEvent("RFID_INPUT_ARMED",{reason:reason||"ui_resume"})},520)}');
+
+    html=html.replace('function paintFocus(reason){if(modalMode||scanInput.readOnly){focusState.className="focusState pause";focusState.textContent="PAUSE";return}var ok=document.visibilityState==="visible"&&document.hasFocus()&&document.activeElement===scanInput;focusState.className=ok?"focusState":"focusState bad";focusState.textContent=ok?"FOCUS OK":"FOCUS LOST"}','function paintFocus(reason){if(modalMode){focusState.className="focusState pause";focusState.textContent="PAUSE";return}if(scanInput.readOnly){focusState.className="focusState";focusState.textContent="RFID READY";return}var ok=document.visibilityState==="visible"&&document.hasFocus()&&document.activeElement===scanInput;focusState.className=ok?"focusState":"focusState bad";focusState.textContent=ok?"RFID ACTIVE":"RFID LOST"}');
+
+    html=html.replace('function commitCurrent(reason){var raw=scanInput.value;if(!raw)return;classifyCommit(raw,reason);scanInput.value=""}','function commitCurrent(reason){var raw=scanInput.value;if(!raw)return;clearTimeout(hardwareArmTimer);classifyCommit(raw,reason);scanInput.value="";scanInput.readOnly=true;try{scanInput.blur()}catch(_){}hideSoftKeyboard();if(!modalMode)paintFocus("commit_done")}');
+
+    html=html.replace('document.addEventListener("keydown",function(e){if(e.key==="Unidentified"){readerEvents++;readerCount.textContent=String(readerEvents)}logEvent("KEYDOWN",eventDetail(e));if((e.key==="Enter"||e.key==="Tab")&&scanInput.value&&!modalMode&&!scanInput.readOnly){e.preventDefault();clearTimeout(idleTimer);commitCurrent(e.key.toUpperCase())}},true);','document.addEventListener("keydown",function(e){if(e.key==="Unidentified"){readerEvents++;readerCount.textContent=String(readerEvents);if(!modalMode&&!pendingScan&&scanInput.readOnly)armHardwareScan("Unidentified")}logEvent("KEYDOWN",eventDetail(e));if((e.key==="Enter"||e.key==="Tab")&&scanInput.value&&!modalMode&&!scanInput.readOnly){e.preventDefault();clearTimeout(idleTimer);commitCurrent(e.key.toUpperCase())}},true);');
+
+    html=html.replace('window.addEventListener("load",function(){scanInput.readOnly=false;syncProductUi();showParsed(null);setWorkState("READY","");focusScan("load");logEvent("PAGE_OPEN",{version:PAGE_VERSION,mode:"confirm-extension-counts-product-menu-keyboard-fix",base:"V2.2.1 stable keyboard guard + V2.3 confirm flow",lock_window_ms:LOCK_MS,test_table:TEST_TABLE});loadRecent();setTimeout(function(){hideSoftKeyboard();logEvent("READY",{});flush(true)},150)});','window.addEventListener("load",function(){scanInput.readOnly=true;syncProductUi();showParsed(null);setWorkState("READY","");hideSoftKeyboard();paintFocus("load");logEvent("PAGE_OPEN",{version:PAGE_VERSION,mode:"hidden-rfid-input-hardware-arm",base:"V2.3.4 STABLE",lock_window_ms:LOCK_MS,test_table:TEST_TABLE});loadRecent();setTimeout(function(){hideSoftKeyboard();logEvent("READY",{});flush(true)},150)});');
+
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(e){
+    boot.className="boot bad";
+    boot.textContent="V2.4 STABLE не завантажилась: "+String(e.message||e);
+  }
+})();
+</script>
+</body>
+</html>
