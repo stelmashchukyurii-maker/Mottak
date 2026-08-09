@@ -21,9 +21,9 @@
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест · списання / UT</div>
 <a class="link current fresh" href="utsending-nordic-test.html">
-<h2>🧪 Nordic ID V2.6 · GREEN BASE</h2>
-<p>Копія робочої GREEN-форми, але повністю на ізольованих ut_test_* таблицях. 12 TEST-замовлень на рампах 41–52. Photo / AI / Manual прибрані. Відкриваємо рампу → скануємо Nordic → товар визначається автоматично → Klar på rampe → Sendt.</p>
-<span class="tag">CURRENT TEST · PROFESSIONAL RFID ONLY</span>
+<h2>🧪 Nordic ID V2.6.1 · GREEN BASE</h2>
+<p>GREEN-подібна TEST-форма на ізольованих ut_test_* таблицях. Photo / AI / Manual прибрані. Після RFID-скану система спочатку показує визначений товар + номер бірки і чекає підтвердження пальцем; лише після OK товар додається на рампу. Далі Klar på rampe → Send fra rampe.</p>
+<span class="tag">CURRENT TEST · PRE-SAVE CONFIRM · 22:42</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v24-stable.html">
@@ -37,8 +37,8 @@
 <p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Якщо нова версія перестає читати EPC — перевіряємо Reader, FOCUS, ACCEPTED/BLOCKED і повний номер тут.</p>
 <span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
 </a>
-<div class="plan">V2.6 — тільки TEST. Вона використовує той самий UT/rampe UI, що GREEN, але через ut-test-api.js усі таблиці та RPC перенаправляються на ut_test_*. Production mottak_scans / ut_orders не змінюються.</div>
-<div class="footer">SCANNER HOME v3.15<br>Oppdatert 09.08.2026 kl. 22:39 · Europe/Oslo</div>
+<div class="plan">V2.6.1 — тільки TEST. Перед кожним записом Nordic робить read-only preview, показує товар для ручного підтвердження і лише після OK виконує запис у ut_test_*. Cancel = жодних змін. Production mottak_scans / ut_orders не змінюються.</div>
+<div class="footer">SCANNER HOME v3.16<br>Oppdatert 09.08.2026 kl. 22:42 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";
