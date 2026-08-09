@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>GREEN — UT Kontor v36</title>
+<title>GREEN — UT Kontor v37</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--panel:#10172a;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--green:#48d597}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}body{display:flex;flex-direction:column}
@@ -21,27 +21,27 @@ iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:v
 #greenHomeFloat{position:fixed;left:max(12px,env(safe-area-inset-left));bottom:max(14px,calc(env(safe-area-inset-bottom) + 8px));z-index:99999;display:flex;align-items:center;justify-content:center;gap:7px;min-height:56px;padding:10px 18px;border:2px solid var(--green);border-radius:999px;background:#10281f;color:#eafff6;text-decoration:none;font-size:15px;font-weight:1000;box-shadow:0 14px 34px rgba(0,0,0,.48);touch-action:manipulation}
 #greenHomeFloat:active{transform:translateY(1px)}
 </style>
-<script src="products.js?v=20260809-1112"></script>
+<script src="products.js?v=20260809-1117"></script>
 </head>
 <body class="notranslate">
 <header class="bar">
-  <div class="top"><div><div class="title" id="greenTitle">GREEN — UT Kontor v36</div><div class="sub" id="greenSub">Parallell klone. GREEN og WORKING bruker samme normale arbeidsdatabase. UT TEST er fortsatt isolert.</div></div><div class="lang"><button id="noBtn" type="button">NO</button><button id="uaBtn" type="button">UA</button></div></div>
+  <div class="top"><div><div class="title" id="greenTitle">GREEN — UT Kontor v37</div><div class="sub" id="greenSub">Parallell klone. GREEN og WORKING bruker samme normale arbeidsdatabase. UT TEST er fortsatt isolert.</div></div><div class="lang"><button id="noBtn" type="button">NO</button><button id="uaBtn" type="button">UA</button></div></div>
   <nav class="nav"><a class="current" href="bestilling-green.html">UT Kontor GREEN</a><a href="camera-green.html">📷 Kamera GREEN</a></nav>
   <div class="badges"><span class="badge">GREEN · SHARED DB</span><span class="badge" id="productBadge">products.js</span></div>
 </header>
-<div id="loader">Laster GREEN — UT Kontor v36…</div>
-<iframe id="app" title="GREEN — UT Kontor v36"></iframe>
+<div id="loader">Laster GREEN — UT Kontor v37…</div>
+<iframe id="app" title="GREEN — UT Kontor v37"></iframe>
 <a id="greenHomeFloat" href="green-home.html">⌂ <span id="greenHomeText">HOME</span></a>
 <script>
 "use strict";
-const BUILD="20260809-1112",LANG_KEY="mottak_ut_language";
+const BUILD="20260809-1117",LANG_KEY="mottak_ut_language";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 let brandTimer=0;
 function lang(){return localStorage.getItem(LANG_KEY)==="uk"?"uk":"nb"}
 function uk(){return lang()==="uk"}
-function paint(){document.getElementById("noBtn").classList.toggle("active",!uk());document.getElementById("uaBtn").classList.toggle("active",uk());document.documentElement.lang=uk()?"uk":"nb";document.getElementById("greenTitle").textContent=uk()?"GREEN — UT Офіс v36":"GREEN — UT Kontor v36";document.getElementById("greenHomeText").textContent=uk()?"ДОДОМУ":"HOME";const p=window.BAMA_PRODUCTS?.getActiveProducts?.()||[];document.getElementById("productBadge").textContent=`products.js v${window.BAMA_PRODUCTS?.meta?.version||"?"} · ${p.length}`}
+function paint(){document.getElementById("noBtn").classList.toggle("active",!uk());document.getElementById("uaBtn").classList.toggle("active",uk());document.documentElement.lang=uk()?"uk":"nb";document.getElementById("greenTitle").textContent=uk()?"GREEN — UT Офіс v37":"GREEN — UT Kontor v37";document.getElementById("greenHomeText").textContent=uk()?"ДОДОМУ":"HOME";const p=window.BAMA_PRODUCTS?.getActiveProducts?.()||[];document.getElementById("productBadge").textContent=`products.js v${window.BAMA_PRODUCTS?.meta?.version||"?"} · ${p.length}`}
 function inject(doc,src,mark){return new Promise((ok,bad)=>{if(mark&&doc.querySelector(`script[data-green-module="${mark}"]`))return ok();const s=doc.createElement("script");s.src=`${src}?v=${BUILD}`;if(mark)s.dataset.greenModule=mark;s.onload=ok;s.onerror=()=>bad(new Error(`Kunne ikke laste ${src}`));doc.body.appendChild(s)})}
-function brandInner(){try{const d=frame.contentDocument;if(!d?.body)return;const v=d.querySelector(".version");if(v)v.innerHTML=`GREEN UT Kontor v36 · 6 PRODUKTER<br>${uk()?"Оновлено":"Oppdatert"} 09.08.2026 kl. 11:12`;const home=d.querySelector("a.home");if(home)home.remove()}catch{}}
+function brandInner(){try{const d=frame.contentDocument;if(!d?.body)return;const v=d.querySelector(".version");if(v)v.innerHTML=`GREEN UT Kontor v37 · 6 PRODUKTER<br>${uk()?"Оновлено":"Oppdatert"} 09.08.2026 kl. 11:17`;const home=d.querySelector("a.home");if(home)home.remove()}catch{}}
 function applyLanguage(){paint();try{const w=frame.contentWindow;w.UT_TEST_LANG?.apply?.();w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();w.BAMA_COMPACT_STOCK_REFRESH?.();brandInner()}catch{}}
 frame.addEventListener("load",async()=>{loader.style.display="none";try{const d=frame.contentDocument,w=frame.contentWindow;w.BAMA_HOME_TARGET="";await inject(d,"ut-kontor-products.js","products");await inject(d,"ut-kontor-history-visuals.js","history");await inject(d,"ut-test-language.js","language");applyLanguage();setTimeout(applyLanguage,300);clearInterval(brandTimer);brandTimer=setInterval(brandInner,1200)}catch(e){console.error(e);loader.style.display="flex";loader.textContent=`GREEN startfeil: ${e.message||e}`}});
 document.getElementById("noBtn").addEventListener("click",()=>{localStorage.setItem(LANG_KEY,"nb");applyLanguage()});document.getElementById("uaBtn").addEventListener("click",()=>{localStorage.setItem(LANG_KEY,"uk");applyLanguage()});paint();frame.src=`bestilling-core-v29.html?v=${BUILD}`;
