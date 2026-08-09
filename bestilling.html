@@ -13,17 +13,17 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
 #app{display:block;width:100%;height:100%;border:0;background:#0b1020}
 #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
 </style>
-<script src="products.js?v=20260809-0925"></script>
+<script src="products.js?v=20260809-0920"></script>
 </head>
 <body>
 <div id="loader">Laster UT Kontor WORKING v30…</div>
-<iframe id="app" title="UT Kontor WORKING v30" src="bestilling-core-v29.html?v=20260809-0925"></iframe>
+<iframe id="app" title="UT Kontor WORKING v30" src="bestilling-core-v29.html?v=20260809-0920"></iframe>
 <script>
 "use strict";
-const BUILD="20260809-0925";
+const BUILD="20260809-0920";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 function inject(doc,src,mark){return new Promise((ok,bad)=>{if(mark&&doc.querySelector(`script[data-working-module="${mark}"]`))return ok();const s=doc.createElement("script");s.src=`${src}?v=${BUILD}`;if(mark)s.dataset.workingModule=mark;s.onload=ok;s.onerror=bad;doc.body.appendChild(s)})}
-function scrub(){try{const d=frame.contentDocument;if(!d?.body)return;const v=d.querySelector(".version");if(v)v.innerHTML="UT Kontor WORKING v30 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 09:25";const walker=d.createTreeWalker(d.body,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);for(const n of nodes){if(n.nodeValue?.includes("TEST"))n.nodeValue=n.nodeValue.replaceAll("TEST","WORKING")}}catch{}}
+function scrub(){try{const d=frame.contentDocument;if(!d?.body)return;const v=d.querySelector(".version");if(v)v.innerHTML="UT Kontor WORKING v30 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 09:20";const walker=d.createTreeWalker(d.body,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);for(const n of nodes){if(n.nodeValue?.includes("TEST"))n.nodeValue=n.nodeValue.replaceAll("TEST","WORKING")}}catch{}}
 frame.addEventListener("load",async()=>{try{const d=frame.contentDocument,w=frame.contentWindow;w.BAMA_HOME_TARGET="bestilling.html";await inject(d,"ut-kontor-products.js","products");scrub();new MutationObserver(scrub).observe(d.body,{childList:true,subtree:true,characterData:true});setTimeout(scrub,250);setTimeout(scrub,900);loader.style.display="none"}catch(e){loader.textContent=`UT Kontor startfeil: ${e.message||e}`}});
 </script>
 </body>
