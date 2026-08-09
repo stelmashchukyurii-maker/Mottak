@@ -21,9 +21,9 @@
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест · нестабільна</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 Nordic ID V2.3.2</h2>
-<p>CONFIRM & SAVE · MODAL KEYBOARD FIX · робочий RFID scan → красиве підтвердження → ручний запис у TEST DB → зелений «ЗАПИСАНО». Тестуємо, щоб клавіатура не з'являлась після SAVE та після «OK — ДАЛІ».</p>
-<span class="tag">CURRENT TEST · 20:55</span>
+<h2>🧪 Nordic ID V2.3.3</h2>
+<p>EXTENSION COUNTS · KEYBOARD GUARD · scan → велике підтвердження → запис у TEST DB. Для Forlengere korte/lange перед записом вводяться Hyller + Forlengere. Клавіатура повинна відкриватися тільки при ручному натисканні числового поля, не після SAVE/OK.</p>
+<span class="tag">CURRENT TEST · 21:09</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v22-product-test.html">
@@ -31,8 +31,8 @@
 <p>PRODUCT TEST · KEYBOARD GUARD · підтверджений стабільний крок. Залишається недоторканим, поки V2.3.x не буде повністю підтверджена.</p>
 <span class="tag">STABLE · CONFIRMED</span>
 </a>
-<div class="plan">Зараз тестуємо тільки верхню V2.3.2. Якщо scan → confirm → save → «OK — ДАЛІ» працює без клавіатури і наступний RFID знову читається — тоді V2.3.2 можна буде підняти до STABLE.</div>
-<div class="footer">SCANNER HOME v3.5<br>Oppdatert 09.08.2026 kl. 20:55:22 · Europe/Oslo</div>
+<div class="plan">Зараз тестуємо тільки верхню V2.3.3. Перевір: звичайний продукт → SAVE → OK без клавіатури; Forlengere → два поля Hyller/Forlengere → SAVE → зелений «ЗАПИСАНО» → OK без повторного відкриття клавіатури.</div>
+<div class="footer">SCANNER HOME v3.6<br>Oppdatert 09.08.2026 kl. 21:09:33 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();location.href=a.getAttribute("href")+"?from=scanner-home&v="+Date.now()})});
