@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uk" translate="no">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0b1020" />
+<meta name="google" content="notranslate" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>Nordic ID V2.5 — UT ONE TAG SIM</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff7373;--info:#75b7ff;--line:#303b59}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}main{width:min(760px,100%);margin:auto;padding:14px 12px 48px}h1{margin:4px 0;color:var(--accent);font-size:34px}.ver{font-size:12px;color:var(--muted);line-height:1.45}.banner{margin:12px 0;padding:12px;border:2px solid var(--info);border-radius:14px;background:rgba(117,183,255,.06);font-weight:850;line-height:1.45}.card{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card)}label{display:block;margin:0 0 6px;color:var(--muted);font-size:12px;font-weight:850}select,input{width:100%;min-height:48px;border:1px solid var(--line);border-radius:12px;background:#0d1426;color:var(--text);padding:10px 12px;font-size:17px;font-weight:850}.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.prod{min-height:58px;border:2px solid var(--line);border-radius:13px;background:#0d1426;color:var(--text);font-weight:950;font-size:15px}.prod.active{border-color:var(--accent);background:rgba(244,196,48,.11);color:#fff5bd}.prod:disabled{opacity:.35}.status{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.pill{padding:9px 7px;border:1px solid var(--line);border-radius:11px;text-align:center;font-size:11px;color:var(--muted)}.pill strong{display:block;margin-top:3px;color:var(--text);font-size:16px}.ready{color:var(--ok)!important}.msg{min-height:42px;margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:11px;color:var(--muted);line-height:1.4}.openUt,.home{display:block;width:100%;min-height:54px;padding:14px;border:0;border-radius:13px;text-align:center;text-decoration:none;font-weight:950;font-size:16px}.openUt{margin-top:10px;background:var(--ok);color:#062418}.home{margin-top:9px;background:#0d1426;color:var(--text);border:1px solid var(--line)}#scanInput{position:fixed!important;left:-10000px!important;top:-10000px!important;width:1px!important;height:1px!important;opacity:0!important;padding:0!important;border:0!important;pointer-events:none!important}.modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.78)}.modal.show{display:flex}.sheet{width:min(620px,100%);max-height:94vh;overflow:auto;padding:18px;border:2px solid var(--accent);border-radius:20px;background:#111827;box-shadow:0 20px 70px rgba(0,0,0,.6)}.sheet.ok{border-color:var(--ok)}.sheet h2{margin:0 0 12px;font-size:28px}.big{font:950 clamp(36px,12vw,64px)/1 monospace;color:var(--accent);letter-spacing:.03em;word-break:break-all}.detail{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#0d1426;line-height:1.5}.counts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.btn{min-height:58px;border:0;border-radius:13px;font-weight:950;font-size:16px}.save{background:var(--ok);color:#062418}.cancel{background:#303b59;color:var(--text)}.okbtn{grid-column:1/-1;background:var(--ok);color:#062418}.err{color:#ffc1c1}.small{font-size:11px;color:var(--muted);line-height:1.4}@media(max-width:470px){.products,.counts,.actions{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}.okbtn{grid-column:auto}}
+</style>
+</head>
+<body>
+<main>
+<h1>📡 Nordic ID V2.5</h1>
+<div class="ver"><strong>UT ONE TAG SIM · CURRENT TEST</strong><br>Оновлено 09.08.2026 22:15 · Europe/Oslo</div>
+<div class="banner">🧪 <b>TEST ONLY.</b> Одна фізична RFID-бірка може імітувати багато різних TEST-одиниць. Production <b>mottak_scans / ut_orders</b> не використовується.</div>
+<div class="card">
+<label for="orderSelect">1. TEST-замовлення / рампа</label>
+<select id="orderSelect"><option value="">Завантажую…</option></select>
+<div id="orderInfo" class="small" style="margin-top:8px">—</div>
+</div>
+<div class="card">
+<label>2. Товар із вибраного замовлення</label>
+<div id="products" class="products"></div>
+<div id="progress" class="small" style="margin-top:9px">Спочатку виберіть замовлення.</div>
+</div>
+<div class="card">
+<label>3. Nordic RFID</label>
+<input id="scanInput" type="text" readonly tabindex="-1" autocomplete="off" autocapitalize="off" spellcheck="false" aria-hidden="true" />
+<div class="status">
+<div class="pill">RFID<strong id="rfidState" class="ready">READY</strong></div>
+<div class="pill">Сканів<strong id="scanCount">0</strong></div>
+<div class="pill">Успішно<strong id="saveCount">0</strong></div>
+</div>
+<div id="message" class="msg">Виберіть TEST-замовлення і товар, потім коротко натисніть trigger Nordic.</div>
+<a id="openUt" class="openUt" href="utsending-test.html" style="display:none">🚚 ВІДКРИТИ ЦЮ РАМПУ В UTSENDING TEST</a>
+<a class="home" href="scanner-home.html">← SCANNER HOME</a>
+</div>
+</main>
+<div id="modal" class="modal" aria-hidden="true"><div id="sheet" class="sheet">
+<h2 id="modalTitle">БІРКУ ПРОСКАНОВАНО</h2>
+<div id="modalLower" class="big">—</div>
+<div id="modalDetail" class="detail"></div>
+<div id="countFields" class="counts" style="display:none">
+<div><label for="hyllerCount">Hyller</label><input id="hyllerCount" type="number" min="0" step="1" inputmode="numeric" /></div>
+<div><label for="forlengereCount">Forlengere</label><input id="forlengereCount" type="number" min="0" step="1" inputmode="numeric" /></div>
+</div>
+<div id="modalMsg" class="small" style="margin-top:10px"></div>
+<div class="actions"><button id="saveBtn" class="btn save" type="button">ВНЕСТИ В TEST</button><button id="cancelBtn" class="btn cancel" type="button">СКАСУВАТИ</button><button id="okBtn" class="btn okbtn" type="button" style="display:none">OK — ДАЛІ</button></div>
+</div></div>
+<script>
+"use strict";
+const SUPABASE_URL="https://hzjsatehehhpgpskckfi.supabase.co";
+const SUPABASE_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+const VERSION="V2.5 UT ONE TAG SIM";
+const PRODUCT_NAMES={bunner:"Bunner",hyller30:"Hyller x30",hyller60:"Hyller x60",forlengere_korte:"Forlengere korte",forlengere_lange:"Forlengere lange"};
+const SUPPORTED=Object.keys(PRODUCT_NAMES);
+const $=id=>document.getElementById(id);
+const orderSelect=$("orderSelect"),products=$("products"),orderInfo=$("orderInfo"),progress=$("progress"),scanInput=$("scanInput"),rfidState=$("rfidState"),scanCount=$("scanCount"),saveCount=$("saveCount"),message=$("message"),openUt=$("openUt"),modal=$("modal"),sheet=$("sheet"),modalTitle=$("modalTitle"),modalLower=$("modalLower"),modalDetail=$("modalDetail"),countFields=$("countFields"),hyllerCount=$("hyllerCount"),forlengereCount=$("forlengereCount"),modalMsg=$("modalMsg"),saveBtn=$("saveBtn"),cancelBtn=$("cancelBtn"),okBtn=$("okBtn");
+let orders=[],items=[],selectedOrder=null,selectedProduct=null,pendingEpc="",scanN=0,saveN=0,armTimer=0,idleTimer=0,busy=false;
+function headers(extra={}){return{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,Accept:"application/json",...extra}}
+async function rest(path,init={}){const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,{cache:"no-store",...init,headers:headers(init.headers||{})});const text=await r.text();let data=null;try{data=text?JSON.parse(text):null}catch{data=text}if(!r.ok)throw new Error(data?.message||data?.hint||text||`HTTP ${r.status}`);return data}
+async function rpc(name,payload){return rest("rpc/"+name,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload||{})})}
+function hideKeyboard(){try{document.activeElement?.blur?.()}catch{}try{navigator.virtualKeyboard?.hide?.()}catch{}}
+function setMsg(t,bad=false){message.textContent=t;message.className="msg"+(bad?" err":"")}
+function orderLabel(o){return `RAMPE ${o.ramp} · ${o.order_number}${o.recipient?" · "+o.recipient:""}`}
+async function loadOrders(){try{orders=await rest("ut_test_orders?select=id,order_number,ramp,status,test_state,recipient,created_at&status=not.in.(completed,cancelled)&test_state=neq.returned&order=created_at.desc&limit=60");orderSelect.innerHTML='<option value="">— виберіть TEST-рампу —</option>'+orders.map(o=>`<option value="${o.id}">${orderLabel(o)}</option>`).join("");const first=orders.find(o=>String(o.order_number||"").startsWith("NID-SIM-20260809-"));if(first){orderSelect.value=first.id;await chooseOrder(first.id)}}catch(e){orderSelect.innerHTML='<option value="">Помилка завантаження</option>';setMsg("Не вдалося завантажити TEST-замовлення: "+e.message,true)}}
+async function chooseOrder(id){selectedOrder=orders.find(o=>o.id===id)||null;selectedProduct=null;products.innerHTML="";openUt.style.display="none";if(!selectedOrder){orderInfo.textContent="—";progress.textContent="Спочатку виберіть замовлення.";return}orderInfo.innerHTML=`<b>RAMPE ${selectedOrder.ramp}</b> · ${selectedOrder.order_number} · status: ${selectedOrder.status}`;openUt.href=`utsending-test.html?open=${encodeURIComponent(selectedOrder.id)}&v=${Date.now()}`;openUt.style.display="block";try{items=await rest(`ut_test_order_items?select=product_id,quantity,unit,sort_order&order_id=eq.${encodeURIComponent(selectedOrder.id)}&order=sort_order.asc`);renderProducts();await refreshProgress();setMsg("Виберіть товар із цього замовлення, потім скануйте одну фізичну RFID-бірку.")}catch(e){setMsg(e.message,true)}}
+function renderProducts(){const allowed=items.filter(i=>SUPPORTED.includes(i.product_id));products.innerHTML=allowed.map(i=>`<button type="button" class="prod" data-product="${i.product_id}">${PRODUCT_NAMES[i.product_id]} · ${i.quantity} ${i.unit}</button>`).join("")||'<div class="small">Немає підтримуваних товарів.</div>';products.querySelectorAll("button").forEach(b=>b.addEventListener("pointerdown",e=>{e.preventDefault();selectedProduct=b.dataset.product;products.querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));hideKeyboard();setMsg(`Вибрано ${PRODUCT_NAMES[selectedProduct]}. Натисніть коротко trigger Nordic.`)}))}
+async function refreshProgress(){if(!selectedOrder)return;try{const scans=await rest(`ut_test_order_scans?select=product,released_at&order_id=eq.${encodeURIComponent(selectedOrder.id)}&released_at=is.null`);let extras=[];try{extras=await rpc("ut_test_extra_progress",{p_order_id:selectedOrder.id})||[]}catch{}const parts=items.filter(i=>SUPPORTED.includes(i.product_id)).map(i=>{let done=0;if(["bunner","hyller30","hyller60"].includes(i.product_id))done=scans.filter(s=>s.product===i.product_id).length;else done=extras.filter(x=>x.product_id===i.product_id&&x.confirmed).length;return `${PRODUCT_NAMES[i.product_id]} ${done}/${i.quantity}`});progress.textContent=parts.join(" · ")||"—"}catch(e){progress.textContent="Прогрес не завантажився: "+e.message}}
+function armHardware(){if(busy||modal.classList.contains("show")||!selectedOrder||!selectedProduct)return;clearTimeout(armTimer);scanInput.value="";scanInput.readOnly=false;try{scanInput.focus({preventScroll:true})}catch{scanInput.focus()}hideKeyboard();rfidState.textContent="ACTIVE";armTimer=setTimeout(()=>{if(!scanInput.value){scanInput.readOnly=true;scanInput.blur();hideKeyboard();rfidState.textContent="READY"}},1600)}
+function normalizeEpc(v){return String(v||"").toUpperCase().replace(/[^0-9A-F]/g,"").slice(0,24)}
+function commit(){clearTimeout(idleTimer);clearTimeout(armTimer);const epc=normalizeEpc(scanInput.value);scanInput.value="";scanInput.readOnly=true;scanInput.blur();hideKeyboard();rfidState.textContent="READY";if(epc.length!==24){if(epc)setMsg(`RFID отримано ${epc.length}/24 символів. Спробуйте короткий trigger ще раз.`,true);return}scanN++;scanCount.textContent=scanN;pendingEpc=epc;openConfirm()}
+function openConfirm(){const extra=["forlengere_korte","forlengere_lange"].includes(selectedProduct);modalTitle.textContent="БІРКУ ПРОСКАНОВАНО";sheet.classList.remove("ok");modalLower.textContent=pendingEpc.slice(-6);modalDetail.innerHTML=`<b>RAMPE ${selectedOrder.ramp}</b><br>${selectedOrder.order_number}<br><b>${PRODUCT_NAMES[selectedProduct]}</b><br><span class="small">Фізичний EPC: ${pendingEpc}</span>`;countFields.style.display=extra?"grid":"none";hyllerCount.value="";forlengereCount.value="";modalMsg.textContent=extra?"Для цього товару введіть кількість полиць і продовжувачів.":"Та сама фізична бірка створить нову віртуальну TEST-одиницю.";saveBtn.style.display="block";cancelBtn.style.display="block";okBtn.style.display="none";modal.classList.add("show");modal.setAttribute("aria-hidden","false");busy=true;hideKeyboard()}
+function closeModal(){modal.classList.remove("show");modal.setAttribute("aria-hidden","true");pendingEpc="";busy=false;hideKeyboard();setTimeout(hideKeyboard,80)}
+async function savePending(){if(!pendingEpc||!selectedOrder||!selectedProduct)return;const extra=["forlengere_korte","forlengere_lange"].includes(selectedProduct);let h=null,f=null;if(extra){if(hyllerCount.value===""||forlengereCount.value===""){modalMsg.textContent="Вкажіть обидва значення: Hyller і Forlengere.";modalMsg.className="small err";return}h=Number(hyllerCount.value);f=Number(forlengereCount.value)}saveBtn.disabled=true;cancelBtn.disabled=true;modalMsg.className="small";modalMsg.textContent="Записую в ізольований UT TEST…";hideKeyboard();try{const result=await rpc("ut_test_nordic_simulate_scan",{p_order_id:selectedOrder.id,p_product:selectedProduct,p_physical_epc:pendingEpc,p_hyller_count:h,p_forlengere_count:f});saveN++;saveCount.textContent=saveN;sheet.classList.add("ok");modalTitle.textContent="✅ ЗАПИСАНО В UT TEST";modalLower.textContent=result?.physical_lower||pendingEpc.slice(-6);modalDetail.innerHTML=`<b>RAMPE ${selectedOrder.ramp}</b><br><b>${PRODUCT_NAMES[selectedProduct]}</b><br>${result?.mode==="stock_scan"?`Віртуальна TEST-бірка: <b>${result.virtual_lower}</b><br>Статус: <b>НА РАМПІ / staged</b>`:`Візок №${result?.unit_index||"?"}<br>Hyller: <b>${h}</b> · Forlengere: <b>${f}</b><br>Підтверджено`}`;countFields.style.display="none";modalMsg.textContent="Тепер можна продовжити або відкрити Utsending TEST.";saveBtn.style.display="none";cancelBtn.style.display="none";okBtn.style.display="block";await refreshProgress();setMsg(`Готово: ${PRODUCT_NAMES[selectedProduct]} записано для RAMPE ${selectedOrder.ramp}.`)}catch(e){modalMsg.className="small err";modalMsg.textContent=e.message||String(e);setMsg("TEST запис не виконано: "+(e.message||e),true);saveBtn.disabled=false;cancelBtn.disabled=false;return}saveBtn.disabled=false;cancelBtn.disabled=false}
+document.addEventListener("keydown",e=>{if(e.key==="Unidentified"){armHardware()}if((e.key==="Enter"||e.key==="Tab")&&!scanInput.readOnly&&scanInput.value){e.preventDefault();commit()}},true);
+scanInput.addEventListener("input",()=>{clearTimeout(idleTimer);if(scanInput.value.length>=24){idleTimer=setTimeout(commit,55)}else idleTimer=setTimeout(commit,180)});
+orderSelect.addEventListener("change",()=>chooseOrder(orderSelect.value));
+saveBtn.addEventListener("pointerdown",e=>e.preventDefault());cancelBtn.addEventListener("pointerdown",e=>e.preventDefault());okBtn.addEventListener("pointerdown",e=>e.preventDefault());
+saveBtn.addEventListener("click",savePending);cancelBtn.addEventListener("click",closeModal);okBtn.addEventListener("click",closeModal);
+window.addEventListener("pageshow",()=>{hideKeyboard();setTimeout(hideKeyboard,80)});window.addEventListener("load",()=>{hideKeyboard();loadOrders()});
+</script>
+</body>
+</html>
