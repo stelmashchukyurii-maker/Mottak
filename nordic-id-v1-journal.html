@@ -1,350 +1,252 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" translate="no">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
+  <meta name="google" content="notranslate" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Nordic ID v1 + Journal</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      padding: 16px;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #f5f7ff;
-      background: #0b1020;
-    }
-    main {
-      width: min(720px, 100%);
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #303b59;
-      border-radius: 18px;
-      background: #151c30;
-    }
-    h1 { margin: 0 0 8px; }
-    h2 { margin: 22px 0 8px; font-size: 20px; }
-    .version { color: #aab4ce; font-size: 13px; line-height: 1.5; }
-    .ok-note {
-      margin: 14px 0;
-      padding: 11px;
-      border: 1px solid #48d597;
-      border-radius: 12px;
-      background: rgba(72,213,151,.08);
-      color: #bdf5da;
-      line-height: 1.45;
-      font-size: 13px;
-    }
-    label { display: block; margin: 20px 0 8px; font-weight: 700; }
-    input {
-      width: 100%;
-      min-height: 58px;
-      padding: 12px 14px;
-      border: 2px solid #f4c430;
-      border-radius: 12px;
-      background: #070b14;
-      color: #f5f7ff;
-      font: 700 22px ui-monospace, Consolas, monospace;
-      outline: none;
-    }
-    input:focus { border-color: #48d597; }
-    p { line-height: 1.5; }
-    .mirror {
-      margin-top: 10px;
-      padding: 12px;
-      border: 1px solid #303b59;
-      border-radius: 12px;
-      background: #0d1426;
-    }
-    .mirror small { display:block; color:#aab4ce; margin-bottom:6px; }
-    .raw {
-      min-height: 26px;
-      font: 800 17px/1.4 ui-monospace, Consolas, monospace;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-    }
-    .stats { margin-top: 7px; color:#aab4ce; font-size:12px; }
-    .buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0; }
-    button {
-      min-height: 50px;
-      border: 0;
-      border-radius: 12px;
-      padding: 10px;
-      font-weight: 900;
-      font-size: 15px;
-    }
-    .copy { background:#f4c430; color:#17130a; }
-    .clear { background:#2c395c; color:#f5f7ff; }
-    #copyStatus { min-height:20px; margin:6px 0; color:#48d597; font-size:13px; font-weight:700; }
-    #journal {
-      width:100%;
-      min-height:300px;
-      max-height:520px;
-      margin:0;
-      padding:12px;
-      overflow:auto;
-      border:1px solid #303b59;
-      border-radius:12px;
-      background:#050811;
-      color:#cbd8f3;
-      font:11px/1.45 ui-monospace, Consolas, monospace;
-      white-space:pre-wrap;
-      overflow-wrap:anywhere;
-      user-select:text;
-    }
-    .footer { margin-top:16px; color:#aab4ce; font-size:11px; text-align:center; line-height:1.5; }
-    @media (max-width:520px) {
-      body { padding:10px; }
-      main { padding:15px; }
-      .buttons { grid-template-columns:1fr; }
-    }
+    body { margin:0; min-height:100vh; padding:14px; font-family:Arial,Helvetica,sans-serif; color:#f5f7ff; background:#0b1020; }
+    main { width:min(720px,100%); margin:0 auto; padding:18px; border:1px solid #303b59; border-radius:18px; background:#151c30; }
+    h1 { margin:0 0 8px; font-size:26px; }
+    h2 { margin:22px 0 8px; font-size:19px; }
+    .version,.muted { color:#aab4ce; font-size:12px; line-height:1.5; }
+    .status { margin:14px 0; padding:11px; border:1px solid #48d597; border-radius:12px; background:rgba(72,213,151,.08); color:#bdf5da; font-size:13px; line-height:1.45; }
+    .status.bad { border-color:#ff6b6b; color:#ffc1c1; background:rgba(255,107,107,.08); }
+    label { display:block; margin:18px 0 8px; font-weight:800; }
+    input { width:100%; min-height:66px; padding:12px 14px; border:3px solid #f4c430; border-radius:14px; background:#070b14; color:#f5f7ff; font:700 22px ui-monospace,Consolas,monospace; outline:none; }
+    .session { margin-top:10px; padding:9px; border:1px solid #303b59; border-radius:10px; color:#aab4ce; font:12px ui-monospace,Consolas,monospace; overflow-wrap:anywhere; }
+    .buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    button { min-height:48px; padding:9px; border:1px solid #303b59; border-radius:12px; background:#202a45; color:#f5f7ff; font-weight:800; font-size:14px; }
+    button.primary { border-color:#48d597; background:#17372c; }
+    #journal { height:300px; overflow:auto; padding:10px; border:1px solid #303b59; border-radius:12px; background:#070b14; white-space:pre-wrap; overflow-wrap:anywhere; font:11px/1.45 ui-monospace,Consolas,monospace; color:#d9e2ff; }
+    .footer { margin-top:18px; text-align:center; color:#7683a4; font-size:10px; line-height:1.5; }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Nordic ID v1 + JOURNAL</h1>
-    <div class="version">
-      <strong>Diagnostic copy of Nordic ID Test v1</strong><br />
-      Original base: 01.08.2026 17:23<br />
-      Journal added: 09.08.2026 14:52 (Europe/Oslo)
-    </div>
+<main>
+  <h1>Nordic ID v1 + JOURNAL</h1>
+  <div class="version"><strong>Test v1.2 — REMOTE JOURNAL</strong><br>Code updated: 09.08.2026 15:04 (Europe/Oslo)</div>
 
-    <div class="ok-note"><strong>Оригінальну робочу v1 не змінено.</strong><br />Це її діагностична копія. Поле Scan code працює так само; журнал лише слухає події браузера і нічого не блокує.</div>
+  <div class="status" id="remoteStatus">REMOTE TEST JOURNAL: запускається…</div>
+  <p class="muted">Логіка поля залишена максимально простою, як у першій версії, що вже прийняла RFID. Журнал лише спостерігає і нічого не блокує.</p>
 
-    <p>Спочатку відтвори точно ту саму послідовність із курком і бірками. Нічого вручну в поле не вводь.</p>
+  <label for="scanInput">Scan code</label>
+  <input id="scanInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Waiting for scan…" />
 
-    <label for="scanInput">Scan code</label>
-    <input
-      id="scanInput"
-      type="text"
-      autocomplete="off"
-      autofocus
-      placeholder="Waiting for scan…"
-    />
+  <div class="session" id="sessionInfo"></div>
 
-    <div class="mirror">
-      <small>Поточне значення поля — без обробки</small>
-      <div id="rawValue" class="raw">—</div>
-      <div class="stats">Довжина: <strong id="rawLength">0</strong> · Подій у журналі: <strong id="eventCount">0</strong></div>
-    </div>
+  <div class="buttons">
+    <button class="primary" id="sendBtn" type="button">☁ ВІДПРАВИТИ ЗАРАЗ</button>
+    <button id="copyBtn" type="button">📋 КОПІЮВАТИ ЖУРНАЛ</button>
+  </div>
 
-    <h2>Журнал браузера</h2>
-    <div class="buttons">
-      <button id="copyBtn" class="copy" type="button">📋 СКОПІЮВАТИ ВЕСЬ ЖУРНАЛ</button>
-      <button id="clearBtn" class="clear" type="button">Очистити тільки журнал</button>
-    </div>
-    <div id="copyStatus"></div>
-    <pre id="journal"></pre>
+  <h2>Журнал на екрані</h2>
+  <div id="journal"></div>
 
-    <div class="footer">NORDIC ID v1 + JOURNAL · TEST ONLY<br />09.08.2026 14:52 · Europe/Oslo</div>
-  </main>
+  <div class="buttons">
+    <button id="clearBtn" type="button">Очистити екранний журнал</button>
+    <button id="focusBtn" type="button">Повернути фокус у поле</button>
+  </div>
 
-  <script>
-    "use strict";
+  <div class="footer">NORDIC ID TEST v1.2 · REMOTE JOURNAL<br>Тільки TEST-таблиця nordic_id_test_log. Production Mottak не змінюється.</div>
+</main>
+<script>
+(function(){
+  "use strict";
 
-    var scanInput = document.getElementById("scanInput");
-    var journal = document.getElementById("journal");
-    var rawValue = document.getElementById("rawValue");
-    var rawLength = document.getElementById("rawLength");
-    var eventCount = document.getElementById("eventCount");
-    var copyStatus = document.getElementById("copyStatus");
-    var copyBtn = document.getElementById("copyBtn");
-    var clearBtn = document.getElementById("clearBtn");
+  var SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6anNhdGVoZWhocGdwc2tja2ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1OTkyNTMsImV4cCI6MjEwMTE3NTI1M30.sti5fzcHsfhlve3GR-wrF_RCecRZysv12qpTBvL11-U";
 
-    var startedAt = Date.now();
-    var seq = 0;
-    var lines = [];
-    var MAX_LINES = 2500;
+  var scanInput = document.getElementById("scanInput");
+  var journal = document.getElementById("journal");
+  var remoteStatus = document.getElementById("remoteStatus");
+  var sessionInfo = document.getElementById("sessionInfo");
+  var queue = [];
+  var localLines = [];
+  var eventNo = 0;
+  var flushTimer = null;
+  var idleTimer = null;
+  var sending = false;
+  var sessionId = "nid-" + new Date().toISOString().replace(/[-:.TZ]/g,"") + "-" + Math.random().toString(36).slice(2,8);
 
-    function two(n) { return n < 10 ? "0" + n : String(n); }
-    function three(n) { return n < 10 ? "00" + n : (n < 100 ? "0" + n : String(n)); }
+  sessionInfo.textContent = "SESSION: " + sessionId;
 
-    function clock() {
-      var d = new Date();
-      return two(d.getHours()) + ":" + two(d.getMinutes()) + ":" + two(d.getSeconds()) + "." + three(d.getMilliseconds());
+  function nowText(){
+    var d = new Date();
+    return d.toLocaleTimeString("uk-UA", {hour12:false}) + "." + String(d.getMilliseconds()).padStart(3,"0");
+  }
+
+  function safe(v){
+    if (v === undefined || v === null) return "";
+    return String(v).replace(/\n/g,"\\n").replace(/\r/g,"\\r").replace(/\t/g,"\\t");
+  }
+
+  function activeName(){
+    var a = document.activeElement;
+    if (!a) return "none";
+    return (a.tagName || "?") + (a.id ? "#" + a.id : "");
+  }
+
+  function writeScreen(type, detail){
+    var bits = [];
+    if (detail.key) bits.push("key=" + safe(detail.key));
+    if (detail.code) bits.push("code=" + safe(detail.code));
+    if (detail.inputType) bits.push("inputType=" + safe(detail.inputType));
+    if (detail.data !== undefined && detail.data !== null) bits.push("data=" + safe(detail.data));
+    if (detail.value !== undefined) bits.push("value=[" + safe(detail.value) + "]");
+    if (detail.length !== undefined) bits.push("len=" + detail.length);
+    if (detail.active) bits.push("focus=" + detail.active);
+    var line = String(eventNo).padStart(4,"0") + "  " + nowText() + "  " + type + (bits.length ? "  " + bits.join("  ") : "");
+    localLines.push(line);
+    if (localLines.length > 700) localLines.shift();
+    journal.textContent = localLines.join("\n");
+    journal.scrollTop = journal.scrollHeight;
+  }
+
+  function scheduleFlush(){
+    if (flushTimer) return;
+    flushTimer = setTimeout(function(){ flushTimer = null; flush(); }, 350);
+  }
+
+  function logEvent(type, extra){
+    eventNo += 1;
+    var detail = extra || {};
+    if (detail.value === undefined) detail.value = scanInput.value;
+    if (detail.length === undefined) detail.length = scanInput.value.length;
+    if (detail.active === undefined) detail.active = activeName();
+    detail.client_iso = new Date().toISOString();
+    detail.performance_ms = Math.round(performance.now());
+    detail.visibility = document.visibilityState;
+    detail.user_agent = navigator.userAgent;
+
+    writeScreen(type, detail);
+    queue.push({
+      session_id: sessionId,
+      event_no: eventNo,
+      event_type: type,
+      detail: detail
+    });
+    scheduleFlush();
+  }
+
+  async function flush(force){
+    if (sending || queue.length === 0) return;
+    sending = true;
+    var batch = queue.splice(0, force ? queue.length : Math.min(queue.length, 80));
+    remoteStatus.className = "status";
+    remoteStatus.textContent = "REMOTE TEST JOURNAL: відправляю " + batch.length + " подій…";
+    try {
+      var res = await fetch(SUPABASE_URL + "/rest/v1/nordic_id_test_log", {
+        method:"POST",
+        headers:{
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization":"Bearer " + SUPABASE_ANON_KEY,
+          "Content-Type":"application/json",
+          "Prefer":"return=minimal"
+        },
+        body:JSON.stringify(batch),
+        keepalive:true
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status + " " + (await res.text()));
+      remoteStatus.className = "status";
+      remoteStatus.textContent = "REMOTE TEST JOURNAL: ✓ передано. Черга: " + queue.length + " · Session " + sessionId;
+    } catch(err) {
+      queue = batch.concat(queue);
+      remoteStatus.className = "status bad";
+      remoteStatus.textContent = "REMOTE TEST JOURNAL: ПОМИЛКА · у черзі " + queue.length + " · " + err.message;
+    } finally {
+      sending = false;
+      if (queue.length) setTimeout(function(){ flush(); }, 1000);
     }
+  }
 
-    function elapsed() {
-      return "+" + (Date.now() - startedAt) + "ms";
+  function eventDetail(e){
+    return {
+      key:e.key,
+      code:e.code,
+      keyCode:e.keyCode,
+      which:e.which,
+      repeat:e.repeat,
+      ctrlKey:e.ctrlKey,
+      altKey:e.altKey,
+      shiftKey:e.shiftKey,
+      metaKey:e.metaKey,
+      inputType:e.inputType,
+      data:e.data,
+      isComposing:e.isComposing,
+      value:scanInput.value,
+      length:scanInput.value.length,
+      active:activeName()
+    };
+  }
+
+  document.addEventListener("keydown", function(e){ logEvent("KEYDOWN", eventDetail(e)); }, true);
+  document.addEventListener("keyup", function(e){ logEvent("KEYUP", eventDetail(e)); }, true);
+  scanInput.addEventListener("beforeinput", function(e){ logEvent("BEFOREINPUT", eventDetail(e)); });
+  scanInput.addEventListener("input", function(e){
+    logEvent("INPUT", eventDetail(e));
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function(){
+      logEvent("IDLE_SNAPSHOT", { value:scanInput.value, length:scanInput.value.length, active:activeName() });
+    }, 300);
+  });
+  scanInput.addEventListener("change", function(e){ logEvent("CHANGE", eventDetail(e)); });
+  scanInput.addEventListener("focus", function(){ logEvent("INPUT_FOCUS", {value:scanInput.value, length:scanInput.value.length}); });
+  scanInput.addEventListener("blur", function(){ logEvent("INPUT_BLUR", {value:scanInput.value, length:scanInput.value.length}); });
+  scanInput.addEventListener("paste", function(e){
+    var text = "";
+    try { text = e.clipboardData ? e.clipboardData.getData("text") : ""; } catch(_) {}
+    logEvent("PASTE", {clipboard:text, value:scanInput.value, length:scanInput.value.length});
+  });
+  scanInput.addEventListener("compositionstart", function(e){ logEvent("COMPOSITION_START", eventDetail(e)); });
+  scanInput.addEventListener("compositionend", function(e){ logEvent("COMPOSITION_END", eventDetail(e)); });
+  document.addEventListener("visibilitychange", function(){ logEvent("VISIBILITY", {state:document.visibilityState}); });
+  window.addEventListener("focus", function(){ logEvent("WINDOW_FOCUS", {}); setTimeout(function(){ scanInput.focus(); }, 50); });
+  window.addEventListener("blur", function(){ logEvent("WINDOW_BLUR", {}); });
+  window.addEventListener("pagehide", function(){ logEvent("PAGE_HIDE", {}); flush(true); });
+
+  document.getElementById("sendBtn").addEventListener("click", function(){
+    logEvent("MANUAL_SEND", {});
+    flush(true);
+    setTimeout(function(){ scanInput.focus(); }, 100);
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async function(){
+    try {
+      await navigator.clipboard.writeText(localLines.join("\n"));
+      remoteStatus.className = "status";
+      remoteStatus.textContent = "Журнал скопійовано. Автоматична передача також працює.";
+    } catch(err) {
+      remoteStatus.className = "status bad";
+      remoteStatus.textContent = "Не вдалося скопіювати: " + err.message;
     }
+    setTimeout(function(){ scanInput.focus(); }, 100);
+  });
 
-    function q(v) {
-      if (typeof v === "undefined") return "undefined";
-      if (v === null) return "null";
-      try { return JSON.stringify(String(v)); }
-      catch (e) { return String(v); }
-    }
+  document.getElementById("clearBtn").addEventListener("click", function(){
+    localLines = [];
+    journal.textContent = "";
+    logEvent("SCREEN_LOG_CLEARED", {});
+    setTimeout(function(){ scanInput.focus(); }, 100);
+  });
 
-    function targetName(t) {
-      if (!t) return "?";
-      var s = (t.tagName || "?").toLowerCase();
-      if (t.id) s += "#" + t.id;
-      return s;
-    }
+  document.getElementById("focusBtn").addEventListener("click", function(){
+    scanInput.focus();
+    logEvent("MANUAL_FOCUS", {});
+  });
 
-    function addLog(type, detail) {
-      seq += 1;
-      var num = String(seq);
-      while (num.length < 4) num = "0" + num;
-      var line = "#" + num + " " + clock() + " " + elapsed() + " [" + type + "]" + (detail ? " " + detail : "");
-      lines.push(line);
-      if (lines.length > MAX_LINES) lines.shift();
-      journal.textContent = lines.join("\n");
-      eventCount.textContent = String(seq);
-      journal.scrollTop = journal.scrollHeight;
-    }
-
-    function updateMirror() {
-      var v = scanInput.value || "";
-      rawValue.textContent = v || "—";
-      rawLength.textContent = String(v.length);
-    }
-
-    function inputDetail(e) {
-      return "target=" + targetName(e.target) +
-        " inputType=" + q(e.inputType) +
-        " data=" + q(e.data) +
-        " value=" + q(scanInput.value) +
-        " len=" + String((scanInput.value || "").length);
-    }
-
-    function keyDetail(e) {
-      return "target=" + targetName(e.target) +
-        " key=" + q(e.key) +
-        " code=" + q(e.code) +
-        " keyCode=" + String(e.keyCode || e.which || 0) +
-        " repeat=" + String(!!e.repeat) +
-        " ctrl=" + String(!!e.ctrlKey) +
-        " alt=" + String(!!e.altKey) +
-        " shift=" + String(!!e.shiftKey) +
-        " meta=" + String(!!e.metaKey);
-    }
-
-    addLog("BOOT", "url=" + q(location.href));
-    addLog("DEVICE", "userAgent=" + q(navigator.userAgent));
-    addLog("SCREEN", "screen=" + screen.width + "x" + screen.height + " viewport=" + window.innerWidth + "x" + window.innerHeight);
-    addLog("STATE", "visibility=" + q(document.visibilityState) + " active=" + targetName(document.activeElement));
-    updateMirror();
-
-    window.addEventListener("load", function() {
-      addLog("WINDOW_LOAD", "beforeFocus active=" + targetName(document.activeElement));
-      scanInput.focus();
-      addLog("V1_FOCUS_CALL", "load -> scanInput.focus() active=" + targetName(document.activeElement));
-    });
-
-    window.addEventListener("focus", function() {
-      addLog("WINDOW_FOCUS", "active=" + targetName(document.activeElement));
-      scanInput.focus();
-      addLog("V1_FOCUS_CALL", "window focus -> scanInput.focus() active=" + targetName(document.activeElement));
-    });
-
-    window.addEventListener("blur", function() {
-      addLog("WINDOW_BLUR", "active=" + targetName(document.activeElement));
-    });
-
-    document.addEventListener("visibilitychange", function() {
-      addLog("VISIBILITY", "state=" + q(document.visibilityState) + " active=" + targetName(document.activeElement));
-    });
-
-    scanInput.addEventListener("focus", function() {
-      addLog("INPUT_FOCUS", "value=" + q(scanInput.value) + " len=" + String(scanInput.value.length));
-    });
-
-    scanInput.addEventListener("blur", function() {
-      addLog("INPUT_BLUR", "value=" + q(scanInput.value) + " len=" + String(scanInput.value.length));
-    });
-
-    scanInput.addEventListener("click", function() {
-      addLog("INPUT_CLICK", "selection=" + String(scanInput.selectionStart) + ".." + String(scanInput.selectionEnd));
-    });
-
-    document.addEventListener("keydown", function(e) { addLog("KEYDOWN", keyDetail(e)); }, true);
-    document.addEventListener("keypress", function(e) { addLog("KEYPRESS", keyDetail(e)); }, true);
-    document.addEventListener("keyup", function(e) { addLog("KEYUP", keyDetail(e)); }, true);
-
-    document.addEventListener("beforeinput", function(e) {
-      addLog("BEFOREINPUT", inputDetail(e));
-    }, true);
-
-    document.addEventListener("input", function(e) {
-      updateMirror();
-      addLog("INPUT", inputDetail(e));
-    }, true);
-
-    scanInput.addEventListener("change", function(e) {
-      addLog("CHANGE", "value=" + q(scanInput.value) + " len=" + String(scanInput.value.length));
-    });
-
-    scanInput.addEventListener("paste", function(e) {
-      var text = "";
-      try { text = e.clipboardData ? e.clipboardData.getData("text") : ""; } catch (err) {}
-      addLog("PASTE", "data=" + q(text) + " beforeValue=" + q(scanInput.value));
-    });
-
-    scanInput.addEventListener("compositionstart", function(e) { addLog("COMPOSITION_START", "data=" + q(e.data)); });
-    scanInput.addEventListener("compositionupdate", function(e) { addLog("COMPOSITION_UPDATE", "data=" + q(e.data)); });
-    scanInput.addEventListener("compositionend", function(e) { addLog("COMPOSITION_END", "data=" + q(e.data)); });
-
-    function buildCopyText() {
-      return [
-        "NORDIC ID v1 + JOURNAL",
-        "Build: 09.08.2026 14:52 Europe/Oslo",
-        "Current value: " + q(scanInput.value),
-        "Current length: " + String(scanInput.value.length),
-        "Event count: " + String(seq),
-        "----- JOURNAL -----",
-        lines.join("\n")
-      ].join("\n");
-    }
-
-    function fallbackCopy(text) {
-      var ta = document.createElement("textarea");
-      ta.value = text;
-      ta.setAttribute("readonly", "readonly");
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      var ok = false;
-      try { ok = document.execCommand("copy"); } catch (e) {}
-      document.body.removeChild(ta);
-      return ok;
-    }
-
-    copyBtn.addEventListener("click", function() {
-      addLog("UI_COPY", "copy requested");
-      var text = buildCopyText();
-      copyStatus.textContent = "Копіюю…";
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function() {
-          copyStatus.textContent = "✓ Журнал скопійовано. Встав його в чат.";
-          setTimeout(function(){ scanInput.focus(); }, 250);
-        }).catch(function() {
-          var ok = fallbackCopy(text);
-          copyStatus.textContent = ok ? "✓ Журнал скопійовано. Встав його в чат." : "Не вдалося скопіювати автоматично — виділи текст журналу вручну.";
-          setTimeout(function(){ scanInput.focus(); }, 250);
-        });
-      } else {
-        var ok = fallbackCopy(text);
-        copyStatus.textContent = ok ? "✓ Журнал скопійовано. Встав його в чат." : "Не вдалося скопіювати автоматично — виділи текст журналу вручну.";
-        setTimeout(function(){ scanInput.focus(); }, 250);
-      }
-    });
-
-    clearBtn.addEventListener("click", function() {
-      lines = [];
-      seq = 0;
-      startedAt = Date.now();
-      journal.textContent = "";
-      eventCount.textContent = "0";
-      copyStatus.textContent = "Журнал очищено. Значення Scan code НЕ очищено.";
-      addLog("JOURNAL_RESET", "currentValue=" + q(scanInput.value) + " len=" + String(scanInput.value.length));
-      setTimeout(function(){ scanInput.focus(); }, 150);
-    });
-  </script>
+  window.addEventListener("load", function(){
+    scanInput.focus();
+    logEvent("PAGE_OPEN", {href:location.href, screen_w:screen.width, screen_h:screen.height});
+    setTimeout(function(){ logEvent("READY", {}); flush(true); }, 150);
+  });
+})();
+</script>
 </body>
 </html>
