@@ -4,6 +4,7 @@
   if (window.__UT_COMPACT_CONNECTION_V275__) return;
   window.__UT_COMPACT_CONNECTION_V275__ = true;
 
+  const BUILD = "20260809-0912";
   const style = document.createElement("style");
   style.id = "utCompactConnectionV275Style";
   style.textContent = `
@@ -53,6 +54,54 @@
     if (cloudText) cloudText.textContent = onlineText();
   }
 
+  function parentPath() {
+    try { return window.parent?.location?.pathname || ""; }
+    catch { return ""; }
+  }
+
+  function isWorkingWrapper() {
+    return /\/utsending\.html$/i.test(parentPath());
+  }
+
+  function scrubWorkingLabels(root = document.body) {
+    if (!isWorkingWrapper() || !root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      if (node.nodeValue?.includes("TEST")) node.nodeValue = node.nodeValue.replaceAll("TEST", "WORKING");
+    });
+  }
+
+  function loadExtraProducts() {
+    if (window.__UT_TEST_EXTRA_PRODUCTS_V1__ || document.querySelector('script[data-bama-ut-extra-products]')) {
+      scrubWorkingLabels();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `utsending-test-extra-products.js?v=${BUILD}`;
+    script.dataset.bamaUtExtraProducts = "1";
+    script.onload = () => {
+      scrubWorkingLabels();
+      window.UT_EXTRA_PRODUCTS_REFRESH?.();
+      setTimeout(() => {
+        scrubWorkingLabels();
+        window.UT_EXTRA_PRODUCTS_REFRESH?.();
+      }, 250);
+    };
+    script.onerror = () => console.error("[UT Lager] Could not load extra products module.");
+    document.body.appendChild(script);
+  }
+
+  if (isWorkingWrapper()) {
+    new MutationObserver(() => scrubWorkingLabels()).observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
+
   window.UT_COMPACT_CONNECTION_REFRESH = install;
   install();
+  loadExtraProducts();
 })();
