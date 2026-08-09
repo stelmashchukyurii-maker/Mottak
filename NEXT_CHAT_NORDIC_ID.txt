@@ -1,39 +1,38 @@
-NID-HANDOFF-2026-08-09-V21-ONE-TAG-CYCLE
+NID-HANDOFF-2026-08-09-V221-PRODUCT-TEST
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 19:56 Europe/Oslo
+Оновлено: 09.08.2026 20:31 Europe/Oslo
 
 У НОВІЙ РОЗМОВІ ОБОВ'ЯЗКОВО:
-1. Прочитай у GitHub repo stelmashchukyurii-maker/Mottak файл NORDIC_ID_RFID_PROTOCOL.md ПОВНІСТЮ.
-2. Потім прочитай NORDIC_ID_PROGRESS_LOG.md — це журнал ЛИШЕ підтверджених/успішно завершених Nordic ID кроків.
-3. Потім прочитай найновішу версію nordic-id-v20-focus.html з GitHub перед будь-якою зміною.
-4. НЕ проси користувача знову переказувати попередні тести, якщо вони є у protocol/progress log/Supabase/Drive.
-5. Постійна Google Drive папка Nordic ID відео/фото: https://drive.google.com/drive/folders/1Xf5puBas4GUveaJqhhuYLNdJcEw_Myo5
-6. НЕ створюй окремий nordic-id-v21.html / v22.html для дрібних змін.
-7. nordic-id-v20-focus.html є ПОСТІЙНОЮ WORK-сторінкою Nordic ID: URL той самий, змінюються код, видима версія і час.
-8. Поточна версія: V2.1 FIRST TAG LOCK, LOCK 600 ms.
-9. scanner-home.html уже показує Nordic ID V2.1 / SCANNER HOME v3.0. При кожній наступній Nordic ID версії одночасно оновлювати номер/час на scanner-home.
-10. Довготривалий progress log не засмічувати тимчасовими FAIL/PARTIAL/гіпотезами. Невирішені проблеми тримати в поточній роботі; коли вирішено і перевірено — записувати один чистий успішний крок.
-11. V2.1 TEST-autolog працює; public.nordic_id_test_log має page_version.
-12. Базова V2.1 session nid-20260809172608390-qf51s1: 20 RFID_ACCEPTED, 20 LOCK_RELEASED, 0 RFID_BLOCKED; обидва EPC читаються; READY → OK·LOCKED → READY працює.
-13. Нове відео: VID_20260809_195650.mp4.
-14. Відповідна session: nid-20260809175459639-p3x1cz.
-15. Нова session: 12 RFID_ACCEPTED, 12 SCAN_COMMIT, 0 RFID_BLOCKED.
-16. EPC 33161403D0000785000E3103 = 10 accepted; EPC 33161403D0000785002CB739 = 2 accepted.
-17. Найменший інтервал між сусідніми accepted = 1352 ms. Не було старих близьких пар 80–190 ms.
-18. Практичний результат нового тесту: у цій конфігурації спостерігалось ОДНЕ accepted RFID-значення за один короткий цикл; дві бірки не створили два близькі робочі scans за один burst.
-19. ГОЛОВНА ПОТОЧНА МЕТА: одне коротке натискання Nordic ID = максимум одна accepted бірка, навіть коли поруч дві RFID-бірки.
-20. Не плутати повторне читання тієї самої бірки після НОВОГО натискання з дублюванням. Дублювання для цього етапу = два RFID commits/accepted від одного короткого physical cycle.
-21. RFID_BLOCKED як технічний event ще не був фактично продемонстрований у новому тесті, бо другий EPC усередині 600 ms не прилітав. Це не мінус поточного практичного результату; якщо другий EPC знову з'явиться <600 ms, він повинен бути BLOCKED, а accepted counter не має збільшитися вдруге.
-22. Код V2.1 поки НЕ міняти. Продовжувати фізичні тести з двома бірками поруч і короткими trigger presses.
-23. Коли користувач пише «дивись журнал» / «журнал» — одразу звіряти останню Supabase session з найновішим відео в Drive.
-24. Після кожного підтвердженого успішного кроку оновлювати NORDIC_ID_PROGRESS_LOG.md.
-25. Лише після достатнього підтвердження стабільної поведінки one press → one accepted tag переходити до accepted EPC → правильний робочий номер → public.mottak_scans.
-26. Blocked у production не писати. Не чіпати production Scanner/Camera/Working до прямого етапу інтеграції.
-27. Зберігати fallback nordic-id-v19-clean.html і nordic-id.html; не перезаписувати.
-28. Android/NUR API відкладено; зараз RFID Wedge + браузер.
-29. Wedge і CC4Scanner не використовувати одночасно.
-30. Після КОЖНОЇ зміни Nordic ID сторінки повідомляти і показувати на сторінці: СТОРІНКА / ВЕРСІЯ / ОНОВЛЕНО точним Europe/Oslo часом.
+1. Прочитай NORDIC_ID_RFID_PROTOCOL.md.
+2. Прочитай NORDIC_ID_PROGRESS_LOG.md — це журнал ЛИШЕ підтверджених/успішно завершених кроків.
+3. Прочитай актуальний TEST-файл nordic-id-v22-product-test.html перед будь-якою зміною.
+4. Прочитай nordic-id-v20-focus.html як стабільну V2.1 RFID-базу/rollback.
+5. Не проси користувача повторювати попередні тести, якщо вони є у GitHub/Supabase/Drive.
+6. Постійна Google Drive папка Nordic ID відео/фото: https://drive.google.com/drive/folders/1Xf5puBas4GUveaJqhhuYLNdJcEw_Myo5
+7. Важлива зміна архітектури за прямою вказівкою користувача: V2.1 НЕ перезаписуємо. Вона лишається стабільною базою в nordic-id-v20-focus.html. Наступний продуктово-базовий етап тесту винесений окремо в nordic-id-v22-product-test.html.
+8. Поточна тестова версія: V2.2.1 PRODUCT TEST KEYBOARD GUARD.
+9. scanner-home.html показує V2.2.1 як CURRENT TEST зверху і V2.1 як STABLE RFID BASE нижче.
+10. V2.1 FIRST TAG LOCK: один короткий physical cycle практично давав максимум один accepted EPC; confirmed stable baseline.
+11. V2.2/V2.2.1 використовують окрему TEST-таблицю public.nordic_id_mottak_test. Production public.mottak_scans поки не чіпати.
+12. Поточні 5 продуктів: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange.
+13. Актуальна схема Nordic TEST-запису: scanner_code = ВЕСЬ 24-char EPC; lower_number = останні 6 символів EPC; старий 078500/upper_number НЕ використовуємо як робочий номер. upper_number у TEST-table лишається порожнім compatibility-field.
+14. V2.2 фактично записала 17 TEST DB rows: 16 × lower_number 0E3103 і 1 × 2CB739; product hyller30.
+15. V2.2.1 KEYBOARD GUARD commit: b80db614ff6b18f699e4c095076a5813a0de32f1.
+16. Користувач 09.08.2026 20:31 підтвердив на фізичному Nordic ID: при виборі продуктів Android-клавіатура НЕ відкривається.
+17. Відповідна V2.2.1 Supabase session: nid-20260809182759942-z7p199. У ній є 4 PRODUCT_SELECTED і 16 UI_KEYBOARD_GUARD events.
+18. KEYBOARD GUARD вважається PASS і вже записаний у NORDIC_ID_PROGRESS_LOG.md.
+19. Користувач зараз ПРОДОВЖУЄ тест V2.2.1. Код не змінювати без нового завдання.
+20. Якщо користувач каже «дивись журнал» / «перевір журнал» — одразу дивитися останню V2.2.1 session у public.nordic_id_test_log і rows у public.nordic_id_mottak_test; за потреби звіряти з найновішим відео у Drive.
+21. Довготривалий progress log не засмічувати невирішеними FAIL/гіпотезами. Проблему записувати тільки після вирішення як чистий PASS.
+22. Після кожного підтвердженого успішного кроку оновлювати NORDIC_ID_PROGRESS_LOG.md і актуальну точку NEXT_CHAT_NORDIC_ID.txt.
+23. Не змінювати production Scanner/Camera/Working без прямої команди користувача.
+24. Android/NUR API відкладено; зараз RFID Wedge + браузер.
+25. Wedge і CC4Scanner не використовувати одночасно.
+26. Після КОЖНОЇ зміни Nordic ID TEST-сторінки оновлювати видиму ВЕРСІЮ та точний Europe/Oslo час; scanner-home теж синхронізувати.
+
+ПОТОЧНИЙ ЛАНЦЮЖОК:
+короткий trigger → V2.1 one-tag RFID logic → accepted EPC → вибраний product → scanner_code = весь EPC → lower_number = останні 6 → public.nordic_id_mottak_test
 
 СТАРТОВА КОМАНДА:
-"Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. Продовжуй на тій самій nordic-id-v20-focus.html. V2.1 зараз тестуємо саме на правило: одне коротке натискання = максимум одна accepted бірка. Новий тест VID_20260809_195650.mp4 / session nid-20260809175459639-p3x1cz дав 12 accepted, 0 blocked, мінімальний інтервал між accepted 1352 ms — близьких подвійних scans не було. Код поки не змінюй; звіряй наступні відео з Supabase."
+"Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. Поточний тест — V2.2.1 у nordic-id-v22-product-test.html; V2.1 у nordic-id-v20-focus.html залишена стабільною базою. KEYBOARD GUARD уже PASS: клавіатура при виборі продуктів не відкривається. Користувач тестує далі. Нічого не змінюй, доки він не дасть нове завдання; якщо попросить журнал — звір Supabase TEST log + nordic_id_mottak_test + за потреби Drive відео."
