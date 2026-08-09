@@ -1,51 +1,53 @@
-NID-HANDOFF-2026-08-09-V232-MODAL-KEYBOARD-FIX
+NID-HANDOFF-2026-08-09-V234-THREE-CARD-HOME
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 20:55:22 Europe/Oslo
+Оновлено: 09.08.2026 21:23:29 Europe/Oslo
 
 У НОВІЙ РОЗМОВІ ОБОВ'ЯЗКОВО:
 1. Прочитай NORDIC_ID_RFID_PROTOCOL.md.
-2. Прочитай NORDIC_ID_PROGRESS_LOG.md — довготривалий журнал лише підтверджених/успішно завершених кроків.
-3. Прочитай поточний TEST-файл nordic-id-v23-confirm-test.html перед будь-якою зміною.
-4. Остання STABLE на головній зараз V2.2.1 у nordic-id-v22-product-test.html.
-5. V2.1 та інші старі rollback-файли залишаються у GitHub, але НЕ повинні захаращувати scanner-home.
-6. Постійна Google Drive папка Nordic ID відео/фото: https://drive.google.com/drive/folders/1Xf5puBas4GUveaJqhhuYLNdJcEw_Myo5
-7. Production public.mottak_scans поки НЕ чіпати. Поточний етап працює тільки з public.nordic_id_mottak_test + public.nordic_id_test_log.
+2. Прочитай NORDIC_ID_PROGRESS_LOG.md.
+3. Прочитай поточний TEST-файл nordic-id-v23-confirm-test.html перед зміною.
+4. Production public.mottak_scans поки НЕ чіпати без окремої команди користувача.
+5. Постійна Google Drive папка Nordic ID відео/фото:
+   https://drive.google.com/drive/folders/1Xf5puBas4GUveaJqhhuYLNdJcEw_Myo5
 
-КЛЮЧОВЕ ПРАВИЛО ВЕРСІЙ НА scanner-home.html:
-8. На головній ЗАВЖДИ рівно ДВІ Nordic-картки:
-   - ВЕРХНЯ = CURRENT TEST / НЕСТАБІЛЬНА. ЇЇ ПЕРЕПИСУЄМО при кожній наступній правці V2.3.2 → V2.3.3 → V2.4 тощо.
-   - НИЖНЯ = STABLE / остання повністю підтверджена версія. ЇЇ НЕ ЧІПАЄМО під час доробок верхньої.
-9. Коли верхня версія повністю підтверджена користувачем + журналом, вона стає новою STABLE і пересувається вниз. Після цього зверху починається новий CURRENT TEST.
-10. Старі rollback HTML-файли не видаляти, але на scanner-home їх окремими картками не показувати.
-11. Після кожної зміни CURRENT TEST синхронно оновлювати видимий номер/опис/Europe-Oslo час у scanner-home.
+ГОЛОВНЕ ПРАВИЛО scanner-home.html — ЗАВЖДИ ТРИ NORDIC-КАРТКИ:
+1) ВЕРХНЯ = CURRENT TEST / НЕСТАБІЛЬНА.
+   Її переписуємо під час наступних доробок.
+2) СЕРЕДНЯ = STABLE / остання повністю підтверджена продуктова версія.
+   Її не чіпаємо, доки CURRENT TEST не стане стабільною.
+3) НИЖНЯ = RFID TEST BASE / DIAGNOSTIC — nordic-id-v20-focus.html, V2.1 FIRST TAG LOCK.
+   ЇЇ НЕ ПЕРЕПИСУВАТИ І НЕ ПРИБИРАТИ З ГОЛОВНОЇ.
+   Вона потрібна як чиста контрольна RFID-форма, якщо нова версія перестає читати EPC/FOCUS.
+
+Коли CURRENT TEST підтверджена:
+- вона стає новою STABLE у середній картці;
+- зверху починається наступний CURRENT TEST;
+- нижня V2.1 RFID TEST BASE завжди залишається на місці.
 
 ПОТОЧНИЙ СТАН:
-12. CURRENT TEST = V2.3.2 MODAL KEYBOARD FIX у nordic-id-v23-confirm-test.html.
-13. STABLE = V2.2.1 PRODUCT TEST / KEYBOARD GUARD у nordic-id-v22-product-test.html.
-14. scanner-home V3.5 показує тільки ці дві картки.
-15. V2.3.1 фізично підтвердила важливий workflow: RFID scan працює; modal «БІРКУ ПРОСКАНОВАНО» показує правильний product + lower_number; INSERT у TEST DB працює; зелений «ЗАПИСАНО» працює.
-16. На V2.3.1 залишилася UI-проблема: Android-клавіатура з'являлася після натискання «ВНЕСТИ В TEST-БАЗУ» і залишалася після «OK — ДАЛІ».
-17. V2.3.2 виправляє ТІЛЬКИ цю проблему, не змінюючи красивий confirm/save workflow.
-18. V2.3.2 під час modal ставить RFID input readOnly + blur; після закриття modal повертає writable input і робить відкладений focus через 800 ms, щоб focus не був прямим наслідком user tap і Android keyboard не відкрилася.
-19. Commit V2.3.2: 0443bb0cfc25d1daf499d68bf63a52f492e906d3.
-20. scanner-home V3.5 commit: edb6cf6c22e91a0333eea830085892d3c6789bcf.
-21. Поточні продукти: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange.
-22. scanner_code = весь 24-char EPC; lower_number = останні 6 символів; 078500/upper_number не використовуємо як робочий номер.
-23. Кнопка «ОЧИСТИТИ ТАБЛИЦЮ НА ЕКРАНІ» очищає тільки екран/видимі лічильники і local cutoff; Supabase history та Nordic TEST log не видаляються.
-24. V2.3.2 ще НЕ записувати в NORDIC_ID_PROGRESS_LOG.md як PASS, доки користувач не підтвердить на фізичному Nordic ID, що scan → confirm → save → green saved → OK → next scan працює БЕЗ появи клавіатури.
-25. Якщо користувач каже «дивись журнал» — дивитися останню V2.3.2 session у public.nordic_id_test_log і відповідні rows у public.nordic_id_mottak_test.
-26. Довготривалий progress log не засмічувати відкритими проблемами; проблему записувати тільки після вирішення як чистий PASS.
+- CURRENT TEST: V2.3.4 PRODUCT MENU KEYBOARD FIX — nordic-id-v23-confirm-test.html.
+- STABLE: V2.2.1 PRODUCT TEST KEYBOARD GUARD — nordic-id-v22-product-test.html.
+- RFID TEST BASE: V2.1 FIRST TAG LOCK — nordic-id-v20-focus.html.
+- scanner-home: v3.8, три картки.
+- TEST DB: public.nordic_id_mottak_test.
+- TEST log: public.nordic_id_test_log.
+- scanner_code = весь 24-char EPC.
+- lower_number = останні 6 символів.
+- 078500 / upper_number не використовується як робочий номер.
 
-ПОТОЧНА ПЕРЕВІРКА V2.3.2:
-1) відкрити верхню CURRENT TEST з scanner-home;
-2) вибрати продукт;
-3) короткий RFID scan;
-4) перевірити красивий modal з product + lower_number;
-5) «ВНЕСТИ В TEST-БАЗУ» — клавіатура НЕ повинна з'явитися;
-6) зелений «ЗАПИСАНО»;
-7) «OK — ДАЛІ» — клавіатура НЕ повинна з'явитися/залишитися;
-8) після ~0.8 s FOCUS OK і наступний RFID scan знову має читатися.
+ПРАВИЛО ПРОДУКТІВ У V2.3.4:
+- Bunner / Hyller x30 / Hyller x60: НІЯКИХ ручних полів Hyller/Forlengere і клавіатура не повинна з'являтися.
+- Forlengere korte / Forlengere lange: після RFID scan показуються два ручні поля — hyller_count і forlengere_count.
+- Числова клавіатура дозволена ТІЛЬКИ коли користувач сам натиснув одне з цих двох полів.
+- Після SAVE та OK клавіатура має закритися і не повертатися.
+- У TEST-таблицю вже додані nullable integer поля hyller_count і forlengere_count.
+- Production Mottak для цих полів ще не змінювався.
+
+ПРОТОКОЛ:
+- у NORDIC_ID_PROGRESS_LOG.md записувати лише підтверджені/успішно завершені кроки;
+- відкриті помилки та невдалі спроби не записувати як окремі FAIL;
+- після фізичного підтвердження успішного fix — записати PASS.
 
 СТАРТОВА КОМАНДА:
-"Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. На scanner-home завжди тільки дві картки: верхня CURRENT TEST переписується, нижня STABLE не чіпається; коли current підтверджена — вона стає stable. Поточний тест V2.3.2 MODAL KEYBOARD FIX, stable V2.2.1. Треба підтвердити, що після SAVE та OK Android-клавіатура більше не з'являється, а наступний RFID scan працює."
+"Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. На scanner-home завжди 3 картки: CURRENT TEST, STABLE і незмінна V2.1 RFID TEST BASE. Поточний тест V2.3.4. Production не чіпай без окремої команди."
