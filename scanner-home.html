@@ -10,35 +10,29 @@
 <meta http-equiv="Expires" content="0" />
 <title>Nordic ID — SCANNER HOME</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}main{width:min(720px,100%);margin:auto;padding:18px 12px 56px}h1{margin:2px 0 8px;color:var(--accent);font-size:clamp(29px,8vw,44px)}.sub{margin:0;color:var(--muted);line-height:1.5}.fixed{margin:16px 0;padding:14px;border:1px solid var(--info);border-radius:16px;background:rgba(117,183,255,.07);line-height:1.5}.fixed strong{color:var(--info)}.refresh{width:100%;min-height:56px;margin:0 0 16px;border:2px solid var(--accent);border-radius:16px;background:var(--accent);color:#17130a;font-size:18px;font-weight:950}.link{display:block;margin-bottom:14px;padding:18px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);text-decoration:none}.link.current{border-color:var(--info)}.link.previous{border-color:var(--ok)}.link.stable{border-color:var(--line);margin-top:24px}.link h2{margin:0;font-size:28px}.link p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.5}.tag{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid currentColor;border-radius:999px;font-size:11px;font-weight:900}.current .tag{color:var(--info)}.previous .tag{color:var(--ok)}.stable .tag{color:var(--muted)}.sectionLabel{margin:23px 0 8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.plan{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0d1426;color:var(--muted);font-size:13px;line-height:1.5}.footer{margin-top:22px;color:var(--muted);font-size:10px;text-align:center}
+:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}main{width:min(720px,100%);margin:auto;padding:18px 12px 56px}h1{margin:2px 0 8px;color:var(--accent);font-size:clamp(29px,8vw,44px)}.sub{margin:0;color:var(--muted);line-height:1.5}.fixed{margin:16px 0;padding:14px;border:1px solid var(--info);border-radius:16px;background:rgba(117,183,255,.07);line-height:1.5}.fixed strong{color:var(--info)}.refresh{width:100%;min-height:56px;margin:0 0 16px;border:2px solid var(--accent);border-radius:16px;background:var(--accent);color:#17130a;font-size:18px;font-weight:950}.link{display:block;margin-bottom:16px;padding:18px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);text-decoration:none}.link.current{border-color:var(--info)}.link.stable{border-color:var(--ok);margin-top:24px}.link h2{margin:0;font-size:28px}.link p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.5}.tag{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid currentColor;border-radius:999px;font-size:11px;font-weight:900}.current .tag{color:var(--info)}.stable .tag{color:var(--ok)}.sectionLabel{margin:23px 0 8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.plan{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0d1426;color:var(--muted);font-size:13px;line-height:1.5}.footer{margin-top:22px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
 </style>
 </head>
 <body>
 <main>
 <h1>📡 Nordic ID — SCANNER</h1>
-<p class="sub">Нові кроки тестуємо окремою версією. Підтверджені попередні версії залишаються нижче.</p>
-<div class="fixed"><strong>ПОТОЧНИЙ ТЕСТ: V2.3.1 — RFID INPUT FIX.</strong><br>Повернуто normal RFID input. Кнопки не забирають focus у RFID-поля. Скан → велике підтвердження продукту й lower_number → «Внести в TEST-базу» → «ЗАПИСАНО · МОЖНА ДАЛІ».</div>
+<p class="sub">На головній завжди тільки дві версії: одна поточна тестова зверху і одна остання стабільна знизу.</p>
+<div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>Верхню CURRENT TEST переписуємо під час доробок. Коли вона повністю підтверджена — вона стає новою STABLE внизу. Після цього зверху починаємо наступний тест. Старі rollback-файли залишаються у GitHub, але не захаращують головну.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
-<div class="sectionLabel">Поточний тест</div>
+<div class="sectionLabel">Поточний тест · нестабільна</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 Nordic ID V2.3.1</h2>
-<p>CONFIRM & SAVE · RFID INPUT FIX · нормальний Wedge input · кнопки без перехоплення focus · очищення тільки екрана.</p>
-<span class="tag">CURRENT TEST · 20:44</span>
+<h2>🧪 Nordic ID V2.3.2</h2>
+<p>CONFIRM & SAVE · MODAL KEYBOARD FIX · робочий RFID scan → красиве підтвердження → ручний запис у TEST DB → зелений «ЗАПИСАНО». Тестуємо, щоб клавіатура не з'являлась після SAVE та після «OK — ДАЛІ».</p>
+<span class="tag">CURRENT TEST · 20:55</span>
 </a>
-<div class="sectionLabel">Підтверджений попередній крок</div>
-<a class="link previous fresh" href="nordic-id-v22-product-test.html">
+<div class="sectionLabel">Остання стабільна</div>
+<a class="link stable fresh" href="nordic-id-v22-product-test.html">
 <h2>✅ Nordic ID V2.2.1</h2>
-<p>PRODUCT TEST · KEYBOARD GUARD · попередня версія збережена окремо.</p>
-<span class="tag">CONFIRMED · KEYBOARD GUARD</span>
+<p>PRODUCT TEST · KEYBOARD GUARD · підтверджений стабільний крок. Залишається недоторканим, поки V2.3.x не буде повністю підтверджена.</p>
+<span class="tag">STABLE · CONFIRMED</span>
 </a>
-<div class="sectionLabel">RFID-база</div>
-<a class="link stable fresh" href="nordic-id-v20-focus.html">
-<h2>✅ Nordic ID V2.1</h2>
-<p>FIRST TAG LOCK · LOCK 600 ms · підтверджена база зчитування RFID.</p>
-<span class="tag">STABLE RFID BASE</span>
-</a>
-<div class="plan">Відкрий V2.3.1 і зроби один короткий RFID-скан. Якщо все добре, одразу має з'явитися велике вікно з продуктом і <strong>lower_number</strong>. Клавіатура при кнопках не повинна відкриватися.</div>
-<div class="footer">SCANNER HOME v3.4<br>Oppdatert 09.08.2026 kl. 20:44:55 · Europe/Oslo</div>
+<div class="plan">Зараз тестуємо тільки верхню V2.3.2. Якщо scan → confirm → save → «OK — ДАЛІ» працює без клавіатури і наступний RFID знову читається — тоді V2.3.2 можна буде підняти до STABLE.</div>
+<div class="footer">SCANNER HOME v3.5<br>Oppdatert 09.08.2026 kl. 20:55:22 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();location.href=a.getAttribute("href")+"?from=scanner-home&v="+Date.now()})});
