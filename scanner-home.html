@@ -19,11 +19,11 @@
 <p class="sub">На головній завжди три Nordic-форми: поточна робоча зверху, остання стабільна посередині і незмінна RFID-діагностика внизу.</p>
 <div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — тут робимо наступні зміни. 2) STABLE — остання повністю підтверджена версія, її не переписуємо. 3) RFID TEST BASE — незмінна діагностика чистого EPC/FOCUS/ACCEPTED/BLOCKED.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
-<div class="sectionLabel">Поточний тест · наступний етап</div>
-<a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 NEXT CURRENT TEST · СПИСАННЯ</h2>
-<p>Робоча копія базується на підтвердженій V2.4. Тут наступним етапом розбираємо логіку списання/руху товару. Поки нова логіка ще не внесена, поведінка лишається базою V2.4.</p>
-<span class="tag">READY FOR WRITE-OFF DESIGN</span>
+<div class="sectionLabel">Поточний тест · списання / UT</div>
+<a class="link current fresh" href="nordic-id-ut-simulator.html">
+<h2>🧪 Nordic ID V2.5 · UT ONE TAG SIM</h2>
+<p>12 штучних TEST-замовлень уже створені на рампах 41–52. Одна фізична RFID-бірка може по черзі імітувати Bunner, H30, H60, Forlengere korte/lange для вибраного TEST-замовлення. Далі відкриваємо Utsending TEST і перевіряємо staged → Sendt.</p>
+<span class="tag">CURRENT TEST · ONE PHYSICAL TAG</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v24-stable.html">
@@ -37,8 +37,8 @@
 <p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Якщо нова версія перестає читати EPC — перевіряємо Reader, FOCUS, ACCEPTED/BLOCKED і повний номер тут.</p>
 <span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
 </a>
-<div class="plan">V2.4 тепер STABLE. Наступний CURRENT TEST присвячуємо списанню. Production не змінюємо, доки окремо не узгодимо правила списання і момент, коли запис має переходити зі складу/у статус списано.</div>
-<div class="footer">SCANNER HOME v3.13<br>Oppdatert 09.08.2026 kl. 21:59 · Europe/Oslo</div>
+<div class="plan">V2.4 лишається STABLE. V2.5 працює тільки з ізольованими ut_test_* таблицями. Production не змінюється. Після скану у V2.5 відкриваємо ту саму рампу в utsending-test.html і тестуємо повний цикл до Sendt/списання.</div>
+<div class="footer">SCANNER HOME v3.14<br>Oppdatert 09.08.2026 kl. 22:15 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";
