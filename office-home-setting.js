@@ -305,7 +305,7 @@
       bar.id = "bamaPinLockBar";
       bar.innerHTML = `
         <button id="bamaPinLockButton" type="button" aria-pressed="false">🔒 Festede sider</button>
-        <span id="bamaPinLockHint">Festede sider can not be removed by accident.</span>`;
+        <span id="bamaPinLockHint">Festede sider kan ikke fjernes ved et uhell.</span>`;
       pinned.insertBefore(bar, grid);
       document.getElementById("bamaPinLockButton").addEventListener("click", () => unlocked ? lock() : unlock());
     }
@@ -348,12 +348,14 @@
   if (!isMainPage()) return;
 
   const TOKEN_KEY = "working_fresh_token";
-  const token = () => {
-    try { return sessionStorage.getItem(TOKEN_KEY) || new URL(location.href).searchParams.get("fresh") || new URL(location.href).searchParams.get("v") || String(Date.now()); }
-    catch { return String(Date.now()); }
-  };
+  let currentToken = "";
+  try {
+    const url = new URL(location.href);
+    currentToken = sessionStorage.getItem(TOKEN_KEY) || url.searchParams.get("fresh") || url.searchParams.get("v") || String(Date.now());
+    sessionStorage.setItem(TOKEN_KEY, currentToken);
+  } catch { currentToken = String(Date.now()); }
 
-  function freshHref(href, currentToken = token()) {
+  function freshHref(href) {
     try {
       const u = new URL(href, location.href);
       if (u.origin !== location.origin) return href;
@@ -365,11 +367,10 @@
 
   function applyTokenToPages() {
     if (typeof pages === "undefined" || !Array.isArray(pages)) return false;
-    const currentToken = token();
     let changed = false;
     pages.forEach(page => {
       if (!page?.href) return;
-      const next = freshHref(page.href, currentToken);
+      const next = freshHref(page.href);
       if (next !== page.href) { page.href = next; changed = true; }
     });
     return changed;
