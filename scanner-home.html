@@ -20,10 +20,10 @@
 <div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — тут робимо наступні зміни. 2) STABLE — остання повністю підтверджена версія, її не переписуємо. 3) RFID TEST BASE — незмінна діагностика чистого EPC/FOCUS/ACCEPTED/BLOCKED.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест · списання / UT</div>
-<a class="link current fresh" href="nordic-id-ut-simulator.html">
-<h2>🧪 Nordic ID V2.5 · UT ONE TAG SIM</h2>
-<p>12 штучних TEST-замовлень уже створені на рампах 41–52. Одна фізична RFID-бірка може по черзі імітувати Bunner, H30, H60, Forlengere korte/lange для вибраного TEST-замовлення. Далі відкриваємо Utsending TEST і перевіряємо staged → Sendt.</p>
-<span class="tag">CURRENT TEST · ONE PHYSICAL TAG</span>
+<a class="link current fresh" href="utsending-nordic-test.html">
+<h2>🧪 Nordic ID V2.6 · GREEN BASE</h2>
+<p>Копія робочої GREEN-форми, але повністю на ізольованих ut_test_* таблицях. 12 TEST-замовлень на рампах 41–52. Photo / AI / Manual прибрані. Відкриваємо рампу → скануємо Nordic → товар визначається автоматично → Klar på rampe → Sendt.</p>
+<span class="tag">CURRENT TEST · PROFESSIONAL RFID ONLY</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v24-stable.html">
@@ -37,8 +37,8 @@
 <p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Якщо нова версія перестає читати EPC — перевіряємо Reader, FOCUS, ACCEPTED/BLOCKED і повний номер тут.</p>
 <span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
 </a>
-<div class="plan">V2.4 лишається STABLE. V2.5 працює тільки з ізольованими ut_test_* таблицями. Production не змінюється. Після скану у V2.5 відкриваємо ту саму рампу в utsending-test.html і тестуємо повний цикл до Sendt/списання.</div>
-<div class="footer">SCANNER HOME v3.14<br>Oppdatert 09.08.2026 kl. 22:15 · Europe/Oslo</div>
+<div class="plan">V2.6 — тільки TEST. Вона використовує той самий UT/rampe UI, що GREEN, але через ut-test-api.js усі таблиці та RPC перенаправляються на ut_test_*. Production mottak_scans / ut_orders не змінюються.</div>
+<div class="footer">SCANNER HOME v3.15<br>Oppdatert 09.08.2026 kl. 22:39 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";
