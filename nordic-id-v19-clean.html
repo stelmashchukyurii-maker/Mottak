@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uk" translate="no">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#111827" />
+<meta name="google" content="notranslate" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Nordic ID v1.9 — CLEAN AUTOLOG</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:8px;font-family:Arial,Helvetica,sans-serif;color:#f5f7ff;background:#0b1020}main{width:min(720px,100%);margin:0 auto;padding:11px;border:1px solid #303b59;border-radius:15px;background:#151c30}h1{margin:0 0 3px;font-size:21px}.version{color:#aab4ce;font-size:10.5px;line-height:1.35}.status{margin:8px 0;padding:7px 9px;border:1px solid #48d597;border-radius:9px;background:rgba(72,213,151,.08);color:#bdf5da;font-size:11.5px;font-weight:800;line-height:1.25}.status.bad{border-color:#ff6b6b;color:#ffc1c1;background:rgba(255,107,107,.08)}label{display:block;margin:9px 0 5px;font-weight:900;font-size:13px}input{width:100%;min-height:60px;padding:9px 11px;border:3px solid #f4c430;border-radius:12px;background:#070b14;color:#f5f7ff;font:700 20px ui-monospace,Consolas,monospace;outline:none;caret-color:#fff;pointer-events:none}.hint{margin:7px 0 0;color:#aab4ce;font-size:10px;line-height:1.35}.counter{margin:9px 0 4px;font-size:14px;font-weight:900}.tableWrap{overflow:hidden;border:1px solid #303b59;border-radius:10px;background:#0d1426}table{width:100%;border-collapse:collapse;table-layout:fixed}col.c-no{width:24px}col.c-time{width:73px}col.c-code{width:auto}th,td{padding:7px 2px;border-bottom:1px solid #303b59;text-align:left}th{color:#aab4ce;background:#111a2d;font-size:9.5px}th.no,td.no{text-align:center}td.no{font-size:9.5px;font-weight:900;color:#f4c430}td.time{white-space:nowrap;color:#b9c5df;font:700 8.6px ui-monospace,Consolas,monospace;letter-spacing:-.2px}td.code{white-space:nowrap;overflow:hidden;text-overflow:clip;color:#fff;font:700 10px ui-monospace,Consolas,monospace;letter-spacing:-.45px}tr:last-child td{border-bottom:0}.empty{padding:15px 8px;text-align:center;color:#7683a4;font-size:11px}.footer{margin-top:8px;text-align:center;color:#7683a4;font-size:8.5px;line-height:1.3}
+</style>
+</head>
+<body>
+<main>
+<h1>Nordic ID — CLEAN SCAN</h1>
+<div class="version"><strong>Test v1.9 — CLEAN AUTOLOG</strong> · Updated 09.08.2026 15:54 (Europe/Oslo)</div>
+<div class="status" id="remoteStatus">Журнал: запускається… · Reader: <span id="readerCount">0</span></div>
+<label for="scanInput">Scan code</label>
+<input id="scanInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Waiting for scan…" />
+<div class="hint">Не торкайся екрана під час тесту. Журнал відправляється автоматично.</div>
+<div class="counter">Проскановано: <span id="scanCount">0</span></div>
+<div class="tableWrap"><table><colgroup><col class="c-no"><col class="c-time"><col class="c-code"></colgroup><thead><tr><th class="no">№</th><th>Час</th><th>Номер</th></tr></thead><tbody id="scanRows"></tbody></table><div class="empty" id="emptyState">Ще немає просканованих номерів</div></div>
+<div class="footer">NORDIC ID TEST v1.9 · звичайний input як у робочій v1.4 · без кнопок · AUTOLOG</div>
+</main>
+<script>
+(function(){
+"use strict";
+var SUPABASE_URL="https://hzjsatehehhpgpskckfi.supabase.co";
+var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6anNhdGVoZWhocGdwc2tja2ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU1OTkyNTMsImV4cCI6MjEwMTE3NTI1M30.sti5fzcHsfhlve3GR-wrF_RCecRZysv12qpTBvL11-U";
+var scanInput=document.getElementById("scanInput"),remoteStatus=document.getElementById("remoteStatus"),readerCount=document.getElementById("readerCount"),scanRows=document.getElementById("scanRows"),scanCount=document.getElementById("scanCount"),emptyState=document.getElementById("emptyState");
+var queue=[],eventNo=0,flushTimer=null,idleTimer=null,sending=false,scans=[],readerEvents=0;
+var sessionId="nid-"+new Date().toISOString().replace(/[-:.TZ]/g,"")+"-"+Math.random().toString(36).slice(2,8);
+function activeName(){var a=document.activeElement;return a?((a.tagName||"?")+(a.id?"#"+a.id:"")):"none"}
+function statusText(base,bad){remoteStatus.className=bad?"status bad":"status";remoteStatus.firstChild.nodeValue=base+" · Reader: ";readerCount.textContent=String(readerEvents)}
+function focusScan(){try{scanInput.focus({preventScroll:true})}catch(_){scanInput.focus()}}
+function scheduleFlush(){if(flushTimer)return;flushTimer=setTimeout(function(){flushTimer=null;flush(false)},350)}
+function logEvent(type,extra){eventNo++;var d=extra||{};if(d.value===undefined)d.value=scanInput.value;if(d.length===undefined)d.length=scanInput.value.length;if(d.active===undefined)d.active=activeName();d.client_iso=new Date().toISOString();d.performance_ms=Math.round(performance.now());d.visibility=document.visibilityState;queue.push({session_id:sessionId,event_no:eventNo,event_type:type,detail:d});scheduleFlush()}
+async function flush(force){if(sending||queue.length===0)return;sending=true;var batch=queue.splice(0,force?queue.length:Math.min(queue.length,80));statusText("Журнал: передаю…",false);try{var res=await fetch(SUPABASE_URL+"/rest/v1/nordic_id_test_log",{method:"POST",headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(batch),keepalive:true});if(!res.ok)throw new Error("HTTP "+res.status);statusText("Журнал: ✓ передано",false)}catch(err){queue=batch.concat(queue);statusText("Журнал: ПОМИЛКА",true)}finally{sending=false;if(queue.length)setTimeout(function(){flush(false)},1200)}}
+function hmsMs(d){var base=d.toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});return base+"."+String(d.getMilliseconds()).padStart(3,"0")}
+function renderScan(code,when){scans.push({code:code,time:when});scanCount.textContent=String(scans.length);emptyState.style.display="none";var tr=document.createElement("tr"),a=document.createElement("td"),b=document.createElement("td"),c=document.createElement("td");a.className="no";a.textContent=String(scans.length);b.className="time";b.textContent=hmsMs(when);c.className="code";c.textContent=code;tr.appendChild(a);tr.appendChild(b);tr.appendChild(c);scanRows.insertBefore(tr,scanRows.firstChild)}
+function commitCurrent(reason){var code=scanInput.value;if(!code)return;var when=new Date();renderScan(code,when);logEvent("SCAN_COMMIT",{reason:reason,scan_no:scans.length,scan_code:code,value:code,length:code.length,scan_time_iso:when.toISOString(),scan_time_ms:when.getTime(),scan_millisecond:when.getMilliseconds()});scanInput.value="";setTimeout(focusScan,20)}
+function eventDetail(e){return{key:e.key,code:e.code,keyCode:e.keyCode,which:e.which,repeat:e.repeat,ctrlKey:e.ctrlKey,altKey:e.altKey,shiftKey:e.shiftKey,metaKey:e.metaKey,inputType:e.inputType,data:e.data,isComposing:e.isComposing,value:scanInput.value,length:scanInput.value.length,active:activeName()}}
+document.addEventListener("keydown",function(e){if(e.key==="Unidentified"){readerEvents++;readerCount.textContent=String(readerEvents)}logEvent("KEYDOWN",eventDetail(e));if((e.key==="Enter"||e.key==="Tab")&&scanInput.value){e.preventDefault();clearTimeout(idleTimer);commitCurrent(e.key.toUpperCase())}},true);
+document.addEventListener("keyup",function(e){logEvent("KEYUP",eventDetail(e))},true);
+scanInput.addEventListener("beforeinput",function(e){logEvent("BEFOREINPUT",eventDetail(e))});
+scanInput.addEventListener("input",function(e){logEvent("INPUT",eventDetail(e));clearTimeout(idleTimer);idleTimer=setTimeout(function(){if(scanInput.value)commitCurrent("IDLE_450MS")},450)});
+scanInput.addEventListener("change",function(e){logEvent("CHANGE",eventDetail(e))});scanInput.addEventListener("focus",function(){logEvent("INPUT_FOCUS",{})});scanInput.addEventListener("blur",function(){logEvent("INPUT_BLUR",{})});document.addEventListener("visibilitychange",function(){logEvent("VISIBILITY",{state:document.visibilityState})});window.addEventListener("focus",function(){logEvent("WINDOW_FOCUS",{})});window.addEventListener("blur",function(){logEvent("WINDOW_BLUR",{})});window.addEventListener("pagehide",function(){logEvent("PAGE_HIDE",{});flush(true)});
+window.addEventListener("load",function(){focusScan();logEvent("PAGE_OPEN",{href:location.href,screen_w:screen.width,screen_h:screen.height,version:"v1.9",mode:"clean-autolog-v14-input"});setTimeout(function(){logEvent("READY",{});flush(true)},150)});
+})();
+</script>
+</body>
+</html>
