@@ -10,14 +10,14 @@
 <meta http-equiv="Expires" content="0" />
 <title>Nordic ID — SCANNER HOME</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}main{width:min(720px,100%);margin:auto;padding:18px 12px 56px}h1{margin:2px 0 8px;color:var(--accent);font-size:clamp(29px,8vw,44px)}.sub{margin:0;color:var(--muted);line-height:1.5}.fixed{margin:16px 0;padding:14px;border:1px solid var(--info);border-radius:16px;background:rgba(117,183,255,.07);line-height:1.5}.fixed strong{color:var(--info)}.refresh{width:100%;min-height:56px;margin:0 0 16px;border:2px solid var(--accent);border-radius:16px;background:var(--accent);color:#17130a;font-size:18px;font-weight:950}.link{display:block;margin-bottom:16px;padding:18px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);text-decoration:none}.link.current{border-color:var(--info)}.link.stable{border-color:var(--ok);margin-top:24px}.link h2{margin:0;font-size:28px}.link p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.5}.tag{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid currentColor;border-radius:999px;font-size:11px;font-weight:900}.current .tag{color:var(--info)}.stable .tag{color:var(--ok)}.sectionLabel{margin:23px 0 8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.plan{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0d1426;color:var(--muted);font-size:13px;line-height:1.5}.footer{margin-top:22px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
+:root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--line:#303b59}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}main{width:min(720px,100%);margin:auto;padding:18px 12px 56px}h1{margin:2px 0 8px;color:var(--accent);font-size:clamp(29px,8vw,44px)}.sub{margin:0;color:var(--muted);line-height:1.5}.fixed{margin:16px 0;padding:14px;border:1px solid var(--info);border-radius:16px;background:rgba(117,183,255,.07);line-height:1.5}.fixed strong{color:var(--info)}.refresh{width:100%;min-height:56px;margin:0 0 16px;border:2px solid var(--accent);border-radius:16px;background:var(--accent);color:#17130a;font-size:18px;font-weight:950}.link{display:block;margin-bottom:16px;padding:18px;border:2px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);text-decoration:none}.link.current{border-color:var(--info)}.link.stable{border-color:var(--ok);margin-top:24px}.link.diagnostic{border-color:var(--accent);margin-top:24px}.link h2{margin:0;font-size:28px}.link p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.5}.tag{display:inline-block;margin-top:10px;padding:5px 8px;border:1px solid currentColor;border-radius:999px;font-size:11px;font-weight:900}.current .tag{color:var(--info)}.stable .tag{color:var(--ok)}.diagnostic .tag{color:var(--accent)}.sectionLabel{margin:23px 0 8px;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.plan{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#0d1426;color:var(--muted);font-size:13px;line-height:1.5}.footer{margin-top:22px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
 </style>
 </head>
 <body>
 <main>
 <h1>📡 Nordic ID — SCANNER</h1>
-<p class="sub">На головній завжди тільки дві версії: одна поточна тестова зверху і одна остання стабільна знизу.</p>
-<div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>Верхню CURRENT TEST переписуємо під час доробок. Коли вона повністю підтверджена — вона стає новою STABLE внизу. Після цього зверху починаємо наступний тест. Старі rollback-файли залишаються у GitHub, але не захаращують головну.</div>
+<p class="sub">На головній завжди три Nordic-форми: поточна тестова зверху, остання стабільна посередині і незмінна RFID-діагностика внизу.</p>
+<div class="fixed"><strong>ПРАВИЛО ВЕРСІЙ.</strong><br>1) CURRENT TEST зверху — її переписуємо під час доробок. 2) STABLE — остання повністю підтверджена версія. Коли CURRENT TEST підтверджена, вона стає новою STABLE. 3) RFID TEST BASE внизу — не переписуємо; вона потрібна, щоб у будь-який момент перевірити чисте читання EPC/FOCUS/ACCEPTED/BLOCKED.</div>
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест · нестабільна</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
@@ -28,11 +28,17 @@
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v22-product-test.html">
 <h2>✅ Nordic ID V2.2.1</h2>
-<p>PRODUCT TEST · KEYBOARD GUARD · підтверджений стабільний крок. Залишається недоторканим, поки V2.3.x не буде повністю підтверджена.</p>
+<p>PRODUCT TEST · KEYBOARD GUARD · підтверджений стабільний крок. Залишається недоторканим, поки верхня V2.3.x не буде повністю підтверджена.</p>
 <span class="tag">STABLE · CONFIRMED</span>
 </a>
-<div class="plan">Зараз тестуємо тільки верхню V2.3.4. Перевір: відкриття/вибір продукту без клавіатури; Bunner/H30/H60 без полів Hyller/Forlengere; Forlengere korte/lange з двома полями до SAVE; після SAVE поля зникають і лишається зелений підсумок.</div>
-<div class="footer">SCANNER HOME v3.7<br>Oppdatert 09.08.2026 kl. 21:19:10 · Europe/Oslo</div>
+<div class="sectionLabel">RFID діагностика · незмінна тестова база</div>
+<a class="link diagnostic fresh" href="nordic-id-v20-focus.html">
+<h2>🛟 Nordic ID V2.1</h2>
+<p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Використовуємо як контрольну точку, якщо нова версія раптом перестає читати EPC: тут видно FOCUS, Reader, ACCEPTED/BLOCKED і сам повний номер.</p>
+<span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
+</a>
+<div class="plan">Зараз тестуємо тільки верхню V2.3.4. Якщо виникає підозра, що Nordic перестав передавати номер, не ламаємо нову форму навмання: відкриваємо нижню V2.1 і перевіряємо чистий RFID-вхід. V2.2.1 лишається останнім стабільним продуктовим fallback.</div>
+<div class="footer">SCANNER HOME v3.8<br>Oppdatert 09.08.2026 kl. 21:23:29 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();location.href=a.getAttribute("href")+"?from=scanner-home&v="+Date.now()})});
