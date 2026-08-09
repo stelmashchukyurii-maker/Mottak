@@ -21,9 +21,9 @@
 <button class="refresh" id="refreshBtn" type="button">↻ ОНОВИТИ СТОРІНКУ</button>
 <div class="sectionLabel">Поточний тест · нестабільна</div>
 <a class="link current fresh" href="nordic-id-v23-confirm-test.html">
-<h2>🧪 Nordic ID V2.3.4</h2>
-<p>PRODUCT MENU KEYBOARD FIX · scan → підтвердження → TEST DB. Поля Hyller + Forlengere показуються тільки для Forlengere korte/lange. Меню продуктів не повинно відкривати клавіатуру; числова клавіатура дозволена тільки при ручному натисканні поля Hyller/Forlengere.</p>
-<span class="tag">CURRENT TEST · 21:19</span>
+<h2>🧪 Nordic ID V2.3.5</h2>
+<p>RFID SOFT KEYBOARD OFF · робочий scan/confirm/save/count workflow збережений. RFID EPC працює як hardware-scanner input без Android-клавіатури. Числова клавіатура дозволена тільки у двох полях Hyller + Forlengere для Forlengere korte/lange.</p>
+<span class="tag">CURRENT TEST · 21:31</span>
 </a>
 <div class="sectionLabel">Остання стабільна</div>
 <a class="link stable fresh" href="nordic-id-v22-product-test.html">
@@ -37,8 +37,8 @@
 <p>FIRST TAG LOCK · чиста базова RFID-форма без продуктового workflow. Використовуємо як контрольну точку, якщо нова версія раптом перестає читати EPC: тут видно FOCUS, Reader, ACCEPTED/BLOCKED і сам повний номер.</p>
 <span class="tag">RFID TEST BASE · DO NOT OVERWRITE</span>
 </a>
-<div class="plan">Зараз тестуємо тільки верхню V2.3.4. Якщо виникає підозра, що Nordic перестав передавати номер, не ламаємо нову форму навмання: відкриваємо нижню V2.1 і перевіряємо чистий RFID-вхід. V2.2.1 лишається останнім стабільним продуктовим fallback.</div>
-<div class="footer">SCANNER HOME v3.8<br>Oppdatert 09.08.2026 kl. 21:23:29 · Europe/Oslo</div>
+<div class="plan">Зараз тестуємо верхню V2.3.5: на Bunner/H30/H60 та кнопках клавіатури бути не повинно; після scan короткого/довгого Forlengere клавіатура має відкриватися тільки після ручного натискання поля Hyller або Forlengere. Після SAVE/OK вона повинна закритися і не повертатися. Якщо RFID раптом не читається — одразу перевіряємо нижню V2.1 TEST BASE.</div>
+<div class="footer">SCANNER HOME v3.9<br>Oppdatert 09.08.2026 kl. 21:31:42 · Europe/Oslo</div>
 </main>
 <script>
 "use strict";document.getElementById("refreshBtn").addEventListener("click",function(){location.replace(location.pathname+"?refresh="+Date.now())});document.querySelectorAll("a.fresh").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();location.href=a.getAttribute("href")+"?from=scanner-home&v="+Date.now()})});
