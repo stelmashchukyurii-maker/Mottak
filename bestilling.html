@@ -7,23 +7,33 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v32</title>
+<title>UT Kontor WORKING v33</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
 #app{display:block;width:100%;height:100%;border:0;background:#0b1020}
 #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:800 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
 </style>
-<script src="products.js?v=20260809-1019"></script>
+<script src="products.js?v=20260809-1035"></script>
 </head>
 <body>
-<div id="loader">Laster UT Kontor WORKING v32…</div>
-<iframe id="app" title="UT Kontor WORKING v32"></iframe>
+<div id="loader">Laster UT Kontor WORKING v33…</div>
+<iframe id="app" title="UT Kontor WORKING v33"></iframe>
 <script>
 "use strict";
-const BUILD="20260809-1019";
+const BUILD="20260809-1035";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 function inject(doc,src,mark){return new Promise((ok,bad)=>{if(mark&&doc.querySelector(`script[data-working-module="${mark}"]`))return ok();const s=doc.createElement("script");s.src=`${src}?v=${BUILD}`;if(mark)s.dataset.workingModule=mark;s.onload=ok;s.onerror=()=>bad(new Error(`Kunne ikke laste ${src}`));doc.body.appendChild(s)})}
-function scrub(){try{const d=frame.contentDocument;if(!d?.body)return;const v=d.querySelector(".version");if(v)v.innerHTML="UT Kontor WORKING v32 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 10:19";const walker=d.createTreeWalker(d.body,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);for(const n of nodes){if(n.nodeValue?.includes("TEST"))n.nodeValue=n.nodeValue.replaceAll("TEST","WORKING")}}catch{}}
+function scrub(){
+  try{
+    const d=frame.contentDocument;if(!d?.body)return;
+    const v=d.querySelector(".version");
+    const target="UT Kontor WORKING v33 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 10:35";
+    if(v&&v.innerHTML!==target)v.innerHTML=target;
+    const walker=d.createTreeWalker(d.body,NodeFilter.SHOW_TEXT),nodes=[];
+    while(walker.nextNode())nodes.push(walker.currentNode);
+    for(const n of nodes){if(n.nodeValue?.includes("TEST"))n.nodeValue=n.nodeValue.replaceAll("TEST","WORKING")}
+  }catch{}
+}
 async function build(){
   try{
     const r=await fetch(`bestilling-core-v29.html?v=${BUILD}`,{cache:"no-store"});
@@ -32,9 +42,7 @@ async function build(){
     html=html.replace(/<script src="compact-stock-counter\.js[^\"]*"><\/script>/i,`<script src="compact-stock-counter-v2.js?v=${BUILD}"><\/script>`);
     html=html.replace(/bestilling-party-fields\.js\?v=[^\"]+/i,`bestilling-party-fields.js?v=${BUILD}`);
     frame.srcdoc=html;
-  }catch(e){
-    loader.textContent=`UT Kontor startfeil: ${e.message||e}`;
-  }
+  }catch(e){loader.textContent=`UT Kontor startfeil: ${e.message||e}`}
 }
 frame.addEventListener("load",async()=>{
   loader.style.display="none";
@@ -43,8 +51,9 @@ frame.addEventListener("load",async()=>{
     w.BAMA_HOME_TARGET="bestilling.html";
     await inject(d,"ut-kontor-products.js","products");
     scrub();
-    new MutationObserver(scrub).observe(d.body,{childList:true,subtree:true,characterData:true});
-    setTimeout(scrub,250);setTimeout(scrub,900);
+    setTimeout(scrub,250);
+    setTimeout(scrub,900);
+    setTimeout(scrub,2000);
   }catch(e){
     console.error(e);
     loader.style.display="flex";
