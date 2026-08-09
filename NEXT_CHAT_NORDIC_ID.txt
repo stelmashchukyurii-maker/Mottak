@@ -1,34 +1,51 @@
-NID-HANDOFF-2026-08-09-V231-RFID-INPUT-FIX
+NID-HANDOFF-2026-08-09-V232-MODAL-KEYBOARD-FIX
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 20:44:55 Europe/Oslo
+Оновлено: 09.08.2026 20:55:22 Europe/Oslo
 
 У НОВІЙ РОЗМОВІ ОБОВ'ЯЗКОВО:
 1. Прочитай NORDIC_ID_RFID_PROTOCOL.md.
-2. Прочитай NORDIC_ID_PROGRESS_LOG.md — це журнал ЛИШЕ підтверджених/успішно завершених кроків.
+2. Прочитай NORDIC_ID_PROGRESS_LOG.md — довготривалий журнал лише підтверджених/успішно завершених кроків.
 3. Прочитай поточний TEST-файл nordic-id-v23-confirm-test.html перед будь-якою зміною.
-4. Прочитай nordic-id-v22-product-test.html як попередню V2.2.1 версію.
-5. Прочитай nordic-id-v20-focus.html як стабільну V2.1 RFID-базу/rollback.
-6. Постійна Google Drive папка: https://drive.google.com/drive/folders/1Xf5puBas4GUveaJqhhuYLNdJcEw_Myo5
-7. Production public.mottak_scans поки НЕ чіпати.
-8. Поточна НЕПІДТВЕРДЖЕНА тестова версія: V2.3.1 CONFIRM SAVE RFID INPUT FIX у nordic-id-v23-confirm-test.html.
-9. scanner-home.html показує V2.3.1 як CURRENT TEST; V2.2.1 і V2.1 лишаються нижче.
-10. V2.3 попередня session nid-20260809184146255-6cd15x показала проблему: reader trigger доходив (20 KEYDOWN Unidentified), але 0 INPUT, 0 SCAN_COMMIT, 0 RFID_ACCEPTED, 0 PRODUCT_TEST_SAVED. Тому modal з номером не міг з'явитися.
-11. Причина звужена до keyboard-guard/input змін: V2.3.1 повертає normal type=text RFID input без virtualkeyboardpolicy=manual, без navigator.virtualKeyboard.hide(), без blur/refocus циклів на кнопках.
-12. У V2.3.1 кнопки мають pointerdown preventDefault: вони НЕ забирають focus у scanInput. Це має не відкривати Android-клавіатуру і водночас не блокувати Wedge.
-13. Commit V2.3.1: b129acf950bf1754be3cf1bf9f2b0270c0d34e12.
-14. scanner-home V3.4 commit: 1a3e0315dc225d3b76d468a80f6084ac155dac3c.
-15. Поточні продукти: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange.
-16. scanner_code = весь 24-char EPC; lower_number = останні 6 символів; 078500/upper_number не використовуємо як робочий номер.
-17. V2.3.1 workflow після успішного RFID input: scan → modal з product + lower_number → USER CONFIRM → INSERT у public.nordic_id_mottak_test → green ЗАПИСАНО → OK → READY.
-18. Кнопка очищення очищає ТІЛЬКИ екран/видимі лічильники та ставить local screen cutoff. Supabase і Nordic журнал не видаляються.
-19. V2.3/V2.3.1 ще НЕ заносити в NORDIC_ID_PROGRESS_LOG.md як PASS, поки користувач фізично не підтвердить RFID input + modal + save + keyboard behavior.
-20. Якщо користувач каже «дивись журнал» — одразу дивитися останню V2.3.1 session у public.nordic_id_test_log і відповідні rows public.nordic_id_mottak_test.
-21. Відео зараз не потрібне, якщо журнал чітко показує INPUT/SCAN_COMMIT/RFID_ACCEPTED. Просити відео тільки якщо журнал не пояснює фізичну поведінку.
-22. Довготривалий progress log не засмічувати відкритими проблемами; записувати тільки вирішене як PASS.
+4. Остання STABLE на головній зараз V2.2.1 у nordic-id-v22-product-test.html.
+5. V2.1 та інші старі rollback-файли залишаються у GitHub, але НЕ повинні захаращувати scanner-home.
+6. Постійна Google Drive папка Nordic ID відео/фото: https://drive.google.com/drive/folders/1Xf5puBas4GUveaJqhhuYLNdJcEw_Myo5
+7. Production public.mottak_scans поки НЕ чіпати. Поточний етап працює тільки з public.nordic_id_mottak_test + public.nordic_id_test_log.
 
-ПОТОЧНА ПЕРЕВІРКА:
-Відкрити V2.3.1 з scanner-home → зробити ОДИН короткий RFID trigger → перевірити, чи з'явився modal з product + lower_number. Паралельно кнопки не повинні викликати Android-клавіатуру.
+КЛЮЧОВЕ ПРАВИЛО ВЕРСІЙ НА scanner-home.html:
+8. На головній ЗАВЖДИ рівно ДВІ Nordic-картки:
+   - ВЕРХНЯ = CURRENT TEST / НЕСТАБІЛЬНА. ЇЇ ПЕРЕПИСУЄМО при кожній наступній правці V2.3.2 → V2.3.3 → V2.4 тощо.
+   - НИЖНЯ = STABLE / остання повністю підтверджена версія. ЇЇ НЕ ЧІПАЄМО під час доробок верхньої.
+9. Коли верхня версія повністю підтверджена користувачем + журналом, вона стає новою STABLE і пересувається вниз. Після цього зверху починається новий CURRENT TEST.
+10. Старі rollback HTML-файли не видаляти, але на scanner-home їх окремими картками не показувати.
+11. Після кожної зміни CURRENT TEST синхронно оновлювати видимий номер/опис/Europe-Oslo час у scanner-home.
+
+ПОТОЧНИЙ СТАН:
+12. CURRENT TEST = V2.3.2 MODAL KEYBOARD FIX у nordic-id-v23-confirm-test.html.
+13. STABLE = V2.2.1 PRODUCT TEST / KEYBOARD GUARD у nordic-id-v22-product-test.html.
+14. scanner-home V3.5 показує тільки ці дві картки.
+15. V2.3.1 фізично підтвердила важливий workflow: RFID scan працює; modal «БІРКУ ПРОСКАНОВАНО» показує правильний product + lower_number; INSERT у TEST DB працює; зелений «ЗАПИСАНО» працює.
+16. На V2.3.1 залишилася UI-проблема: Android-клавіатура з'являлася після натискання «ВНЕСТИ В TEST-БАЗУ» і залишалася після «OK — ДАЛІ».
+17. V2.3.2 виправляє ТІЛЬКИ цю проблему, не змінюючи красивий confirm/save workflow.
+18. V2.3.2 під час modal ставить RFID input readOnly + blur; після закриття modal повертає writable input і робить відкладений focus через 800 ms, щоб focus не був прямим наслідком user tap і Android keyboard не відкрилася.
+19. Commit V2.3.2: 0443bb0cfc25d1daf499d68bf63a52f492e906d3.
+20. scanner-home V3.5 commit: edb6cf6c22e91a0333eea830085892d3c6789bcf.
+21. Поточні продукти: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange.
+22. scanner_code = весь 24-char EPC; lower_number = останні 6 символів; 078500/upper_number не використовуємо як робочий номер.
+23. Кнопка «ОЧИСТИТИ ТАБЛИЦЮ НА ЕКРАНІ» очищає тільки екран/видимі лічильники і local cutoff; Supabase history та Nordic TEST log не видаляються.
+24. V2.3.2 ще НЕ записувати в NORDIC_ID_PROGRESS_LOG.md як PASS, доки користувач не підтвердить на фізичному Nordic ID, що scan → confirm → save → green saved → OK → next scan працює БЕЗ появи клавіатури.
+25. Якщо користувач каже «дивись журнал» — дивитися останню V2.3.2 session у public.nordic_id_test_log і відповідні rows у public.nordic_id_mottak_test.
+26. Довготривалий progress log не засмічувати відкритими проблемами; проблему записувати тільки після вирішення як чистий PASS.
+
+ПОТОЧНА ПЕРЕВІРКА V2.3.2:
+1) відкрити верхню CURRENT TEST з scanner-home;
+2) вибрати продукт;
+3) короткий RFID scan;
+4) перевірити красивий modal з product + lower_number;
+5) «ВНЕСТИ В TEST-БАЗУ» — клавіатура НЕ повинна з'явитися;
+6) зелений «ЗАПИСАНО»;
+7) «OK — ДАЛІ» — клавіатура НЕ повинна з'явитися/залишитися;
+8) після ~0.8 s FOCUS OK і наступний RFID scan знову має читатися.
 
 СТАРТОВА КОМАНДА:
-"Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. Поточний тест — V2.3.1 у nordic-id-v23-confirm-test.html. V2.3 не приймала EPC: reader KEYDOWN були, INPUT/SCAN_COMMIT/ACCEPTED = 0. У V2.3.1 повернуто normal RFID input, а кнопки лише не забирають focus. Чекаємо один фізичний scan; якщо користувач пише 'дивись журнал' — перевір V2.3.1 session."
+"Прочитай NEXT_CHAT_NORDIC_ID.txt, NORDIC_ID_RFID_PROTOCOL.md і NORDIC_ID_PROGRESS_LOG.md. На scanner-home завжди тільки дві картки: верхня CURRENT TEST переписується, нижня STABLE не чіпається; коли current підтверджена — вона стає stable. Поточний тест V2.3.2 MODAL KEYBOARD FIX, stable V2.2.1. Треба підтвердити, що після SAVE та OK Android-клавіатура більше не з'являється, а наступний RFID scan працює."
