@@ -83,6 +83,7 @@ frame.addEventListener("load",async()=>{
   try{
     const d=frame.contentDocument,w=frame.contentWindow;
     w.BAMA_HOME_TARGET="";
+    w.localStorage.setItem("mottak_ut_language","no");
     await inject(d,"ut-kontor-products.js","products");
     await waitForProducts(w);
     await inject(d,"ut-kontor-history-visuals.js","history");
