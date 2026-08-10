@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Nordic ID – Til lager · DEV V1.0</title>
+<title>Nordic ID – Til lager · DEV V1.0.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--yellow:#f4c430;--green:#48d597;--red:#ff7373}
@@ -18,7 +18,7 @@
 </head>
 <body>
 <main>
-  <div class="version">Nordic ID – Til lager · DEV V1.0 · 10.08.2026 kl. 21:36</div>
+  <div class="version">Nordic ID – Til lager · DEV V1.0.1 · 10.08.2026 kl. 22:02</div>
   <div class="env"><button class="test active" id="testBtn">🧪 TEST</button><button class="work" id="workBtn">🏭 WORK · УТРИМАТИ</button></div>
   <div class="env-note" id="envNote">TEST · environment=test · ту саму RFID-бірку можна використовувати повторно</div>
   <section class="section"><h1>📥 Til lager</h1><p class="subtitle">Вибери продукт один раз. Вибір залишається для наступних сканів.</p><div class="products" id="products"></div></section>
@@ -33,11 +33,11 @@ const LOCK_MS=600,ARM_MS=1600,IDLE_MS=150,PRODUCT_KEY="bama_til_lager_product_v1
 const PRODUCTS=[["bunner","Bunner"],["hyller30","Hyller x30"],["hyller60","Hyller x60"],["forlengere_korte","Forlengere korte"],["forlengere_lange","Forlengere lange"],["vrak_bunner","Vrak bunner · 10"],["vrak_hyller","Vrak hyller · 30"]],PN=Object.fromEntries(PRODUCTS),$=id=>document.getElementById(id);
 let env="test",selected=localStorage.getItem(PRODUCT_KEY)||"",client=null,idleTimer=0,armTimer=0,lockUntil=0,busy=false,pending=null,workTimer=0;
 function makeClient(){client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{headers:{"x-bama-environment":env}}});}
-function hideKb(){try{document.activeElement?.blur?.()}catch{}try{navigator.virtualKeyboard?.hide?.()}catch{}}
+function hideKb(){try{navigator.virtualKeyboard?.hide?.()}catch{}}
 function normalize(v){return String(v||"").toUpperCase().replace(/[^0-9A-F]/g,"").slice(0,24)}function lowerOf(epc){return epc.slice(-6)}
 function setState(text,kind="ready",detail=""){const s=$("state");s.textContent=text;s.className="state"+(kind==="wait"?" wait":kind==="bad"?" bad":"");if(detail)$("detail").textContent=detail;}
 function renderProducts(){$("products").innerHTML=PRODUCTS.map(([id,name])=>`<button class="product${selected===id?" active":""}" data-product="${id}">${name}</button>`).join("");if(selected){$("selected").textContent=PN[selected]||selected;setState("READY","ready","Коротко натисни trigger Nordic ID.");}else{$("selected").textContent="Спочатку вибери продукт";setState("ВИБЕРИ","wait","Після вибору продукту коротко натисни trigger Nordic ID.");}}
-function cancelPending(){pending=null;$("modal").classList.remove("show");$("yesBtn").hidden=false;$("yesBtn").disabled=false;hideKb();}
+function cancelPending(){pending=null;$("modal").classList.remove("show");$("yesBtn").hidden=false;$("yesBtn").disabled=false;const input=$("nidInput");input.readOnly=true;try{input.blur()}catch{}hideKb();}
 function setEnv(next){env=next==="work"?"work":"test";makeClient();$("testBtn").classList.toggle("active",env==="test");$("workBtn").classList.toggle("active",env==="work");$("envNote").textContent=env==="test"?"TEST · environment=test · ту саму RFID-бірку можна використовувати повторно":"WORK · реальний склад · дублікати RFID заблоковані";cancelPending();renderProducts();}
 function arm(){if(busy||pending||!selected)return;clearTimeout(armTimer);const input=$("nidInput");input.value="";input.readOnly=false;try{input.focus({preventScroll:true})}catch{input.focus()}hideKb();setState("SCAN","ready","RFID ACTIVE · чекаю EPC…");armTimer=setTimeout(()=>{if(!input.value&&!pending){input.readOnly=true;try{input.blur()}catch{}hideKb();renderProducts();}},ARM_MS);}
 function commit(){const input=$("nidInput"),epc=normalize(input.value);input.value="";input.readOnly=true;clearTimeout(armTimer);try{input.blur()}catch{}hideKb();if(epc.length!==24){setState("RETRY","bad",`RFID має дати 24 HEX. Отримано: ${epc.length}.`);setTimeout(renderProducts,1100);return;}if(performance.now()<lockUntil)return;lockUntil=performance.now()+LOCK_MS;preview(epc).catch(e=>setState("ПОМИЛКА","bad",String(e.message||e)));}
