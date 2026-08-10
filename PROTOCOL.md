@@ -1,53 +1,99 @@
 # BaMavaremottak — Project Protocol
 
-**Оновлено:** 10.08.2026 20:37 Europe/Oslo
+**Оновлено:** 10.08.2026 22:15 Europe/Oslo
 
-## CURRENT PRIORITY — Nordic ID
+## CURRENT PRIORITY — Nordic ID / Til lager
 
-Офіційна стабільна форма outgoing / ramp operation:
+Офіційна стабільна outgoing / ramp operation:
 
 `Nordic ID – Til rampe · STABLE V2.9.7`
 
 Stable entry:
-
 `nordic-id-til-rampe-stable.html`
 
 Критичне правило:
 - STABLE не переписувати й не видаляти;
 - frozen source commit: `ed3a19b20efd9af0bf07bc4a079589b3b6038157`;
 - final stable-entry commit: `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`;
-- нові експерименти тільки у DEV (`utsending-nordic-test.html` або нова DEV-копія).
+- outgoing experiments only in DEV.
 
-Поточний `scanner-home.html` показує оператору тільки:
-- `📥 НА СКЛАД` — майбутня Nordic Mottak / INN форма;
-- `📤 TIL RAMPE` — final stable V2.9.7.
+Поточний `scanner-home.html`:
+- `📥 TIL LAGER` → `nordic-id-til-lager-test.html` → DEV V1.0.1 · TEST FIRST;
+- `📤 TIL RAMPE` → frozen final stable V2.9.7.
 
-V2.4, V2.1 і DEV збережені в GitHub, але приховані з робочого екрана.
+`Til lager` не називати stable до фізичного Nordic PASS.
+Детальний DEV state: `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`.
 
 ### TEST / WORK
-Активні TEST і WORK працюють у shared public tables, розділених `environment=test/work`.
-TEST дозволяє duplicate EPC для симуляцій; WORK зберігає duplicate protection.
+Shared public tables розділені `environment=test/work`.
+TEST дозволяє duplicate EPC; WORK зберігає duplicate protection.
+
+### RFID products
+Central registry `products.js` v1.3.0.
+
+RFID:
+- bunner
+- hyller30
+- hyller60
+- forlengere_korte
+- forlengere_lange
+- vrak_bunner
+- vrak_hyller
+
+No RFID:
+- forlengere_plast
+
+Rules:
+- Vrak bunner = 10 per RFID stack;
+- Vrak hyller = 30 per RFID stack;
+- усі продукти можуть іти на RAMPE;
+- korte/lange counts вводяться при outgoing, не Mottak.
+
+### Server groundwork
+- product constraints розширені для Vrak + korte/lange RFID;
+- `private.nordic_preview` розширено для Vrak без зміни frozen Til rampe frontend;
+- TEST duplicate Vrak RFID transactional check = allowed;
+- WORK duplicate Vrak RFID transactional check = blocked;
+- test rows rolled back, production не засмічено.
 
 ### WORK unknown RFID tag
-Якщо EPC прочитаний, але WORK stock row відсутній, `Til rampe` пропонує оприбуткувати товар із цією біркою й одразу продовжити на поточну RAMPE.
+Якщо EPC прочитаний, але WORK stock row відсутній, `Til rampe` пропонує register + continue to current RAMPE.
 Якщо EPC не прочитаний — фіктивний номер не створювати.
 
-Повний фізичний WORK end-to-end запланований на 11.08.2026. До PASS stable-код не змінювати.
+### Camera fallback
+Confirmed PASS:
+- Camera v4.25 LOWER RESET;
+- Camera v4.26 AUTO SAVE FOCUS.
 
-### Forlengere
-Forlengere korte/lange:
-- `hyller_count` + `forlengere_count` вводяться при Utsending / списанні;
-- на Mottak counts не вводити.
+Current Camera wrapper v4.27 adds fallback product choices for korte/lange/Vrak, але ще не physical PASS.
+
+### UT Kontor
+- Existing layout/behavior зберігати.
+- Мова примусово повернена на Norwegian (`mottak_ut_language=no`).
+- `ut-kontor-vrak-products.js` additive-only додає Vrak bunner / Vrak hyller.
+- Existing six product flows не переписані.
+- UI now identifies 8 products.
+- Norwegian + Vrak browser confirmation ще потрібна перед PASS.
 
 ### Протоколи Nordic
 Перед Nordic-змінами читати:
 1. `NEXT_CHAT_NORDIC_ID.txt`
 2. `NORDIC_ID_RFID_PROTOCOL.md`
 3. `NORDIC_ID_PROGRESS_LOG.md`
-4. `NORDIC_TIL_RAMPE_STABLE_LOCK.md`
+4. `NORDIC_TIL_LAGER_DEV_PROTOCOL.md` для incoming DEV
+5. `NORDIC_TIL_RAMPE_STABLE_LOCK.md` якщо зміна торкається stable
 
-Історичний Nordic research snapshot:
+Історичний snapshot:
 `NORDIC_ID_RFID_PROTOCOL_ARCHIVE_2026-08-09.md`
+
+### Next physical step
+- `scanner-home.html` → `📥 TIL LAGER`;
+- verify `DEV V1.0.1` + TEST;
+- choose Bunner або Vrak bunner;
+- one short RFID scan;
+- confirm;
+- query DB/log;
+- WORK тільки після TEST physical PASS.
 
 ---
 
