@@ -1,9 +1,9 @@
-NID-HANDOFF-2026-08-10-TIL-RAMPE-FINAL-STABLE
+NID-HANDOFF-2026-08-10-TIL-LAGER-DEV-V1.0.1
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 10.08.2026 20:37 Europe/Oslo
+Оновлено: 10.08.2026 22:13 Europe/Oslo
 
-КРИТИЧНЕ ПРАВИЛО:
+КРИТИЧНЕ ПРАВИЛО — TIL RAMPE:
 - Офіційна стабільна форма списання/переміщення на рампу: `Nordic ID – Til rampe`.
 - FINAL STABLE entry: `nordic-id-til-rampe-stable.html`.
 - Stable version: V2.9.7.
@@ -11,40 +11,32 @@ NID-HANDOFF-2026-08-10-TIL-RAMPE-FINAL-STABLE
 - Final stable-entry commit: `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`.
 - Lock manifest: `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
 - `Nordic ID – Til rampe` STABLE НЕ ПЕРЕПИСУВАТИ І НЕ ВИДАЛЯТИ.
-- Усі подальші експерименти робити тільки у `utsending-nordic-test.html` або новій DEV-копії.
-- V2.1 `nordic-id-v20-focus.html` лишається незмінною RFID diagnostic/test base.
+- V2.1 `nordic-id-v20-focus.html` лишається RFID diagnostic/test base.
 - V2.4 `nordic-id-v24-stable.html` лишається історичним RFID rollback.
 
-SCANNER HOME — ПОТОЧНИЙ РОБОЧИЙ ВИГЛЯД:
-- `scanner-home.html` очищений 10.08.2026 20:36.
-- На робочому екрані залишено тільки 2 операції:
-  1) `📥 НА СКЛАД` — окрема Nordic INN / Mottak форма ще не підключена.
-  2) `📤 TIL RAMPE` → `nordic-id-til-rampe-stable.html`.
-- DEV, V2.4, V2.1 не показуються на робочому екрані.
-- Вони НЕ видалені з GitHub і лишаються rollback/diagnostic/development assets.
-- На головній є WORK-підказка для unknown RFID tag.
+SCANNER HOME — ПОТОЧНИЙ СТАН:
+- `scanner-home.html` має дві основні операції:
+  1) `📥 TIL LAGER` → `nordic-id-til-lager-test.html` → DEV V1.0.1 · TEST FIRST.
+  2) `📤 TIL RAMPE` → frozen STABLE V2.9.7.
+- Поточний scanner-home content SHA: `d1e483c49b6cc6eaf374f5a94555b4b3eeb67019`.
+- Til lager ще НЕ stable і НЕ physical PASS.
 
-ПІДТВЕРДЖЕНИЙ PHYSICAL TEST PASS V2.9.7:
+TIL RAMPE V2.9.7 — PHYSICAL TEST PASS:
 - V2.4 hidden RFID/Wedge engine;
 - 24-char HEX EPC;
 - 600 ms lock;
-- TEST / WORK перемикач в одній формі;
-- TEST дублікати RFID дозволені;
-- SMART FOCUS: після відкриття RAMPE і після кожної дії екран сам переходить до найінформативнішого місця;
-- видно замовлено / виконано / залишилось / наступний товар;
-- Bunner / Hyller x30 / Hyller x60 мають просте велике підтвердження;
-- Forlengere korte/lange: кількість Hyller + Forlengere вводиться при списанні;
-- INPUT LOCK не дозволяє refresh стерти введені числа;
-- COUNT COMPACT: для малого екрана Nordic два count-поля поруч і короткі `ДОДАТИ / СКАСУВАТИ` поруч над клавіатурою;
-- користувач підтвердив повністю робочий TEST-цикл і наказав зафіксувати форму як остаточну.
-
-STABLE LOCK:
-- `nordic-id-til-rampe-stable.html` відкриває V2.9.7 з конкретного GitHub commit через pinned CDN URL, а не поточний main.
-- Подальші зміни DEV-файлів не повинні змінювати stable-поведінку.
-- Якщо stable entry випадково видалено/змінено — відновлювати через GitHub history та `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
+- TEST / WORK switch;
+- TEST duplicates allowed;
+- SMART FOCUS: ordered / done / remaining / next;
+- INPUT LOCK;
+- COUNT COMPACT for korte/lange;
+- Bunner / H30 / H60 simple confirmation;
+- Forlengere korte/lange counts entered only at outgoing;
+- WORK unknown EPC can be registered and immediately continued to current RAMPE;
+- no EPC read → never invent a number.
 
 SHARED TEST/WORK ARCHITECTURE — SERVER PASS:
-Активні TEST і WORK використовують ті самі public tables, розділені `environment = work/test`:
+Shared public tables separated by `environment = work/test`:
 - mottak_scans
 - ut_orders
 - ut_order_items
@@ -52,59 +44,128 @@ SHARED TEST/WORK ARCHITECTURE — SERVER PASS:
 - ut_extra_confirmations
 - mottak_stock_events
 
-- TEST API додає `x-bama-environment:test`.
-- Nordic WORK додає `x-bama-environment:work`.
-- Старі production browser forms без header трактуються як WORK.
-- RLS / server logic розділяє TEST і WORK.
-- TEST same EPC може створювати повторні TEST units.
-- WORK дублікати захищені.
-- Cross-link guards не дозволяють змішувати TEST/WORK stock-order-scan.
-- Старі `ut_test_*` не видаляти: archive/rollback.
+- TEST header: `x-bama-environment:test`.
+- WORK/default production uses work environment.
+- TEST same EPC may repeat.
+- WORK duplicates protected.
+- Cross-environment links blocked.
+- old `ut_test_*` remain archive/rollback.
 
 RFID MAPPING:
 - full Nordic EPC → `scanner_code`
 - last 6 → `lower_number`
 - `upper_number=''`
-- Camera може мати `scanner_code=''` і лише `lower_number`.
+- Camera can have `scanner_code=''` and only `lower_number`.
 
-PRODUCTS:
+PRODUCT REGISTRY — v1.3.0:
+RFID products:
 - bunner
 - hyller30
 - hyller60
 - forlengere_korte
 - forlengere_lange
-- forlengere_plast без RFID / manual phone flow.
+- vrak_bunner
+- vrak_hyller
 
-FORLENGERE RULE:
-- korte/lange counts вводяться тільки при Utsending / списанні;
-- на Mottak counts не вводити;
-- production `ut_extra_confirmations` має `hyller_count` + `forlengere_count`.
+Without RFID:
+- forlengere_plast — manual / phone count flow.
 
-WORK UNKNOWN TAG FLOW — IMPLEMENTED / SERVER READY:
-- якщо tag знайдений і доступний → reuse existing stock row;
-- якщо already staged/unavailable → warning/block;
-- якщо WORK EPC успішно прочитаний, але stock row відсутній → UI пропонує оприбуткувати зараз і одразу додати на поточну RAMPE;
-- YES → зберегти full EPC + last 6 і продовжити outgoing flow;
-- якщо EPC не прочитаний взагалі → не створювати фіктивний номер.
+NEW BUSINESS RULES:
+- RFID exists on everything except Forlengere plast.
+- All products can go to RAMPE.
+- `vrak_bunner` = 1 RFID unit / stack = 10 Vrak bunner.
+- `vrak_hyller` = 1 RFID unit / stack = 30 Vrak hyller.
+- korte/lange: no Hyller/Forlengere counts at Mottak; counts only at outgoing confirmation.
 
-ВАЖЛИВО:
-- WORK unknown-tag та повний WORK end-to-end серверно підготовлені, але фізичний WORK тест на реальному складі ще не завершено.
-- Наступна фізична перевірка запланована на 11.08.2026.
-- До неї `Nordic ID – Til rampe` STABLE НЕ ЗМІНЮВАТИ.
+DB PRODUCT SERVER PASS:
+Migration `extend_rfid_products_for_vrak_and_extenders`:
+- `mottak_scans_product_check` accepts Bunner/H30/H60/korte/lange/Vrak bunner/Vrak hyller.
+- `ut_order_scans_product_check` accepts same RFID set.
+- Forlengere plast intentionally excluded from RFID scan table.
 
-COMMON NORDIC RPC:
-- public.nordic_preview(uuid,text)
-- public.nordic_auto_scan(uuid,text)
-- public.nordic_confirm_extra(uuid,text,integer,integer)
+Migration `extend_nordic_preview_for_vrak_products_v2`:
+- private `nordic_preview(uuid,text)` accepts Vrak bunner / Vrak hyller as normal RFID stock items.
+- frozen Til rampe frontend was not modified.
 
-TEST SEED:
-Synthetic TEST orders NID-SIM-20260809-01...12, RAMPE 41...52, environment=test.
+Transactional browser-role verification:
+- TEST duplicate Vrak RFID: 2 rows allowed.
+- WORK duplicate Vrak RFID: only 1 row.
+- tests rolled back; no artificial rows left in production.
+
+NORDIC ID – TIL LAGER DEV:
+File: `nordic-id-til-lager-test.html`
+Current version: DEV V1.0.1
+Content SHA: `03c43233b1d81b5e107799bbbf4c396ddcc23907`
+Commit: `44d3c5544ca8bf65ff1bba53b1cc1e379c323dd5`
+Detailed DEV protocol: `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`
+
+Flow:
+- TEST default.
+- WORK only after ~1.5 sec hold + confirm.
+- select product once; selection persists.
+- hidden RFID input, readonly idle.
+- Unidentified hardware trigger arms RFID input.
+- 24 HEX EPC, 600 ms lock, 1600 ms arm, 150 ms idle commit.
+- V1.0.1 specifically fixed soft-keyboard hiding so RFID ACTIVE keeps focus; blur happens only on commit/timeout/cancel.
+- scan → product + lower 6 → confirm.
+- success → large `PÅ LAGER` → automatic READY.
+
+Til lager WORK logic:
+- existing same lower + different product → block.
+- existing full RFID → block duplicate/status warning.
+- existing same-product Camera row with `scanner_code=''` and `in_stock` → enrich same row with full EPC; keep photo; no duplicate.
+- staged/dispatched existing row → block.
+- no row → insert verified/in_stock WORK row.
+
+Til lager TEST logic:
+- inserts environment=test verified/in_stock row.
+- same physical RFID may be reused.
+
+NEXT PHYSICAL STEP:
+1. Refresh `scanner-home.html`.
+2. Tap `📥 TIL LAGER`.
+3. Confirm screen shows `DEV V1.0.1` and TEST is active.
+4. Then choose Bunner or Vrak bunner and do one short RFID scan.
+5. After user reports result / says `дивись журнал`, query recent TEST `mottak_scans` and correlate EPC/lower/product/status/stock_status/source.
+6. Do NOT test WORK until TEST physical pass is confirmed.
+
+CAMERA:
+Physical PASS:
+- Camera v4.25 LOWER RESET: after save no stuck `ОБРОБКА…`; returns to `📷 ФОТО`.
+- Camera v4.26 AUTO SAVE FOCUS: after valid OCR automatically scrolls/highlights `💾 ЗБЕРЕГТИ`; user confirmed successful.
+
+Current wrapper has advanced to Camera v4.27 `RFID FALLBACK PRODUCTS` and is NOT yet physically confirmed.
+Current v4.27 adds fallback Camera product choices:
+- forlengere_korte
+- forlengere_lange
+- vrak_bunner
+- vrak_hyller
+Files:
+- `camera-extra-rfid-products.js`
+- `camera-live-v4-floating-camera-v2.js`
+Camera v4.26 remains the last physically confirmed rollback in GitHub history.
+
+UT KONTOR:
+- User said existing UT Kontor behavior/layout is ideal; preserve it.
+- Language regression fixed minimally: `bestilling.html` forces `mottak_ut_language=no` before loading language module.
+- No existing calculation/order behavior was intentionally changed by the language fix.
+- Additive Vrak module created: `ut-kontor-vrak-products.js`.
+- `bestilling.html` now loads Vrak module and visibly says `UT Kontor WORKING v36 · 8 PRODUKTER`.
+- Vrak cards:
+  - Vrak bunner, stabel, 10 per RFID unit.
+  - Vrak hyller, stabel, 30 per RFID unit.
+- Existing Bunner/H30/H60/Forlengere flows remain in original module.
+- UT Kontor Norwegian + Vrak additions still require physical/browser confirmation before being logged as PASS.
 
 PROTOCOLS:
-- `NORDIC_ID_PROGRESS_LOG.md` — тільки підтверджені PASS / server PASS з чітким статусом фізичного тесту.
-- `NORDIC_TIL_RAMPE_STABLE_LOCK.md` — незмінні правила stable snapshot + recovery.
-- `NEXT_CHAT_NORDIC_ID.txt` — актуальний handoff.
-- Стан протоколів звірено та синхронізовано 10.08.2026 20:37 Europe/Oslo.
+- `NORDIC_ID_PROGRESS_LOG.md` — only confirmed physical PASS / explicit SERVER PASS.
+- `NORDIC_TIL_LAGER_DEV_PROTOCOL.md` — current unconfirmed Til lager development state.
+- `NORDIC_TIL_RAMPE_STABLE_LOCK.md` — immutable Til rampe stable/recovery contract.
+- `NEXT_CHAT_NORDIC_ID.txt` — this current handoff.
+- Camera v4.25/v4.26 and Vrak server groundwork are recorded in `NORDIC_ID_PROGRESS_LOG.md`.
 
-НАСТУПНИЙ ВЕЛИКИЙ ЕТАП:
-Створити окрему стабільну Nordic-форму для приймання `НА СКЛАД`. Робоча норвезька назва ще не зафіксована; логічні варіанти `Til lager` / `Varemottak`. Не змінювати при цьому `Nordic ID – Til rampe` STABLE.
+DO NOT CLAIM YET:
+- Til lager physical PASS — not tested yet.
+- Til lager stable — not frozen yet.
+- Camera v4.27 physical PASS — not tested yet.
+- UT Kontor Vrak physical PASS — not tested yet.
