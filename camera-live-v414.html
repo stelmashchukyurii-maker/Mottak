@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Camera Cloud v4.25</title>
+  <title>Camera Cloud v4.26</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster Camera Cloud v4.25…</div>
-  <iframe id="app" title="Camera Cloud v4.25" src="camera-live.html?base=425-lower-workflow-reset-20260810-2051"></iframe>
+  <div id="loader">Laster Camera Cloud v4.26…</div>
+  <iframe id="app" title="Camera Cloud v4.26" src="camera-live.html?base=426-auto-save-focus-20260810-2106"></iframe>
   <script>
     "use strict";
-    const VERSION = "20260810-2051";
+    const VERSION = "20260810-2106";
     const frame = document.getElementById("app");
     const loader = document.getElementById("loader");
 
@@ -49,6 +49,7 @@
         await injectScript(doc, "camera-live-v4-compact-language.js?v=414-newurl-20260807-1834");
         await injectScript(doc, "camera-live-v4-mobile-ui.js?v=414-newurl-20260807-1834");
         await injectScript(doc, `camera-lower-only.js?v=${VERSION}`);
+        await injectScript(doc, `camera-auto-save-focus.js?v=${VERSION}`);
         await injectScript(doc, `stock-lifecycle-ui.js?v=${VERSION}`);
         await injectScript(doc, `camera-current-stock-only.js?v=${VERSION}`);
 
@@ -57,7 +58,7 @@
         injectScript(doc, `compact-stock-counter-v2.js?v=${VERSION}`).catch(error => console.warn("Compact stock v2 failed", error));
 
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.25 · LOWER RESET<br>Oppdatert 10.08.2026 kl. 20:51";
+        if (version) version.innerHTML = "Kamera Cloud v4.26 · AUTO SAVE FOCUS<br>Oppdatert 10.08.2026 kl. 21:06";
 
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => {
@@ -66,7 +67,7 @@
           }, 80));
         });
       } catch (error) {
-        loader.textContent = `Kunne ikke starte Camera Cloud v4.25: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte Camera Cloud v4.26: ${error.message || error}`;
       }
     });
   </script>
