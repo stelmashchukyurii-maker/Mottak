@@ -2,7 +2,7 @@
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
 **Створено:** 09.08.2026 19:43:37 Europe/Oslo  
-**Оновлено:** 10.08.2026 20:14 Europe/Oslo
+**Оновлено:** 10.08.2026 20:37 Europe/Oslo
 
 ## Правило журналу
 У цей файл записуємо **тільки підтверджені успішні/завершені кроки**. Тимчасові помилки, невдалі спроби, гіпотези та відкриті проблеми сюди не додаємо.
@@ -110,6 +110,42 @@ Google Drive Nordic ID відео/фото:
 
 # 10.08.2026 — ПІДТВЕРДЖЕНІ КРОКИ
 
+## SERVER PASS — SHARED TEST / WORK ENVIRONMENT
+Підтверджено серверними тестами та read-back перевірками:
+- активні TEST і WORK використовують спільні робочі таблиці з `environment = test/work`;
+- старі production browser-форми без environment header трактуються як WORK;
+- TEST API передає `x-bama-environment:test`, Nordic WORK — `x-bama-environment:work`;
+- TEST і WORK рядки ізольовані RLS / серверною логікою;
+- TEST дозволяє повторне використання тієї самої фізичної EPC;
+- WORK зберігає захист від дублювання;
+- cross-link перевірки не дозволяють змішувати TEST і WORK stock/order/scan;
+- synthetic TEST orders `NID-SIM-20260809-01...12`, RAMPE `41...52`, працюють у common tables як `environment=test`;
+- old `ut_test_*` збережені як archive/rollback, не як активний backend.
+
+Ключові спільні таблиці:
+- `mottak_scans`
+- `ut_orders`
+- `ut_order_items`
+- `ut_order_scans`
+- `ut_extra_confirmations`
+- `mottak_stock_events`
+
+**Важливо:** це серверний PASS. Повний фізичний WORK end-to-end на реальному складі запланований на 11.08.2026.
+
+---
+
+## PASS — WORK UNKNOWN RFID TAG BUSINESS FLOW IMPLEMENTED
+Серверна логіка й UI-контракт зафіксовані:
+- якщо WORK RFID EPC прочитаний і stock row існує та доступний → використовувати існуючий запис;
+- якщо запис уже staged / недоступний → попередити або заблокувати;
+- якщо EPC успішно прочитаний, але stock row відсутній → показати пропозицію оприбуткувати товар зараз і одразу продовжити на поточну RAMPE;
+- при підтвердженні зберегти full EPC у `scanner_code`, last 6 у `lower_number`, після чого одразу використати товар у поточному outgoing flow;
+- якщо EPC взагалі не прочитаний → **не створювати фіктивний номер**.
+
+**Статус:** реалізація/серверна логіка готова; фізичний WORK-тест цього сценарію ще має бути виконаний 11.08.2026.
+
+---
+
 ## PASS — Nordic ID – Til rampe · V2.9.7 → FINAL STABLE
 **Офіційна норвезька назва:** `Nordic ID – Til rampe`  
 **Підтверджено користувачем:** 10.08.2026 20:14 Europe/Oslo  
@@ -117,12 +153,12 @@ Google Drive Nordic ID відео/фото:
 **Stable entry:** `nordic-id-til-rampe-stable.html`  
 **Lock manifest:** `NORDIC_TIL_RAMPE_STABLE_LOCK.md`  
 **Frozen source commit:** `ed3a19b20efd9af0bf07bc4a079589b3b6038157`  
-**Stable-entry creation commit:** `aaad7d7b3133c1df2a0eb87eb1840b18b1dc0553`
+**Final stable-entry commit:** `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`
 
 Підтверджено фізично на Nordic ID:
 - V2.4 hidden RFID/Wedge engine стабільно читає 24-char EPC;
 - 600 ms RFID lock збережено;
-- TEST / WORK перемикач працює як окремий режим бізнес-логіки;
+- TEST / WORK перемикач є частиною однієї форми;
 - відкриття RAMPE автоматично переводить екран до найінформативнішого блоку;
 - видно `замовлено / виконано / залишилось / наступний товар`;
 - після підтвердження скану екран автоматично повертається до актуального прогресу RAMPE;
@@ -131,7 +167,7 @@ Google Drive Nordic ID відео/фото:
 - Forlengere korte / Forlengere lange вводять `Полиці + Продовжувачі` саме при списанні;
 - INPUT LOCK не дає фоновому refresh стерти введені числа;
 - COUNT COMPACT стискає сценарій продовжувачів для малого Nordic-екрана: два поля поруч + `ДОДАТИ / СКАСУВАТИ` поруч над цифровою клавіатурою;
-- весь підтверджений цикл користувач оцінив як повністю робочий і придатний до фіксації.
+- весь підтверджений TEST-цикл користувач оцінив як повністю робочий і придатний до фіксації.
 
 ### Заморозка
 `nordic-id-til-rampe-stable.html` не тягне майбутній `main`, а відкриває V2.9.7 з конкретного GitHub commit. Тому майбутні зміни DEV-файлів не повинні змінювати цю STABLE-форму.
@@ -140,12 +176,31 @@ Google Drive Nordic ID відео/фото:
 
 ---
 
+## PASS — SCANNER HOME CLEAN WORK VIEW
+**Підтверджено рішенням користувача:** 10.08.2026 20:36 Europe/Oslo
+
+Робочий `scanner-home.html` очищено від історичних/технічних карток.
+На екрані залишено тільки:
+1. **📥 НА СКЛАД** — майбутня окрема Nordic INN / Mottak форма;
+2. **📤 TIL RAMPE** → `nordic-id-til-rampe-stable.html` → `Nordic ID – Til rampe · STABLE V2.9.7`.
+
+Також на головній коротко зафіксовано WORK-правило для невідомої RFID-бірки: якщо EPC прочитано, але товару ще нема на складі, `Til rampe` пропонує оприбуткувати й одразу продовжити на RAMPE; без прочитаного EPC фіктивний номер не створюється.
+
+Історичні V2.4 / V2.1 та DEV-копії **не видалені** з GitHub, а лише приховані з робочого екрана.
+
+---
+
 # ПОТОЧНА АРХІТЕКТУРА scanner-home.html
 
-1. Основна робоча кнопка **📤 TIL RAMPE** → `nordic-id-til-rampe-stable.html` → **Nordic ID – Til rampe STABLE V2.9.7**.
-2. **CURRENT / DEV** → `utsending-nordic-test.html` — дозволено змінювати для наступних етапів.
-3. **STABLE** → `nordic-id-til-rampe-stable.html` — не переписувати/не видаляти.
-4. **RFID TEST BASE** → `nordic-id-v20-focus.html` (V2.1) — не переписувати/не видаляти.
-5. `nordic-id-v24-stable.html` лишається історичним rollback-файлом у GitHub, але окрема картка на головній більше не потрібна.
+На робочому екрані тільки дві операції:
+1. **📥 НА СКЛАД** — ще не підключена окрема Nordic Mottak форма.
+2. **📤 TIL RAMPE** — `Nordic ID – Til rampe · STABLE V2.9.7` через `nordic-id-til-rampe-stable.html`.
+
+Приховано з робочого екрана, але збережено в GitHub:
+- `utsending-nordic-test.html` — DEV copy для майбутніх змін;
+- `nordic-id-v24-stable.html` — історичний RFID rollback;
+- `nordic-id-v20-focus.html` — V2.1 diagnostic/test base.
 
 Наступний окремий напрямок: **Nordic ID – På lager / Mottak (НА СКЛАД)**. Він не повинен змінювати `Nordic ID – Til rampe` STABLE.
+
+Наступна перевірка 11.08.2026: фізичний WORK end-to-end на реальному складі. До цього тесту `Nordic ID – Til rampe` STABLE не змінювати.
