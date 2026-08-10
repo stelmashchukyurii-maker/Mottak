@@ -5,6 +5,82 @@
   window.__BAMA_CAMERA_LOWER_ONLY__ = true;
 
   const lowerValid = value => /^[A-Z0-9]{6}$/.test(String(value || ""));
+  const FLOW_STYLE_ID = "bama-lower-only-mobile-table";
+
+  const FLOW_COPY = {
+    nb: { photo: "📷 FOTO", recognize: "🔍 LES NUMMER", save: "💾 LAGRE", correct: "✏️ SKRIV NUMMER", processing: "⏳ BEHANDLER…" },
+    pl: { photo: "📷 FOTO", recognize: "🔍 ODCZYTAJ NUMER", save: "💾 ZAPISZ", correct: "✏️ WPISZ NUMER", processing: "⏳ PRZETWARZANIE…" },
+    uk: { photo: "📷 ФОТО", recognize: "🔍 РОЗПІЗНАТИ", save: "💾 ЗБЕРЕГТИ", correct: "✏️ ВВЕСТИ НОМЕР", processing: "⏳ ОБРОБКА…" }
+  };
+
+  function flowText() {
+    try { return FLOW_COPY[language] || FLOW_COPY.nb; }
+    catch { return FLOW_COPY.nb; }
+  }
+
+  function installMobileLowerTable() {
+    if (document.getElementById(FLOW_STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = FLOW_STYLE_ID;
+    style.textContent = `
+      @media(max-width:760px){
+        .table-wrap table{min-width:760px!important}
+        .table-wrap th:nth-child(4),.table-wrap td:nth-child(4),
+        .table-wrap th:nth-child(5),.table-wrap td:nth-child(5){display:none!important}
+        .table-wrap th:nth-child(6),.table-wrap td:nth-child(6){min-width:118px!important;font-weight:950!important}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function syncFloatingLower() {
+    const panel = document.getElementById("bama-floating-camera");
+    const action = panel?.querySelector(".bama-photo-button");
+    if (!panel || !action) return;
+
+    let isBusy = false;
+    let hasImage = false;
+    try { isBusy = Boolean(busy); } catch {}
+    try { hasImage = Boolean(imageData); } catch {}
+
+    const lowerInput = document.getElementById("lowerValue");
+    const lower = normalizeLower(lowerInput?.value || "");
+    const c = flowText();
+    let state = "photo", label = c.photo, icon = "📷";
+
+    if (isBusy) {
+      state = "busy"; label = c.processing; icon = "⏳";
+    } else if (!hasImage) {
+      state = "photo"; label = c.photo; icon = "📷";
+    } else if (lowerValid(lower)) {
+      state = "save"; label = c.save; icon = "💾";
+    } else if (lower) {
+      state = "correct"; label = c.correct; icon = "✏️";
+    } else {
+      state = "recognize"; label = c.recognize; icon = "🔍";
+    }
+
+    panel.dataset.workflowState = state;
+    action.dataset.workflowAction = state;
+    action.dataset.workflowIcon = icon;
+    action.textContent = label;
+    action.disabled = isBusy;
+    action.setAttribute("aria-label", label.replace(/^[^A-Za-zА-Яа-яЇїІіЄєŁł]+/u, "").trim());
+
+    // The old floating workflow could stay visually stuck on "processing"
+    // after lower-only replaced renderResult(). Once the base flow is no
+    // longer busy and the photo has been reset, clear that stale status.
+    if (!isBusy && !hasImage) {
+      const status = document.getElementById("bama-floating-workflow-status");
+      if (status) status.hidden = true;
+    }
+  }
+
+  function scheduleFloatingSync() {
+    setTimeout(syncFloatingLower, 0);
+    setTimeout(syncFloatingLower, 80);
+    setTimeout(syncFloatingLower, 300);
+  }
 
   function clearUpperUi() {
     const upper = document.getElementById("upperValue");
@@ -76,6 +152,7 @@
       const save = document.getElementById("saveButton");
       if (save) save.disabled = !(imageData && lowerValid(lower)) || busy;
       lowerInput?.classList.toggle("invalid-field", Boolean(lower) && !lowerValid(lower));
+      scheduleFloatingSync();
     };
   }
 
@@ -111,6 +188,7 @@
 
       busy = true;
       show(t().updating);
+      scheduleFloatingSync();
       try {
         const duplicate = await client.from(TABLE)
           .select("id")
@@ -134,17 +212,26 @@
         show(`${t().updateError}\n${error.message || error}`, "bad");
       } finally {
         busy = false;
+        scheduleFloatingSync();
       }
     };
   }
 
   const observer = new MutationObserver(() => clearUpperUi());
   observer.observe(document.documentElement, { childList: true, subtree: true });
-  clearUpperUi();
+
+  installMobileLowerTable();
+  ["lowerValue", "photoInput", "recognizeButton", "saveButton", "newPhotoButton"].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", scheduleFloatingSync);
+    document.getElementById(id)?.addEventListener("change", scheduleFloatingSync);
+    document.getElementById(id)?.addEventListener("click", scheduleFloatingSync);
+  });
+
   setTimeout(() => {
     try { renderResult(); } catch {}
     try { renderTable(); } catch {}
+    scheduleFloatingSync();
   }, 0);
 
-  console.info("Camera lower-number-only mode active: upper_number is no longer used.");
+  console.info("Camera lower-number-only mode active: workflow reset + mobile lower-number table enabled.");
 })();
