@@ -1,50 +1,50 @@
 NID-HANDOFF-2026-08-10-TIL-RAMPE-FINAL-STABLE
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 10.08.2026 20:14 Europe/Oslo
+Оновлено: 10.08.2026 20:37 Europe/Oslo
 
 КРИТИЧНЕ ПРАВИЛО:
-- Офіційна стабільна форма списання/переміщення на рампу тепер має назву: `Nordic ID – Til rampe`.
+- Офіційна стабільна форма списання/переміщення на рампу: `Nordic ID – Til rampe`.
 - FINAL STABLE entry: `nordic-id-til-rampe-stable.html`.
 - Stable version: V2.9.7.
 - Frozen source commit: `ed3a19b20efd9af0bf07bc4a079589b3b6038157`.
+- Final stable-entry commit: `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`.
 - Lock manifest: `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
 - `Nordic ID – Til rampe` STABLE НЕ ПЕРЕПИСУВАТИ І НЕ ВИДАЛЯТИ.
 - Усі подальші експерименти робити тільки у `utsending-nordic-test.html` або новій DEV-копії.
 - V2.1 `nordic-id-v20-focus.html` лишається незмінною RFID diagnostic/test base.
 - V2.4 `nordic-id-v24-stable.html` лишається історичним RFID rollback.
 
-SCANNER HOME:
-- `scanner-home.html` = v3.26.
-- Основна зелена кнопка: `📤 TIL RAMPE` → `nordic-id-til-rampe-stable.html`.
-- CURRENT / DEV → `utsending-nordic-test.html` — дозволено змінювати.
-- STABLE → `Nordic ID – Til rampe` V2.9.7.
-- Нижня diagnostic → V2.1 FIRST TAG LOCK.
-- V2.4 лишається у GitHub без окремої картки.
+SCANNER HOME — ПОТОЧНИЙ РОБОЧИЙ ВИГЛЯД:
+- `scanner-home.html` очищений 10.08.2026 20:36.
+- На робочому екрані залишено тільки 2 операції:
+  1) `📥 НА СКЛАД` — окрема Nordic INN / Mottak форма ще не підключена.
+  2) `📤 TIL RAMPE` → `nordic-id-til-rampe-stable.html`.
+- DEV, V2.4, V2.1 не показуються на робочому екрані.
+- Вони НЕ видалені з GitHub і лишаються rollback/diagnostic/development assets.
+- На головній є WORK-підказка для unknown RFID tag.
 
-ПІДТВЕРДЖЕНИЙ PASS V2.9.7:
-- фізично перевірено на Nordic ID;
+ПІДТВЕРДЖЕНИЙ PHYSICAL TEST PASS V2.9.7:
 - V2.4 hidden RFID/Wedge engine;
 - 24-char HEX EPC;
 - 600 ms lock;
-- TEST / WORK перемикач;
+- TEST / WORK перемикач в одній формі;
 - TEST дублікати RFID дозволені;
-- WORK дублікати блокує;
 - SMART FOCUS: після відкриття RAMPE і після кожної дії екран сам переходить до найінформативнішого місця;
 - видно замовлено / виконано / залишилось / наступний товар;
 - Bunner / Hyller x30 / Hyller x60 мають просте велике підтвердження;
 - Forlengere korte/lange: кількість Hyller + Forlengere вводиться при списанні;
 - INPUT LOCK не дозволяє refresh стерти введені числа;
 - COUNT COMPACT: для малого екрана Nordic два count-поля поруч і короткі `ДОДАТИ / СКАСУВАТИ` поруч над клавіатурою;
-- користувач підтвердив: «все дуже добре, все дуже красиво» і наказав зафіксувати форму як остаточну.
+- користувач підтвердив повністю робочий TEST-цикл і наказав зафіксувати форму як остаточну.
 
 STABLE LOCK:
-`nordic-id-til-rampe-stable.html` відкриває V2.9.7 з конкретного GitHub commit через pinned CDN URL, а не поточний main. Тому зміни DEV-файлів не повинні змінювати stable-поведінку.
-Stable-entry creation commit: `aaad7d7b3133c1df2a0eb87eb1840b18b1dc0553`.
-Якщо stable entry випадково видалено/змінено — відновлювати через GitHub history та `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
+- `nordic-id-til-rampe-stable.html` відкриває V2.9.7 з конкретного GitHub commit через pinned CDN URL, а не поточний main.
+- Подальші зміни DEV-файлів не повинні змінювати stable-поведінку.
+- Якщо stable entry випадково видалено/змінено — відновлювати через GitHub history та `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
 
-SHARED TEST/WORK ARCHITECTURE:
-Активні TEST і WORK використовують ті самі public tables, розділені `environment` = work/test:
+SHARED TEST/WORK ARCHITECTURE — SERVER PASS:
+Активні TEST і WORK використовують ті самі public tables, розділені `environment = work/test`:
 - mottak_scans
 - ut_orders
 - ut_order_items
@@ -52,9 +52,14 @@ SHARED TEST/WORK ARCHITECTURE:
 - ut_extra_confirmations
 - mottak_stock_events
 
-TEST API додає `x-bama-environment:test`, Nordic WORK — `x-bama-environment:work`.
-Старі production browser forms без header трактуються як WORK.
-Старі `ut_test_*` таблиці не видаляти — archive/rollback.
+- TEST API додає `x-bama-environment:test`.
+- Nordic WORK додає `x-bama-environment:work`.
+- Старі production browser forms без header трактуються як WORK.
+- RLS / server logic розділяє TEST і WORK.
+- TEST same EPC може створювати повторні TEST units.
+- WORK дублікати захищені.
+- Cross-link guards не дозволяють змішувати TEST/WORK stock-order-scan.
+- Старі `ut_test_*` не видаляти: archive/rollback.
 
 RFID MAPPING:
 - full Nordic EPC → `scanner_code`
@@ -75,11 +80,17 @@ FORLENGERE RULE:
 - на Mottak counts не вводити;
 - production `ut_extra_confirmations` має `hyller_count` + `forlengere_count`.
 
-WORK UNKNOWN TAG FLOW:
+WORK UNKNOWN TAG FLOW — IMPLEMENTED / SERVER READY:
 - якщо tag знайдений і доступний → reuse existing stock row;
 - якщо already staged/unavailable → warning/block;
-- якщо WORK tag прочитаний, але stock row відсутній → UI пропонує оприбуткувати зараз і одразу додати на RAMPE;
+- якщо WORK EPC успішно прочитаний, але stock row відсутній → UI пропонує оприбуткувати зараз і одразу додати на поточну RAMPE;
+- YES → зберегти full EPC + last 6 і продовжити outgoing flow;
 - якщо EPC не прочитаний взагалі → не створювати фіктивний номер.
+
+ВАЖЛИВО:
+- WORK unknown-tag та повний WORK end-to-end серверно підготовлені, але фізичний WORK тест на реальному складі ще не завершено.
+- Наступна фізична перевірка запланована на 11.08.2026.
+- До неї `Nordic ID – Til rampe` STABLE НЕ ЗМІНЮВАТИ.
 
 COMMON NORDIC RPC:
 - public.nordic_preview(uuid,text)
@@ -89,9 +100,11 @@ COMMON NORDIC RPC:
 TEST SEED:
 Synthetic TEST orders NID-SIM-20260809-01...12, RAMPE 41...52, environment=test.
 
-ЖУРНАЛ:
-- `NORDIC_ID_PROGRESS_LOG.md` містить тільки фізично підтверджені PASS.
-- 10.08.2026 V2.9.7 / Nordic ID – Til rampe записана як FINAL STABLE.
+PROTOCOLS:
+- `NORDIC_ID_PROGRESS_LOG.md` — тільки підтверджені PASS / server PASS з чітким статусом фізичного тесту.
+- `NORDIC_TIL_RAMPE_STABLE_LOCK.md` — незмінні правила stable snapshot + recovery.
+- `NEXT_CHAT_NORDIC_ID.txt` — актуальний handoff.
+- Стан протоколів звірено та синхронізовано 10.08.2026 20:37 Europe/Oslo.
 
 НАСТУПНИЙ ВЕЛИКИЙ ЕТАП:
-Створити окрему стабільну Nordic-форму для приймання **НА СКЛАД**. Робоча норвезька назва ще не зафіксована; логічні варіанти `Til lager` / `Varemottak`. Не змінювати при цьому `Nordic ID – Til rampe` STABLE.
+Створити окрему стабільну Nordic-форму для приймання `НА СКЛАД`. Робоча норвезька назва ще не зафіксована; логічні варіанти `Til lager` / `Varemottak`. Не змінювати при цьому `Nordic ID – Til rampe` STABLE.
