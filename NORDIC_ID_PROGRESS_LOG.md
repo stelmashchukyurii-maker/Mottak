@@ -2,7 +2,7 @@
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
 **Створено:** 09.08.2026 19:43:37 Europe/Oslo  
-**Оновлено:** 09.08.2026 21:59 Europe/Oslo
+**Оновлено:** 10.08.2026 20:14 Europe/Oslo
 
 ## Правило журналу
 У цей файл записуємо **тільки підтверджені успішні/завершені кроки**. Тимчасові помилки, невдалі спроби, гіпотези та відкриті проблеми сюди не додаємо.
@@ -89,7 +89,7 @@ Google Drive Nordic ID відео/фото:
 
 ---
 
-## PASS — V2.4 HIDDEN RFID INPUT → НОВА STABLE
+## PASS — V2.4 HIDDEN RFID INPUT → STABLE RFID BASE
 **Підтверджено користувачем:** 09.08.2026 21:59 Europe/Oslo  
 **Робочий файл, з якого зроблено stable:** `nordic-id-v23-confirm-test.html`  
 **Заморожений stable-файл:** `nordic-id-v24-stable.html`  
@@ -102,20 +102,50 @@ Google Drive Nordic ID відео/фото:
 - Nordic trigger активує прийом EPC, після чого робочий scan/confirm/save flow продовжується;
 - Bunner / Hyller x30 / Hyller x60 не потребують видимих текстових полів або ручної клавіатури;
 - для Forlengere korte / Forlengere lange видимими ручними input залишаються тільки `hyller_count` і `forlengere_count`;
-- великий confirm/save UI, TEST DB запис, `scanner_code`, `lower_number`, екранне очищення та Forlengere counts збережені з V2.3.4;
-- production `public.mottak_scans` не змінювалась.
+- великий confirm/save UI, TEST DB запис, `scanner_code`, `lower_number`, екранне очищення та Forlengere counts збережені з V2.3.4.
 
-**Рішення користувача:** V2.4 зафіксована як нова **STABLE**. Наступний верхній CURRENT TEST буде використовуватись для розробки логіки **списання/руху товару**.
+**Статус:** історична стабільна RFID-база. Файл не переписувати.
+
+---
+
+# 10.08.2026 — ПІДТВЕРДЖЕНІ КРОКИ
+
+## PASS — Nordic ID – Til rampe · V2.9.7 → FINAL STABLE
+**Офіційна норвезька назва:** `Nordic ID – Til rampe`  
+**Підтверджено користувачем:** 10.08.2026 20:14 Europe/Oslo  
+**Робочий DEV-файл:** `utsending-nordic-test.html`  
+**Stable entry:** `nordic-id-til-rampe-stable.html`  
+**Lock manifest:** `NORDIC_TIL_RAMPE_STABLE_LOCK.md`  
+**Frozen source commit:** `ed3a19b20efd9af0bf07bc4a079589b3b6038157`  
+**Stable-entry creation commit:** `aaad7d7b3133c1df2a0eb87eb1840b18b1dc0553`
+
+Підтверджено фізично на Nordic ID:
+- V2.4 hidden RFID/Wedge engine стабільно читає 24-char EPC;
+- 600 ms RFID lock збережено;
+- TEST / WORK перемикач працює як окремий режим бізнес-логіки;
+- відкриття RAMPE автоматично переводить екран до найінформативнішого блоку;
+- видно `замовлено / виконано / залишилось / наступний товар`;
+- після підтвердження скану екран автоматично повертається до актуального прогресу RAMPE;
+- Bunner / Hyller x30 / Hyller x60 мають просте велике підтвердження;
+- TEST дозволяє повторно використовувати ту саму RFID-бірку;
+- Forlengere korte / Forlengere lange вводять `Полиці + Продовжувачі` саме при списанні;
+- INPUT LOCK не дає фоновому refresh стерти введені числа;
+- COUNT COMPACT стискає сценарій продовжувачів для малого Nordic-екрана: два поля поруч + `ДОДАТИ / СКАСУВАТИ` поруч над цифровою клавіатурою;
+- весь підтверджений цикл користувач оцінив як повністю робочий і придатний до фіксації.
+
+### Заморозка
+`nordic-id-til-rampe-stable.html` не тягне майбутній `main`, а відкриває V2.9.7 з конкретного GitHub commit. Тому майбутні зміни DEV-файлів не повинні змінювати цю STABLE-форму.
+
+**Рішення:** `Nordic ID – Til rampe` є остаточною стабільною формою для операції **Til rampe**. Не переписувати й не видаляти. Нові експерименти — тільки у CURRENT/DEV.
 
 ---
 
 # ПОТОЧНА АРХІТЕКТУРА scanner-home.html
 
-На головній завжди три Nordic-картки:
-1. **CURRENT TEST** — верхня робоча копія (`nordic-id-v23-confirm-test.html`), наступний етап = списання/рух товару.
-2. **STABLE** — середня, зараз `V2.4` → `nordic-id-v24-stable.html`. Stable-файл не переписувати.
-3. **RFID TEST BASE** — нижня `V2.1 FIRST TAG LOCK` → `nordic-id-v20-focus.html`. Не переписувати і не прибирати.
+1. Основна робоча кнопка **📤 TIL RAMPE** → `nordic-id-til-rampe-stable.html` → **Nordic ID – Til rampe STABLE V2.9.7**.
+2. **CURRENT / DEV** → `utsending-nordic-test.html` — дозволено змінювати для наступних етапів.
+3. **STABLE** → `nordic-id-til-rampe-stable.html` — не переписувати/не видаляти.
+4. **RFID TEST BASE** → `nordic-id-v20-focus.html` (V2.1) — не переписувати/не видаляти.
+5. `nordic-id-v24-stable.html` лишається історичним rollback-файлом у GitHub, але окрема картка на головній більше не потрібна.
 
-Коли наступний CURRENT TEST підтверджений користувачем — заморозити його окремим stable-файлом, пересунути у середню STABLE-картку, а верхній робочий файл лишити для наступних змін.
-
-Production `public.mottak_scans` не змінювати, доки окремо не узгоджена логіка списання.
+Наступний окремий напрямок: **Nordic ID – På lager / Mottak (НА СКЛАД)**. Він не повинен змінювати `Nordic ID – Til rampe` STABLE.
