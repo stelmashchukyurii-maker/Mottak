@@ -1,74 +1,187 @@
-NID-HANDOFF-2026-08-09-V27-THREE-DEVICE-PARALLEL
+NID-HANDOFF-2026-08-10-V28-SHARED-ENVIRONMENT
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 09.08.2026 22:59 Europe/Oslo
+Оновлено: 10.08.2026 10:43 Europe/Oslo
 
 ГОЛОВНЕ ПРАВИЛО:
-- Production public.mottak_scans / public.ut_orders не чіпати без окремої команди користувача.
-- UT isolated contour = ut_test_stock / ut_test_orders / ut_test_order_items / ut_test_order_scans / ut_test_extra_confirmations.
-- NORDIC_ID_PROGRESS_LOG.md містить тільки фізично підтверджені PASS. V2.7 туди ще НЕ додавати.
+- Робочі production HTML/JS форми Camera / Bestilling / Utsending НЕ змінювати без окремої команди.
+- Існуючі колонки робочих таблиць не видаляти/перейменовувати/міняти типи. Розширення — тільки сумісні додавання або захисна серверна логіка.
+- NORDIC_ID_PROGRESS_LOG.md містить тільки фізично підтверджені PASS. V2.8 туди ще НЕ додавати.
+- Старі ut_test_* таблиці НЕ видаляти: тепер вони архів/rollback, а не активний TEST backend.
 
 SCANNER HOME ЗАВЖДИ 3 КАРТКИ:
 1) CURRENT TEST зверху.
 2) STABLE посередині.
 3) V2.1 FIRST TAG LOCK / RFID TEST BASE внизу назавжди.
 
-STABLE:
-- V2.4 HIDDEN RFID INPUT TEST = nordic-id-v24-stable.html. НЕ ПЕРЕПИСУВАТИ.
-- V2.1 diagnostic = nordic-id-v20-focus.html. НЕ ПЕРЕПИСУВАТИ.
+STABLE — НЕ ЧІПАТИ:
+- V2.4 HIDDEN RFID INPUT = nordic-id-v24-stable.html.
+- V2.1 diagnostic = nordic-id-v20-focus.html.
 
-CURRENT TEST:
-- V2.7 PARALLEL MIRROR.
-- Nordic Utsending = utsending-nordic-test.html.
-- Це вже не Green-experiment: wrapper перебазований на актуальний utsending-core-v7 + ті самі production-flow/language/status/stock modules, але через ut-test-api.js у TEST.
-- RFID-логіка винесена в nordic-ut-test-scanner.js.
+CURRENT:
+- Nordic ID V2.8 ENV SWITCH = utsending-nordic-test.html.
+- Одна форма має режими TEST / WORK.
+- При кожному відкритті стартує TEST.
+- Перехід у WORK: утримати WORK ~1.5 секунди + підтвердити діалог.
+- WORK банер чітко показує REAL DATABASE.
 
-ПОВНИЙ TEST-ЛАНЦЮЖОК НА 3 ГАДЖЕТАХ:
-A) camera-live-v414-test.html — дзеркало актуальної Camera Cloud v4.24. Дані → ut_test_stock, фото → ut-test-photos. Підключені lower-only/lifecycle/current-stock modules як у WORKING.
-B) bestilling-test.html — дзеркало актуального bestilling-core-v29 / UT Kontor WORKING. ut-test-api.js вставлений усередину core ДО його DB-скриптів; створює/читає тільки ut_test_orders/items і TEST-склад.
-C) utsending-nordic-test.html — дзеркало актуального Utsending UI, але Photo/AI/Manual scan приховані; Nordic RFID → preview → власний localized confirm → TEST rampe → Klar på rampe → Send fra rampe.
-Головна для трьох форм: test-home.html (TEST HOME v3.0).
+НОВА АРХІТЕКТУРА TEST/WORK:
+Активні TEST і WORK використовують ТІ САМІ таблиці:
+- public.mottak_scans
+- public.ut_orders
+- public.ut_order_items
+- public.ut_order_scans
+- public.ut_extra_confirmations
+- public.mottak_stock_events
+
+У кожній додана колонка:
+  environment text not null default 'work'
+дозволено лише:
+  work / test
+
+Старі production браузери не передають нового заголовка, тому база автоматично трактує їх як WORK.
+TEST wrapper передає:
+  x-bama-environment: test
+Nordic WORK передає:
+  x-bama-environment: work
+
+RLS прямого REST доступу розділяє рядки по environment.
+Cross-link triggers не дозволяють TEST stock/order/scan прив'язати до WORK і навпаки.
+
+DUPLICATES:
+- WORK: одна бірка/нижній 6-значний номер залишається унікальним. Дубль блокується partial unique indexes тільки для environment=work.
+- TEST: та сама фізична EPC може бути використана багато разів. Кожне підтвердження створює окрему TEST-одиницю.
+
+RFID MAPPING:
+- Nordic full EPC 24 HEX → mottak_scans.scanner_code
+- останні 6 → mottak_scans.lower_number
+- upper_number = ''
+- Camera може мати scanner_code='' і лише lower_number — це нормальна робоча логіка.
+
+PRODUCTS:
+RFID у mottak_scans дозволені:
+- bunner
+- hyller30
+- hyller60
+- forlengere_korte
+- forlengere_lange
+Forlengere plast не має RFID; лишається в існуючому телефонному/manual flow.
+
+FORLENGERE — АВТОРИТЕТНЕ ПРАВИЛО:
+- Forlengere korte/lange: кількість Hyller + кількість Forlengere вводимо ПРИ СПИСАННІ / Utsending.
+- На прийманні ці два counts НЕ вводимо.
+- Camera TEST extender module тепер лише додає product buttons korte/lange, без count-полів.
+- Існуючий public.ut_extra_confirmations уже має hyller_count / forlengere_count і використовується для списання.
+- Forlengere plast Nordic не обробляє.
+
+WORK NORDIC MISSING TAG:
+Після scan Nordic у WORK:
+- якщо бірка знайдена на складі і доступна → використовує існуючий stock row;
+- якщо вже staged → блокує як уже на рампі;
+- якщо бірку/товар не знайдено → preview показує register_required=true, UI питає:
+  «БІРКИ НЕМАЄ НА СКЛАДІ»
+  «Оприбуткувати товар зараз і одразу додати на рампу?»
+  YES → створити/оновити stock row, записати full EPC + lower 6, одразу staged на поточну RAMPE.
+- якщо RFID взагалі не прочитався, фіктивний номер не створювати.
+
+COMMON NORDIC RPC:
+Public SECURITY INVOKER wrappers:
+- public.nordic_preview(uuid,text)
+- public.nordic_auto_scan(uuid,text)
+- public.nordic_confirm_extra(uuid,text,integer,integer)
+Implementation у private schema:
+- private.nordic_preview
+- private.nordic_auto_scan
+- private.nordic_confirm_extra
+Вони беруть environment через public.bama_request_environment().
+
+ІСНУЮЧІ UT RPC:
+19 робочих RPC більше не hardcode environment='work'. Вони використовують public.bama_request_environment().
+Без header = WORK, тому production форми лишаються сумісні.
+Перевірка показала hardcoded_work=false / env_aware=true для всіх ключових RPC.
 
 TEST API:
-- ut-test-api.js v1.8.0.
-- table map: mottak_scans→ut_test_stock; ut_orders→ut_test_orders; ut_order_items→ut_test_order_items; ut_order_scans→ut_test_order_scans.
-- unknown production REST/RPC у TEST-контурі блокується помилкою.
-- RPC map включає stage/dispatch/return/cancel/edit/save/order items + nordic_preview/nordic_auto_scan/nordic_confirm_extra.
-- custom Nordic module ставить __NORDIC_CUSTOM_CONFIRM__, тому системний about:srcdoc confirm не використовується.
+- ut-test-api.js v2.0.0.
+- Більше НЕ переписує mottak_scans→ut_test_stock та інші таблиці.
+- Залишає справжні production table/RPC names.
+- Додає x-bama-environment:test (або work у Nordic WORK mode).
+- Unknown REST table/RPC блокується ENV SAFETY.
 
-FLEXIBLE FORLENGERE COUNTS — АВТОРИТЕТНЕ ПРАВИЛО:
-- тільки forlengere_korte / forlengere_lange мають Hyller + Forlengere counts.
-- counts належать складській одиниці/бірці.
-- на прийманні можна внести обидва, тільки одне або нічого.
-- Utsending підтягує те, що вже є; просить відсутні дані.
-- перед Klar på rampe обидва значення повинні бути відомі.
-- при списанні snapshot counts зберігається в ut_test_order_scans.
-- TEST schema вже має nullable integer hyller_count / forlengere_count у ut_test_stock і ut_test_order_scans + nonnegative checks.
-- Camera TEST має optional extension camera-test-extender-counts.js для Forlengere korte/lange; введені непорожні counts домішуються в TEST stock insert/update через ut-test-api.js.
+ТРИ TEST ФОРМИ:
+A) camera-live-v414-test.html
+- та сама Camera Cloud v4.24 core;
+- mottak_scans, але environment=test;
+- фото лишаються ut-test-photos;
+- counts Forlengere на прийманні прибрані.
 
-NORDIC EXTENDER FLOW:
-- ut_test_nordic_preview read-only повертає stock/counts/complete.
-- для Forlengere preview повертає already-known hyller_count / forlengere_count з matching TEST stock, якщо вони є.
-- ut_test_nordic_confirm_extra_scan зберігає/доповнює counts у ut_test_stock, ставить stock unit staged, робить ut_test_extra_confirmation і додає ut_test_order_scans зі snapshot counts.
-- dispatch function уже універсальна: переводить усі staged ut_test_stock цієї рампи в dispatched і ставить dispatched_at усім order scans; окремого фільтра по 3 старих продуктах немає.
+B) bestilling-test.html
+- той самий bestilling-core-v29;
+- ut_orders / ut_order_items, але environment=test.
 
-RAMPE 42 СТАН ПЕРЕД НОВИМ ТЕСТОМ:
-- order NID-SIM-20260809-02, id 72836fe5-1c74-4e70-852d-9ff1c0a07c2f.
-- H60 = 2/2 already scanned.
-- Forlengere korte = 0/1.
-- status = in_progress; нічого не staged/dispatched після старого timeout.
-- новий read-only preview для EPC 33161403D0000785000E3103 правильно повернув forlengere_korte, unit 1/1, hyller_count=null, forlengere_count=null.
+C) utsending-nordic-test.html
+- Utsending core + Nordic RFID;
+- перемикач TEST / WORK;
+- новий module nordic-ut-env-scanner.js.
 
-ШТУЧНІ ЗАМОВЛЕННЯ:
-- NID-SIM-20260809-01 ... 12, RAMPE 41 ... 52, active TEST only.
+TEST HOME:
+- test-home.html = TEST HOME v3.1 SHARED TABLES / ENVIRONMENT.
+
+SCANNER HOME:
+- scanner-home.html = v3.18.
+- top CURRENT = Nordic ID V2.8 ENV SWITCH.
+- V2.4 + V2.1 frozen below.
+
+SHARED TEST SEED:
+У common public.ut_orders/ut_order_items скопійовано 12 synthetic TEST orders:
+- NID-SIM-20260809-01 ... 12
+- RAMPE 41 ... 52
+- environment=test
+- status reset to new
+- 12 orders / 36 item rows.
+Old ut_test_* copies залишаються archive.
+
+SERVER TESTS PASSED:
+1) TEST same EPC twice:
+   EPC 33161403D0000785000E3103
+   → 2 separate TEST stock rows
+   → 2 order scans
+   → both lower_number=0E3103.
+2) WORK unknown EPC:
+   EPC 33161403D000078500A81001
+   → preview register_required=true
+   → confirmation saved full EPC + lower A81001
+   → second WORK duplicate BLOCKED_OK.
+3) Browser-role RLS:
+   x-bama-environment:test → sees 12 seeded TEST orders, 0 WORK orders/stock.
+   no header → sees 38 WORK orders, 0 TEST.
+4) ut_physical_stock:
+   TEST → independent count (at check 0/0)
+   WORK → independent real count.
+5) save_ut_order_with_items with TEST header creates TEST order/items correctly in transaction.
+
+DELETE AUDIT:
+Private table:
+  private.mottak_delete_audit
+BEFORE DELETE trigger on mottak_scans:
+  trg_mottak_delete_audit
+Stores full deleted row + environment + EPC/lower + request headers + role/sub/method/path.
+Verified synthetic browser-role DELETE produced:
+  request_role=anon
+  request_sub=audit-check
+  request_method=DELETE
+  user-agent=BAMA-AUDIT-CHECK
+Audit table has no anon/auth access.
+
+ROW COUNT NOTE:
+Раніше спостерігалось 133 → 117 mottak_scans без доведеної причини; у цей час production Android Camera була активна. Старі видалення до встановлення audit trigger відновити неможливо. Відтепер кожен DELETE потрапляє в private.mottak_delete_audit.
 
 НАСТУПНИЙ ФІЗИЧНИЙ ТЕСТ:
-1. Відкрити test-home.html на потрібних гаджетах.
-2. Camera TEST: за бажанням додати TEST-stock; для Forlengere можна лишити counts частково/порожньо.
-3. Bestilling TEST: створити/відкрити TEST order.
-4. Utsending Nordic TEST: відкрити рампу, scan RFID. Має бути велике підтвердження мовою NO/PL/UK.
-5. Forlengere: поля мають бути prefilled тим, що вже відомо, або порожні; до RAMPE потрібно заповнити обидва.
-6. Після комплектності checkbox → Klar på rampe → Send fra rampe.
-7. За «дивись базу/журнал» перевірити ut_test_stock, ut_test_order_scans, ut_test_extra_confirmations, ut_test_orders.
+1. Відкрити scanner-home.html → Nordic ID V2.8.
+2. Залишити TEST.
+3. Відкрити RAMPE 41 (має Bunner 2 + H30 2).
+4. Однією фізичною EPC зробити два підтверджені скани для Bunner — TEST має дозволити дубль.
+5. Перевірити іншу рампу з Forlengere korte/lange: при списанні повинні з'явитися 2 count-поля.
+6. WORK поки тестувати тільки свідомо: утримати WORK + confirm. Для невідомої бірки має бути «оприбуткувати і продовжити».
+7. За командою «дивись журнал / дивись базу» перевіряти common public tables з environment=test/work + private.mottak_delete_audit + nordic_id_test_log за потреби RFID diagnostics.
 
-НЕ НАЗИВАТИ V2.7 STABLE ДО ФІЗИЧНОГО ПІДТВЕРДЖЕННЯ.
+НЕ НАЗИВАТИ V2.8 STABLE ДО ФІЗИЧНОГО ПІДТВЕРДЖЕННЯ.
