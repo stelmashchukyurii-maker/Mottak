@@ -5,6 +5,7 @@
 **Підтверджено користувачем:** 10.08.2026 20:14 Europe/Oslo  
 **Stable entry:** `nordic-id-til-rampe-stable.html`  
 **Frozen source commit:** `ed3a19b20efd9af0bf07bc4a079589b3b6038157`  
+**Final stable-entry commit:** `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`  
 **Frozen source page:** `utsending-nordic-test.html`
 
 ## LOCK RULE
@@ -12,7 +13,7 @@
 Ця форма вважається остаточною стабільною формою Nordic ID для операції **Til rampe**.
 
 - `nordic-id-til-rampe-stable.html` не переписувати і не видаляти під час подальшої розробки.
-- Stable entry завантажує весь комплект коду з конкретного GitHub commit, а не з поточного `main`.
+- Stable entry відкриває повноекранно весь комплект коду з конкретного GitHub commit, а не з поточного `main`.
 - Тому подальші зміни CURRENT/DEV-файлів не повинні змінювати поведінку цієї STABLE-форми.
 - Усі нові експерименти виконувати в `utsending-nordic-test.html` або новій робочій копії.
 - V2.4 `nordic-id-v24-stable.html` лишається історичним RFID rollback.
@@ -34,4 +35,4 @@
 
 ## Відновлення
 
-Якщо stable entry випадково змінено або видалено, відновлювати його з GitHub history/commit `aaad7d7b3133c1df2a0eb87eb1840b18b1dc0553`, не збирати заново «по пам’яті».
+Якщо stable entry випадково змінено або видалено, відновлювати його з GitHub history/commit `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`, не збирати заново «по пам’яті».
