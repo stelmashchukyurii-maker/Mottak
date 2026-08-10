@@ -1,18 +1,18 @@
 # Nordic ID – Til lager · DEV PROTOCOL
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
-**Створено:** 10.08.2026 22:02 Europe/Oslo  
+**Оновлено:** 10.08.2026 22:39 Europe/Oslo  
 **Статус:** DEV / TEST FIRST — НЕ STABLE
 
 ## Незмінне правило
 - `Nordic ID – Til rampe · STABLE V2.9.7` не переписувати і не видаляти.
-- Нова форма приймання розробляється окремо як `nordic-id-til-lager-test.html`.
-- У `NORDIC_ID_PROGRESS_LOG.md` `Til lager` можна переносити як PASS тільки після фізичного підтвердження користувачем на Nordic ID.
+- `Til lager` розробляється окремо.
+- У `NORDIC_ID_PROGRESS_LOG.md` повний `Til lager` PASS записувати тільки після фізичного підтвердження користувачем.
 
 ## Бізнес-правила продуктів
 RFID є у всіх робочих продуктів, крім `forlengere_plast`.
 
-RFID-продукти:
+RFID products:
 - `bunner`
 - `hyller30`
 - `hyller60`
@@ -22,117 +22,130 @@ RFID-продукти:
 - `vrak_hyller`
 
 Без RFID:
-- `forlengere_plast` — ручний / телефонний count-flow.
+- `forlengere_plast` — manual/phone count flow.
 
-Нові підтверджені правила:
+Rules:
 - `vrak_bunner` = 1 RFID-одиниця / стопка = 10 Vrak bunner.
 - `vrak_hyller` = 1 RFID-одиниця / стопка = 30 Vrak hyller.
-- Усі перелічені продукти можуть бути відправлені на RAMPE.
-- `forlengere_korte` / `forlengere_lange`: при прийманні на склад кількість Hyller/Forlengere НЕ вводиться; ці кількості вводяться лише при UT / списанні.
+- Усі продукти можуть бути відправлені на RAMPE.
+- Forlengere korte/lange: counts не вводити при Mottak; counts вводяться тільки при outgoing.
 
-## Центральний product registry
-`products.js` оновлено до **v1.3.0**.
-Додано permanent IDs:
-- `vrak_bunner`
-- `vrak_hyller`
+## Product registry / DB — SERVER PASS
+`products.js` = v1.3.0.
+Permanent IDs: `vrak_bunner`, `vrak_hyller`.
 
-`forlengere_plast` явно позначено як `rfid:false`.
+DB constraints allow RFID products in:
+- `mottak_scans`
+- `ut_order_scans`
 
-## Supabase product constraints — SERVER PASS
-Project: `hzjsatehehhpgpskckfi`
+`forlengere_plast` intentionally excluded from RFID scan constraints.
 
-Migration:
-- `extend_rfid_products_for_vrak_and_extenders`
+`private.nordic_preview(uuid,text)` server-compatible with Vrak products without editing frozen Til rampe frontend.
 
-`mottak_scans_product_check` тепер дозволяє:
-- bunner
-- hyller30
-- hyller60
-- forlengere_korte
-- forlengere_lange
-- vrak_bunner
-- vrak_hyller
+Transactional verification:
+- TEST duplicate same Vrak RFID → allowed;
+- WORK duplicate same Vrak RFID → blocked;
+- tests rolled back;
+- no synthetic rows left in production.
 
-`ut_order_scans_product_check` тепер дозволяє той самий RFID-набір.
-`forlengere_plast` навмисно не доданий у RFID scan table.
+## Physical TEST evidence before V1.0.2
+User physically scanned via `Til lager` in TEST. Database read-back confirmed real `environment=test`, `status=verified`, `stock_status=in_stock`, `source=nordic_id` rows using EPC `33161403D0000785000E3103` / lower `0E3103` for:
+- Hyller x60
+- Bunner
+- Forlengere lange
+- Vrak hyller
+- Vrak bunner
 
-## Til rampe server compatibility — SERVER PASS
-Migration:
-- `extend_nordic_preview_for_vrak_products_v2`
+Therefore RFID → confirm → shared TEST `mottak_scans` write path is working. Remaining reported UI issues were:
+1. user could not visually see the stock arrival/count inside Til lager;
+2. WORK switch did not activate reliably on Android.
 
-`private.nordic_preview(uuid,text)` розширено так, щоб `vrak_bunner` і `vrak_hyller` проходили як звичайні RFID stock items.
-Frozen frontend `Nordic ID – Til rampe V2.9.7` не переписувався.
+## Nordic ID – Til lager · DEV V1.0.2
+Working entry from scanner home:
+- `nordic-id-til-lager-v102.html`
 
-## TEST / WORK database verification
-Перевірено через browser-role semantics (`anon` + `x-bama-environment`):
-- TEST: дві однакові RFID-бірки для `vrak_bunner` успішно існували одночасно (`count=2`).
-- WORK: друга однакова RFID-бірка для `vrak_hyller` не створила дубль (`count=1`).
-- Обидві перевірки виконані всередині транзакції з `ROLLBACK`.
-- Контрольний SELECT після тесту повернув 0 тестових рядків: production не засмічено.
+Base intake page:
+- `nordic-id-til-lager-test.html` · V1.0.1 write flow
 
-## Nordic ID – Til lager DEV
-**Файл:** `nordic-id-til-lager-test.html`  
-**Поточна версія:** DEV V1.0.1  
-**GitHub content SHA:** `03c43233b1d81b5e107799bbbf4c396ddcc23907`
+V1.0.2 additive module:
+- `nordic-til-lager-v102-fix.js`
 
-Основний flow:
-1. TEST за замовчуванням.
-2. WORK тільки після ~1.5 s hold + browser confirm.
-3. Вибрати продукт один раз; вибір зберігається для наступних сканів.
-4. V2.4-style hidden RFID input:
-   - `Unidentified` hardware trigger arms input;
-   - 24 HEX EPC;
-   - 600 ms lock;
-   - input readonly в idle;
-   - soft keyboard ховається без blur під час RFID ACTIVE.
-5. Scan → показати product + lower 6 → підтвердити.
-6. TEST: створити нову TEST-одиницю; same physical RFID дозволена повторно.
-7. WORK:
-   - якщо RFID уже існує → block/warning;
-   - якщо існує Camera-row з тим самим `lower_number`, `scanner_code=''`, тим самим product і `in_stock` → доповнити цей самий row повним EPC, не створювати дубль і не втрачати photo;
-   - якщо Camera-row має інший product → block, нічого не змінювати;
-   - якщо row staged/dispatched → block;
-   - якщо рядка немає → створити verified `in_stock` WORK row.
-8. Success → великий `PÅ LAGER` → автоматично повернутися до READY.
+Published wrapper SHA:
+- `da3a74a87e4d9c56a9a51b0b3dd0ec35a0ff5c57`
+
+Published v1.0.2 module SHA:
+- `db244c9aadb0716d6f536bf675ba66c7b1bfe659`
+
+V1.0.2 changes only UI/control around the already DB-confirmed intake path:
+
+### WORK HOLD
+- old WORK button listener is removed by replacing the DOM button;
+- real 1.5 second pointer/touch hold;
+- visible red progress bar + countdown;
+- browser confirmation after full hold;
+- then calls base `setEnv("work")` so base save logic uses real WORK environment;
+- TEST button remains immediate;
+- Android context-menu/selection is prevented on WORK button.
+
+### PÅ LAGER NÅ
+New stock card directly under RFID work area:
+- current environment badge TEST/WORK;
+- selected product;
+- actual count of `verified + in_stock` rows for that product/environment;
+- business conversion:
+  - Bunner ×10;
+  - H30 ×30;
+  - H60 ×60;
+  - Vrak bunner ×10;
+  - Vrak hyller ×30;
+  - Forlengere shows RFID-unit count;
+- `Siste mottak`: lower number + time + source;
+- after successful confirm/save, wrapper refreshes this stock card and scrolls it into view.
+
+## Base Til lager logic retained
+- TEST default.
+- select product once; selection persists.
+- hidden RFID input, readonly idle.
+- `Unidentified` hardware trigger arms input.
+- 24 HEX EPC.
+- 600 ms lock.
+- 1600 ms arm window.
+- soft keyboard hidden without blur during RFID ACTIVE.
+- scan → product + lower 6 → confirm.
+- TEST duplicates allowed.
+- WORK duplicate/status protection.
+- same-product Camera row with `scanner_code=''` can be enriched with full EPC without creating a duplicate.
+- different-product Camera row is blocked.
+- staged/dispatched existing row is blocked.
+- new WORK row → verified/in_stock.
+- success state → `PÅ LAGER` → READY.
 
 ## Scanner home
-`scanner-home.html` тепер показує:
-- `📥 TIL LAGER` → DEV V1.0.1 · TEST FIRST
-- `📤 TIL RAMPE` → STABLE V2.9.7 · LOCKED
+`scanner-home.html` currently points:
+- `📥 TIL LAGER` → `nordic-id-til-lager-v102.html` → DEV V1.0.2
+- `📤 TIL RAMPE` → frozen STABLE V2.9.7
 
-Til lager ще не називати stable до фізичного Nordic PASS.
+Scanner home content SHA after V1.0.2 link:
+- `893bb5da1711bd964d837e6e58213f502187c7ec`
 
 ## Camera fallback
-Фізично підтверджена попередня база:
-- Camera v4.25 LOWER RESET — після save більше не зависає на `ОБРОБКА…`.
-- Camera v4.26 AUTO SAVE FOCUS — після успішного OCR автоматично фокусується/прокручується до `ЗБЕРЕГТИ`.
+Physical PASS remains:
+- Camera v4.25 LOWER RESET
+- Camera v4.26 AUTO SAVE FOCUS
 
-Підготовлено наступну DEV-надбудову для fallback нових RFID-продуктів:
-- `camera-extra-rfid-products.js`
-- `camera-live-v4-floating-camera-v2.js`
-- `camera-live-v414.html` → Camera v4.27 `RFID FALLBACK PRODUCTS`
-
-Нові Camera fallback products:
-- forlengere_korte
-- forlengere_lange
-- vrak_bunner
-- vrak_hyller
-
-Camera v4.27 ще потребує фізичного підтвердження; v4.26 лишається останнім підтвердженим Camera PASS/rollback у GitHub history.
+Camera v4.27 with extra RFID fallback products is prepared but not yet physical PASS.
 
 ## UT Kontor
-`bestilling.html` лишається функціонально тим самим `UT Kontor WORKING v36`.
-Виправлено тільки мову: перед language-module примусово встановлюється `mottak_ut_language=no`, щоб production UT Kontor не підхоплював українську з TEST/localStorage.
+- existing layout/behavior should remain unchanged;
+- production language forced to Norwegian;
+- additive Vrak module prepared;
+- Norwegian/Vrak browser confirmation still required before PASS.
 
-Vrak-продукти ще треба додати до order-entry cards UT Kontor окремим additive кроком; не змінювати існуючі 6 product flows.
-
-## Наступний фізичний крок
-На Nordic:
-1. відкрити `scanner-home.html`;
-2. `📥 TIL LAGER`;
-3. залишити **TEST**;
-4. вибрати `Bunner` або `Vrak bunner`;
-5. коротко scan відомої RFID-бірки;
-6. перевірити modal product + lower_number;
-7. підтвердити TEST;
-8. після цього перевірити DB/log перед переходом до WORK.
+## Next physical check
+1. Refresh `scanner-home.html`.
+2. Open `📥 TIL LAGER`.
+3. Verify visible `DEV V1.0.2 · STOCK VIEW + WORK HOLD`.
+4. Choose a product: `PÅ LAGER NÅ` must show TEST count and `Siste mottak`.
+5. Hold WORK for ~1.5 seconds: red bar/countdown → confirm → button must become `WORK ✓`; stock badge must become WORK.
+6. Do not make a real WORK stock write unless deliberately testing a real item.
+7. After user reports result, query DB/log before declaring PASS.
