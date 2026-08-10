@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Nordic ID — НА РАМПУ · V2.9.2</title>
+<title>Nordic ID — НА РАМПУ · V2.9.3</title>
 <style>
 html,body{margin:0;min-height:100%;background:#0b1020;color:#f5f7ff;font-family:Arial,sans-serif}*{box-sizing:border-box}
 #envBar{position:sticky;top:0;z-index:100001;padding:9px 10px;background:#0b1020;border-bottom:1px solid #303b59}
@@ -32,7 +32,7 @@ html,body{margin:0;min-height:100%;background:#0b1020;color:#f5f7ff;font-family:
 <iframe id="utCore" title="Nordic ID — НА РАМПУ · TEST / WORK"></iframe>
 <script>
 "use strict";
-const VERSION="20260810-1828", PAGE_VERSION="V2.9.2";
+const VERSION="20260810-1859", PAGE_VERSION="V2.9.3";
 const f=document.getElementById("utCore"),loader=document.getElementById("loader"),testBtn=document.getElementById("testBtn"),workBtn=document.getElementById("workBtn"),envNote=document.getElementById("envNote");
 let MODE="test",openTries=0,holdTimer=0,holdDone=false,viewportTimer=0,modalWasOpen=false;
 
@@ -50,7 +50,7 @@ function mark(){try{
   const d=f.contentDocument,w=f.contentWindow;if(!d?.body)return;w.BAMA_HOME_TARGET="scanner-home.html";
   let b=d.getElementById("utNordicMirrorBanner");if(!b){b=d.createElement("div");b.id="utNordicMirrorBanner";const h=d.querySelector("h1");if(h?.parentElement)h.insertAdjacentElement("beforebegin",b)}
   if(b){const work=MODE==="work";b.style.cssText=`margin:10px 0 12px;padding:11px 13px;border:2px solid ${work?'#ff7373':'#48d597'};border-radius:14px;background:${work?'rgba(255,115,115,.09)':'rgba(72,213,151,.09)'};color:#f5f7ff;font:900 13px/1.45 Arial,sans-serif;text-align:center`;b.innerHTML=work?"🏭 <b>НА РАМПУ · WORK</b><br>V2.4 RFID engine · реальний склад.":"🧪 <b>НА РАМПУ · TEST</b><br>V2.4 RFID engine · environment=test · дублікати RFID дозволені."}
-  const v=d.querySelector(".version");if(v)v.innerHTML=`${PAGE_VERSION} · НА РАМПУ · V2.4 RFID ENGINE · ${MODE.toUpperCase()}<br>Oppdatert 10.08.2026 kl. 18:28`;
+  const v=d.querySelector(".version");if(v)v.innerHTML=`${PAGE_VERSION} · НА РАМПУ · V2.4 RFID ENGINE · ${MODE.toUpperCase()}<br>Oppdatert 10.08.2026 kl. 18:59`;
   const home=d.querySelector("a.home");if(home&&!home.dataset.nidHome){home.dataset.nidHome="1";home.href="scanner-home.html";home.target="_top";home.onclick=e=>{e.preventDefault();top.location.href="scanner-home.html"}}
 }catch{}}
 
