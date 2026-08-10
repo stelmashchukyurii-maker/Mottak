@@ -17,14 +17,14 @@ body{display:flex;flex-direction:column}
 iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}
 #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font:900 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
 </style>
-<script src="products.js?v=20260809-1139"></script>
+<script src="products.js?v=20260810-2210"></script>
 </head>
 <body class="notranslate">
 <div id="loader">Laster UT Kontor WORKING v36…</div>
 <iframe id="app" title="UT Kontor WORKING v36"></iframe>
 <script>
 "use strict";
-const BUILD="20260809-1139";
+const BUILD="20260810-2210";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 
 function inject(doc,src,mark){
@@ -54,7 +54,7 @@ function applyWorkingBrand(){
     const home=d.querySelector("a.home");
     if(home)home.remove();
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v36 · 6 PRODUKTER<br>Oppdatert 09.08.2026 kl. 11:39";
+    if(version)version.innerHTML="UT Kontor WORKING v36 · 8 PRODUKTER<br>Oppdatert 10.08.2026 kl. 22:10";
   }catch{}
 }
 
@@ -86,6 +86,7 @@ frame.addEventListener("load",async()=>{
     w.localStorage.setItem("mottak_ut_language","no");
     await inject(d,"ut-kontor-products.js","products");
     await waitForProducts(w);
+    await inject(d,"ut-kontor-vrak-products.js","vrak-products");
     await inject(d,"ut-kontor-history-visuals.js","history");
     await inject(d,"ut-test-language.js","language");
     await refreshInner();
