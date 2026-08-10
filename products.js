@@ -1,6 +1,6 @@
 // BaMavaremottak — central product registry
-// Version 1.2.2
-// Updated: 2026-08-08 13:40 Europe/Oslo
+// Version 1.3.0
+// Updated: 2026-08-10 21:30 Europe/Oslo
 //
 // IMPORTANT:
 // - This registry is used by the standalone product/test pages.
@@ -13,9 +13,9 @@
 
   const meta = {
     registry: "BaMavaremottak products",
-    schemaVersion: 5,
-    version: "1.2.2",
-    updatedAt: "2026-08-08T13:40:00+02:00",
+    schemaVersion: 6,
+    version: "1.3.0",
+    updatedAt: "2026-08-10T21:30:00+02:00",
     defaultLanguage: "no",
     languages: ["no", "pl", "uk"]
   };
@@ -166,12 +166,55 @@
       name: { no: "Forlengere plast", pl: "Przedłużki plastikowe", uk: "Подовжувачі пластикові" },
       unit: "eske",
       stackSize: null,
+      inventory: { tracked: true, rfid: false },
       shipment: { orderUnit: "eske", confirmation: "count_only" },
       package: { type: "box", internalQuantity: null, weightKg: null, detailsPending: true },
       notes: {
-        no: "Én enhet = 1 eske. Ingen Bunner, Hyller eller CC Post inngår. Vekt og antall plastforlengere i esken er ikke fastsatt ennå.",
-        pl: "Jedna jednostka = 1 pudełko. Bez podstawy, półek i CC Post. Waga i liczba plastikowych przedłużek w pudełku nie są jeszcze ustalone.",
-        uk: "Одна одиниця = 1 ящик. Без Bunner, полиць і CC Post. Вага і кількість пластикових подовжувачів у ящику поки не визначені."
+        no: "Én enhet = 1 eske. Ingen RFID. Ingen Bunner, Hyller eller CC Post inngår. Vekt og antall plastforlengere i esken er ikke fastsatt ennå.",
+        pl: "Jedna jednostka = 1 pudełko. Bez RFID, podstawy, półek i CC Post. Waga i liczba plastikowych przedłużek w pudełku nie są jeszcze ustalone.",
+        uk: "Одна одиниця = 1 ящик. Без RFID, Bunner, полиць і CC Post. Вага і кількість пластикових подовжувачів у ящику поки не визначені."
+      }
+    },
+    {
+      id: "vrak_bunner",
+      sortOrder: 70,
+      active: true,
+      name: { no: "Vrak bunner", pl: "Brakowane podstawy", uk: "Браковані основи" },
+      unit: "stabel",
+      stackSize: 10,
+      inventory: { tracked: true, rfid: true },
+      shipment: {
+        orderUnit: "stabel",
+        confirmation: "bundle",
+        components: {
+          vrak_bunner: { quantity: 10, mode: "fixed" }
+        }
+      },
+      notes: {
+        no: "Én RFID-enhet = én stabel med 10 Vrak bunner. Kan registreres på lager og sendes til rampe.",
+        pl: "Jedna jednostka RFID = jeden stos 10 brakowanych podstaw. Może być przyjęta na magazyn i wysłana na rampę.",
+        uk: "Одна RFID-одиниця = одна стопка з 10 Vrak bunner. Може оприбутковуватися на склад і відправлятися на рампу."
+      }
+    },
+    {
+      id: "vrak_hyller",
+      sortOrder: 80,
+      active: true,
+      name: { no: "Vrak hyller", pl: "Brakowane półki", uk: "Браковані полиці" },
+      unit: "stabel",
+      stackSize: 30,
+      inventory: { tracked: true, rfid: true },
+      shipment: {
+        orderUnit: "stabel",
+        confirmation: "bundle",
+        components: {
+          vrak_hyller: { quantity: 30, mode: "fixed" }
+        }
+      },
+      notes: {
+        no: "Én RFID-enhet = én stabel med 30 Vrak hyller. Kan registreres på lager og sendes til rampe.",
+        pl: "Jedna jednostka RFID = jeden stos 30 brakowanych półek. Może być przyjęta na magazyn i wysłana na rampę.",
+        uk: "Одна RFID-одиниця = одна стопка з 30 Vrak hyller. Може оприбутковуватися на склад і відправлятися на рампу."
       }
     }
   ];
