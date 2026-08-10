@@ -2,7 +2,7 @@
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
 **Створено:** 09.08.2026 19:43:37 Europe/Oslo  
-**Оновлено:** 10.08.2026 20:37 Europe/Oslo
+**Оновлено:** 10.08.2026 22:12 Europe/Oslo
 
 ## Правило журналу
 У цей файл записуємо **тільки підтверджені успішні/завершені кроки**. Тимчасові помилки, невдалі спроби, гіпотези та відкриті проблеми сюди не додаємо.
@@ -180,7 +180,7 @@ Google Drive Nordic ID відео/фото:
 **Підтверджено рішенням користувача:** 10.08.2026 20:36 Europe/Oslo
 
 Робочий `scanner-home.html` очищено від історичних/технічних карток.
-На екрані залишено тільки:
+На момент підтвердження на екрані було залишено тільки:
 1. **📥 НА СКЛАД** — майбутня окрема Nordic INN / Mottak форма;
 2. **📤 TIL RAMPE** → `nordic-id-til-rampe-stable.html` → `Nordic ID – Til rampe · STABLE V2.9.7`.
 
@@ -190,17 +190,70 @@ Google Drive Nordic ID відео/фото:
 
 ---
 
+## PASS — CAMERA CLOUD v4.25 · LOWER RESET
+**Підтверджено користувачем фізично:** 10.08.2026 21:06–21:20 Europe/Oslo
+
+Підтверджено:
+- Camera/телефон як і раніше записує реальний `lower_number` у `mottak_scans`;
+- після успішного збереження товару нижня плаваюча панель більше не зависає на `⏳ ОБРОБКА…`;
+- після завершення save UI автоматично повертається до `📷 ФОТО` для наступного товару;
+- попередня регресія була UI-hook проблемою після lower-only override, а не втратою даних у Supabase;
+- мобільна таблиця більше не ставить зайві `Службовий код` / старий `Верхній номер` перед робочим `Нижній номер`.
+
+**Статус:** підтверджений Camera rollback / база перед v4.26.
+
+---
+
+## PASS — CAMERA CLOUD v4.26 · AUTO SAVE FOCUS
+**Підтверджено користувачем:** 10.08.2026 після фізичного OCR/save тесту.
+
+Підтверджено:
+- після успішного Gemini/OpenAI розпізнавання валідного `lower_number` сторінка сама переходить до правильної наступної дії;
+- кнопка `💾 ЗБЕРЕГТИ` автоматично прокручується у зручне місце та коротко підсвічується;
+- після save зберігається підтверджений v4.25 flow `→ 📷 ФОТО` без повного перезавантаження сторінки;
+- користувач підтвердив: «Супер все зроблено».
+
+**Статус:** останній фізично підтверджений Camera PASS перед розширенням product fallback.
+
+---
+
+## SERVER PASS — RFID PRODUCT MODEL EXTENDED FOR VRAK
+**Підтверджено серверними read-back / transactional tests:** 10.08.2026.
+
+Підтверджені бізнес-правила:
+- RFID мають усі робочі продукти, крім `forlengere_plast`;
+- `vrak_bunner` = 1 RFID-одиниця / стопка = 10 Vrak bunner;
+- `vrak_hyller` = 1 RFID-одиниця / стопка = 30 Vrak hyller;
+- обидва Vrak-продукти можуть прийматися на склад і відправлятися на RAMPE.
+
+Зміни:
+- `products.js` → v1.3.0, permanent IDs `vrak_bunner`, `vrak_hyller`;
+- `mottak_scans_product_check` дозволяє Bunner/H30/H60/korte/lange/Vrak bunner/Vrak hyller;
+- `ut_order_scans_product_check` дозволяє той самий RFID-набір;
+- `forlengere_plast` навмисно не включений у RFID scan constraint;
+- `private.nordic_preview(uuid,text)` серверно розширено для Vrak без переписування frozen `Til rampe V2.9.7` frontend.
+
+Transactional browser-role verification:
+- TEST: однакова фізична RFID для `vrak_bunner` може існувати двічі (`count=2`);
+- WORK: дубль тієї самої RFID для `vrak_hyller` не створюється (`count=1`);
+- тести виконані в транзакціях із `ROLLBACK`;
+- контроль після тесту: 0 штучних рядків лишилося в production.
+
+**Статус:** SERVER PASS. Фізичне приймання Vrak через нову `Til lager` ще не підтверджене.
+
+---
+
 # ПОТОЧНА АРХІТЕКТУРА scanner-home.html
 
-На робочому екрані тільки дві операції:
-1. **📥 НА СКЛАД** — ще не підключена окрема Nordic Mottak форма.
-2. **📤 TIL RAMPE** — `Nordic ID – Til rampe · STABLE V2.9.7` через `nordic-id-til-rampe-stable.html`.
+На робочому екрані дві операції:
+1. **📥 TIL LAGER** → `nordic-id-til-lager-test.html` → `Nordic ID – Til lager · DEV V1.0.1 · TEST FIRST`.
+2. **📤 TIL RAMPE** → `nordic-id-til-rampe-stable.html` → `Nordic ID – Til rampe · STABLE V2.9.7`.
+
+`Til lager` поки **DEV, не STABLE і не PASS**. Її детальний непідтверджений стан ведеться окремо у `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`.
 
 Приховано з робочого екрана, але збережено в GitHub:
 - `utsending-nordic-test.html` — DEV copy для майбутніх змін;
 - `nordic-id-v24-stable.html` — історичний RFID rollback;
 - `nordic-id-v20-focus.html` — V2.1 diagnostic/test base.
 
-Наступний окремий напрямок: **Nordic ID – På lager / Mottak (НА СКЛАД)**. Він не повинен змінювати `Nordic ID – Til rampe` STABLE.
-
-Наступна перевірка 11.08.2026: фізичний WORK end-to-end на реальному складі. До цього тесту `Nordic ID – Til rampe` STABLE не змінювати.
+Наступний фізичний крок: **Nordic ID – Til lager V1.0.1 у TEST**. Після фізичного PASS — перевірити DB/log, далі окремо WORK. `Nordic ID – Til rampe` STABLE не змінювати.
