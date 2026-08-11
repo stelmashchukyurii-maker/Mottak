@@ -1,30 +1,38 @@
 NID-HANDOFF-2026-08-11-STOCK8-TIL-LAGER-V1.0.3
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 11.08.2026 08:23 Europe/Oslo
+Оновлено: 11.08.2026 08:30 Europe/Oslo
 
 КРИТИЧНЕ ПРАВИЛО — TIL RAMPE:
 - FINAL STABLE: `Nordic ID – Til rampe · V2.9.7`.
 - Entry: `nordic-id-til-rampe-stable.html`.
 - Frozen source commit: `ed3a19b20efd9af0bf07bc4a079589b3b6038157`.
 - Final stable-entry commit: `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`.
-- `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
+- Lock: `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
 - STABLE НЕ ПЕРЕПИСУВАТИ І НЕ ВИДАЛЯТИ.
-- V2.4 historical rollback and V2.1 diagnostic remain hidden from scanner home.
 
 SCANNER HOME:
 - `📥 TIL LAGER` → `nordic-id-til-lager-v103.html` → DEV V1.0.3.
-- `📤 TIL RAMPE` → frozen stable V2.9.7.
-- current scanner-home SHA: `08852ef06776602bef2a53954ccbc8729d53395c`.
+- `📤 TIL RAMPE` → frozen STABLE V2.9.7.
+- scanner-home SHA `08852ef06776602bef2a53954ccbc8729d53395c`.
+
+TIL RAMPE NEW DEV — NOT ON HOME:
+- entry `nordic-id-til-rampe-v298-dev.html`
+- overlay `nordic-til-rampe-v298-progress.js`
+- protocol `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md`
+- purpose: all-product/Vrak ordered-done-remaining-next progress.
+- uses `bama_order_product_progress(uuid)`.
+- final action is visually blocked in DEV while any product remains.
+- NOT PHYSICAL PASS, NOT STABLE, do not replace V2.9.7.
 
 TIL LAGER:
-- base RFID write flow physically wrote TEST rows successfully for H60, Bunner, Forlengere lange, Vrak hyller, Vrak bunner with EPC ending `0E3103`.
-- current wrapper V1.0.3 keeps V1.0.2 WORK-hold + last receipt card and adds shared 8-product counters.
+- base TEST RFID write path physically confirmed in DB for H60, Bunner, Forlengere lange, Vrak hyller, Vrak bunner with EPC ending `0E3103`.
+- current V1.0.3 = base intake + V1.0.2 WORK hold/last receipt + unified 8-product counters.
 - TEST default; WORK requires ~1.5 s hold + confirm.
-- WORK Camera merge: same product/lower + Camera row with empty scanner_code/in_stock → enrich same row with full EPC, preserve photo, no duplicate.
-- Til lager still DEV; WORK-hold and V1.0.3 counters are not yet physically confirmed.
+- WORK Camera merge: same product/lower + Camera row with empty scanner_code/in_stock → enrich same row, preserve photo, no duplicate.
+- V1.0.3 counters/WORK-hold still require physical confirmation.
 
-AUTHORITATIVE PRODUCTS — products.js v1.3.0:
+PRODUCTS — products.js v1.3.0:
 RFID:
 - bunner
 - hyller30
@@ -39,100 +47,107 @@ Rules:
 - Vrak bunner = 10 per RFID stack.
 - Vrak hyller = 30 per RFID stack.
 - all products can go to RAMPE.
-- short/long counts only at outgoing, never at Mottak.
+- short/long counts only at outgoing.
 
 UNIFIED STOCK RULE — SERVER PASS:
-RPC: `public.bama_stock_summary()`.
+RPC `bama_stock_summary()`.
 Counter 1 = physical `in_stock`.
 Counter 2 = physical stock minus still-unfulfilled active ramp orders.
 Counter 2 changes immediately at order create/edit.
-When a unit is physically staged, physical stock and remaining order both decrease, so available stock is NOT double-subtracted.
-Products returned: all 8.
-Fields: physical_count, on_ramp_count, order_remaining, available_count, shortage_count, unit, package_size.
+Staging does NOT double-subtract because physical and remaining demand decrease together.
+Returns all 8 products with physical/on-ramp/order-remaining/available/shortage/unit/package size.
+
+Shared UI `stock-summary-8-v1.js`, SHA `1d994edb772686d8eefa3741d2d7ef7d194fe0fb`.
+Current consumers, unconfirmed physically:
+- Camera v4.29
+- UT Kontor v37
+- Til lager V1.0.3
+
 Current real WORK check after rollback tests:
-- Bunner 14
+- B 14
 - H30 7
 - H60 14
-- all new products 0
-- active WORK orders 0
-
-SHARED FRONTEND COUNTER:
-`stock-summary-8-v1.js`
-SHA: `1d994edb772686d8eefa3741d2d7ef7d194fe0fb`
-Used by:
-- Camera current v4.29
-- UT Kontor current v37
-- Til lager V1.0.3
-These current UI versions are not physical PASS yet.
+- short/lange/plast/Vrak 0
+- active WORK orders 0.
 
 PLASTIC QUANTITY STOCK — SERVER PASS:
 Tables:
 - `mottak_quantity_stock`
 - `mottak_quantity_stock_events`
-Only `forlengere_plast` uses this quantity ledger.
-Order lifecycle verified transactionally:
-- order creation reserves availability;
+Only `forlengere_plast` uses quantity ledger.
+Lifecycle passed:
+- order reserves availability;
 - stage deducts physical boxes;
-- cancel restores boxes;
-- non-operational order edit preserves staged stock;
-- operational item/ramp edit restores stock + releases confirmations.
-Manual receipt RPC:
-- `receive_mottak_quantity_stock(text,integer,text)`
-- no fake RFID/lower_number.
-- anon TEST transactional PASS.
-Camera current v4.29 loads `camera-plast-manual-receipt.js` for this manual receipt UI; physical UI test pending.
-
-VRAK OUTGOING — SERVER PASS:
-- `private.nordic_preview` supports Vrak.
-- `stage_ut_order` and `confirm_ut_dispatch` validate Vrak RFID.
-- transactional full cycle PASS: Vrak order → Nordic → staged → dispatched.
-- `bama_order_product_progress(uuid)` returns progress for all order products incl. Vrak/plastic.
-IMPORTANT: frozen V2.9.7 progress UI was created before Vrak and does not visually list Vrak. Server prevents false final completion, but a new outgoing DEV UI is needed for convenient Vrak progress. Do not alter stable V2.9.7.
+- cancel restores undispatched boxes;
+- non-operational edit preserves staged stock;
+- operational item/ramp edit restores + resets.
+Manual receipt RPC `receive_mottak_quantity_stock(text,integer,text)`; no fake RFID/lower number.
+Anon TEST transactional PASS.
 
 CAMERA:
-Physical PASS rollback:
+Last physical PASS rollback:
 - v4.25 LOWER RESET
 - v4.26 AUTO SAVE FOCUS
-Current unconfirmed wrapper:
-- v4.29 `8 PRODUKTER · PLAST MANUELT MOTTAK`
-- file `camera-live-v414.html`
+Current unconfirmed v4.29:
+- `camera-live-v414.html`
 - commit `1cdd303943e10674372a84be88c25bf8f0dac5d1`
 - SHA `988ffe9865766754f74462791db33f60f49596e5`
-- includes Camera fallback products short/long/Vrak, 8 counters, manual plastic receipt.
+- fallback choices for short/long/Vrak;
+- 8-product two counters;
+- manual plastic receipt module `camera-plast-manual-receipt.js`.
 
 UT KONTOR:
-- keep existing layout/behavior.
-- forced Norwegian startup.
-- current `UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE`.
+- preserve established layout/behavior.
+- current unconfirmed `UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE`.
 - `bestilling.html` commit `10cfbd91fc90213048df2f64c4691f961d3aa7c3`, SHA `f84b0e60794ab1ad239cbe8ae00d1da607c3b131`.
-- Vrak cards additive; shared stock summary refreshes immediately after successful load/save.
-- physical/browser confirmation pending.
+- forced Norwegian startup.
+- Vrak cards additive.
+- unified stock summary refreshes after save/load.
+
+VRAK OUTGOING — SERVER PASS:
+- `private.nordic_preview` handles Vrak.
+- `stage_ut_order` / `confirm_ut_dispatch` validate Vrak RFID.
+- transactional cycle PASS: order → Nordic → staged → dispatched.
+- `bama_order_product_progress(uuid)` returns progress for all products including Vrak/plastic.
+- frozen V2.9.7 old progress UI predates Vrak; server prevents false completion.
+- V2.9.8 DEV exists for visual Vrak progress; test separately before any promotion.
+
+TEST / WORK:
+Shared environment-separated tables. TEST repeat EPC allowed, WORK duplicates protected. Old `ut_test_*` archive only.
+
+RFID MAPPING:
+- full EPC → scanner_code
+- last 6 → lower_number
+- upper_number=''
+- Camera may have only lower_number
+- no EPC → never invent RFID.
 
 SERVER TESTS PASSED / ROLLED BACK:
-- TEST duplicate RFID allowed / WORK duplicate blocked.
-- order creation immediately subtracts availability; staging no double subtraction.
-- Vrak full outgoing cycle.
-- plastic reservation → stage decrement → cancel restore.
-- non-operational edit preserves staged stock; operational edit restores/resets.
-- anon TEST manual plastic receipt.
-- anon TEST 8-product order progress RPC.
-No synthetic WORK rows/order/quantities left from tests.
+- duplicate TEST/WORK behavior;
+- immediate order reservation + no double subtraction after stage;
+- Vrak full outgoing cycle;
+- plastic reservation/stage/cancel;
+- order edit lifecycle;
+- manual plastic receipt;
+- all-product order progress RPC.
+No synthetic WORK leftovers.
 
 PROTOCOLS:
-- `NORDIC_ID_PROGRESS_LOG.md` — physical PASS + explicit SERVER PASS only.
-- `NORDIC_TIL_LAGER_DEV_PROTOCOL.md` — current unconfirmed incoming DEV.
+- `NORDIC_ID_PROGRESS_LOG.md` — physical PASS / explicit SERVER PASS.
 - `NORDIC_ID_RFID_PROTOCOL.md` — canonical architecture.
-- `NORDIC_TIL_RAMPE_STABLE_LOCK.md` — frozen outgoing stable contract.
-- `PROTOCOL.md` / `PROTOCOLS.md` — project summaries.
+- `NORDIC_TIL_LAGER_DEV_PROTOCOL.md` — incoming DEV.
+- `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md` — outgoing Vrak-progress DEV.
+- `NORDIC_TIL_RAMPE_STABLE_LOCK.md` — immutable V2.9.7 contract.
+- `PROTOCOL.md`, `PROTOCOLS.md` — project summaries.
 
-NEXT PHYSICAL CHECKS, one at a time:
-1. Nordic scanner → refresh home → TIL LAGER V1.0.3 → verify two 8-product counters in TEST and WORK-hold behavior.
-2. Camera v4.29 → verify 8-product counters and manual plastic receipt block visually; do not add real plastic unless deliberately testing.
-3. UT Kontor v37 → verify Norwegian, 8 product cards, two counters; create no real order unless deliberately testing.
-4. Later create/test separate outgoing DEV supporting Vrak progress. Frozen V2.9.7 stays untouched.
+NEXT PHYSICAL CHECKS:
+1. Nordic scanner → TIL LAGER V1.0.3 → verify TEST counters + WORK hold.
+2. Camera v4.29 → verify 8 counters + plastic manual receipt panel; do not add real plastic accidentally.
+3. UT Kontor v37 → verify Norwegian + 8 products/counters; no real order unless deliberate.
+4. Explicitly open V2.9.8 DEV later with a TEST Vrak order and verify Vrak progress/final guard.
 
 DO NOT CLAIM YET:
-- Til lager V1.0.3 physical PASS/stable.
+- Til lager V1.0.3 full physical PASS/stable.
 - Camera v4.29 physical PASS.
 - UT Kontor v37 physical PASS.
-- Vrak progress UI on frozen Til rampe stable.
+- Til rampe V2.9.8 physical PASS/stable.
