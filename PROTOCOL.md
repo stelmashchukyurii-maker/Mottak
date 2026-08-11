@@ -1,79 +1,147 @@
 # BaMavaremottak — Project Protocol
 
-**Оновлено:** 11.08.2026 08:32 Europe/Oslo
+**Оновлено:** 11.08.2026 22:43 Europe/Oslo
 
-## CURRENT PRIORITY — 8-product warehouse / Nordic Til lager
+## CURRENT OPERATIONAL STATE
 
-### Frozen outgoing stable
-`Nordic ID – Til rampe · STABLE V2.9.7`
-- `nordic-id-til-rampe-stable.html`
-- frozen source `ed3a19b20efd9af0bf07bc4a079589b3b6038157`
-- do not overwrite/delete/repoint.
+### Nordic scanner home — WORK default
+`scanner-home.html`
 
-Separate unconfirmed outgoing DEV:
-- `nordic-id-til-rampe-v298-dev.html`
-- `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md`
-- all-product/Vrak visual progress only;
-- not linked from scanner home.
+- `📥 TIL LAGER · WORK` → `nordic-id-til-lager-v104.html`
+- `📤 TIL RAMPE · WORK` → `nordic-id-til-rampe-work-default.html`
+- TEST remains available manually inside each form.
 
-### Scanner home
-- `📥 TIL LAGER` → V1.0.3 DEV.
-- `📤 TIL RAMPE` → frozen V2.9.7 stable.
+### Nordic Til rampe
+Frozen business logic:
+`V2.9.7` at commit `ed3a19b20efd9af0bf07bc4a079589b3b6038157`.
 
-### Products
-RFID: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange, vrak_bunner, vrak_hyller.
-No RFID: forlengere_plast.
-Vrak bunner = 10/stack; Vrak hyller = 30/stack; all products may go to RAMPE; short/long counts only outgoing.
+Do not rewrite RFID / confirm / count-entry / staging / dispatch logic without explicit user approval.
 
-### Canonical stock model
-RPC `bama_stock_summary()`.
-- counter 1 = physical `in_stock`;
-- counter 2 = physical minus still-unfulfilled active ramp orders;
-- order create/edit changes counter 2 immediately;
-- staging does not double-subtract.
+Operational WORK-default wrapper is physically confirmed on Nordic.
+Forlengere piece-count display (`NNN stk.` from real `ut_extra_progress.forlengere_count`) is also physically confirmed.
 
-Shared frontend: `stock-summary-8-v1.js`.
-Current unconfirmed consumers:
-- Camera v4.29
-- UT Kontor v37
-- Til lager V1.0.3
+Stable/operational lock:
+`NORDIC_TIL_RAMPE_STABLE_LOCK.md`
 
-### Plastic quantity stock
-Tables `mottak_quantity_stock`, `mottak_quantity_stock_events`.
-Manual receipt RPC `receive_mottak_quantity_stock(text,integer,text)`.
-Order lifecycle reservation/stage/cancel/edit tested transactionally.
-Current Camera v4.29 contains manual plastic receipt UI without fake RFID.
+Display patch record:
+`NORDIC_TIL_RAMPE_EXTENSION_COUNT_DISPLAY_2026-08-11.md`
 
-### Vrak outgoing
-Server full cycle PASS.
-`bama_order_product_progress(uuid)` provides all-product progress.
-Frozen V2.9.7 UI predates Vrak, so separate V2.9.8 DEV exists; server blocks false completion on old stable.
+### Nordic Til lager
+Current:
+`DEV V1.0.4 / WORK DEFAULT`
+
+Entry:
+`nordic-id-til-lager-v104.html`
+
+Real WORK Nordic intake path is proven in DB. The final V1.0.4 visual WORK-default startup still needs explicit physical confirmation before being called UI PASS.
+
+Protocol:
+`NORDIC_TIL_LAGER_DEV_PROTOCOL.md`
+
+## Product model
+RFID:
+- bunner
+- hyller30
+- hyller60
+- forlengere_korte
+- forlengere_lange
+- vrak_bunner
+- vrak_hyller
+
+No RFID:
+- forlengere_plast
+
+Rules:
+- Vrak bunner = 10 per RFID stack.
+- Vrak hyller = 30 per RFID stack.
+- short/long counts are entered at outgoing.
+- plastic is quantity-only; never fake RFID.
+
+## RFID contract
+- full 24-char EPC → `scanner_code`
+- last 6 → `lower_number`
+- `upper_number=''`
+- no EPC read → never invent RFID.
+
+## Shared TEST / WORK architecture
+Tables use `environment=test/work` isolation.
+TEST repeated EPC allowed. WORK duplicate protection remains mandatory.
+
+## Canonical stock model
+RPC:
+`bama_stock_summary()`
+
+Two counters:
+1. physical warehouse;
+2. available warehouse = physical − still-unfulfilled active RAMPE demand.
+
+Order create/edit changes available immediately. Staging does not double-subtract.
+
+### Historical baseline reset
+11.08.2026 35 old WORK RFID units were moved from `in_stock` to `dispatched` after user confirmed they had already physically shipped manually.
+
+Record:
+`WORK_STOCK_BASELINE_RESET_2026-08-11.md`
+
+New stock was subsequently received. Never reuse the old zero baseline as current stock; query live DB.
+
+Archive-time stock snapshot 11.08.2026 22:43:
+- Bunner 25
+- H30 3
+- H60 20
+- korte 4
+- lange 4
+- plast 0
+- Vrak bunner 0
+- Vrak hyller 2
+- on-ramp 0 / order_remaining 0 for all 8.
+
+Snapshot only — not a future constant.
+
+## RAMPE 28 trial
+WORK order `34113828-6904-4254-bc85-7c2cd8e8bbd1`, RAMPE 28, was used for real partial Nordic testing.
+
+Confirmed partial flow:
+- Bunner 1/1
+- Forlengere korte 1/1
+- Forlengere lange 1/1
+- both extension confirmations stored 15 hyller + 150 forlengere.
+
+The trial was later cancelled/released. It is not active and no stock remains on ramp from it.
+
+## Manual WORK receipt
+3 × Hyller x30 manually received with lower numbers:
+`000012`, `000013`, `000014`.
+
+No fake EPC was created.
+
+## Deferred items
+### Vrak/all-8 outgoing UI
+Separate `Nordic ID – Til rampe · DEV V2.9.8` exists for complete visual Vrak/all-product progress.
+Server lifecycle already passes, but UI DEV is not physical PASS and not linked from scanner home.
 
 ### Camera
-Physical rollback PASS: v4.25, v4.26.
-Current v4.29 unconfirmed: short/long/Vrak fallback + two 8-product counters + plastic manual receipt.
+Last physical rollback PASS: v4.26.
+Current v4.29 remains not fully physically accepted.
 
 ### UT Kontor
-Preserve existing layout/behavior.
-Current v37 unconfirmed: Norwegian + 8 products + two counters + immediate refresh after order save/load.
+Current v37 remains preserved and not fully physically accepted in this session.
 
-### Til lager
-Current V1.0.3 unconfirmed full wrapper.
-Base TEST RFID writes physically evidenced; V1.0.3 counters/WORK hold need confirmation.
+### Lager Admin
+TEST-only DEV. User explicitly deferred it. WORK remains server-locked.
 
-### Protocols
-Read in order:
+## Protocol order
 1. `NEXT_CHAT_NORDIC_ID.txt`
 2. `NORDIC_ID_RFID_PROTOCOL.md`
 3. `NORDIC_ID_PROGRESS_LOG.md`
-4. `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`
-5. `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md` when testing outgoing DEV
-6. `NORDIC_TIL_RAMPE_STABLE_LOCK.md` for stable/recovery.
+4. `NORDIC_TIL_RAMPE_STABLE_LOCK.md`
+5. `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`
+6. `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md` only when resuming Vrak/all-8 outgoing DEV
+7. `NORDIC_SESSION_ARCHIVE_2026-08-11_2243.md` for this session closure.
 
-### Next physical checks
-1. Til lager V1.0.3 counters + WORK hold.
-2. Camera v4.29 counters + plastic panel.
-3. UT Kontor v37 Norwegian + 8 products/counters.
-4. V2.9.8 DEV with TEST Vrak order.
+## User change-control rule
+If an already working production behavior appears problematic, explain the issue first and get explicit authorization before modifying it.
 
-Historical protocols remain archives. Current stock values must always come from live DB, not old baselines.
+## Session status
+The Forlengere display task and Til rampe WORK-default task are complete and accepted.
+This conversation can be archived after protocol synchronization.
