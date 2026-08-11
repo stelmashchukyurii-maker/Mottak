@@ -1,7 +1,7 @@
-NID-HANDOFF-2026-08-11-STOCK8-TIL-LAGER-V1.0.3
+NID-HANDOFF-2026-08-11-WORK-STOCK-ZERO-NEW-INTAKE
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 11.08.2026 08:30 Europe/Oslo
+Оновлено: 11.08.2026 14:50 Europe/Oslo
 
 КРИТИЧНЕ ПРАВИЛО — TIL RAMPE:
 - FINAL STABLE: `Nordic ID – Til rampe · V2.9.7`.
@@ -11,26 +11,56 @@ NID-HANDOFF-2026-08-11-STOCK8-TIL-LAGER-V1.0.3
 - Lock: `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
 - STABLE НЕ ПЕРЕПИСУВАТИ І НЕ ВИДАЛЯТИ.
 
+NEW WORK BASELINE — 11.08.2026 ~14:47:
+User confirmed that all goods previously shown in WORK warehouse had already been physically shipped manually.
+Before correction WORK physical stock was:
+- Bunner 14
+- Hyller x30 7
+- Hyller x60 14
+- all other 5 products 0
+- active WORK orders 0
+
+Action performed:
+- all 35 WORK `verified + in_stock` RFID rows moved to `stock_status='dispatched'`;
+- `dispatched_at` and `updated_at` set;
+- 35 audit events written to `mottak_stock_events` with `action='mark_dispatched'` and batch marker `created_by='chatgpt_admin_bulk_2026-08-11'`;
+- TEST environment untouched.
+
+Verified after correction:
+- WORK `physical_count=0` for all 8 products;
+- WORK `available_count=0` for all 8 products;
+- WORK `on_ramp_count=0`;
+- WORK `order_remaining=0`;
+- exact batch audit count = 35.
+
+Canonical milestone file:
+`WORK_STOCK_BASELINE_RESET_2026-08-11.md`
+
+IMPORTANT:
+**Do not quote old 14/7/14 as current stock anymore. Current real WORK warehouse baseline is ZERO across all 8 products.**
+New real goods should now be received from this clean baseline with Nordic `Til lager`.
+
 SCANNER HOME:
 - `📥 TIL LAGER` → `nordic-id-til-lager-v103.html` → DEV V1.0.3.
 - `📤 TIL RAMPE` → frozen STABLE V2.9.7.
-- scanner-home SHA `08852ef06776602bef2a53954ccbc8729d53395c`.
-
-TIL RAMPE NEW DEV — NOT ON HOME:
-- entry `nordic-id-til-rampe-v298-dev.html`
-- overlay `nordic-til-rampe-v298-progress.js`
-- protocol `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md`
-- purpose: all-product/Vrak ordered-done-remaining-next progress.
-- uses `bama_order_product_progress(uuid)`.
-- final action is visually blocked in DEV while any product remains.
-- NOT PHYSICAL PASS, NOT STABLE, do not replace V2.9.7.
 
 TIL LAGER:
-- base TEST RFID write path physically confirmed in DB for H60, Bunner, Forlengere lange, Vrak hyller, Vrak bunner with EPC ending `0E3103`.
-- current V1.0.3 = base intake + V1.0.2 WORK hold/last receipt + unified 8-product counters.
-- TEST default; WORK requires ~1.5 s hold + confirm.
-- WORK Camera merge: same product/lower + Camera row with empty scanner_code/in_stock → enrich same row, preserve photo, no duplicate.
-- V1.0.3 counters/WORK-hold still require physical confirmation.
+- base TEST RFID write path physically/DB-confirmed for H60, Bunner, Forlengere lange, Vrak hyller, Vrak bunner with EPC ending `0E3103`;
+- current V1.0.3 = base intake + V1.0.2 WORK hold/last receipt + unified 8-product counters;
+- TEST default; WORK requires ~1.5 s hold + confirm;
+- WORK Camera merge: same product/lower + Camera row with empty scanner_code/in_stock → enrich same row, preserve photo, no duplicate;
+- V1.0.3 WORK-hold/counters still need final physical confirmation before calling Til lager STABLE.
+
+NEXT REAL OPERATION:
+User wants to receive NEW stock with Nordic scanner now that WORK baseline is zero.
+Recommended next physical step:
+1. Open scanner home → `📥 TIL LAGER`.
+2. Verify V1.0.3.
+3. Switch deliberately to WORK using hold + confirm.
+4. Scan ONE real new incoming RFID item.
+5. Confirm product/lower number and save.
+6. Immediately query WORK `mottak_scans` + `bama_stock_summary()` and verify physical/available increased by exactly 1.
+7. Only after this physical WORK receipt PASS continue bulk receiving.
 
 PRODUCTS — products.js v1.3.0:
 RFID:
@@ -51,66 +81,46 @@ Rules:
 
 UNIFIED STOCK RULE — SERVER PASS:
 RPC `bama_stock_summary()`.
-Counter 1 = physical `in_stock`.
+Counter 1 = physical stock.
 Counter 2 = physical stock minus still-unfulfilled active ramp orders.
 Counter 2 changes immediately at order create/edit.
-Staging does NOT double-subtract because physical and remaining demand decrease together.
-Returns all 8 products with physical/on-ramp/order-remaining/available/shortage/unit/package size.
-
-Shared UI `stock-summary-8-v1.js`, SHA `1d994edb772686d8eefa3741d2d7ef7d194fe0fb`.
-Current consumers, unconfirmed physically:
-- Camera v4.29
-- UT Kontor v37
-- Til lager V1.0.3
-
-Current real WORK check after rollback tests:
-- B 14
-- H30 7
-- H60 14
-- short/lange/plast/Vrak 0
-- active WORK orders 0.
+Staging does not double-subtract.
+Returns all 8 products.
 
 PLASTIC QUANTITY STOCK — SERVER PASS:
-Tables:
 - `mottak_quantity_stock`
 - `mottak_quantity_stock_events`
-Only `forlengere_plast` uses quantity ledger.
-Lifecycle passed:
-- order reserves availability;
-- stage deducts physical boxes;
-- cancel restores undispatched boxes;
-- non-operational edit preserves staged stock;
-- operational item/ramp edit restores + resets.
-Manual receipt RPC `receive_mottak_quantity_stock(text,integer,text)`; no fake RFID/lower number.
-Anon TEST transactional PASS.
+- Forlengere plast has no RFID and uses quantity stock.
+- manual receipt RPC exists; no fake RFID/lower number.
 
 CAMERA:
 Last physical PASS rollback:
 - v4.25 LOWER RESET
 - v4.26 AUTO SAVE FOCUS
 Current unconfirmed v4.29:
-- `camera-live-v414.html`
-- commit `1cdd303943e10674372a84be88c25bf8f0dac5d1`
-- SHA `988ffe9865766754f74462791db33f60f49596e5`
-- fallback choices for short/long/Vrak;
-- 8-product two counters;
-- manual plastic receipt module `camera-plast-manual-receipt.js`.
+- extra RFID fallback products;
+- 8-product counters;
+- manual plastic receipt.
 
 UT KONTOR:
 - preserve established layout/behavior.
 - current unconfirmed `UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE`.
-- `bestilling.html` commit `10cfbd91fc90213048df2f64c4691f961d3aa7c3`, SHA `f84b0e60794ab1ad239cbe8ae00d1da607c3b131`.
 - forced Norwegian startup.
 - Vrak cards additive.
-- unified stock summary refreshes after save/load.
 
-VRAK OUTGOING — SERVER PASS:
-- `private.nordic_preview` handles Vrak.
-- `stage_ut_order` / `confirm_ut_dispatch` validate Vrak RFID.
-- transactional cycle PASS: order → Nordic → staged → dispatched.
-- `bama_order_product_progress(uuid)` returns progress for all products including Vrak/plastic.
-- frozen V2.9.7 old progress UI predates Vrak; server prevents false completion.
-- V2.9.8 DEV exists for visual Vrak progress; test separately before any promotion.
+TIL RAMPE NEW DEV — NOT ON HOME:
+- entry `nordic-id-til-rampe-v298-dev.html`
+- overlay `nordic-til-rampe-v298-progress.js`
+- protocol `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md`
+- purpose: all-product/Vrak progress.
+- NOT PHYSICAL PASS, NOT STABLE, do not replace V2.9.7.
+
+LAGER ADMIN — DEFERRED:
+- `lager-admin.html` / `admin-admin.html` exists as TEST-only DEV.
+- browser page successfully opened and displayed TEST AKTIV / WORK LÅST and product cards.
+- mutation flow was not physically tested by user.
+- user explicitly decided to postpone this task on 11.08.2026.
+- WORK remains server-locked; do not resume unless user explicitly asks.
 
 TEST / WORK:
 Shared environment-separated tables. TEST repeat EPC allowed, WORK duplicates protected. Old `ut_test_*` archive only.
@@ -122,32 +132,18 @@ RFID MAPPING:
 - Camera may have only lower_number
 - no EPC → never invent RFID.
 
-SERVER TESTS PASSED / ROLLED BACK:
-- duplicate TEST/WORK behavior;
-- immediate order reservation + no double subtraction after stage;
-- Vrak full outgoing cycle;
-- plastic reservation/stage/cancel;
-- order edit lifecycle;
-- manual plastic receipt;
-- all-product order progress RPC.
-No synthetic WORK leftovers.
-
 PROTOCOLS:
-- `NORDIC_ID_PROGRESS_LOG.md` — physical PASS / explicit SERVER PASS.
+- `WORK_STOCK_BASELINE_RESET_2026-08-11.md` — authoritative new zero-WORK baseline milestone.
+- `NORDIC_ID_PROGRESS_LOG.md` — physical PASS / explicit SERVER PASS historical log.
 - `NORDIC_ID_RFID_PROTOCOL.md` — canonical architecture.
 - `NORDIC_TIL_LAGER_DEV_PROTOCOL.md` — incoming DEV.
 - `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md` — outgoing Vrak-progress DEV.
 - `NORDIC_TIL_RAMPE_STABLE_LOCK.md` — immutable V2.9.7 contract.
-- `PROTOCOL.md`, `PROTOCOLS.md` — project summaries.
-
-NEXT PHYSICAL CHECKS:
-1. Nordic scanner → TIL LAGER V1.0.3 → verify TEST counters + WORK hold.
-2. Camera v4.29 → verify 8 counters + plastic manual receipt panel; do not add real plastic accidentally.
-3. UT Kontor v37 → verify Norwegian + 8 products/counters; no real order unless deliberate.
-4. Explicitly open V2.9.8 DEV later with a TEST Vrak order and verify Vrak progress/final guard.
+- `LAGER_ADMIN_DEV_PROTOCOL.md` — deferred TEST-only admin work.
 
 DO NOT CLAIM YET:
-- Til lager V1.0.3 full physical PASS/stable.
+- Til lager V1.0.3 full physical WORK PASS/stable.
 - Camera v4.29 physical PASS.
 - UT Kontor v37 physical PASS.
 - Til rampe V2.9.8 physical PASS/stable.
+- Lager Admin mutation physical PASS or WORK availability.
