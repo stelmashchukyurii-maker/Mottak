@@ -1,88 +1,67 @@
-NID-HANDOFF-2026-08-11-RAMPE28-V297-DELIVERY-FIX
+NID-HANDOFF-2026-08-11-WORK-DEFAULT-BOTH-NORDIC
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 11.08.2026 18:36 Europe/Oslo
+Оновлено: 11.08.2026 21:28 Europe/Oslo
 
-TIL RAMPE — CURRENT CRITICAL STATE
-- FINAL application logic remains `Nordic ID – Til rampe · STABLE V2.9.7`.
-- Frozen source commit: `ed3a19b20efd9af0bf07bc4a079589b3b6038157`.
-- Do NOT rewrite RFID/confirm/count/progress logic of V2.9.7.
-- Stable entry: `nordic-id-til-rampe-stable.html`.
-- Stable lock: `NORDIC_TIL_RAMPE_STABLE_LOCK.md`.
+USER DECISION — CRITICAL
+User explicitly requested that BOTH Nordic operational forms open directly in WORK by default because switching mode on the scanner is inconvenient.
 
-DELIVERY BUG FOUND PHYSICALLY 11.08.2026
-User opened TIL RAMPE correctly from `scanner-home.html` on Nordic ID.
-The previous stable entry redirected the Nordic browser directly to jsDelivr HTML. Nordic displayed the HTML source as plain text (`<!DOCTYPE html>`, CSS, etc.) instead of rendering the form.
-Therefore V2.9.7 did not start, Nordic log had no new events, and RAMPE 28 had no `ut_order_scans`.
+SCANNER HOME CURRENT
+- `📥 TIL LAGER` → `nordic-id-til-lager-v104.html`
+  - DEV V1.0.4
+  - WORK DEFAULT
+  - same receipt/RFID logic as V1.0.3/base; wrapper calls existing `setEnv("work")` after load
+  - TEST remains available manually
+- `📤 TIL RAMPE` → `nordic-id-til-rampe-work-default.html`
+  - V2.9.7 WORK DEFAULT
+  - exact frozen application source remains commit `ed3a19b20efd9af0bf07bc4a079589b3b6038157`
+  - loader changes only startup environment/labels to WORK
+  - RFID/confirm/count/progress/dispatch logic is not rewritten
+  - TEST remains available manually
 
-DELIVERY FIX IMPLEMENTED
-- New local GitHub Pages loader: `nordic-id-til-rampe-v297-frozen-loader.html`.
-- Loader commit: `33e4762ba918a7b2489b0e59b1fbe79b5f532679`.
-- Stable entry now redirects locally to loader.
-- Stable entry delivery-fix commit: `1fd069d9c7bd0d8598b454edb3f14ca3b9bbd15c`.
-- Loader fetches exact frozen V2.9.7 source from commit `ed3a19...` as text and renders it as HTML.
-- Dependency URLs are pinned to the same frozen commit.
-- Application logic itself was not edited.
+SCANNER HOME update commit:
+`48bb68ad3284f55eae1e6249c428193e7466dbbc`
 
-STATUS:
-DELIVERY FIX IMPLEMENTED — PHYSICAL RECHECK PENDING.
-Do not mark PASS until Nordic opens normal V2.9.7 UI from the main TIL RAMPE button.
+TIL RAMPE WORK-default entry create commit:
+`7070ba23ce0be8158df2a3db489ff4392f357e33`
 
-CURRENT WORK TEST ORDER
+TIL LAGER V1.0.4 create commit:
+`6157207e9b87e07d983e0880877e1c9fab29fb4e`
+
+PROTOCOLS UPDATED
+- `NORDIC_TIL_RAMPE_STABLE_LOCK.md` — operational WORK-default launch documented; frozen logic preserved.
+- `NORDIC_TIL_LAGER_DEV_PROTOCOL.md` — V1.0.4 WORK DEFAULT documented.
+
+PHYSICAL STATUS
+WORK-default deployment is implemented but NOT yet physically confirmed on the Nordic device.
+Do not call either startup change PASS until user opens each form and confirms WORK is visibly active immediately.
+
+NEXT PHYSICAL ACTION
+1. Refresh/open `scanner-home.html` on Nordic.
+2. Open `📤 TIL RAMPE`.
+   Expected: normal V2.9.7 UI and WORK already active without hold.
+3. Return home and open `📥 TIL LAGER`.
+   Expected: V1.0.4 and WORK already active without hold.
+4. If user confirms both, record physical PASS in `NORDIC_ID_PROGRESS_LOG.md`.
+5. For outgoing RAMPE 28, when user scans or says `журнал`, immediately query Nordic log + `ut_order_scans` + order progress.
+
+CURRENT WORK TRIAL ORDER
 - RAMPE 28
 - order id `34113828-6904-4254-bc85-7c2cd8e8bbd1`
 - environment=work
-- status=new
-- created 11.08.2026 18:07 Europe/Oslo approx.
-- quantity 1 of each of all 8 products.
-- before delivery fix: done=0 / remaining=1 for every product.
-- `ut_order_scans` for this order = 0.
+- was created with quantity 1 of each all 8 products
+- before outgoing scan: done=0 / remaining=1 and no `ut_order_scans`
+Always query live DB before stating current progress.
 
-CURRENT ORDER SHORTAGES AT LAST CHECK
-- Forlengere plast: physical 0, remaining order 1, shortage 1.
-- Vrak bunner: physical 0, remaining order 1, shortage 1.
-Other ordered products had available stock at that check.
-Always query DB again before quoting current live stock.
+RECENT MANUAL WORK RECEIPT
+- 3 × Hyller x30
+- lower numbers `000012`, `000013`, `000014`
+- source=manual
+- scanner_code empty
+- verified/in_stock
 
-RECENT WORK MANUAL RECEIPT
-- 3 × Hyller x30 manually received with lower numbers `000012`, `000013`, `000014`.
-- source=manual, scanner_code empty, environment=work, verified/in_stock.
-- no fake EPC created.
+HISTORICAL DELIVERY FIX
+Direct jsDelivr navigation displayed HTML source text on Nordic. Local loader approach is retained so Nordic renders the frozen V2.9.7 source correctly.
 
-WORK BASELINE HISTORY
-- Earlier 35 old WORK units were corrected to dispatched because user confirmed they had already physically shipped manually.
-- milestone: `WORK_STOCK_BASELINE_RESET_2026-08-11.md`.
-- New stock has since been received, so do NOT assume current stock is zero; query `bama_stock_summary()` live.
-
-SCANNER HOME
-- `📥 TIL LAGER` → `nordic-id-til-lager-v103.html` DEV V1.0.3.
-- `📤 TIL RAMPE` → `nordic-id-til-rampe-stable.html` → local frozen loader → exact V2.9.7 source.
-
-PRODUCTS
-RFID:
-- bunner
-- hyller30
-- hyller60
-- forlengere_korte
-- forlengere_lange
-- vrak_bunner
-- vrak_hyller
-No RFID:
-- forlengere_plast
-Rules:
-- Vrak bunner = 10 per RFID stack.
-- Vrak hyller = 30 per RFID stack.
-- all products can go to RAMPE.
-- short/long counts entered only at outgoing.
-
-NEXT PHYSICAL STEP
-1. On Nordic, return to scanner home.
-2. Tap `📤 TIL RAMPE` again.
-3. Expected: normal V2.9.7 UI, NOT HTML source.
-4. If normal UI opens, open RAMPE 28.
-5. Then user can say `журнал` / `дивись журнал`; query Nordic log + order scans immediately.
-
-DO NOT CLAIM YET
-- V2.9.7 delivery fix physical PASS.
-- RAMPE 28 outgoing scan PASS.
-- full WORK Til rampe end-to-end with new 8-product order.
+RULE
+If an already working production behavior appears problematic, explain the issue to the user first and get authorization before changing it. The user explicitly requested this after the earlier switch discussion.
