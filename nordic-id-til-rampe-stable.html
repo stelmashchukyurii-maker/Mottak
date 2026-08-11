@@ -12,11 +12,11 @@
 <div>Nordic ID – Til rampe<br><small>STABLE V2.9.7 · åpner låst versjon…</small></div>
 <script>
 "use strict";
-// FROZEN STABLE ENTRY — DO NOT REPOINT TO main.
-// The target is the exact physically confirmed source commit.
-const PIN="ed3a19b20efd9af0bf07bc4a079589b3b6038157";
-const BASE=`https://cdn.jsdelivr.net/gh/stelmashchukyurii-maker/Mottak@${PIN}/utsending-nordic-test.html`;
-location.replace(BASE+(location.search||""));
+// FROZEN STABLE ENTRY. V2.9.7 application logic remains pinned to the
+// physically confirmed commit; only the delivery path is local GitHub Pages
+// so Nordic browser renders HTML instead of displaying CDN source as text.
+const TARGET="nordic-id-til-rampe-v297-frozen-loader.html";
+location.replace(TARGET+(location.search||""));
 </script>
 </body>
 </html>
