@@ -1,151 +1,163 @@
 # Nordic ID – Til lager · DEV PROTOCOL
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
-**Оновлено:** 10.08.2026 22:39 Europe/Oslo  
+**Оновлено:** 11.08.2026 08:24 Europe/Oslo  
 **Статус:** DEV / TEST FIRST — НЕ STABLE
 
-## Незмінне правило
+## Незмінні правила
 - `Nordic ID – Til rampe · STABLE V2.9.7` не переписувати і не видаляти.
 - `Til lager` розробляється окремо.
-- У `NORDIC_ID_PROGRESS_LOG.md` повний `Til lager` PASS записувати тільки після фізичного підтвердження користувачем.
+- Повний `Til lager` PASS записувати тільки після фізичного підтвердження користувачем.
+- RFID products use `mottak_scans`; `forlengere_plast` uses quantity-only stock, never fake RFID.
 
-## Бізнес-правила продуктів
-RFID є у всіх робочих продуктів, крім `forlengere_plast`.
+## Products
+RFID:
+- bunner
+- hyller30
+- hyller60
+- forlengere_korte
+- forlengere_lange
+- vrak_bunner
+- vrak_hyller
 
-RFID products:
-- `bunner`
-- `hyller30`
-- `hyller60`
-- `forlengere_korte`
-- `forlengere_lange`
-- `vrak_bunner`
-- `vrak_hyller`
-
-Без RFID:
-- `forlengere_plast` — manual/phone count flow.
+No RFID:
+- forlengere_plast
 
 Rules:
-- `vrak_bunner` = 1 RFID-одиниця / стопка = 10 Vrak bunner.
-- `vrak_hyller` = 1 RFID-одиниця / стопка = 30 Vrak hyller.
-- Усі продукти можуть бути відправлені на RAMPE.
-- Forlengere korte/lange: counts не вводити при Mottak; counts вводяться тільки при outgoing.
+- Vrak bunner = 1 RFID stack = 10.
+- Vrak hyller = 1 RFID stack = 30.
+- all products can go to RAMPE.
+- short/long Hyller/Forlengere counts only at outgoing.
 
-## Product registry / DB — SERVER PASS
-`products.js` = v1.3.0.
-Permanent IDs: `vrak_bunner`, `vrak_hyller`.
-
-DB constraints allow RFID products in:
-- `mottak_scans`
-- `ut_order_scans`
-
-`forlengere_plast` intentionally excluded from RFID scan constraints.
-
-`private.nordic_preview(uuid,text)` server-compatible with Vrak products without editing frozen Til rampe frontend.
-
-Transactional verification:
-- TEST duplicate same Vrak RFID → allowed;
-- WORK duplicate same Vrak RFID → blocked;
-- tests rolled back;
-- no synthetic rows left in production.
-
-## Physical TEST evidence before V1.0.2
-User physically scanned via `Til lager` in TEST. Database read-back confirmed real `environment=test`, `status=verified`, `stock_status=in_stock`, `source=nordic_id` rows using EPC `33161403D0000785000E3103` / lower `0E3103` for:
+## Physical TEST evidence
+Base Til lager RFID write path was physically used by user in TEST and DB read-back confirmed `environment=test`, `verified`, `in_stock`, `source=nordic_id`, EPC `33161403D0000785000E3103` / lower `0E3103` for:
 - Hyller x60
 - Bunner
 - Forlengere lange
 - Vrak hyller
 - Vrak bunner
 
-Therefore RFID → confirm → shared TEST `mottak_scans` write path is working. Remaining reported UI issues were:
-1. user could not visually see the stock arrival/count inside Til lager;
-2. WORK switch did not activate reliably on Android.
+Therefore RFID → confirm → shared TEST stock write is proven. Full wrapper V1.0.3 is not yet physical PASS.
 
-## Nordic ID – Til lager · DEV V1.0.2
-Working entry from scanner home:
-- `nordic-id-til-lager-v102.html`
+## Current Til lager entry — DEV V1.0.3
+Entry:
+- `nordic-id-til-lager-v103.html`
 
-Base intake page:
-- `nordic-id-til-lager-test.html` · V1.0.1 write flow
+Composition:
+1. base `nordic-id-til-lager-test.html` V1.0.1 write flow;
+2. `nordic-til-lager-v102-fix.js` for WORK HOLD + selected-product last receipt;
+3. `stock-summary-8-v1.js` for unified two stock counters.
 
-V1.0.2 additive module:
-- `nordic-til-lager-v102-fix.js`
+Scanner home points to V1.0.3.
 
-Published wrapper SHA:
-- `da3a74a87e4d9c56a9a51b0b3dd0ec35a0ff5c57`
-
-Published v1.0.2 module SHA:
-- `db244c9aadb0716d6f536bf675ba66c7b1bfe659`
-
-V1.0.2 changes only UI/control around the already DB-confirmed intake path:
-
-### WORK HOLD
-- old WORK button listener is removed by replacing the DOM button;
-- real 1.5 second pointer/touch hold;
-- visible red progress bar + countdown;
-- browser confirmation after full hold;
-- then calls base `setEnv("work")` so base save logic uses real WORK environment;
-- TEST button remains immediate;
-- Android context-menu/selection is prevented on WORK button.
-
-### PÅ LAGER NÅ
-New stock card directly under RFID work area:
-- current environment badge TEST/WORK;
-- selected product;
-- actual count of `verified + in_stock` rows for that product/environment;
-- business conversion:
-  - Bunner ×10;
-  - H30 ×30;
-  - H60 ×60;
-  - Vrak bunner ×10;
-  - Vrak hyller ×30;
-  - Forlengere shows RFID-unit count;
-- `Siste mottak`: lower number + time + source;
-- after successful confirm/save, wrapper refreshes this stock card and scrolls it into view.
-
-## Base Til lager logic retained
+### RFID flow retained
 - TEST default.
-- select product once; selection persists.
-- hidden RFID input, readonly idle.
+- product selection persists.
+- hidden RFID input readonly idle.
 - `Unidentified` hardware trigger arms input.
 - 24 HEX EPC.
 - 600 ms lock.
-- 1600 ms arm window.
+- 1600 ms arm.
 - soft keyboard hidden without blur during RFID ACTIVE.
 - scan → product + lower 6 → confirm.
-- TEST duplicates allowed.
-- WORK duplicate/status protection.
-- same-product Camera row with `scanner_code=''` can be enriched with full EPC without creating a duplicate.
-- different-product Camera row is blocked.
-- staged/dispatched existing row is blocked.
-- new WORK row → verified/in_stock.
-- success state → `PÅ LAGER` → READY.
+- success → `PÅ LAGER` → READY.
 
-## Scanner home
-`scanner-home.html` currently points:
-- `📥 TIL LAGER` → `nordic-id-til-lager-v102.html` → DEV V1.0.2
-- `📤 TIL RAMPE` → frozen STABLE V2.9.7
+### WORK HOLD from V1.0.2
+- real ~1.5 s pointer/touch hold;
+- visible progress/countdown;
+- confirm before WORK;
+- then base `setEnv("work")`.
+This fix still requires physical confirmation on Nordic Android.
 
-Scanner home content SHA after V1.0.2 link:
-- `893bb5da1711bd964d837e6e58213f502187c7ec`
+### Selected-product arrival card
+- actual in_stock count in current environment;
+- selected product conversion ×10/30/60 as applicable;
+- `Siste mottak`: lower + time + source;
+- refresh after successful save.
+
+### Unified 8-product counters
+Module `stock-summary-8-v1.js` reads only server RPC `bama_stock_summary()`.
+Shows:
+1. physical warehouse;
+2. available warehouse = physical minus outstanding active ramp-order demand.
+
+All 8 products are displayed. TEST/WORK comes from current Til lager environment.
+
+## WORK Camera merge rule
+- same lower + different product → block;
+- existing full RFID → duplicate/status block;
+- same product + Camera row with `scanner_code=''` + `in_stock` → enrich same row with full EPC and preserve photo;
+- staged/dispatched → block;
+- missing row → create verified/in_stock WORK row.
+
+## Unified stock SERVER PASS
+RPC: `public.bama_stock_summary()`.
+Rule:
+- physical = `in_stock`;
+- available = physical − unfulfilled active order quantity;
+- order create/edit changes available immediately;
+- staging does not double-subtract.
+
+Transactional PASS:
+`order creation subtracts immediately; staging does not double-subtract`.
+
+Current WORK check after rollbacks:
+- B 14
+- H30 7
+- H60 14
+- all new products 0
+- active WORK orders 0.
+
+## Plastic quantity-only stock SERVER PASS
+Tables:
+- `mottak_quantity_stock`
+- `mottak_quantity_stock_events`
+
+RPC:
+- `receive_mottak_quantity_stock(text,integer,text)`
+
+Lifecycle:
+- order creation reserves availability;
+- stage deducts physical plastic boxes;
+- cancel returns non-dispatched staged boxes;
+- operational order edit returns staged plastic and resets order;
+- non-operational edit preserves lifecycle.
+
+Manual receipt has anon TEST transactional PASS and no fake tag/number.
+Phone UI is in current Camera v4.29; not part of Nordic scanner Til lager because plastic has no RFID.
+
+## Vrak outgoing SERVER PASS
+- Nordic server preview/auto scan supports Vrak.
+- `stage_ut_order` and `confirm_ut_dispatch` validate Vrak RFID.
+- full transactional Vrak order → Nordic → staged → dispatched passed.
+- `bama_order_product_progress(uuid)` exposes all product rows incl Vrak/plastic.
+
+Frozen Til rampe V2.9.7 progress panel predates Vrak. Server blocks false completion, but a separate outgoing DEV UI is required for correct visual Vrak progress. Do not edit stable.
 
 ## Camera fallback
-Physical PASS remains:
-- Camera v4.25 LOWER RESET
-- Camera v4.26 AUTO SAVE FOCUS
+Last physical PASS:
+- v4.25 LOWER RESET
+- v4.26 AUTO SAVE FOCUS
 
-Camera v4.27 with extra RFID fallback products is prepared but not yet physical PASS.
+Current unconfirmed Camera:
+- v4.29
+- extra RFID fallback choices short/long/Vrak;
+- unified 8-product counters;
+- manual plastic receipt panel.
 
 ## UT Kontor
-- existing layout/behavior should remain unchanged;
-- production language forced to Norwegian;
-- additive Vrak module prepared;
-- Norwegian/Vrak browser confirmation still required before PASS.
+Current unconfirmed:
+- WORKING v37
+- forced Norwegian;
+- 8 product order cards;
+- unified 8-product physical/available counters;
+- counter refresh after order load/save.
+Existing layout/flow must remain unchanged apart from additive product/counter support.
 
 ## Next physical check
 1. Refresh `scanner-home.html`.
 2. Open `📥 TIL LAGER`.
-3. Verify visible `DEV V1.0.2 · STOCK VIEW + WORK HOLD`.
-4. Choose a product: `PÅ LAGER NÅ` must show TEST count and `Siste mottak`.
-5. Hold WORK for ~1.5 seconds: red bar/countdown → confirm → button must become `WORK ✓`; stock badge must become WORK.
-6. Do not make a real WORK stock write unless deliberately testing a real item.
-7. After user reports result, query DB/log before declaring PASS.
+3. Verify `DEV V1.0.3`.
+4. In TEST, confirm both 8-product counters appear and TEST Vrak values are visible.
+5. Hold WORK 1.5 s and confirm the mode changes; do not create real WORK stock unless deliberate.
+6. Report result / `дивись журнал`; query DB before declaring PASS.
