@@ -34,19 +34,6 @@ small{color:#aab4ce}
     html=html.replace(/inject\(d,"([^"]+\.js)"/g,(m,p)=>`inject(d,"${CDN}${p}"`);
     html=html.split('./ut-test-api.js').join(CDN+'ut-test-api.js');
 
-    // Nordic browser compatibility: the frozen V2.9.7 WORK control used only
-    // Pointer Events + long hold. Some Nordic Android browser builds do not
-    // dispatch that gesture reliably. Add a safe single-tap fallback that still
-    // requires an explicit confirmation before entering the real WORK database.
-    html=html.replace(
-      'loader.textContent=work?',
-      'workBtn.textContent=work?"🏭 WORK ✓":"🏭 WORK";loader.textContent=work?'
-    );
-    html=html.replace(
-      'workBtn.addEventListener("pointerdown",startHold);workBtn.addEventListener("pointerup",cancelHold);workBtn.addEventListener("pointerleave",cancelHold);workBtn.addEventListener("pointercancel",cancelHold);',
-      'workBtn.addEventListener("pointerdown",startHold);workBtn.addEventListener("pointerup",cancelHold);workBtn.addEventListener("pointerleave",cancelHold);workBtn.addEventListener("pointercancel",cancelHold);workBtn.addEventListener("click",function(){if(MODE==="work"||holdDone)return;if(confirm("Перейти в WORK? Це реальний склад і реальні замовлення."))switchMode("work");else updateOuter()});if(!("PointerEvent" in window)){workBtn.addEventListener("touchstart",startHold,{passive:false});workBtn.addEventListener("touchend",cancelHold,{passive:false});workBtn.addEventListener("touchcancel",cancelHold,{passive:false});}'
-    );
-
     document.open();
     document.write(html);
     document.close();
