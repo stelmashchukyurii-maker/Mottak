@@ -1,26 +1,27 @@
 NID-HANDOFF-2026-08-11-WORK-DEFAULT-BOTH-NORDIC
 
 Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 11.08.2026 21:28 Europe/Oslo
+Оновлено: 11.08.2026 21:35 Europe/Oslo
 
 USER DECISION — CRITICAL
-User explicitly requested that BOTH Nordic operational forms open directly in WORK by default because switching mode on the scanner is inconvenient.
+User explicitly requested that BOTH Nordic operational forms open directly in WORK by default because switching mode on the scanner is inconvenient. User is now operating in WORK. TEST should remain available only as a manual fallback mode inside each form.
 
 SCANNER HOME CURRENT
-- `📥 TIL LAGER` → `nordic-id-til-lager-v104.html`
+- `📥 TIL LAGER · WORK` → `nordic-id-til-lager-v104.html`
   - DEV V1.0.4
   - WORK DEFAULT
   - same receipt/RFID logic as V1.0.3/base; wrapper calls existing `setEnv("work")` after load
   - TEST remains available manually
-- `📤 TIL RAMPE` → `nordic-id-til-rampe-work-default.html`
+- `📤 TIL RAMPE · WORK` → `nordic-id-til-rampe-work-default.html`
   - V2.9.7 WORK DEFAULT
   - exact frozen application source remains commit `ed3a19b20efd9af0bf07bc4a079589b3b6038157`
   - loader changes only startup environment/labels to WORK
   - RFID/confirm/count/progress/dispatch logic is not rewritten
   - TEST remains available manually
 
-SCANNER HOME update commit:
-`48bb68ad3284f55eae1e6249c428193e7466dbbc`
+SCANNER HOME now visibly says `WORK ER STANDARD · REAL DATABASE` and both main buttons include WORK in the label.
+Latest scanner-home commit:
+`8b61e3a0626edc63358fa0ff17e695cb090213e7`
 
 TIL RAMPE WORK-default entry create commit:
 `7070ba23ce0be8158df2a3db489ff4392f357e33`
@@ -33,14 +34,14 @@ PROTOCOLS UPDATED
 - `NORDIC_TIL_LAGER_DEV_PROTOCOL.md` — V1.0.4 WORK DEFAULT documented.
 
 PHYSICAL STATUS
-WORK-default deployment is implemented but NOT yet physically confirmed on the Nordic device.
+WORK-default deployment is implemented but must still be visually confirmed after refresh on the Nordic device.
 Do not call either startup change PASS until user opens each form and confirms WORK is visibly active immediately.
 
 NEXT PHYSICAL ACTION
 1. Refresh/open `scanner-home.html` on Nordic.
-2. Open `📤 TIL RAMPE`.
+2. Open `📤 TIL RAMPE · WORK`.
    Expected: normal V2.9.7 UI and WORK already active without hold.
-3. Return home and open `📥 TIL LAGER`.
+3. Return home and open `📥 TIL LAGER · WORK`.
    Expected: V1.0.4 and WORK already active without hold.
 4. If user confirms both, record physical PASS in `NORDIC_ID_PROGRESS_LOG.md`.
 5. For outgoing RAMPE 28, when user scans or says `журнал`, immediately query Nordic log + `ut_order_scans` + order progress.
