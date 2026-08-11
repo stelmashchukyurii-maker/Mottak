@@ -1,14 +1,41 @@
 # Nordic ID – Til lager · DEV PROTOCOL
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
-**Оновлено:** 11.08.2026 08:24 Europe/Oslo  
-**Статус:** DEV / TEST FIRST — НЕ STABLE
+**Оновлено:** 11.08.2026 14:51 Europe/Oslo  
+**Статус:** DEV / WORK INTAKE NEXT — НЕ STABLE
 
 ## Незмінні правила
 - `Nordic ID – Til rampe · STABLE V2.9.7` не переписувати і не видаляти.
 - `Til lager` розробляється окремо.
 - Повний `Til lager` PASS записувати тільки після фізичного підтвердження користувачем.
 - RFID products use `mottak_scans`; `forlengere_plast` uses quantity-only stock, never fake RFID.
+
+## NEW WORK BASELINE — 11.08.2026 14:47
+User confirmed all previously listed WORK stock had already been physically shipped manually.
+
+Before correction:
+- Bunner 14
+- Hyller x30 7
+- Hyller x60 14
+- all other products 0
+- active WORK orders 0
+
+All 35 WORK `verified + in_stock` RFID rows were moved to `dispatched` with audit events.
+Batch marker:
+`created_by='chatgpt_admin_bulk_2026-08-11'`
+
+Verified after correction:
+- exact batch events = 35;
+- WORK physical stock = 0 for all 8 products;
+- WORK available = 0 for all 8 products;
+- WORK on ramp = 0;
+- WORK outstanding order demand = 0;
+- TEST untouched.
+
+Canonical milestone:
+`WORK_STOCK_BASELINE_RESET_2026-08-11.md`
+
+**Do not use old 14/7/14 as current stock. Current WORK baseline is ZERO.**
 
 ## Products
 RFID:
@@ -37,7 +64,7 @@ Base Til lager RFID write path was physically used by user in TEST and DB read-b
 - Vrak hyller
 - Vrak bunner
 
-Therefore RFID → confirm → shared TEST stock write is proven. Full wrapper V1.0.3 is not yet physical PASS.
+Therefore RFID → confirm → shared TEST stock write is proven. Full wrapper V1.0.3 is not yet full physical WORK PASS.
 
 ## Current Til lager entry — DEV V1.0.3
 Entry:
@@ -67,7 +94,7 @@ Scanner home points to V1.0.3.
 - visible progress/countdown;
 - confirm before WORK;
 - then base `setEnv("work")`.
-This fix still requires physical confirmation on Nordic Android.
+This fix still requires final physical confirmation on Nordic Android.
 
 ### Selected-product arrival card
 - actual in_stock count in current environment;
@@ -93,20 +120,13 @@ All 8 products are displayed. TEST/WORK comes from current Til lager environment
 ## Unified stock SERVER PASS
 RPC: `public.bama_stock_summary()`.
 Rule:
-- physical = `in_stock`;
+- physical = `in_stock` + approved manual overlay where applicable;
 - available = physical − unfulfilled active order quantity;
 - order create/edit changes available immediately;
 - staging does not double-subtract.
 
-Transactional PASS:
-`order creation subtracts immediately; staging does not double-subtract`.
-
-Current WORK check after rollbacks:
-- B 14
-- H30 7
-- H60 14
-- all new products 0
-- active WORK orders 0.
+Current WORK baseline after user-directed manual-shipment correction:
+**0 across all 8 products.**
 
 ## Plastic quantity-only stock SERVER PASS
 Tables:
@@ -154,10 +174,22 @@ Current unconfirmed:
 - counter refresh after order load/save.
 Existing layout/flow must remain unchanged apart from additive product/counter support.
 
-## Next physical check
+## Lager Admin
+- TEST-only DEV exists;
+- page/browser load was visually confirmed;
+- mutation flow not physically tested;
+- user postponed this task on 11.08.2026;
+- WORK remains server-locked.
+
+## Next physical WORK check — PRIORITY
+User wants to receive NEW stock with scanner.
+
 1. Refresh `scanner-home.html`.
 2. Open `📥 TIL LAGER`.
-3. Verify `DEV V1.0.3`.
-4. In TEST, confirm both 8-product counters appear and TEST Vrak values are visible.
-5. Hold WORK 1.5 s and confirm the mode changes; do not create real WORK stock unless deliberate.
-6. Report result / `дивись журнал`; query DB before declaring PASS.
+3. Verify `DEV V1.0.3` and that WORK stock counters show 0 after switching to WORK.
+4. Hold WORK ~1.5 s and confirm mode change.
+5. Scan **one real new incoming RFID item**.
+6. Confirm product + lower number and save.
+7. Immediately query WORK `mottak_scans` and `bama_stock_summary()`.
+8. Expected: selected product physical/available goes `0 → 1` and exact EPC/lower is stored.
+9. Only after this single-item WORK PASS continue bulk receiving.
