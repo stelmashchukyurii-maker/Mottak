@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Nordic ID – Til rampe · V2.9.7 · WORK DEFAULT</title>
+<style>html,body{margin:0;min-height:100%;background:#0b1020;color:#f5f7ff;font-family:Arial,sans-serif}body{display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}#box{max-width:640px;font-weight:900;line-height:1.5}small{color:#aab4ce}.err{color:#ffb7b7}</style>
+</head>
+<body>
+<div id="box">Nordic ID – Til rampe<br><small>V2.9.7 · starter WORK…</small></div>
+<script>
+"use strict";
+(async()=>{
+  const PIN="ed3a19b20efd9af0bf07bc4a079589b3b6038157";
+  const CDN=`https://cdn.jsdelivr.net/gh/stelmashchukyurii-maker/Mottak@${PIN}/`;
+  const box=document.getElementById("box");
+  try{
+    const r=await fetch(CDN+"utsending-nordic-test.html",{cache:"no-store",mode:"cors"});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    let html=await r.text();
+    if(!html.includes('PAGE_VERSION="V2.9.7"'))throw new Error("Frozen V2.9.7 signature mangler");
+
+    // Frozen application source remains pinned. Only operational startup defaults to WORK.
+    html=html.replace('let MODE="test"','let MODE="work"');
+    html=html.replace('<button id="testBtn" class="env-btn test active"','<button id="testBtn" class="env-btn test"');
+    html=html.replace('<button id="workBtn" class="env-btn work" type="button">🏭 WORK · УТРИМАТИ</button>','<button id="workBtn" class="env-btn work active" type="button">🏭 WORK</button>');
+    html=html.replace('<div id="envNote" class="env-note"><b>TEST</b> · environment=test · дублікати RFID дозволені.</div>','<div id="envNote" class="env-note"><b>WORK · REAL DATABASE</b> · реальний склад · дублікати RFID заблоковані.</div>');
+    html=html.replace('<div id="loader">Laster Nordic ID · НА РАМПУ · TEST…</div>','<div id="loader">Laster Nordic ID · НА РАМПУ · WORK…</div>');
+
+    // Pin every dependency to the same frozen commit.
+    html=html.replace('fetch(`utsending-core-v7.html','fetch(`'+CDN+'utsending-core-v7.html');
+    html=html.replace(/inject\(d,"([^"]+\.js)"/g,(m,p)=>`inject(d,"${CDN}${p}"`);
+    html=html.split('./ut-test-api.js').join(CDN+'ut-test-api.js');
+
+    document.open();document.write(html);document.close();
+  }catch(e){
+    box.className="err";
+    box.innerHTML=`Kunne ikke starte V2.9.7 WORK.<br><small>${String(e&&e.message||e)}</small><br><br><button onclick="location.reload()" style="min-height:52px;padding:10px 18px;border:0;border-radius:12px;background:#f4c430;color:#17130a;font-weight:950">PRØV IGJEN</button>`;
+  }
+})();
+</script>
+</body>
+</html>
