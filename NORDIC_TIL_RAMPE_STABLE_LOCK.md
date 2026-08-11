@@ -1,72 +1,91 @@
 # Nordic ID – Til rampe · STABLE LOCK
 
-**Офіційна назва форми:** `Nordic ID – Til rampe`  
+**Офіційна назва:** `Nordic ID – Til rampe`  
 **Stable version:** `V2.9.7`  
-**Підтверджено користувачем:** 10.08.2026 20:14 Europe/Oslo  
-**Протоколи повторно звірено:** 10.08.2026 20:37 Europe/Oslo  
+**Фізично підтверджена логіка:** 10.08.2026  
 **Stable entry:** `nordic-id-til-rampe-stable.html`  
-**Frozen source commit:** `ed3a19b20efd9af0bf07bc4a079589b3b6038157`  
-**Final stable-entry commit:** `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`  
-**Frozen source page:** `utsending-nordic-test.html`
+**Frozen application source:** `utsending-nordic-test.html`  
+**Frozen source commit:** `ed3a19b20efd9af0bf07bc4a079589b3b6038157`
 
 ## LOCK RULE
 
-Ця форма вважається остаточною стабільною формою Nordic ID для операції **Til rampe**.
+V2.9.7 є зафіксованою outgoing-логікою Nordic ID для `Til rampe`.
 
-- `nordic-id-til-rampe-stable.html` не переписувати і не видаляти під час подальшої розробки.
-- Stable entry відкриває повноекранно весь комплект коду з конкретного GitHub commit, а не з поточного `main`.
-- Тому подальші зміни CURRENT/DEV-файлів не повинні змінювати поведінку цієї STABLE-форми.
-- Усі нові експерименти виконувати в `utsending-nordic-test.html` або новій робочій копії.
-- V2.4 `nordic-id-v24-stable.html` лишається історичним RFID rollback.
-- V2.1 `nordic-id-v20-focus.html` лишається незмінною RFID diagnostic/test base.
-- Історичні/DEV файли можна приховувати з `scanner-home.html`, але не видаляти з GitHub без окремого рішення.
+- Не змінювати RFID / confirm / progress / count-flow V2.9.7 без окремого рішення користувача.
+- Нові outgoing-функції розробляти тільки в окремому DEV.
+- V2.4 лишається historical RFID rollback.
+- V2.1 лишається diagnostic RFID base.
 
-## Підтверджений фізичний функціонал V2.9.7
+## Підтверджений V2.9.7 функціонал
 
-- V2.4 hidden RFID input / Nordic Wedge engine;
-- 24 HEX EPC + 600 ms lock;
-- TEST / WORK перемикач в одній формі;
-- RAMPE order progress: замовлено / виконано / залишилось / наступний товар;
-- SMART FOCUS після відкриття RAMPE та після дій;
-- TEST duplicate RFID flow;
-- Bunner / Hyller x30 / Hyller x60 confirm flow;
-- Forlengere korte / lange counts entered only at outgoing confirmation;
-- INPUT LOCK під час введення кількостей;
-- COUNT COMPACT: Полиці + Продовжувачі та ДОДАТИ/СКАСУВАТИ компактно для малого екрана Nordic;
-- автоматичне повернення до інформативного місця після дії.
+- V2.4 hidden RFID/Wedge engine;
+- 24-char HEX EPC;
+- 600 ms first-tag lock;
+- TEST / WORK switch;
+- SMART FOCUS;
+- ordered / done / remaining / next;
+- TEST duplicate RFID support;
+- Bunner / Hyller x30 / Hyller x60 confirm;
+- Forlengere korte/lange counts only at outgoing;
+- INPUT LOCK;
+- COUNT COMPACT;
+- auto-return to useful ramp progress after action.
+
+## DELIVERY PATH FIX — 11.08.2026 18:36 Europe/Oslo
+
+### Problem observed physically
+When the operator correctly opened `📤 TIL RAMPE` from `scanner-home.html` on the Nordic ID device, the browser navigated from the stable entry directly to a jsDelivr URL containing frozen `utsending-nordic-test.html`.
+
+On the Nordic browser, that CDN HTML response was displayed as **plain source text** (`<!DOCTYPE html>`, CSS, etc.) instead of being rendered as a web page. Consequently V2.9.7 never started and no Nordic log / `ut_order_scans` event was produced.
+
+### Fix
+The V2.9.7 application logic itself was **not edited**.
+
+New loader:
+`nordic-id-til-rampe-v297-frozen-loader.html`
+
+Loader commit:
+`33e4762ba918a7b2489b0e59b1fbe79b5f532679`
+
+Stable-entry delivery fix commit:
+`1fd069d9c7bd0d8598b454edb3f14ca3b9bbd15c`
+
+New launch path:
+`scanner-home.html`
+→ `nordic-id-til-rampe-stable.html`
+→ local GitHub Pages `nordic-id-til-rampe-v297-frozen-loader.html`
+→ fetch exact frozen application source from commit `ed3a19...`
+→ render that source as HTML inside the GitHub Pages document.
+
+The loader also rewrites only the **dependency URLs** (`utsending-core-v7.html`, `ut-test-api.js`, injected JS modules) to the same exact frozen commit. This prevents current `main` changes from altering V2.9.7 behavior.
+
+### Status
+**DELIVERY FIX IMPLEMENTED — PHYSICAL RECHECK PENDING.**
+Do not call this delivery fix PASS until the operator reopens `TIL RAMPE` on Nordic and sees the normal V2.9.7 UI instead of HTML source text.
 
 ## WORK UNKNOWN RFID TAG CONTRACT
 
-Це частина зафіксованої бізнес-логіки V2.9.7 / shared backend:
+1. Existing available WORK RFID row → reuse.
+2. Staged/unavailable → warning/block.
+3. Read EPC missing from WORK stock → offer register now + continue current RAMPE.
+4. Full EPC → `scanner_code`; last 6 → `lower_number`.
+5. No EPC read → never invent an RFID number.
 
-1. Якщо RFID EPC прочитаний і відповідний WORK stock row існує та доступний — використати існуючий запис.
-2. Якщо stock row уже staged / недоступний — показати warning/block, не створювати дубль.
-3. Якщо RFID EPC успішно прочитаний, але stock row відсутній — запропонувати:
-   **оприбуткувати товар зараз і одразу продовжити на поточну RAMPE**.
-4. При підтвердженні:
-   - full EPC → `scanner_code`;
-   - last 6 → `lower_number`;
-   - після створення/оновлення stock row одразу продовжити outgoing flow.
-5. Якщо RFID EPC взагалі не прочитаний — **не створювати фіктивний номер і не продовжувати як RFID item**.
+## Current physical WORK test context — 11.08.2026
 
-**Статус на 10.08.2026:** реалізація та серверна логіка готові. Повний фізичний WORK end-to-end, включно з unknown-tag flow, ще має бути перевірений на реальному складі 11.08.2026. До цього тесту stable-файл не змінювати.
+Active test order:
+- RAMPE 28
+- environment `work`
+- quantity 1 of each of all 8 products.
 
-## SCANNER HOME VISIBILITY POLICY
+Before delivery-path fix verification:
+- `ut_order_scans` for RAMPE 28 = 0;
+- all product progress = done 0 / remaining 1;
+- Nordic log had no new events because the form did not start.
 
-Після очищення робочого екрана 10.08.2026 20:36 `scanner-home.html` показує лише:
-- `📥 НА СКЛАД` — майбутня окрема Nordic INN / Mottak форма;
-- `📤 TIL RAMPE` — ця STABLE V2.9.7.
+## Recovery
 
-DEV, V2.4 і V2.1 збережені в GitHub, але не показуються оператору на головному робочому екрані.
+For application behavior, source of truth remains frozen commit:
+`ed3a19b20efd9af0bf07bc4a079589b3b6038157`.
 
-## Відновлення
-
-Якщо stable entry випадково змінено або видалено, відновлювати його з GitHub history/commit `f049f5c568dd592f64c8cfadbd416622e5c5fc9d`, не збирати заново «по пам’яті».
-
-Після відновлення обов'язково звірити:
-- stable entry → frozen source commit `ed3a19b20efd9af0bf07bc4a079589b3b6038157`;
-- назву `Nordic ID – Til rampe`;
-- version `V2.9.7`;
-- TEST/WORK switch;
-- SMART FOCUS / INPUT LOCK / COUNT COMPACT;
-- WORK unknown-tag contract вище.
+If the delivery loader breaks, restore the launch architecture from Git history while preserving that exact frozen source commit. Do not rebuild V2.9.7 behavior from memory.
