@@ -2,7 +2,7 @@
 
 **Репозиторій:** `stelmashchukyurii-maker/Mottak`  
 **Гілка:** `main`  
-**Оновлено:** 11.08.2026 08:27 Europe/Oslo
+**Оновлено:** 11.08.2026 08:33 Europe/Oslo
 
 ## 1. Start here
 For Nordic/RFID:
@@ -10,168 +10,103 @@ For Nordic/RFID:
 2. `NORDIC_ID_RFID_PROTOCOL.md`
 3. `NORDIC_ID_PROGRESS_LOG.md`
 4. `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`
-5. `NORDIC_TIL_RAMPE_STABLE_LOCK.md` when stable/recovery is relevant.
+5. `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md` when testing new outgoing compatibility
+6. `NORDIC_TIL_RAMPE_STABLE_LOCK.md` for frozen stable/recovery.
 
-Historical research:
-- `NORDIC_ID_RFID_PROTOCOL_ARCHIVE_2026-08-09.md`
-- older docs under `docs/` remain history.
+Historical Nordic: `NORDIC_ID_RFID_PROTOCOL_ARCHIVE_2026-08-09.md`.
+Older `docs/` files remain historical.
 
-## 2. Current Nordic status
-### Outgoing stable
+## 2. Current Nordic entries
+### Frozen outgoing stable
 `Nordic ID – Til rampe · STABLE V2.9.7`
 - `nordic-id-til-rampe-stable.html`
 - frozen source `ed3a19b20efd9af0bf07bc4a079589b3b6038157`
-- do not edit/delete.
+- do not edit/delete/repoint.
+
+### Outgoing compatibility DEV
+`Nordic ID – Til rampe · DEV V2.9.8`
+- `nordic-id-til-rampe-v298-dev.html`
+- all-product/Vrak progress overlay;
+- not linked from home;
+- not physical PASS/stable.
 
 ### Incoming DEV
 `Nordic ID – Til lager · DEV V1.0.3`
-- entry `nordic-id-til-lager-v103.html`
+- `nordic-id-til-lager-v103.html`
 - TEST first;
-- V1.0.2 WORK-hold + last receipt;
-- V1.0.3 unified 8-product counters;
-- not stable/full physical PASS yet.
+- current full wrapper not physical PASS/stable.
 
-Scanner home:
+### Scanner home
 - `📥 TIL LAGER` → V1.0.3
-- `📤 TIL RAMPE` → V2.9.7 stable
+- `📤 TIL RAMPE` → frozen V2.9.7
 
-## 3. Authoritative products
+## 3. Products
 `products.js` v1.3.0.
+RFID: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange, vrak_bunner, vrak_hyller.
+No RFID: forlengere_plast.
+Vrak bunner = 10/stack; Vrak hyller = 30/stack; short/long counts only outgoing; all products may go to RAMPE.
 
-RFID:
-- bunner
-- hyller30
-- hyller60
-- forlengere_korte
-- forlengere_lange
-- vrak_bunner
-- vrak_hyller
-
-No RFID:
-- forlengere_plast
-
-Rules:
-- Vrak bunner = 10 per stack.
-- Vrak hyller = 30 per stack.
-- all products may go to RAMPE.
-- short/long counts only at outgoing.
-- CC Post derived/display-only.
-
-## 4. Unified 8-product stock model
-RPC:
-`public.bama_stock_summary()`
-
+## 4. Unified stock model
+RPC `bama_stock_summary()`.
 Two canonical counters:
-1. physical `in_stock` warehouse;
-2. available = physical − still-unfulfilled active ramp orders.
+1. physical `in_stock`;
+2. available = physical − unfulfilled active ramp-order demand.
 
-Critical rule:
-- order create/edit immediately changes available;
-- staging does not double-subtract.
-
-Shared UI:
-`stock-summary-8-v1.js`
-
-Current consumers:
-- Camera v4.29
-- UT Kontor v37
-- Til lager V1.0.3
-
-Server tests passed. Current UI versions require physical/browser confirmation.
+Order create/edit changes available immediately. Staging does not double-subtract.
+Shared UI module `stock-summary-8-v1.js`.
+Current unconfirmed consumers: Camera v4.29, UT Kontor v37, Til lager V1.0.3.
 
 ## 5. Plastic quantity stock
 Tables:
 - `mottak_quantity_stock`
 - `mottak_quantity_stock_events`
+RPC `receive_mottak_quantity_stock(text,integer,text)`.
+Plastic has no RFID and never receives a fake number.
+Reservation/stage/cancel/edit lifecycle server-tested.
+Manual phone receipt UI: `camera-plast-manual-receipt.js` in Camera v4.29.
 
-RPC:
-`receive_mottak_quantity_stock(text,integer,text)`
-
-No RFID or lower number for plastic.
-Lifecycle:
-- order reservation affects available;
-- stage removes physical boxes;
-- cancel restores undispatched boxes;
-- operational order edit restores/reset;
-- non-operational edit preserves lifecycle.
-
-Manual phone receipt UI:
-`camera-plast-manual-receipt.js` in current Camera v4.29.
-
-## 6. Vrak / outgoing server support
+## 6. Vrak outgoing
 Server PASS:
-- Vrak accepted by Nordic preview/auto scan;
-- stage/dispatch validation supports Vrak;
-- full transactional Vrak lifecycle passes;
-- `bama_order_product_progress(uuid)` returns all-product progress.
-
-Frozen V2.9.7 visual progress predates Vrak. It must not be edited; create/test a separate outgoing DEV for Vrak visual progress.
+- Vrak Nordic scan/stage/dispatch full cycle;
+- `bama_order_product_progress(uuid)` exposes all-product progress.
+Frozen V2.9.7 progress predates Vrak; server prevents false final completion. V2.9.8 DEV supplies visual Vrak progress for testing.
 
 ## 7. Camera
-Physical PASS rollback:
-- v4.25 LOWER RESET
-- v4.26 AUTO SAVE FOCUS
-
-Current unconfirmed:
-`Camera Cloud v4.29 · 8 PRODUKTER · PLAST MANUELT MOTTAK`
-- `camera-live-v414.html`
-- fallback choices for short/long/Vrak;
-- 8-product physical/available counters;
+Physical rollback PASS: v4.25 and v4.26.
+Current unconfirmed `Camera Cloud v4.29`:
+- fallback short/long/Vrak;
+- two 8-product counters;
 - manual plastic receipt.
 
 ## 8. UT Kontor
-User rule: preserve established layout/behavior.
-Current unconfirmed:
-`UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE`
-- Norwegian forced at startup;
-- Vrak cards additive;
-- shared counters refresh after order save/load.
+Preserve existing layout/behavior.
+Current unconfirmed `UT Kontor WORKING v37`:
+- Norwegian startup;
+- 8 product cards;
+- two unified counters;
+- refresh after order save/load.
 
-## 9. TEST / WORK architecture
-Shared tables, separated by `environment=test/work`:
-- mottak_scans
-- ut_orders
-- ut_order_items
-- ut_order_scans
-- ut_extra_confirmations
-- mottak_stock_events
+## 9. Til lager
+Base TEST RFID writes already evidenced in DB for multiple products including Vrak.
+V1.0.3 adds WORK-hold/last receipt + shared counters; full physical confirmation pending.
 
-TEST same EPC repeat allowed; WORK duplicate protection; cross-environment guards; old `ut_test_*` archive only.
-
-## 10. RFID mapping
-- full EPC → scanner_code
-- last 6 → lower_number
-- upper_number = ''
-- Camera can have only lower_number.
-- never invent RFID when EPC was not read.
+## 10. TEST / WORK and RFID
+Shared environment-separated tables; TEST duplicate EPC allowed, WORK protected.
+RFID: full EPC → scanner_code; last 6 → lower_number; upper_number=''. Camera may have only lower_number. Never invent RFID.
 
 ## 11. Wedge rules
-- short trigger presses;
-- do not use CC4Scanner and Wedge simultaneously;
-- do not use `inputmode=none` for RFID receiver;
-- avoid unconditional blur while RFID input is armed.
+Short trigger presses. Do not run CC4Scanner with Wedge. Do not use inputmode=none. Do not blur armed hidden RFID receiver.
 
-## 12. Stock lifecycle
-- `in_stock` = physical warehouse
-- `staged` = physically on ramp
-- `dispatched` = sent
-
-Cancellation/edit must not resurrect dispatched goods.
-Always query live DB for current quantities.
+## 12. Lifecycle
+`in_stock` → `staged` → `dispatched`.
+Cancel/edit must not resurrect dispatched goods.
+Always read current stock from live DB.
 
 ## 13. Protocol update rule
-After physical PASS or explicit SERVER PASS:
-- progress log;
-- handoff if current state changes;
-- canonical Nordic protocol if architecture changes;
-- Til lager DEV protocol during incoming DEV;
-- stable lock only when stable contract changes;
-- sync this index and `PROTOCOL.md` after major milestones.
+After physical PASS or explicit SERVER PASS update progress/handoff/canonical/appropriate DEV protocol; stable lock only if stable contract changes; sync project summaries after major milestones. Failed experiments are never PASS.
 
-Failed experiments are not PASS.
-
-## 14. Next tests
-1. Til lager V1.0.3 — TEST counters and WORK-hold.
-2. Camera v4.29 — 8 counters + plastic manual receipt UI.
+## 14. Next physical sequence
+1. Til lager V1.0.3 — TEST counters + WORK hold.
+2. Camera v4.29 — counters + plastic manual receipt panel.
 3. UT Kontor v37 — Norwegian + 8 products/counters.
-4. Separate outgoing DEV for Vrak progress.
+4. V2.9.8 DEV — TEST Vrak progress/final guard.
