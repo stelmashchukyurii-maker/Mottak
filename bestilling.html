@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v36</title>
+<title>UT Kontor WORKING v37</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--text:#f5f7ff}
 *{box-sizing:border-box}
@@ -17,14 +17,14 @@ body{display:flex;flex-direction:column}
 iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:var(--bg)}
 #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font:900 18px/1.5 Arial,sans-serif;text-align:center;z-index:9}
 </style>
-<script src="products.js?v=20260810-2210"></script>
+<script src="products.js?v=20260811-0810"></script>
 </head>
 <body class="notranslate">
-<div id="loader">Laster UT Kontor WORKING v36…</div>
-<iframe id="app" title="UT Kontor WORKING v36"></iframe>
+<div id="loader">Laster UT Kontor WORKING v37…</div>
+<iframe id="app" title="UT Kontor WORKING v37"></iframe>
 <script>
 "use strict";
-const BUILD="20260810-2210";
+const BUILD="20260811-0810";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 
 function inject(doc,src,mark){
@@ -54,7 +54,7 @@ function applyWorkingBrand(){
     const home=d.querySelector("a.home");
     if(home)home.remove();
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v36 · 8 PRODUKTER<br>Oppdatert 10.08.2026 kl. 22:10";
+    if(version)version.innerHTML="UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 11.08.2026 kl. 08:10";
   }catch{}
 }
 
@@ -63,7 +63,7 @@ async function refreshInner(){
     const w=frame.contentWindow;
     await w.UT_KONTOR_HISTORY_VISUALS?.refreshProgress?.();
     w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
-    w.BAMA_COMPACT_STOCK_REFRESH?.();
+    await w.BAMA_STOCK_SUMMARY_REFRESH?.();
     applyWorkingBrand();
   }catch{}
 }
@@ -72,10 +72,21 @@ function applyLanguage(){
   try{
     const w=frame.contentWindow;
     w.UT_TEST_LANG?.apply?.();
-    w.BAMA_COMPACT_STOCK_REFRESH?.();
+    w.BAMA_STOCK_SUMMARY_REFRESH?.();
     applyWorkingBrand();
     refreshInner();
   }catch{}
+}
+
+function hookStockRefreshAfterLoadUt(w){
+  if(w.__BAMA_STOCK_SUMMARY_LOADUT_HOOK__||typeof w.loadUt!=="function")return;
+  w.__BAMA_STOCK_SUMMARY_LOADUT_HOOK__=true;
+  const base=w.loadUt;
+  w.loadUt=async function(...args){
+    const result=await base.apply(this,args);
+    await w.BAMA_STOCK_SUMMARY_REFRESH?.();
+    return result;
+  };
 }
 
 frame.addEventListener("load",async()=>{
@@ -89,6 +100,8 @@ frame.addEventListener("load",async()=>{
     await inject(d,"ut-kontor-vrak-products.js","vrak-products");
     await inject(d,"ut-kontor-history-visuals.js","history");
     await inject(d,"ut-test-language.js","language");
+    await inject(d,"stock-summary-8-v1.js","stock-summary-8");
+    hookStockRefreshAfterLoadUt(w);
     await refreshInner();
     applyLanguage();
     setTimeout(refreshInner,350);
