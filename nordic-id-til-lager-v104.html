@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="uk" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="google" content="notranslate">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Nordic ID – Til lager · DEV V1.0.4 · WORK DEFAULT</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b1020;color:#f5f7ff;font:900 18px/1.5 Arial,sans-serif;text-align:center;z-index:5}</style>
+</head>
+<body>
+<div id="loader">Laster Nordic ID – Til lager · WORK…</div>
+<iframe id="app" title="Nordic ID – Til lager · DEV V1.0.4 · WORK DEFAULT" src="nordic-id-til-lager-test.html?v=20260811-2128"></iframe>
+<script>
+"use strict";
+const BUILD="20260811-2128",frame=document.getElementById("app"),loader=document.getElementById("loader");
+function inject(doc,src){return new Promise((ok,bad)=>{const s=doc.createElement("script");s.src=`${src}?v=${BUILD}`;s.onload=ok;s.onerror=()=>bad(new Error(`Kunne ikke laste ${src}`));doc.body.appendChild(s)})}
+frame.addEventListener("load",async()=>{
+  try{
+    const d=frame.contentDocument,w=frame.contentWindow;
+    await inject(d,"nordic-til-lager-v102-fix.js");
+    await inject(d,"stock-summary-8-v1.js");
+    if(typeof w.setEnv!=="function")throw new Error("WORK switch function mangler");
+    w.setEnv("work");
+    const wb=d.getElementById("workBtn");if(wb)wb.textContent="🏭 WORK";
+    const version=d.querySelector(".version");
+    if(version)version.textContent="Nordic ID – Til lager · DEV V1.0.4 · WORK DEFAULT · 8 PRODUKTER · 2 LAGERTELLERE · 11.08.2026 kl. 21:28";
+    w.BAMA_STOCK_SUMMARY_REFRESH?.();
+    loader.style.display="none";
+  }catch(e){loader.textContent=`Til lager V1.0.4 startfeil: ${e.message||e}`}
+});
+</script>
+</body>
+</html>
