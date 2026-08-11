@@ -2,7 +2,7 @@
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
 **Створено:** 09.08.2026 19:43:37 Europe/Oslo  
-**Оновлено:** 10.08.2026 22:12 Europe/Oslo
+**Оновлено:** 11.08.2026 08:22 Europe/Oslo
 
 ## Правило журналу
 У цей файл записуємо **тільки підтверджені успішні/завершені кроки**. Тимчасові помилки, невдалі спроби, гіпотези та відкриті проблеми сюди не додаємо.
@@ -243,17 +243,130 @@ Transactional browser-role verification:
 
 ---
 
+# 11.08.2026 — ПІДТВЕРДЖЕНІ СЕРВЕРНІ КРОКИ
+
+## SERVER PASS — ЄДИНИЙ 8-PRODUCT STOCK SUMMARY
+**RPC:** `public.bama_stock_summary()`
+
+Зафіксоване правило користувача:
+1. перший лічильник = **фізично на складі (`in_stock`)**;
+2. другий лічильник = **фізичний склад − ще не виконана частина активних замовлень на RAMPE**;
+3. другий лічильник змінюється одразу після створення/редагування замовлення;
+4. після фізичного перенесення одиниці на RAMPE вона не віднімається вдруге: `in_stock` зменшується, а `order_remaining` одночасно зменшується.
+
+`bama_stock_summary()` повертає однакову модель для 8 продуктів:
+- `bunner`
+- `hyller30`
+- `hyller60`
+- `forlengere_korte`
+- `forlengere_lange`
+- `forlengere_plast`
+- `vrak_bunner`
+- `vrak_hyller`
+
+Поля summary:
+- `physical_count`
+- `on_ramp_count`
+- `order_remaining`
+- `available_count`
+- `shortage_count`
+- `unit`
+- `package_size`
+
+Transactional verification:
+- створення Bunner-замовлення одразу зменшує `available_count`;
+- після staging цієї ж одиниці `physical_count` падає, `order_remaining` падає, а `available_count` **не віднімається вдруге**;
+- результат: `PASS: order creation subtracts immediately; staging does not double-subtract`.
+
+Anon/RLS verification:
+- WORK повертає 8 rows;
+- TEST повертає 8 rows;
+- середовища не змішуються.
+
+Контрольний WORK стан після всіх rollback-тестів:
+- Bunner 14;
+- Hyller x30 7;
+- Hyller x60 14;
+- Forlengere korte/lange/plast 0;
+- Vrak bunner/hyller 0;
+- active WORK orders 0.
+
+---
+
+## SERVER PASS — VRAK FULL OUTGOING LIFECYCLE
+Перевірено транзакційно:
+`Vrak order → nordic_auto_scan → staged → stage_ut_order → confirm_ut_dispatch → dispatched`.
+
+Результат:
+`PASS: Vrak RFID order → Nordic → staged → dispatched`.
+
+`stage_ut_order` / `confirm_ut_dispatch` тепер валідовують Vrak RFID так само, як Bunner/Hyller.
+Frozen frontend `Til rampe V2.9.7` не переписаний.
+
+Окремо додано `public.bama_order_product_progress(uuid)`, який повертає ordered/done/remaining для всіх товарних рядків, включно з Vrak і пластиком. Anon TEST transactional verification пройшла.
+
+**Важливо:** frozen V2.9.7 progress UI історично знає тільки старий набір продуктів. Сервер не дозволить неправильно завершити Vrak-order, але для нового зручного Vrak progress потрібна окрема DEV outgoing-версія. STABLE V2.9.7 не змінювати.
+
+---
+
+## SERVER PASS — FORLENGERE PLAST QUANTITY STOCK
+Пластикові продовжувачі не мають RFID, тому для них створено окремий кількісний склад:
+- `public.mottak_quantity_stock`
+- `public.mottak_quantity_stock_events`
+
+WORK lifecycle:
+- створення замовлення зменшує тільки `available_count`;
+- при `stage_ut_order` потрібна кількість фізично знімається зі складу та переходить на RAMPE;
+- при скасуванні до dispatch кількість повертається на склад;
+- при операційному редагуванні staged order пластик повертається на склад і order reset-иться;
+- звичайне редагування Mottaker / Transportør / note не рухає staged товар.
+
+Transactional PASS:
+- `plastic reservation → stage decrement → cancel restore`;
+- `non-operational edit preserves staged stock; operational edit restores and resets`.
+
+Ручний прихід:
+- RPC `public.receive_mottak_quantity_stock(text,integer,text)`;
+- тільки `forlengere_plast`;
+- додає кількість у поточне TEST/WORK environment;
+- пише audit event `manual_receive`;
+- не створює fake RFID / lower_number.
+
+Anon TEST transactional verification:
+`PASS: anon TEST manual plastic receipt updates summary and rolls back cleanly`.
+
+---
+
+## SERVER PASS — НОВІ UI-ДЖЕРЕЛА ПІДГОТОВЛЕНІ, АЛЕ ЩЕ НЕ PHYSICAL PASS
+Спільний frontend module:
+`stock-summary-8-v1.js`
+
+Він читає тільки `bama_stock_summary()` і малює два однакові 8-product counters для Camera / UT Kontor / Til lager.
+
+Підготовлені, але ще **не записуються як фізичний PASS**:
+- Camera Cloud **v4.29** — 8 product counters + RFID fallback products + ручний прихід Forlengere plast;
+- UT Kontor **WORKING v37** — 8 products + два stock counters;
+- Nordic ID – Til lager **DEV V1.0.3** — 8 product counters + V1.0.2 stock/WORK-hold fixes.
+
+Останній фізично підтверджений Camera rollback залишається **v4.26**.
+
+---
+
 # ПОТОЧНА АРХІТЕКТУРА scanner-home.html
 
-На робочому екрані дві операції:
-1. **📥 TIL LAGER** → `nordic-id-til-lager-test.html` → `Nordic ID – Til lager · DEV V1.0.1 · TEST FIRST`.
+На робочому Nordic-екрані дві операції:
+1. **📥 TIL LAGER** → `nordic-id-til-lager-v103.html` → `Nordic ID – Til lager · DEV V1.0.3 · 8 PRODUKTER · 2 LAGERTELLERE`.
 2. **📤 TIL RAMPE** → `nordic-id-til-rampe-stable.html` → `Nordic ID – Til rampe · STABLE V2.9.7`.
 
-`Til lager` поки **DEV, не STABLE і не PASS**. Її детальний непідтверджений стан ведеться окремо у `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`.
+`Til lager` поки **DEV, не STABLE і не full physical PASS**. Її детальний непідтверджений стан ведеться у `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`.
 
 Приховано з робочого екрана, але збережено в GitHub:
-- `utsending-nordic-test.html` — DEV copy для майбутніх змін;
+- `utsending-nordic-test.html` — outgoing DEV copy;
 - `nordic-id-v24-stable.html` — історичний RFID rollback;
 - `nordic-id-v20-focus.html` — V2.1 diagnostic/test base.
 
-Наступний фізичний крок: **Nordic ID – Til lager V1.0.1 у TEST**. Після фізичного PASS — перевірити DB/log, далі окремо WORK. `Nordic ID – Til rampe` STABLE не змінювати.
+Наступні фізичні перевірки:
+- `Til lager V1.0.3`: TEST stock counters + WORK-hold;
+- Camera v4.29: 8 counters + manual plastic receipt UI (спочатку без реального додавання, потім свідомий тест);
+- UT Kontor v37: Norwegian + 8 product cards/counters;
+- outgoing Vrak progress — тільки через окрему DEV-версію, frozen `Til rampe V2.9.7` не змінювати.
