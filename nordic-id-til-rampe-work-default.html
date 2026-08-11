@@ -34,6 +34,10 @@
     html=html.replace(/inject\(d,"([^"]+\.js)"/g,(m,p)=>`inject(d,"${CDN}${p}"`);
     html=html.split('./ut-test-api.js').join(CDN+'ut-test-api.js');
 
+    // Display-only add-on: show actual entered Forlengere piece counts from ut_extra_progress.
+    // RFID / confirmation / staging / dispatch logic remains the frozen V2.9.7 logic.
+    html=html.replace('</body>','<script src="./nordic-til-rampe-extension-count-display-v1.js?v=20260811-2154"><\/script></body>');
+
     document.open();document.write(html);document.close();
   }catch(e){
     box.className="err";
