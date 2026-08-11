@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Camera Cloud v4.28</title>
+  <title>Camera Cloud v4.29</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <div id="loader">Laster Camera Cloud v4.28…</div>
-  <iframe id="app" title="Camera Cloud v4.28" src="camera-live.html?base=428-stock-summary-8-20260811-0809"></iframe>
+  <div id="loader">Laster Camera Cloud v4.29…</div>
+  <iframe id="app" title="Camera Cloud v4.29" src="camera-live.html?base=429-stock8-plast-receipt-20260811-0818"></iframe>
   <script>
     "use strict";
-    const VERSION = "20260811-0809";
+    const VERSION = "20260811-0818";
     const frame = document.getElementById("app");
     const loader = document.getElementById("loader");
 
@@ -57,18 +57,20 @@
         loader.style.display = "none";
         win.__BAMA_COMPACT_STOCK_COUNTER__ = true;
         await injectScript(doc, `stock-summary-8-v1.js?v=${VERSION}`);
+        await injectScript(doc, `camera-plast-manual-receipt.js?v=${VERSION}`);
 
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.28 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 11.08.2026 kl. 08:09";
+        if (version) version.innerHTML = "Kamera Cloud v4.29 · 8 PRODUKTER · PLAST MANUELT MOTTAK<br>Oppdatert 11.08.2026 kl. 08:18";
 
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => {
             win.refreshBamaStock?.().catch(() => {});
             win.BAMA_STOCK_SUMMARY_REFRESH?.();
+            win.CAMERA_PLAST_RECEIPT?.refresh?.();
           }, 80));
         });
       } catch (error) {
-        loader.textContent = `Kunne ikke starte Camera Cloud v4.28: ${error.message || error}`;
+        loader.textContent = `Kunne ikke starte Camera Cloud v4.29: ${error.message || error}`;
       }
     });
   </script>
