@@ -1,6 +1,7 @@
 # Nordic ID – Til rampe · Forlengere quantity display
 
 **Date:** 11.08.2026 21:54 Europe/Oslo  
+**Physical PASS:** 11.08.2026 22:43 Europe/Oslo  
 **Scope:** display only / WORK-default Nordic entry  
 **Frozen application logic:** V2.9.7 at `ed3a19b20efd9af0bf07bc4a079589b3b6038157`
 
@@ -16,7 +17,7 @@ The phone order view showed the useful entered piece quantity as well:
 User requested the Nordic progress panel to show the actual extension quantity too, without risking the working RFID/outgoing flow.
 
 ## Data source verified
-`public.ut_extra_progress(order_id)` already exposes the actual outgoing confirmation fields:
+`public.ut_extra_progress(order_id)` exposes the actual outgoing confirmation fields:
 - `hyller_count`
 - `forlengere_count`
 
@@ -24,16 +25,16 @@ For RAMPE 28 / order `34113828-6904-4254-bc85-7c2cd8e8bbd1`, DB evidence showed:
 - `forlengere_korte`: `hyller_count=15`, `forlengere_count=150`
 - `forlengere_lange`: `hyller_count=15`, `forlengere_count=150`
 
-Therefore the Nordic display must read the real `forlengere_count`; no hardcoded 150 and no inferred package calculation.
+Therefore the Nordic display reads the real `forlengere_count`; there is no hardcoded 150 and no inferred package calculation.
 
 ## Implementation
-New display-only module:
+Display-only module:
 `nordic-til-rampe-extension-count-display-v1.js`
 
 Create commit:
 `9cfc4be8d14163cfa37a1bbc7c0a781009483914`
 
-Operational WORK-default loader updated:
+Operational WORK-default loader:
 `nordic-id-til-rampe-work-default.html`
 
 Loader update commit:
@@ -48,7 +49,10 @@ Behavior:
 - does not change RFID input, preview, confirm, staging, dispatch, duplicate protection, or count-entry flow.
 
 ## Physical status
-The underlying WORK-default Til rampe flow is physically confirmed by user screenshot: WORK visibly active and RAMPE 28 was partially processed successfully.
+The underlying WORK-default Til rampe flow was physically confirmed by user photo: WORK visibly active and RAMPE 28 partially processed successfully.
 
-The new `NNN stk.` display add-on is **DEPLOYED — PHYSICAL VISUAL RECHECK PENDING**.
-Do not mark this display add-on PASS until user refreshes/reopens Til rampe and confirms the piece count is visible and the normal scan flow is unchanged.
+On 11.08.2026 at session close, the user explicitly confirmed: **“Продовжувачі готові.”** This confirms the new piece-count display is working on the physical Nordic flow.
+
+**STATUS: PHYSICAL PASS.**
+
+The display-only overlay is now accepted. Frozen V2.9.7 RFID/outgoing business logic remains unchanged.
