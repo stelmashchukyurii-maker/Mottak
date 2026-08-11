@@ -5,7 +5,7 @@
 **Фізично підтверджена application logic:** 10.08.2026  
 **Frozen application source:** `utsending-nordic-test.html`  
 **Frozen source commit:** `ed3a19b20efd9af0bf07bc4a079589b3b6038157`  
-**Оновлено operational launch/display:** 11.08.2026 21:54 Europe/Oslo
+**Оновлено operational launch/display:** 11.08.2026 22:43 Europe/Oslo
 
 ## LOCK RULE
 V2.9.7 є зафіксованою outgoing-логікою Nordic ID для `Til rampe`.
@@ -67,7 +67,7 @@ Therefore:
 
 This does not by itself mean every 8-product outgoing case is physically complete.
 
-## DISPLAY-ONLY FORLENGERE PIECE COUNT — 11.08.2026 21:54
+## DISPLAY-ONLY FORLENGERE PIECE COUNT — 11.08.2026
 User observed that phone order view showed `Forlengere korte/lange` as e.g. `1 vogn · 150 stk.`, while Nordic progress only showed `1 / 1`.
 
 Verified source of truth:
@@ -86,9 +86,11 @@ The overlay:
 - does not write data;
 - does not change RFID/confirm/count-entry/staging/dispatch.
 
-Status:
-**DEPLOYED — PHYSICAL VISUAL RECHECK PENDING.**
-Do not call the new `NNN stk.` display PASS until the user refreshes/reopens and confirms it visually.
+### Physical confirmation
+11.08.2026 22:43 Europe/Oslo user explicitly confirmed the Forlengere change is ready: **“Продовжувачі готові.”**
+
+Therefore:
+**FORLENGERE `NNN stk.` DISPLAY = PHYSICAL PASS.**
 
 ## WORK UNKNOWN RFID TAG CONTRACT
 1. Existing available WORK RFID row → reuse.
@@ -97,10 +99,30 @@ Do not call the new `NNN stk.` display PASS until the user refreshes/reopens and
 4. Full EPC → `scanner_code`; last 6 → `lower_number`.
 5. No EPC read → never invent an RFID number.
 
-## Current WORK order context
-RAMPE 28 was created as a real WORK trial with quantity 1 of all 8 products and was physically partially processed on Nordic.
+## WORK trial history — RAMPE 28
+RAMPE 28 / order `34113828-6904-4254-bc85-7c2cd8e8bbd1` was a real WORK trial with quantity 1 of all 8 products.
 
-The order was subsequently released/cancelled during the trial, so current progress may be reset. Always query the live database before stating its current progress or stock impact.
+Physical partial pass showed:
+- Bunner 1/1;
+- Forlengere korte 1/1;
+- Forlengere lange 1/1;
+- real entered counts for both extension types: 15 hyller + 150 forlengere.
+
+The order was later cancelled/released during the trial. Latest archive verification showed:
+- order status `cancelled`;
+- `on_ramp_count=0` for all products;
+- one historical Bunner scan remains linked to the cancelled trial;
+- extension confirmations are marked released.
+
+Always query live DB before stating current stock or active order progress.
+
+## Deferred outgoing compatibility
+`Nordic ID – Til rampe · DEV V2.9.8` exists separately for full visual progress including Vrak.
+- NOT linked from scanner home;
+- NOT physical PASS;
+- server already prevents false completion if Vrak/plastic remains.
+
+Do not promote V2.9.8 without a separate physical test and explicit user decision.
 
 ## Recovery
 Application behavior source of truth remains frozen commit:
