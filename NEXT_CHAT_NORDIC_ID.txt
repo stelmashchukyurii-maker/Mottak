@@ -1,143 +1,71 @@
-NID-HANDOFF-2026-08-11-SESSION-CLOSED-WORK-DEFAULT-RAMPE-PASS
+NID-HANDOFF-2026-08-12-ADMIN-WORK
 
-Проєкт: BaMavaremottak / AI Scanner Mottak
-Оновлено: 11.08.2026 22:43 Europe/Oslo
+Продовжуємо проєкт BaMavaremottak / Nordic ID.
 
-SESSION STATUS
-This 11.08 Nordic session is synchronized and ready for archive.
-Canonical closure snapshot:
-`NORDIC_SESSION_ARCHIVE_2026-08-11_2243.md`
+Спочатку прочитай:
+1. NORDIC_ID_RFID_PROTOCOL.md
+2. NORDIC_ID_PROGRESS_LOG.md
+3. NORDIC_TIL_RAMPE_STABLE_LOCK.md
+4. NORDIC_TIL_LAGER_DEV_PROTOCOL.md
+5. LAGER_ADMIN_DEV_PROTOCOL.md
+6. PROTOCOLS.md
 
-CRITICAL USER DECISIONS
-- User is now working in WORK.
-- BOTH Nordic operational forms should open in WORK by default.
-- TEST remains available manually only when needed.
-- If an already working production behavior appears problematic, explain the issue first and get explicit authorization before modifying it.
+Останній Nordic archive:
+NORDIC_SESSION_ARCHIVE_2026-08-11_2243.md
 
-SCANNER HOME CURRENT
-`scanner-home.html`
+=== NORDIC / SCANNER FREEZE ===
+Станом на 12.08.2026 усі Nordic ID / scanner production-форми та їхня вже робоча логіка FROZEN.
 
-- `📥 TIL LAGER · WORK` → `nordic-id-til-lager-v104.html`
-  - DEV V1.0.4
-  - WORK DEFAULT
-  - base real WORK Nordic receipt path is proven in DB
-  - final V1.0.4 visual WORK-default startup still lacks explicit user confirmation after final wrapper change
-  - TEST remains manual fallback
+Не редагувати production Nordic/scanner code у рамках інших задач.
+Будь-яка зміна лише після окремого прямого дозволу користувача.
 
-- `📤 TIL RAMPE · WORK` → `nordic-id-til-rampe-work-default.html`
-  - exact frozen V2.9.7 business logic source remains commit `ed3a19b20efd9af0bf07bc4a079589b3b6038157`
-  - WORK DEFAULT
-  - TEST remains manual fallback
-  - WORK-default startup = PHYSICAL PASS
+Production entries залишаються:
+📥 TIL LAGER · WORK → nordic-id-til-lager-v104.html
+📤 TIL RAMPE · WORK → nordic-id-til-rampe-work-default.html
 
-SCANNER HOME visibly says:
-`WORK ER STANDARD · REAL DATABASE`
+Til rampe:
+- frozen V2.9.7;
+- WORK-default PHYSICAL PASS;
+- Forlengere NNN stk. display PHYSICAL PASS.
 
-Latest scanner-home commit:
-`8b61e3a0626edc63358fa0ff17e695cb090213e7`
+Til lager:
+- V1.0.4 WORK DEFAULT;
+- real WORK intake exists;
+- final visual startup PASS after wrapper change still pending.
 
-TIL RAMPE — PHYSICAL PASS STATE
-Frozen V2.9.7 RFID/confirm/count-entry/staging/dispatch logic remains unchanged.
+=== LAGER ADMIN ===
+Active development is now Lager Admin.
 
-Confirmed on physical Nordic:
-- normal page opens instead of raw HTML source;
-- WORK active immediately;
-- RAMPE 28 opened and was partially processed;
-- Bunner outgoing scan worked;
-- Forlengere korte/lange confirmations worked;
-- actual piece-count display `NNN stk.` is now confirmed by user: “Продовжувачі готові.”
+Direct entry:
+https://stelmashchukyurii-maker.github.io/Mottak/lager-admin.html
 
-Forlengere display module:
-`nordic-til-rampe-extension-count-display-v1.js`
+Do not add this link to scanner-home, Nordic ID, or other production navigation.
 
-Display source:
-`public.ut_extra_progress(order_id).forlengere_count`
+12.08.2026 deployed:
+- lager-admin.html WORK v2.0;
+- Supabase Edge Function lager-admin-work v1 ACTIVE;
+- custom Admin-code auth on server;
+- Admin code is not stored in HTML;
+- browser never receives service_role key;
+- allowed origin restricted to stelmashchukyurii-maker.github.io;
+- WORK changes use manual quantity overlay;
+- no fake RFID/EPC/lower_number;
+- WORK audit actions admin_adjust_work / admin_set_work;
+- SETT FAKTISK has browser confirmation.
 
-No hardcoded 150. No DB writes. No frozen outgoing behavior changed.
+Deployment safety verification:
+- live bama_stock_summary() before and after deployment unchanged;
+- zero WORK admin audit events created by deployment.
 
-Dedicated display protocol:
-`NORDIC_TIL_RAMPE_EXTENSION_COUNT_DISPLAY_2026-08-11.md`
+Lager Admin WORK is SERVER/UI ACTIVE but PHYSICAL PASS is still pending user test from phone.
 
-Stable/operational lock:
-`NORDIC_TIL_RAMPE_STABLE_LOCK.md`
+For current stock NEVER use old protocol snapshots. Always query live via bama_stock_summary().
+If user says “журнал” / “дивись журнал”, inspect Supabase live and correlate real WORK records.
 
-RAMPE 28 TRIAL HISTORY
-Order id:
-`34113828-6904-4254-bc85-7c2cd8e8bbd1`
+Deferred:
+- Nordic Til rampe V2.9.8 DEV — Vrak/all-8 progress;
+- Camera v4.29;
+- UT Kontor v37.
 
-- environment=work
-- created with quantity 1 of all 8 products
-- physical screenshot showed Bunner 1/1, korte 1/1, lange 1/1
-- korte DB confirmation: 15 hyller + 150 forlengere
-- lange DB confirmation: 15 hyller + 150 forlengere
-- one Bunner row remains in historical `ut_order_scans`
-- order later became `cancelled`
-- extension confirmations are released
-- archive verification: on_ramp_count=0 and order_remaining=0 across all 8
-
-Do not treat RAMPE 28 as active.
-
-WORK STOCK HISTORY
-Earlier on 11.08 user confirmed old system stock had already physically shipped manually.
-35 WORK RFID rows were bulk-corrected from in_stock to dispatched.
-Milestone:
-`WORK_STOCK_BASELINE_RESET_2026-08-11.md`
-
-New stock was received afterward. Never assume the old zero baseline is current.
-
-Archive-time stock snapshot at 22:43 Europe/Oslo:
-- Bunner 25
-- Hyller x30 3
-- Hyller x60 20
-- Forlengere korte 4
-- Forlengere lange 4
-- Forlengere plast 0
-- Vrak bunner 0
-- Vrak hyller 2
-- on-ramp 0 / order_remaining 0 for all 8
-
-Snapshot only. Query live `bama_stock_summary()` before quoting current stock.
-
-REAL WORK NORDIC INTAKE EVIDENCE
-Real WORK `mottak_scans` includes Nordic rows with:
-- source=nordic_id
-- device_id=NORDIC-ID
-- full EPC scanner_code
-- lower 6 lower_number
-- verified/in_stock
-
-Confirmed real incoming products include Bunner, Hyller x60 and Vrak hyller.
-
-MANUAL WORK RECEIPT
-3 × Hyller x30 manually received:
-- 000012
-- 000013
-- 000014
-
-No fake EPC; scanner_code empty; source manual.
-
-DEFERRED / NOT PHYSICAL PASS
-1. `Til lager V1.0.4` final visual WORK-default startup confirmation.
-2. `Nordic ID – Til rampe DEV V2.9.8` all-8/Vrak visual progress test and any future promotion.
-3. Camera v4.29 full acceptance.
-4. UT Kontor v37 full acceptance.
-5. Lager Admin mutation UI; user deferred the entire task and WORK remains server-locked.
-
-DO NOT PROMOTE / CLAIM
-- V2.9.8 is not stable and not physical PASS.
-- Til lager V1.0.4 startup UI is not yet explicitly physically confirmed.
-- Camera v4.29 / UT Kontor v37 / Lager Admin mutation are not physically accepted.
-
-PROTOCOLS SYNCHRONIZED AT SESSION CLOSE
-- `NORDIC_ID_PROGRESS_LOG.md`
-- `NORDIC_ID_RFID_PROTOCOL.md`
-- `NORDIC_TIL_RAMPE_STABLE_LOCK.md`
-- `NORDIC_TIL_RAMPE_EXTENSION_COUNT_DISPLAY_2026-08-11.md`
-- `PROTOCOL.md`
-- `PROTOCOLS.md`
-- this handoff
-- `NORDIC_SESSION_ARCHIVE_2026-08-11_2243.md`
-
-NEXT SESSION
-No urgent carry-over from the completed Forlengere display / Til rampe WORK-default task.
-If user resumes Nordic work, likely next useful confirmation is simply opening `📥 TIL LAGER · WORK` on the physical Nordic and confirming V1.0.4 starts in WORK before scanning new incoming stock.
+Change control:
+If a problem is found in already working production behavior, explain it first. Do not change it without explicit user “роби”.
