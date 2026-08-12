@@ -1,25 +1,26 @@
-# Lager Admin · DEV PROTOCOL
+# Lager Admin · DEV / WORK PROTOCOL
 
 **Проєкт:** BaMavaremottak / AI Scanner Mottak  
 **Створено:** 11.08.2026 13:10 Europe/Oslo  
-**Оновлено:** 11.08.2026 14:50 Europe/Oslo  
-**Статус:** DEV / TEST ONLY / DEFERRED — WORK SERVER-LOCKED
+**Оновлено:** 12.08.2026 08:09 Europe/Oslo  
+**Статус:** WORK ACTIVATION IN PROGRESS
 
 ## Поточне рішення користувача
-11.08.2026 після відкриття сторінки користувач вирішив **відкласти Lager Admin** і перейти до реального нового приходу через Nordic scanner.
+12.08.2026 користувач окремо дозволив повернутися до Lager Admin і включити WORK.
 
-Не продовжувати Lager Admin, не відкривати WORK і не робити production manual corrections, доки користувач окремо не попросить повернутися до цієї задачі.
+Посилання на Lager Admin не додається в scanner-home, Nordic ID чи інші робочі форми. Воно залишається окремим прямим URL.
 
-## Що вже підтверджено фізично
+## Freeze інших робочих форм
+Nordic ID / scanner production-форми не змінювати в рамках Lager Admin. Їхня чинна робоча логіка FROZEN. Будь-які зміни тільки після окремого прямого дозволу користувача.
+
+## Що було підтверджено до WORK activation
 Browser/UI load PASS:
 - `admin-admin.html` відкриває `lager-admin.html`;
-- видно `🧪 TEST AKTIV`;
-- видно `🔒 WORK LÅST`;
 - видно product cards, включно з Forlengere/Vrak;
 - видно PÅ LAGER / RFID / MANUELL / TILGJENGELIG;
 - mobile layout працює на телефоні.
 
-Mutation buttons `+/-/SETT FAKTISK` користувач фізично **не тестував** перед рішенням відкласти задачу.
+Стара TEST-версія mutation buttons `+/-/SETT FAKTISK` фізично не була прийнята користувачем перед відкладенням.
 
 ## Призначення
 Окрема адміністративна сторінка для швидкого ручного коригування складських показників без створення вигаданих RFID-номерів.
@@ -28,16 +29,12 @@ Entry:
 - `lager-admin.html`
 - mnemonic redirect: `admin-admin.html`
 
-## TEST / WORK
-V1 працює тільки в `environment=test`.
-WORK не просто прихований у UI — RPC-функції серверно відхиляють будь-яку спробу коригування при `environment=work`.
-
 ## Джерело ручної поправки
-Використовується quantity ledger:
+Quantity ledger:
 - `public.mottak_quantity_stock`
 - `public.mottak_quantity_stock_events`
 
-Product constraint розширено на всі 8 продуктів.
+Product constraint охоплює всі 8 продуктів.
 
 RFID products:
 - `bunner`
@@ -64,8 +61,24 @@ Forlengere plast:
 
 Оператор не редагує `available_count` вручну.
 
-## Ручна корекція DEV
-Admin page підтримує:
+## WORK architecture 12.08.2026
+Не відкриваємо privileged DB mutation RPC напряму для browser anon.
+
+Створено окремий server-side Supabase Edge Function:
+- `lager-admin-work`
+- status ACTIVE
+- version 1
+
+Безпека:
+- дозволений origin тільки `https://stelmashchukyurii-maker.github.io`;
+- окремий Admin-код передається з браузера в `x-admin-key`;
+- код не зберігається в HTML;
+- Edge Function використовує server-side `SUPABASE_SERVICE_ROLE_KEY`;
+- `verify_jwt=false` тільки тому, що використовується custom Admin-key authentication;
+- WORK mutation проходить через server-side function, а не напряму з publishable key.
+
+## WORK actions
+Admin page має підтримувати:
 - `-5`
 - `-1`
 - `+1`
@@ -78,38 +91,32 @@ Reason presets:
 - Korreksjon
 - Annet
 
+WORK delta дозволені тільки: `-5, -1, +1, +5`.
+`SETT FAKTISK` має окреме підтвердження перед записом.
+
 ## RFID safety
 Admin не створює `mottak_scans` і не генерує fake EPC/lower_number.
 Для RFID-продуктів manual_count є адміністративною поправкою.
 Для Forlengere plast manual stock є нормальним quantity stock.
 
 ## Audit
-TEST-зміни пишуться в `mottak_quantity_stock_events`.
+WORK-зміни пишуться в `mottak_quantity_stock_events` з action:
+- `admin_adjust_work`
+- `admin_set_work`
 
-RPC:
-- `bama_admin_stock_summary()`
-- `bama_admin_stock_adjust_test(product,delta,reason)`
-- `bama_admin_stock_set_test(product,target,reason)`
-- `bama_admin_stock_history_test(limit)`
+## Live baseline перед WORK activation
+12.08.2026 перед змінами перевірено live через `bama_stock_summary()`:
+- bunner 24
+- hyller30 3
+- hyller60 20
+- forlengere_korte 3
+- forlengere_lange 3
+- forlengere_plast 0
+- vrak_bunner 0
+- vrak_hyller 2
 
-Mutation RPCs мають hard guard `environment='test'`.
+Це контрольний snapshot лише на момент перевірки. Поточний склад надалі завжди брати live через `bama_stock_summary()`.
 
-## SERVER PASS 11.08.2026
-Transactional/browser-role verification:
-- anon TEST `vrak_bunner +5` працює;
-- `SETT FAKTISK` перераховує manual delta;
-- history RPC бачить зміни;
-- TEST manual overlay входить у stock summary;
-- усі write-тести виконані з ROLLBACK;
-- WORK mutation підтверджено заблокована сервером.
-
-## Новий пріоритет після відкладення
-Поточний реальний WORK baseline після manual-shipment correction = **0 по всіх 8 продуктах**.
-Див. `WORK_STOCK_BASELINE_RESET_2026-08-11.md`.
-
-Наступний реальний прихід користувач хоче робити через `Nordic ID – Til lager`.
-
-## Не заявляти
-- Lager Admin mutation physical PASS — нема.
-- WORK admin — не реалізований і навмисно заблокований.
-- production manual corrections — не робити без нового явного рішення користувача.
+## Не заявляти до фізичного тесту
+- Lager Admin WORK physical PASS — ще нема.
+- Не вважати WORK mutation фізично прийнятим, доки користувач не зробить контрольну зміну зі свого телефону та не підтвердить результат.
