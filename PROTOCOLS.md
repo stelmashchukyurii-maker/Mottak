@@ -2,7 +2,7 @@
 
 **Репозиторій:** `stelmashchukyurii-maker/Mottak`  
 **Гілка:** `main`  
-**Оновлено:** 11.08.2026 22:43 Europe/Oslo
+**Оновлено:** 12.08.2026 08:09 Europe/Oslo
 
 ## 1. Start here — Nordic/RFID
 1. `NEXT_CHAT_NORDIC_ID.txt`
@@ -16,7 +16,7 @@
 Historical Nordic snapshot:
 `NORDIC_ID_RFID_PROTOCOL_ARCHIVE_2026-08-09.md`
 
-## 2. Current Nordic operator entries
+## 2. Current Nordic operator entries — FROZEN
 ### Scanner home
 `scanner-home.html`
 
@@ -25,6 +25,11 @@ Production buttons are WORK-first:
 - `📤 TIL RAMPE · WORK` → `nordic-id-til-rampe-work-default.html`
 
 TEST remains available manually inside each form.
+
+### Change lock 12.08.2026
+Усі Nordic ID / scanner production-форми та їхня вже робоча production-логіка вважаються FROZEN.
+
+Не змінювати їх у рамках інших задач. Будь-яка зміна лише після окремого прямого дозволу користувача.
 
 ### Til rampe operational state
 Application logic remains frozen V2.9.7 at:
@@ -82,12 +87,7 @@ Two canonical counters:
 
 Create/edit order reduces available immediately. Stage does not double-subtract.
 
-### Historical WORK reset
-35 old physically shipped WORK RFID units were corrected to dispatched on 11.08.2026.
-Record:
-`WORK_STOCK_BASELINE_RESET_2026-08-11.md`
-
-New stock arrived afterward, so old zero baseline is historical only.
+Never use an old protocol stock snapshot as current stock. Always query live via `bama_stock_summary()`.
 
 ## 7. Confirmed WORK trial — RAMPE 28
 Order:
@@ -128,16 +128,29 @@ Current v4.29 remains not fully physically accepted.
 ## 12. UT Kontor
 Current v37 remains preserved; full current acceptance is deferred/unconfirmed.
 
-## 13. Lager Admin
+## 13. Lager Admin — current active development
+Protocol:
 `LAGER_ADMIN_DEV_PROTOCOL.md`
 
-TEST-only DEV. UI load was visible; mutation UI not physically accepted. User explicitly deferred it. WORK remains server-locked.
+Current direct entry:
+`lager-admin.html`
+
+12.08.2026:
+- WORK v2.0 UI deployed;
+- server-side Supabase Edge Function `lager-admin-work` v1 ACTIVE;
+- Admin-code custom auth is server-side; code is not stored in HTML;
+- direct Admin link is not added to scanner-home/Nordic/production navigation;
+- changes use manual quantity overlay and do not create fake RFID;
+- WORK audit actions: `admin_adjust_work`, `admin_set_work`;
+- server/UI deployment did not change stock and created zero WORK admin audit events.
+
+WORK PHYSICAL PASS still pending user test from phone.
 
 ## 14. Change-control rule
 Already working production behavior must not be changed on a guess. Explain the problem first and get explicit user authorization.
 
 ## 15. Archive status
-The 11.08.2026 session is closed after:
+The 11.08.2026 Nordic session remains closed after:
 - Til rampe WORK-default physical PASS;
 - real partial RAMPE 28 WORK test;
 - Forlengere actual `NNN stk.` display physical PASS;
