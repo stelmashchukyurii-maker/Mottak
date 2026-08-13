@@ -69,7 +69,7 @@
           setCollapsed(!section.classList.contains("camera-stock-collapsed"));
         });
 
-        setCollapsed(true);
+        setCollapsed(section.classList.contains("physical"));
       });
       return true;
     }
@@ -102,7 +102,7 @@
         await injectScript(doc, `camera-plast-manual-receipt.js?v=${VERSION}`);
 
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.29 · 8 PRODUKTER · PLAST MANUELT MOTTAK<br>Oppdatert 13.08.2026 kl. 16:02";
+        if (version) version.innerHTML = "Kamera Cloud v4.29 · 8 PRODUKTER · PLAST MANUELT MOTTAK<br>Oppdatert 13.08.2026 kl. 20:21";
 
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => {
