@@ -1,6 +1,6 @@
 // BaMavaremottak — UT TEST language helper
-// Version 1.1.0
-// Updated: 2026-08-08 11:29 Europe/Oslo
+// Version 1.1.1
+// Updated: 2026-08-13 20:21 Europe/Oslo
 //
 // Stability rules:
 // - No MutationObserver.
@@ -134,9 +134,31 @@
     }
   }
 
+  function applyUtStockDefaultView(){
+    try {
+      if (window.__UT_STOCK_DEFAULT_VIEW_APPLIED__) return;
+      const root = document.getElementById("bamaStockSummary8");
+      const physical = root?.querySelector(".bs8-section.physical");
+      const available = root?.querySelector(".bs8-section.available");
+      if (!physical || !available || available.dataset.utCollapseReady !== "1") return;
+
+      physical.classList.add("ut-stock-collapsed");
+      available.classList.remove("ut-stock-collapsed");
+
+      const pChevron = physical.querySelector(".ut-stock-chevron");
+      const aChevron = available.querySelector(".ut-stock-chevron");
+      if (pChevron) pChevron.textContent = "▼";
+      if (aChevron) aChevron.textContent = "▲";
+      physical.querySelector(".bs8-head")?.setAttribute("aria-expanded","false");
+      available.querySelector(".bs8-head")?.setAttribute("aria-expanded","true");
+      window.__UT_STOCK_DEFAULT_VIEW_APPLIED__ = true;
+    } catch {}
+  }
+
   function apply(){
     document.documentElement.lang = currentLang() === "uk" ? "uk" : "nb";
     if (document.body) translateTree(document.body);
+    applyUtStockDefaultView();
   }
 
   window.UT_TEST_LANG = {
@@ -146,7 +168,7 @@
 
   const start = () => {
     apply();
-    [120, 450, 1000].forEach(delay => setTimeout(apply, delay));
+    [120, 450, 1000, 1600].forEach(delay => setTimeout(apply, delay));
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once:true });
   else start();
