@@ -325,8 +325,11 @@
   document.addEventListener("bama:office-switch-rendered", () => queueMicrotask(() => { ensureBar(); paint(); }));
 
   function stampRelease() {
+    document.title = "Florivo — Hovedmeny";
+    const heading = document.querySelector("h1");
+    if (heading && heading.textContent.trim() === "BaMavaremottak") heading.textContent = "Florivo";
     const version = document.querySelector(".version");
-    if (version) version.textContent = "Hovedmeny v19 RELEASE · Oppdatert 09.08.2026 kl. 01:47";
+    if (version) version.textContent = "Hovedmeny v19.1 RELEASE · Oppdatert 13.08.2026 kl. 18:24";
   }
 
   if (document.readyState === "loading") {
