@@ -33,39 +33,45 @@
       });
     }
 
-    function enablePhysicalStockCollapse(doc) {
-      if (doc.getElementById("cameraPhysicalStockCollapseStyle")) return;
-      const section = doc.querySelector("#bamaStockSummary8 .bs8-section.physical");
-      const head = section?.querySelector(".bs8-head");
-      if (!section || !head) return;
+    function enableStockSectionsCollapse(doc) {
+      const root = doc.getElementById("bamaStockSummary8");
+      if (!root) return false;
 
-      const style = doc.createElement("style");
-      style.id = "cameraPhysicalStockCollapseStyle";
-      style.textContent = `
-        #bamaStockSummary8 .bs8-section.physical.camera-stock-collapsed .bs8-grid{display:none!important}
-        #bamaStockSummary8 .bs8-section.physical.camera-stock-collapsed .bs8-head{margin-bottom:0}
-        #bamaStockSummary8 .bs8-section.physical .bs8-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-        #bamaStockSummary8 .camera-stock-chevron{flex:0 0 auto;min-width:34px;min-height:34px;border:1px solid #303b59;border-radius:10px;background:#151c30;color:#aab4ce;font:1000 15px/34px Arial,sans-serif;text-align:center}
-      `;
-      doc.head.appendChild(style);
+      if (!doc.getElementById("cameraStockSectionsCollapseStyle")) {
+        const style = doc.createElement("style");
+        style.id = "cameraStockSectionsCollapseStyle";
+        style.textContent = `
+          #bamaStockSummary8 .bs8-section.camera-stock-collapsed .bs8-grid{display:none!important}
+          #bamaStockSummary8 .bs8-section.camera-stock-collapsed .bs8-head{margin-bottom:0}
+          #bamaStockSummary8 .bs8-section .bs8-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+          #bamaStockSummary8 .camera-stock-chevron{flex:0 0 auto;min-width:34px;min-height:34px;border:1px solid #303b59;border-radius:10px;background:#151c30;color:#aab4ce;font:1000 15px/34px Arial,sans-serif;text-align:center}
+        `;
+        doc.head.appendChild(style);
+      }
 
-      const chevron = doc.createElement("span");
-      chevron.className = "camera-stock-chevron";
-      chevron.textContent = "▼";
-      head.appendChild(chevron);
+      root.querySelectorAll(".bs8-section.physical,.bs8-section.available").forEach(section => {
+        const head = section.querySelector(".bs8-head");
+        if (!head || section.dataset.cameraCollapseReady === "1") return;
+        section.dataset.cameraCollapseReady = "1";
 
-      const setCollapsed = collapsed => {
-        section.classList.toggle("camera-stock-collapsed", collapsed);
-        chevron.textContent = collapsed ? "▼" : "▲";
-        head.setAttribute("aria-expanded", collapsed ? "false" : "true");
-      };
+        const chevron = doc.createElement("span");
+        chevron.className = "camera-stock-chevron";
+        head.appendChild(chevron);
 
-      head.addEventListener("click", event => {
-        event.preventDefault();
-        setCollapsed(!section.classList.contains("camera-stock-collapsed"));
+        const setCollapsed = collapsed => {
+          section.classList.toggle("camera-stock-collapsed", collapsed);
+          chevron.textContent = collapsed ? "▼" : "▲";
+          head.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        };
+
+        head.addEventListener("click", event => {
+          event.preventDefault();
+          setCollapsed(!section.classList.contains("camera-stock-collapsed"));
+        });
+
+        setCollapsed(true);
       });
-
-      setCollapsed(true);
+      return true;
     }
 
     frame.addEventListener("load", async () => {
@@ -92,17 +98,18 @@
         loader.style.display = "none";
         win.__BAMA_COMPACT_STOCK_COUNTER__ = true;
         await injectScript(doc, `stock-summary-8-v1.js?v=${VERSION}`);
-        enablePhysicalStockCollapse(doc);
+        enableStockSectionsCollapse(doc);
         await injectScript(doc, `camera-plast-manual-receipt.js?v=${VERSION}`);
 
         const version = doc.querySelector(".version");
-        if (version) version.innerHTML = "Kamera Cloud v4.29 · 8 PRODUKTER · PLAST MANUELT MOTTAK<br>Oppdatert 13.08.2026 kl. 15:44";
+        if (version) version.innerHTML = "Kamera Cloud v4.29 · 8 PRODUKTER · PLAST MANUELT MOTTAK<br>Oppdatert 13.08.2026 kl. 16:02";
 
         [doc.getElementById("languages"), doc.getElementById("products")].forEach(element => {
           element?.addEventListener("click", () => setTimeout(() => {
             win.refreshBamaStock?.().catch(() => {});
             win.BAMA_STOCK_SUMMARY_REFRESH?.();
             win.CAMERA_PLAST_RECEIPT?.refresh?.();
+            enableStockSectionsCollapse(doc);
           }, 80));
         });
       } catch (error) {
