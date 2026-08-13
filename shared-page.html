@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
-  <title>BaMavaremottak</title>
+  <title>Florivo</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
     iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
@@ -13,17 +13,25 @@
 </head>
 <body>
 <div id="loader">Laster siden…</div>
-<iframe id="page" title="BaMavaremottak"></iframe>
+<iframe id="page" title="Florivo"></iframe>
 <script>
 "use strict";
 const allowed=new Set(["mottak-table-v1.html","review-pages.html","presentasjon.html"]);
 const requested=new URLSearchParams(location.search).get("src")||"";
 const source=allowed.has(requested)?requested:"review-pages.html";
 const frame=document.getElementById("page"),loader=document.getElementById("loader");
-frame.src=`${source}?shared-stock=20260805-1049`;
+frame.src=`${source}?shared-stock=20260813-1824`;
 frame.addEventListener("load",()=>{
   try{
     const doc=frame.contentDocument;
+    document.title="Florivo";
+    if(doc.title)doc.title=doc.title.replaceAll("BaMavaremottak","Florivo");
+    if(source==="presentasjon.html"){
+      const h1=doc.querySelector("h1");
+      if(h1&&h1.textContent.trim()==="BaMavaremottak")h1.textContent="Florivo";
+      const version=doc.querySelector(".version");
+      if(version)version.textContent="Presentasjon v1 · Florivo · Oppdatert 13.08.2026 kl. 18:24";
+    }
     doc.querySelectorAll("a[href]").forEach(link=>link.target="_top");
     const script=doc.createElement("script");
     script.src="shared-stock-status.js?v=20260805-1049";
