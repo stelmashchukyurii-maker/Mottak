@@ -24,7 +24,7 @@ iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:v
 <iframe id="app" title="UT Kontor WORKING v37"></iframe>
 <script>
 "use strict";
-const BUILD="20260811-0810";
+const BUILD="20260813-1544";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 
 function inject(doc,src,mark){
@@ -47,6 +47,42 @@ async function waitForProducts(w){
   return false;
 }
 
+function enablePhysicalStockCollapse(doc){
+  if(doc.getElementById("utPhysicalStockCollapseStyle"))return true;
+  const section=doc.querySelector("#bamaStockSummary8 .bs8-section.physical");
+  const head=section?.querySelector(".bs8-head");
+  if(!section||!head)return false;
+
+  const style=doc.createElement("style");
+  style.id="utPhysicalStockCollapseStyle";
+  style.textContent=`
+    #bamaStockSummary8 .bs8-section.physical.ut-stock-collapsed .bs8-grid{display:none!important}
+    #bamaStockSummary8 .bs8-section.physical.ut-stock-collapsed .bs8-head{margin-bottom:0}
+    #bamaStockSummary8 .bs8-section.physical .bs8-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+    #bamaStockSummary8 .ut-stock-chevron{flex:0 0 auto;min-width:34px;min-height:34px;border:1px solid #303b59;border-radius:10px;background:#151c30;color:#aab4ce;font:1000 15px/34px Arial,sans-serif;text-align:center}
+  `;
+  doc.head.appendChild(style);
+
+  const chevron=doc.createElement("span");
+  chevron.className="ut-stock-chevron";
+  chevron.textContent="▼";
+  head.appendChild(chevron);
+
+  const setCollapsed=collapsed=>{
+    section.classList.toggle("ut-stock-collapsed",collapsed);
+    chevron.textContent=collapsed?"▼":"▲";
+    head.setAttribute("aria-expanded",collapsed?"false":"true");
+  };
+
+  head.addEventListener("click",event=>{
+    event.preventDefault();
+    setCollapsed(!section.classList.contains("ut-stock-collapsed"));
+  });
+
+  setCollapsed(true);
+  return true;
+}
+
 function applyWorkingBrand(){
   try{
     const d=frame.contentDocument;
@@ -54,7 +90,7 @@ function applyWorkingBrand(){
     const home=d.querySelector("a.home");
     if(home)home.remove();
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 11.08.2026 kl. 08:10";
+    if(version)version.innerHTML="UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 13.08.2026 kl. 15:44";
   }catch{}
 }
 
@@ -64,6 +100,7 @@ async function refreshInner(){
     await w.UT_KONTOR_HISTORY_VISUALS?.refreshProgress?.();
     w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
     await w.BAMA_STOCK_SUMMARY_REFRESH?.();
+    enablePhysicalStockCollapse(frame.contentDocument);
     applyWorkingBrand();
   }catch{}
 }
@@ -73,6 +110,7 @@ function applyLanguage(){
     const w=frame.contentWindow;
     w.UT_TEST_LANG?.apply?.();
     w.BAMA_STOCK_SUMMARY_REFRESH?.();
+    enablePhysicalStockCollapse(frame.contentDocument);
     applyWorkingBrand();
     refreshInner();
   }catch{}
@@ -85,6 +123,7 @@ function hookStockRefreshAfterLoadUt(w){
   w.loadUt=async function(...args){
     const result=await base.apply(this,args);
     await w.BAMA_STOCK_SUMMARY_REFRESH?.();
+    enablePhysicalStockCollapse(frame.contentDocument);
     return result;
   };
 }
@@ -101,11 +140,12 @@ frame.addEventListener("load",async()=>{
     await inject(d,"ut-kontor-history-visuals.js","history");
     await inject(d,"ut-test-language.js","language");
     await inject(d,"stock-summary-8-v1.js","stock-summary-8");
+    enablePhysicalStockCollapse(d);
     hookStockRefreshAfterLoadUt(w);
     await refreshInner();
     applyLanguage();
-    setTimeout(refreshInner,350);
-    setTimeout(applyWorkingBrand,1200);
+    setTimeout(()=>{enablePhysicalStockCollapse(d);refreshInner()},350);
+    setTimeout(()=>{enablePhysicalStockCollapse(d);applyWorkingBrand()},1200);
   }catch(e){
     console.error(e);
     loader.style.display="flex";
