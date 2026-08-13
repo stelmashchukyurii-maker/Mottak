@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v37</title>
+<title>UT Kontor WORKING v37.1</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--text:#f5f7ff}
 *{box-sizing:border-box}
@@ -20,8 +20,8 @@ iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:v
 <script src="products.js?v=20260811-0810"></script>
 </head>
 <body class="notranslate">
-<div id="loader">Laster UT Kontor WORKING v37…</div>
-<iframe id="app" title="UT Kontor WORKING v37"></iframe>
+<div id="loader">Laster UT Kontor WORKING v37.1…</div>
+<iframe id="app" title="UT Kontor WORKING v37.1"></iframe>
 <script>
 "use strict";
 const BUILD="20260813-1544";
@@ -88,14 +88,53 @@ function enableStockSectionsCollapse(doc){
   return true;
 }
 
+function ensureTopActions(doc){
+  const top=doc.querySelector(".top");
+  if(!top)return false;
+
+  if(!doc.getElementById("utTopActionsStyle")){
+    const style=doc.createElement("style");
+    style.id="utTopActionsStyle";
+    style.textContent=`
+      .top{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"home presentation" "version version";gap:6px 8px;align-items:center!important}
+      .top>a.home{grid-area:home;justify-self:start}
+      .top>.ut-presentation-link{grid-area:presentation;justify-self:end;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 11px;border:1px solid rgba(244,196,48,.72);border-radius:12px;background:rgba(244,196,48,.1);color:#ffe17a;text-decoration:none;font-size:11px;font-weight:950;white-space:nowrap}
+      .top>.version{grid-area:version;justify-self:end;text-align:right}
+      @media(max-width:560px){.top>.ut-presentation-link,.top>a.home{min-height:38px;padding:7px 9px;font-size:10px}}
+    `;
+    doc.head.appendChild(style);
+  }
+
+  let home=top.querySelector("a.home");
+  if(!home){
+    home=doc.createElement("a");
+    home.className="home";
+    top.prepend(home);
+  }
+  home.href="index.html";
+  home.target="_top";
+  home.textContent="⌂ HOVEDMENY";
+
+  let presentation=top.querySelector(".ut-presentation-link");
+  if(!presentation){
+    presentation=doc.createElement("a");
+    presentation.className="ut-presentation-link";
+    presentation.href="https://drive.google.com/file/d/1Js2sVvUDo_nLFwx3oOtfXgt6GYsQQVZS/view?usp=drivesdk";
+    presentation.target="_blank";
+    presentation.rel="noopener noreferrer";
+    presentation.textContent="▶ PRESENTASJON";
+    top.insertBefore(presentation,top.querySelector(".version")||null);
+  }
+  return true;
+}
+
 function applyWorkingBrand(){
   try{
     const d=frame.contentDocument;
     if(!d?.body)return;
-    const home=d.querySelector("a.home");
-    if(home)home.remove();
+    ensureTopActions(d);
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 13.08.2026 kl. 16:02";
+    if(version)version.innerHTML="UT Kontor WORKING v37.1 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 13.08.2026 kl. 19:34";
   }catch{}
 }
 
@@ -137,6 +176,7 @@ frame.addEventListener("load",async()=>{
   loader.style.display="none";
   try{
     const d=frame.contentDocument,w=frame.contentWindow;
+    ensureTopActions(d);
     w.BAMA_HOME_TARGET="";
     w.localStorage.setItem("mottak_ut_language","no");
     await inject(d,"ut-kontor-products.js","products");
