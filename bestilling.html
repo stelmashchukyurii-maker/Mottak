@@ -47,39 +47,44 @@ async function waitForProducts(w){
   return false;
 }
 
-function enablePhysicalStockCollapse(doc){
-  if(doc.getElementById("utPhysicalStockCollapseStyle"))return true;
-  const section=doc.querySelector("#bamaStockSummary8 .bs8-section.physical");
-  const head=section?.querySelector(".bs8-head");
-  if(!section||!head)return false;
+function enableStockSectionsCollapse(doc){
+  const root=doc.getElementById("bamaStockSummary8");
+  if(!root)return false;
 
-  const style=doc.createElement("style");
-  style.id="utPhysicalStockCollapseStyle";
-  style.textContent=`
-    #bamaStockSummary8 .bs8-section.physical.ut-stock-collapsed .bs8-grid{display:none!important}
-    #bamaStockSummary8 .bs8-section.physical.ut-stock-collapsed .bs8-head{margin-bottom:0}
-    #bamaStockSummary8 .bs8-section.physical .bs8-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-    #bamaStockSummary8 .ut-stock-chevron{flex:0 0 auto;min-width:34px;min-height:34px;border:1px solid #303b59;border-radius:10px;background:#151c30;color:#aab4ce;font:1000 15px/34px Arial,sans-serif;text-align:center}
-  `;
-  doc.head.appendChild(style);
+  if(!doc.getElementById("utStockSectionsCollapseStyle")){
+    const style=doc.createElement("style");
+    style.id="utStockSectionsCollapseStyle";
+    style.textContent=`
+      #bamaStockSummary8 .bs8-section.ut-stock-collapsed .bs8-grid{display:none!important}
+      #bamaStockSummary8 .bs8-section.ut-stock-collapsed .bs8-head{margin-bottom:0}
+      #bamaStockSummary8 .bs8-section .bs8-head{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+      #bamaStockSummary8 .ut-stock-chevron{flex:0 0 auto;min-width:34px;min-height:34px;border:1px solid #303b59;border-radius:10px;background:#151c30;color:#aab4ce;font:1000 15px/34px Arial,sans-serif;text-align:center}
+    `;
+    doc.head.appendChild(style);
+  }
 
-  const chevron=doc.createElement("span");
-  chevron.className="ut-stock-chevron";
-  chevron.textContent="▼";
-  head.appendChild(chevron);
+  root.querySelectorAll(".bs8-section.physical,.bs8-section.available").forEach(section=>{
+    const head=section.querySelector(".bs8-head");
+    if(!head||section.dataset.utCollapseReady==="1")return;
+    section.dataset.utCollapseReady="1";
 
-  const setCollapsed=collapsed=>{
-    section.classList.toggle("ut-stock-collapsed",collapsed);
-    chevron.textContent=collapsed?"▼":"▲";
-    head.setAttribute("aria-expanded",collapsed?"false":"true");
-  };
+    const chevron=doc.createElement("span");
+    chevron.className="ut-stock-chevron";
+    head.appendChild(chevron);
 
-  head.addEventListener("click",event=>{
-    event.preventDefault();
-    setCollapsed(!section.classList.contains("ut-stock-collapsed"));
+    const setCollapsed=collapsed=>{
+      section.classList.toggle("ut-stock-collapsed",collapsed);
+      chevron.textContent=collapsed?"▼":"▲";
+      head.setAttribute("aria-expanded",collapsed?"false":"true");
+    };
+
+    head.addEventListener("click",event=>{
+      event.preventDefault();
+      setCollapsed(!section.classList.contains("ut-stock-collapsed"));
+    });
+
+    setCollapsed(true);
   });
-
-  setCollapsed(true);
   return true;
 }
 
@@ -90,7 +95,7 @@ function applyWorkingBrand(){
     const home=d.querySelector("a.home");
     if(home)home.remove();
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 13.08.2026 kl. 15:44";
+    if(version)version.innerHTML="UT Kontor WORKING v37 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 13.08.2026 kl. 16:02";
   }catch{}
 }
 
@@ -100,7 +105,7 @@ async function refreshInner(){
     await w.UT_KONTOR_HISTORY_VISUALS?.refreshProgress?.();
     w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
     await w.BAMA_STOCK_SUMMARY_REFRESH?.();
-    enablePhysicalStockCollapse(frame.contentDocument);
+    enableStockSectionsCollapse(frame.contentDocument);
     applyWorkingBrand();
   }catch{}
 }
@@ -110,7 +115,7 @@ function applyLanguage(){
     const w=frame.contentWindow;
     w.UT_TEST_LANG?.apply?.();
     w.BAMA_STOCK_SUMMARY_REFRESH?.();
-    enablePhysicalStockCollapse(frame.contentDocument);
+    enableStockSectionsCollapse(frame.contentDocument);
     applyWorkingBrand();
     refreshInner();
   }catch{}
@@ -123,7 +128,7 @@ function hookStockRefreshAfterLoadUt(w){
   w.loadUt=async function(...args){
     const result=await base.apply(this,args);
     await w.BAMA_STOCK_SUMMARY_REFRESH?.();
-    enablePhysicalStockCollapse(frame.contentDocument);
+    enableStockSectionsCollapse(frame.contentDocument);
     return result;
   };
 }
@@ -140,12 +145,12 @@ frame.addEventListener("load",async()=>{
     await inject(d,"ut-kontor-history-visuals.js","history");
     await inject(d,"ut-test-language.js","language");
     await inject(d,"stock-summary-8-v1.js","stock-summary-8");
-    enablePhysicalStockCollapse(d);
+    enableStockSectionsCollapse(d);
     hookStockRefreshAfterLoadUt(w);
     await refreshInner();
     applyLanguage();
-    setTimeout(()=>{enablePhysicalStockCollapse(d);refreshInner()},350);
-    setTimeout(()=>{enablePhysicalStockCollapse(d);applyWorkingBrand()},1200);
+    setTimeout(()=>{enableStockSectionsCollapse(d);refreshInner()},350);
+    setTimeout(()=>{enableStockSectionsCollapse(d);applyWorkingBrand()},1200);
   }catch(e){
     console.error(e);
     loader.style.display="flex";
