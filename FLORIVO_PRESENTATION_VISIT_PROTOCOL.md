@@ -56,6 +56,7 @@ Allowed `target_key` values:
 - `ut_kontor` — UT KONTOR
 - `ut_lager_utsending` — UT LAGER OG UTSENDING
 - `scanner_home` — SCANNER HOME
+- `versjonslogg` — VERSJONSLOGG / technical development log
 
 Write RPC:
 
@@ -95,15 +96,17 @@ Important limitation:
 
 ## 4. Click counting rules
 
-A click is recorded only when one of the five tracked links is activated from `presentasjon-hovedmeny.html`.
+A click is recorded only when one of the six tracked links is activated from `presentasjon-hovedmeny.html`.
 
 Rules:
 
 - every click on a tracked presentation button is counted
 - click totals are NOT subject to the 30-minute visit deduplication rule
 - `COUNT(DISTINCT visitor_id)` per `target_key` gives the approximate number of different browsers that clicked that button
-- opening `bestilling.html`, `scanner-home.html`, another work page, or the Drive video directly by URL does NOT count as a transition from the presentation page
+- opening `bestilling.html`, `scanner-home.html`, `teknisk-versjonslogg.html`, another work page, or the Drive video directly by URL does NOT count as a transition from the presentation page
+- opening the version log from the normal `index.html` main menu does NOT count as a presentation click
 - direct use of the destination pages is not modified and does not write to this click journal
+- `versjonslogg` is shown as a separate click counter and is intentionally excluded from the five-stage work-content funnel
 
 ## 5. Browser storage
 
@@ -271,7 +274,8 @@ It displays aggregate statistics only:
 - total visits
 - daily visit breakdown
 - latest visit
-- expandable/open-by-default presentation-button list with today / total / approximate unique browsers / latest click for each tracked destination
+- expandable/open-by-default presentation-button list with today / total / approximate unique browsers / latest click for each of the six tracked destinations
+- the version-log counter is separate from the work-content funnel
 
 ## 10. Rules for another ChatGPT conversation
 
@@ -287,6 +291,7 @@ Examples of user requests:
 - “Коли були останні заходи?”
 - “Скільки разів відкривали відеопрезентацію?”
 - “Скільки переходів було в UT Kontor?”
+- “Скільки відкривали журнал версій?”
 - “Які кнопки найчастіше натискали?”
 - “Покажи переходи по всіх сторінках сьогодні.”
 
@@ -303,7 +308,7 @@ If the user asks “who visited/clicked”, explain that the journal intentional
 
 Visit tracking started on 14.08.2026.
 
-Click tracking for the five presentation links was added on 14.08.2026 after the visit journal. Clicks made before click tracking was deployed cannot be reconstructed from this table.
+Click tracking for the original five presentation links was added on 14.08.2026 after the visit journal. Tracking for the `VERSJONSLOGG` presentation link was added later on 14.08.2026. Clicks made before the relevant logger was deployed cannot be reconstructed from this table.
 
 Do not invent or estimate historical data unless the user explicitly asks for an estimate based on another source.
 
