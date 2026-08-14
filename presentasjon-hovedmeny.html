@@ -55,19 +55,19 @@
   <div class="present-badge">PRESENTASJONSSIDE</div>
   <h1>Florivo</h1>
   <p class="lead">Utvalgte arbeidssider for demonstrasjon.</p>
-  <a class="video" href="https://drive.google.com/file/d/1Js2sVvUDo_nLFwx3oOtfXgt6GYsQQVZS/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">▶ VIDEOPRESENTASJON</a>
+  <a class="video" data-florivo-click="video_presentasjon" href="https://drive.google.com/file/d/1Js2sVvUDo_nLFwx3oOtfXgt6GYsQQVZS/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">▶ VIDEOPRESENTASJON</a>
 
   <section class="group">
     <h2>📱 Arbeidssider for mobil</h2>
     <p class="group-note">De viktigste sidene som brukes fra telefon.</p>
     <div class="links">
-      <a class="page-link" href="camera-live-v4.html">
+      <a class="page-link" data-florivo-click="kamera_cloud" href="camera-live-v4.html">
         <span><strong>📷 KAMERA CLOUD</strong><small>Foto og registrering fra mobil.</small></span><span class="open">ÅPNE</span>
       </a>
-      <a class="page-link" href="bestilling.html">
+      <a class="page-link" data-florivo-click="ut_kontor" href="bestilling.html">
         <span><strong>📋 UT — VAREBESTILLING · KONTOR</strong><small>Opprett og følg bestillinger til rampe.</small></span><span class="open">ÅPNE</span>
       </a>
-      <a class="page-link" href="utsending.html">
+      <a class="page-link" data-florivo-click="ut_lager_utsending" href="utsending.html">
         <span><strong>🚚 UT — LAGER OG UTSENDING</strong><small>Arbeid på lager, rampe og utsending.</small></span><span class="open">ÅPNE</span>
       </a>
     </div>
@@ -77,7 +77,7 @@
     <h2>📡 Nordic ID-skanner</h2>
     <p class="group-note">Hovedsiden på firmaskanneren med inngang til TIL LAGER og TIL RAMPE i WORK.</p>
     <div class="links">
-      <a class="page-link" href="scanner-home.html">
+      <a class="page-link" data-florivo-click="scanner_home" href="scanner-home.html">
         <span><strong>📡 SCANNER HOME</strong><small>Nordic ID · TIL LAGER · TIL RAMPE</small></span><span class="open">ÅPNE</span>
       </a>
     </div>
@@ -97,6 +97,7 @@
 (()=>{
   "use strict";
   const ENDPOINT="https://hzjsatehehhpgpskckfi.supabase.co/rest/v1/rpc/log_florivo_presentation_visit";
+  const CLICK_ENDPOINT="https://hzjsatehehhpgpskckfi.supabase.co/rest/v1/rpc/log_florivo_presentation_click";
   const API_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
   const STORAGE_KEY="florivo_presentation_visitor_v1";
 
@@ -124,21 +125,36 @@
     return makeVisitorId();
   }
 
-  function recordVisit(){
-    const visitorId=getVisitorId();
-    if(!visitorId)return;
+  function post(endpoint,body){
     try{
-      fetch(ENDPOINT,{
+      fetch(endpoint,{
         method:"POST",
         headers:{"apikey":API_KEY,"Content-Type":"application/json","Accept":"application/json"},
-        body:JSON.stringify({p_page_key:"presentasjon-hovedmeny",p_visitor_id:visitorId}),
+        body:JSON.stringify(body),
         cache:"no-store",
         keepalive:true
       }).catch(()=>{});
     }catch{}
   }
 
+  function recordVisit(){
+    const visitorId=getVisitorId();
+    if(!visitorId)return;
+    post(ENDPOINT,{p_page_key:"presentasjon-hovedmeny",p_visitor_id:visitorId});
+  }
+
+  function recordClick(targetKey){
+    const visitorId=getVisitorId();
+    if(!visitorId||!targetKey)return;
+    post(CLICK_ENDPOINT,{p_target_key:targetKey,p_visitor_id:visitorId});
+  }
+
   addEventListener("pageshow",recordVisit,{passive:true});
+  document.addEventListener("click",event=>{
+    const link=event.target.closest?.("[data-florivo-click]");
+    if(!link)return;
+    recordClick(link.getAttribute("data-florivo-click"));
+  },{capture:true,passive:true});
 })();
 </script>
 </body>
