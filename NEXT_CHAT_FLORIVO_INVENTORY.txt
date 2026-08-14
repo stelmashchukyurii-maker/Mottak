@@ -1,0 +1,31 @@
+FLORIVO-INVENTORY-HANDOFF-2026-08-14
+
+Продовжуємо окремий напрямок Florivo Inventory / Inventering.
+
+Спочатку прочитай:
+1. FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md
+2. FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md — лише для загальної server-first архітектури scanner
+3. PROTOCOLS.md — щоб не порушити FROZEN production правила
+
+Мета цієї розмови:
+створити і фізично протестувати окрему Browser TEST-форму для щомісячної інвентаризації складу.
+
+Основна логіка:
+- inventory створює незалежну session/snapshot;
+- під час обходу НЕ змінює WORK-stock;
+- RFID scan → фактично що бачимо;
+- Bunner stabel: default 10, можна змінити;
+- Bunner + Hyller: ввести фактичну кількість полиць, не обмежувати лише 30/60;
+- повторний RFID у тій самій session не рахується вдруге;
+- неробоча/відсутня бірка → MANUELL → MAN-xxx → працівник відмічає товар фізично наліпкою/маркером;
+- unknown RFID або server-status mismatch треба дозволити записати як physical evidence, але не змінювати WORK автоматично;
+- після AVSLUTT порівняти SERVER FORVENTET ↔ FAKTISK TELT та сформувати AVVIK report;
+- будь-яке майбутнє коригування WORK — лише окремо, audited, після людського підтвердження.
+
+Перший етап:
+Browser TEST only. Не вносити inventory експеримент у заморожені Nordic WORK production-форми.
+
+Після PHYSICAL PASS браузерної версії успішний UX/logic можна переносити в Florivo Android Scanner як окрему кнопку 📋 INVENTERING.
+
+Поточний статус:
+CONCEPT CREATED / Browser TEST NOT YET IMPLEMENTED / NO WORK CHANGES / NO INVENTORY DB CHANGES YET.
