@@ -2,7 +2,7 @@
 
 **Репозиторій:** `stelmashchukyurii-maker/Mottak`  
 **Гілка:** `main`  
-**Оновлено:** 12.08.2026 08:09 Europe/Oslo
+**Оновлено:** 14.08.2026 19:11 Europe/Oslo
 
 ## 1. Start here — Nordic/RFID
 1. `NEXT_CHAT_NORDIC_ID.txt`
@@ -146,10 +146,38 @@ Current direct entry:
 
 WORK PHYSICAL PASS still pending user test from phone.
 
-## 14. Change-control rule
+## 14. Florivo Android Scanner — CONCEPT
+Concept protocol:
+`FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md`
+
+Status:
+- architecture / idea only;
+- no APK yet;
+- no pairing API/tables yet;
+- no WORK changes;
+- does not unfreeze Nordic production.
+
+Core concept:
+- Android Scanner is a thin client;
+- scanner reads RFID/QR/camera and sends action + factual scan data to server;
+- server owns validation, stock/order logic, permissions and audit;
+- scanner pairing uses a short-lived one-time QR → pending device → APPROVE/DENY and optional matching control number;
+- every scanner gets a revocable server-side `device_id` and permissions;
+- no `service_role`, Admin code or permanent universal production secret inside APK.
+
+Critical UT rule:
+- `UT Kontor` creates the order;
+- customer/recipient/destination data belongs to the server-side UT order;
+- Android scanner does **not** choose or recreate the customer;
+- for TIL RAMPE / DISPATCH scanner sends `order_id` + physical RFID/action, and server resolves who/where the order is for.
+
+First recommended future stage only after explicit user decision:
+`Android V0.1 — DEVICE + RFID LAB`, without production stock writes.
+
+## 15. Change-control rule
 Already working production behavior must not be changed on a guess. Explain the problem first and get explicit user authorization.
 
-## 15. Archive status
+## 16. Archive status
 The 11.08.2026 Nordic session remains closed after:
 - Til rampe WORK-default physical PASS;
 - real partial RAMPE 28 WORK test;
