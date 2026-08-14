@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nb" translate="no">
+<html lang="uk" translate="no">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Florivo — Besøksoversikt</title>
+  <title>Florivo — Статистика відвідувань</title>
   <style>
     :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--bad:#ff7373}
     *{box-sizing:border-box}
@@ -41,26 +41,26 @@
 </head>
 <body class="notranslate">
 <main>
-  <div class="badge">INTERN BESØKSOVERSIKT</div>
+  <div class="badge">ВНУТРІШНЯ СТАТИСТИКА ВІДВІДУВАНЬ</div>
   <h1>Florivo</h1>
-  <p class="sub">Presentasjonsside · anonym besøksstatistikk</p>
+  <p class="sub">Презентаційна сторінка · анонімна статистика відвідувань</p>
 
   <div class="grid">
-    <section class="card primary"><div class="label">Besøk i dag</div><div class="value" id="visitsToday">—</div><div class="small">Registrerte besøk med 30 min. duplikatfilter</div></section>
-    <section class="card primary"><div class="label">Unike i dag</div><div class="value" id="uniqueToday">—</div><div class="small">Omtrentlige unike nettlesere</div></section>
-    <section class="card info"><div class="label">Siste 7 dager</div><div class="value" id="visits7d">—</div><div class="small"><span id="unique7d">—</span> unike nettlesere</div></section>
-    <section class="card info"><div class="label">Totalt</div><div class="value" id="visitsTotal">—</div><div class="small"><span id="uniqueTotal">—</span> unike nettlesere</div></section>
+    <section class="card primary"><div class="label">Відвідування сьогодні</div><div class="value" id="visitsToday">—</div><div class="small">Скільки зарахованих входів було сьогодні. Повторний вхід з того самого браузера протягом 30 хвилин не додається.</div></section>
+    <section class="card primary"><div class="label">Унікальні сьогодні</div><div class="value" id="uniqueToday">—</div><div class="small">Приблизна кількість різних браузерів / пристроїв, які заходили сьогодні.</div></section>
+    <section class="card info"><div class="label">Останні 7 днів</div><div class="value" id="visits7d">—</div><div class="small">Усього входів за 7 днів · <span id="unique7d">—</span> унікальних браузерів.</div></section>
+    <section class="card info"><div class="label">Всього</div><div class="value" id="visitsTotal">—</div><div class="small">Від початку журналу · <span id="uniqueTotal">—</span> унікальних браузерів.</div></section>
   </div>
 
   <section class="section">
-    <h2>Siste 7 dager</h2>
-    <div class="daily" id="daily"><div class="small">Laster…</div></div>
+    <h2>По днях — останні 7 днів</h2>
+    <div class="daily" id="daily"><div class="small">Завантаження…</div></div>
   </section>
 
-  <div class="latest">Siste registrerte besøk: <strong id="latestVisit">—</strong></div>
-  <button id="refreshBtn" type="button">↻ OPPDATER</button>
+  <div class="latest">Останнє зафіксоване відвідування: <strong id="latestVisit">—</strong></div>
+  <button id="refreshBtn" type="button">↻ ОНОВИТИ</button>
   <div class="status" id="status"></div>
-  <div class="footer">Europe/Oslo · siden er ikke lenket fra Florivo-menyene</div>
+  <div class="footer">Часова зона: Europe/Oslo · ця сторінка ніде не підключена в меню Florivo</div>
 </main>
 <script>
 (()=>{
@@ -70,11 +70,11 @@
   const $=id=>document.getElementById(id);
 
   function formatDate(day){
-    try{return new Intl.DateTimeFormat("nb-NO",{weekday:"short",day:"2-digit",month:"2-digit"}).format(new Date(day+"T12:00:00"))}catch{return day}
+    try{return new Intl.DateTimeFormat("uk-UA",{weekday:"short",day:"2-digit",month:"2-digit"}).format(new Date(day+"T12:00:00"))}catch{return day}
   }
   function formatLatest(value){
-    if(!value)return "Ingen besøk registrert ennå";
-    try{return new Intl.DateTimeFormat("nb-NO",{timeZone:"Europe/Oslo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date(value))}catch{return value}
+    if(!value)return "Поки що немає зафіксованих відвідувань";
+    try{return new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Oslo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date(value))}catch{return value}
   }
   function render(data){
     $("visitsToday").textContent=data.visits_today??0;
@@ -85,22 +85,22 @@
     $("uniqueTotal").textContent=data.unique_total??0;
     $("latestVisit").textContent=formatLatest(data.latest_visit);
     const rows=Array.isArray(data.daily_7d)?data.daily_7d:[];
-    $("daily").innerHTML=rows.length?rows.map(r=>`<div class="row"><strong>${formatDate(r.day)}</strong><span>${Number(r.unique||0)} unike</span><b>${Number(r.visits||0)} besøk</b></div>`).join(""):'<div class="small">Ingen registrerte besøk de siste 7 dagene.</div>';
+    $("daily").innerHTML=rows.length?rows.map(r=>`<div class="row"><strong>${formatDate(r.day)}</strong><span>${Number(r.unique||0)} унікальних</span><b>${Number(r.visits||0)} відвідувань</b></div>`).join(""):'<div class="small">За останні 7 днів ще немає зафіксованих відвідувань.</div>';
   }
   async function load(){
     const status=$("status");
     status.className="status";
-    status.textContent="Oppdaterer…";
+    status.textContent="Оновлення…";
     try{
       const res=await fetch(ENDPOINT,{method:"POST",headers:{"apikey":API_KEY,"Content-Type":"application/json","Accept":"application/json"},body:"{}",cache:"no-store"});
       if(!res.ok)throw new Error(`HTTP ${res.status}`);
       let data=await res.json();
       if(Array.isArray(data))data=data[0]||{};
       render(data||{});
-      status.textContent=`Oppdatert ${new Intl.DateTimeFormat("nb-NO",{timeZone:"Europe/Oslo",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())}`;
+      status.textContent=`Оновлено ${new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Oslo",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())}`;
     }catch(err){
       status.className="status bad";
-      status.textContent="Kunne ikke hente statistikk. Prøv igjen.";
+      status.textContent="Не вдалося отримати статистику. Спробуй ще раз.";
     }
   }
   $("refreshBtn").addEventListener("click",load);
