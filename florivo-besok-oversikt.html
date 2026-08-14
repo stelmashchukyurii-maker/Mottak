@@ -30,18 +30,35 @@
     .daily{display:grid;gap:8px}
     .row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
     .row strong{font-size:14px}.row span{color:var(--muted);font-size:12px}.row b{font-size:15px}
+    .click-details{margin-top:16px;border:1px solid rgba(72,213,151,.5);border-radius:18px;background:rgba(72,213,151,.035);overflow:hidden}
+    .click-details summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:78px;padding:15px;cursor:pointer}
+    .click-details summary::-webkit-details-marker{display:none}
+    .click-details summary strong{display:block;font-size:21px}
+    .click-details summary small{display:block;margin-top:5px;color:var(--muted);font-size:11px;line-height:1.4}
+    .chev{color:var(--muted);font-size:23px;transition:transform .18s ease}
+    .click-details[open] .chev{transform:rotate(180deg)}
+    .click-list{display:grid;gap:9px;padding:0 15px 15px}
+    .click-row{padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+    .click-title{font-size:16px;font-weight:1000;line-height:1.3}
+    .click-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .metric{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+    .metric span{display:block;color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.05em}
+    .metric b{display:block;margin-top:2px;font-size:25px;line-height:1.05}
+    .metric small{display:block;margin-top:4px;color:var(--muted);font-size:10px}
+    .click-latest{margin-top:8px;color:var(--muted);font-size:10px;line-height:1.4}
+    .click-note{padding:0 15px 15px;color:var(--muted);font-size:11px;line-height:1.5}
     .latest{margin-top:16px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--muted);line-height:1.5}
     .latest strong{color:var(--text)}
     button{width:100%;min-height:54px;margin-top:14px;border:2px solid var(--accent);border-radius:15px;background:var(--accent);color:#17130a;font:950 17px Arial,sans-serif;cursor:pointer}
     .status{min-height:20px;margin-top:9px;color:var(--muted);font-size:12px;text-align:center}
     .status.bad{color:var(--bad)}
     .footer{margin-top:18px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
-    @media(max-width:560px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr auto}.row span{grid-column:1/-1}}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr auto}.row span{grid-column:1/-1}.click-metrics{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body class="notranslate">
 <main>
-  <div class="badge">ВНУТРІШНЯ СТАТИСТИКА ВІДВІДУВАНЬ</div>
+  <div class="badge">ВНУТРІШНЯ СТАТИСТИКА ВІДВІДУВАНЬ І ПЕРЕХОДІВ</div>
   <h1>Florivo</h1>
   <p class="sub">Презентаційна сторінка · анонімна статистика відвідувань</p>
 
@@ -51,6 +68,15 @@
     <section class="card info"><div class="label">Останні 7 днів</div><div class="value" id="visits7d">—</div><div class="small">Усього входів за 7 днів · <span id="unique7d">—</span> унікальних браузерів.</div></section>
     <section class="card info"><div class="label">Всього</div><div class="value" id="visitsTotal">—</div><div class="small">Від початку журналу · <span id="uniqueTotal">—</span> унікальних браузерів.</div></section>
   </div>
+
+  <details class="click-details" open>
+    <summary>
+      <span><strong>Переходи з презентаційної сторінки</strong><small>Розгорнутий список натискань на основні кнопки Florivo</small></span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="click-list" id="clickList"><div class="small">Завантаження…</div></div>
+    <div class="click-note">Рахуються тільки переходи через кнопки на <b>presentasjon-hovedmeny.html</b>. Якщо хтось відкриє робочу сторінку напряму за її адресою, такий перехід тут не зараховується. «Унікальні» — приблизна кількість різних браузерів, які натискали конкретну кнопку.</div>
+  </details>
 
   <section class="section">
     <h2>По днях — останні 7 днів</h2>
@@ -68,13 +94,34 @@
   const ENDPOINT="https://hzjsatehehhpgpskckfi.supabase.co/rest/v1/rpc/florivo_presentation_visit_stats";
   const API_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
   const $=id=>document.getElementById(id);
+  const CLICK_LABELS={
+    video_presentasjon:"🎬 ВІДЕОПРЕЗЕНТАЦІЯ",
+    kamera_cloud:"📷 KAMERA CLOUD",
+    ut_kontor:"📋 UT KONTOR",
+    ut_lager_utsending:"🚚 UT LAGER І ВІДПРАВКА",
+    scanner_home:"📡 SCANNER HOME"
+  };
 
   function formatDate(day){
     try{return new Intl.DateTimeFormat("uk-UA",{weekday:"short",day:"2-digit",month:"2-digit"}).format(new Date(day+"T12:00:00"))}catch{return day}
   }
-  function formatLatest(value){
-    if(!value)return "Поки що немає зафіксованих відвідувань";
+  function formatLatest(value,emptyText="Поки що немає зафіксованих відвідувань"){
+    if(!value)return emptyText;
     try{return new Intl.DateTimeFormat("uk-UA",{timeZone:"Europe/Oslo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date(value))}catch{return value}
+  }
+  function renderClicks(rows){
+    const list=Array.isArray(rows)?rows:[];
+    $("clickList").innerHTML=list.length?list.map(r=>{
+      const label=CLICK_LABELS[r.target_key]||r.target_key;
+      return `<div class="click-row">
+        <div class="click-title">${label}</div>
+        <div class="click-metrics">
+          <div class="metric"><span>СЬОГОДНІ</span><b>${Number(r.clicks_today||0)}</b><small>${Number(r.unique_today||0)} унікальних браузерів</small></div>
+          <div class="metric"><span>ВСЬОГО</span><b>${Number(r.clicks_total||0)}</b><small>${Number(r.unique_total||0)} унікальних браузерів</small></div>
+        </div>
+        <div class="click-latest">Останнє відкриття через цю кнопку: ${formatLatest(r.latest_click,"ще не було")}</div>
+      </div>`;
+    }).join(""):'<div class="small">Переходів ще не зафіксовано.</div>';
   }
   function render(data){
     $("visitsToday").textContent=data.visits_today??0;
@@ -84,6 +131,7 @@
     $("visitsTotal").textContent=data.visits_total??0;
     $("uniqueTotal").textContent=data.unique_total??0;
     $("latestVisit").textContent=formatLatest(data.latest_visit);
+    renderClicks(data.clicks);
     const rows=Array.isArray(data.daily_7d)?data.daily_7d:[];
     $("daily").innerHTML=rows.length?rows.map(r=>`<div class="row"><strong>${formatDate(r.day)}</strong><span>${Number(r.unique||0)} унікальних</span><b>${Number(r.visits||0)} відвідувань</b></div>`).join(""):'<div class="small">За останні 7 днів ще немає зафіксованих відвідувань.</div>';
   }
