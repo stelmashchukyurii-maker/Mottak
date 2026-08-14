@@ -2,7 +2,7 @@
 
 **Репозиторій:** `stelmashchukyurii-maker/Mottak`  
 **Гілка:** `main`  
-**Оновлено:** 14.08.2026 19:11 Europe/Oslo
+**Оновлено:** 14.08.2026 19:28 Europe/Oslo
 
 ## 1. Start here — Nordic/RFID
 1. `NEXT_CHAT_NORDIC_ID.txt`
@@ -174,10 +174,40 @@ Critical UT rule:
 First recommended future stage only after explicit user decision:
 `Android V0.1 — DEVICE + RFID LAB`, without production stock writes.
 
-## 15. Change-control rule
+## 15. Florivo Inventory / Inventering — CONCEPT
+Concept protocol:
+`FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md`
+
+Next-chat handoff:
+`NEXT_CHAT_FLORIVO_INVENTORY.txt`
+
+Status:
+- concept / TEST design only;
+- Browser TEST not yet implemented;
+- no inventory DB tables yet;
+- no WORK changes;
+- no Android inventory implementation yet.
+
+Core concept:
+- monthly/periodic physical warehouse count in a separate inventory session;
+- inventory session records what is physically seen without automatically changing WORK-stock;
+- Bunner stack defaults to 10 but is editable;
+- Bunner + Hyller records the actual physical shelf count, including non-standard counts such as 57;
+- duplicate RFID within one session must not count twice;
+- broken/missing tag uses manual `MAN-xxx` inventory reference plus a physical sticker/mark on the counted asset;
+- unknown RFID or server-state mismatch is recorded as physical evidence and becomes an AVVIK, not an automatic stock mutation;
+- session completion compares SERVER FORVENTET ↔ FAKTISK TELT and creates discrepancy groups;
+- any later WORK correction must be a separate audited, human-approved step.
+
+Development rule:
+- first implementation must be a separate Browser TEST form;
+- do not experiment inside frozen Nordic WORK production forms;
+- only after Browser PHYSICAL PASS should successful inventory UX/logic move into Florivo Android Scanner as `📋 INVENTERING`.
+
+## 16. Change-control rule
 Already working production behavior must not be changed on a guess. Explain the problem first and get explicit user authorization.
 
-## 16. Archive status
+## 17. Archive status
 The 11.08.2026 Nordic session remains closed after:
 - Til rampe WORK-default physical PASS;
 - real partial RAMPE 28 WORK test;
