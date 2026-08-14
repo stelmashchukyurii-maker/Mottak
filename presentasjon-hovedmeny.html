@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="nb" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Florivo — Presentasjonsside</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--info:#75b7ff;--ok:#48d597}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg)}
+    body{font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}
+    .app{width:min(820px,100%);margin:auto;padding:18px 14px 54px}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .back{display:inline-flex;align-items:center;min-height:38px;padding:7px 10px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--muted);text-decoration:none;font-size:11px;font-weight:900}
+    .version{color:var(--muted);font-size:10px;text-align:right}
+    .present-badge{display:inline-flex;align-items:center;min-height:40px;padding:8px 13px;border:2px solid var(--accent);border-radius:999px;background:rgba(244,196,48,.09);color:#ffe17a;font-size:14px;font-weight:1000;letter-spacing:.06em}
+    h1{margin:13px 0 7px;font-size:clamp(40px,11vw,62px);line-height:1}
+    .lead{margin:0 0 14px;color:var(--muted);font-size:17px;line-height:1.5}
+    .video{display:inline-flex;align-items:center;justify-content:center;min-height:54px;margin:3px 0 20px;padding:12px 18px;border:2px solid rgba(244,196,48,.76);border-radius:15px;background:rgba(244,196,48,.1);color:#ffe17a;text-decoration:none;font-size:16px;font-weight:1000}
+    .group{margin:14px 0 18px;padding:15px;border:2px solid rgba(244,196,48,.65);border-radius:20px;background:rgba(244,196,48,.055)}
+    .group.scanner{border-color:rgba(117,183,255,.68);background:rgba(117,183,255,.055)}
+    .group h2{margin:0 0 5px;font-size:clamp(22px,6vw,31px)}
+    .group-note{margin:0 0 13px;color:var(--muted);font-size:13px;line-height:1.45}
+    .links{display:grid;gap:11px}
+    .page-link{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-height:78px;padding:13px 15px;border:1px solid var(--line);border-radius:16px;background:var(--panel2);color:var(--text);text-decoration:none}
+    .page-link strong{display:block;font-size:clamp(17px,4.8vw,22px);line-height:1.22}
+    .page-link small{display:block;margin-top:5px;color:var(--muted);font-size:11px;line-height:1.35}
+    .open{display:grid;place-items:center;min-width:66px;min-height:42px;padding:6px 9px;border-radius:11px;background:var(--accent);color:#17130a;font-size:11px;font-weight:1000}
+    .scanner .open{background:var(--info);color:#071a2e}
+    details{margin-top:18px;border:1px solid var(--line);border-radius:18px;background:rgba(13,20,38,.86);overflow:hidden}
+    summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:74px;padding:14px 16px;cursor:pointer}
+    summary::-webkit-details-marker{display:none}
+    summary strong{display:block;font-size:19px}
+    summary small{display:block;margin-top:4px;color:var(--muted);font-size:11px;font-weight:400}
+    .arrow{color:var(--muted);font-size:22px}
+    details[open] .arrow{transform:rotate(180deg)}
+    .technical-text{padding:0 16px 17px;color:#dbe4f7;line-height:1.55}
+    .technical-text b{color:#ffe17a}
+    .footer{margin-top:18px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
+    @media(max-width:520px){.page-link{grid-template-columns:1fr}.open{justify-self:start;min-width:82px}.topline{align-items:flex-start}.version{max-width:150px}}
+  </style>
+</head>
+<body class="notranslate">
+<main class="app">
+  <div class="topline">
+    <a class="back" href="index.html">← FULL HOVEDMENY</a>
+    <div class="version">Presentasjonsside v1.0<br>Oppdatert 14.08.2026 kl. 12:30</div>
+  </div>
+
+  <div class="present-badge">PRESENTASJONSSIDE</div>
+  <h1>Florivo</h1>
+  <p class="lead">Utvalgte arbeidssider for demonstrasjon.</p>
+  <a class="video" href="https://drive.google.com/file/d/1Js2sVvUDo_nLFwx3oOtfXgt6GYsQQVZS/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">▶ VIDEOPRESENTASJON</a>
+
+  <section class="group">
+    <h2>📱 Arbeidssider for mobil</h2>
+    <p class="group-note">De viktigste sidene som brukes fra telefon.</p>
+    <div class="links">
+      <a class="page-link" href="camera-live-v4.html">
+        <span><strong>📷 KAMERA CLOUD</strong><small>Foto og registrering fra mobil.</small></span><span class="open">ÅPNE</span>
+      </a>
+      <a class="page-link" href="bestilling.html">
+        <span><strong>📋 UT — VAREBESTILLING · KONTOR</strong><small>Opprett og følg bestillinger til rampe.</small></span><span class="open">ÅPNE</span>
+      </a>
+      <a class="page-link" href="utsending.html">
+        <span><strong>🚚 UT — LAGER OG UTSENDING</strong><small>Arbeid på lager, rampe og utsending.</small></span><span class="open">ÅPNE</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="group scanner">
+    <h2>📡 Nordic ID-skanner</h2>
+    <p class="group-note">Hovedsiden på firmaskanneren med inngang til TIL LAGER og TIL RAMPE i WORK.</p>
+    <div class="links">
+      <a class="page-link" href="scanner-home.html">
+        <span><strong>📡 SCANNER HOME</strong><small>Nordic ID · TIL LAGER · TIL RAMPE</small></span><span class="open">ÅPNE</span>
+      </a>
+    </div>
+  </section>
+
+  <details>
+    <summary>
+      <span><strong>Andre tekniske sider</strong><small>Ikke vist i presentasjonsversjonen</small></span>
+      <span class="arrow">⌄</span>
+    </summary>
+    <div class="technical-text"><b>Florivo inneholder også mange andre tekniske sider, testsider, utviklingssider og arkivsider.</b> De brukes ikke i presentasjonsversjonen og vises derfor ikke her.</div>
+  </details>
+
+  <div class="footer">Florivo · Presentasjonsside v1.0 · 14.08.2026</div>
+</main>
+</body>
+</html>
