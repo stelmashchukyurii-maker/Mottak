@@ -7,16 +7,18 @@ Supabase project ref: `hzjsatehehhpgpskckfi`.
 
 ## 1. Purpose
 
-Keep a private journal of visits to the Florivo presentation landing page:
+Keep a private journal of visits to the Florivo presentation landing page and clicks from that page:
 
 - page: `presentasjon-hovedmeny.html`
 - page key in database: `presentasjon-hovedmeny`
-- nothing about the counter/statistics is shown to visitors on the page
-- statistics are checked only on request by querying live Supabase data
+- nothing about the counter/statistics is shown to visitors on the presentation page
+- statistics are checked on request from live Supabase or via the unlinked internal page `florivo-besok-oversikt.html`
 
-This journal is isolated from Nordic ID, WORK/TEST, stock, orders and dispatch logic.
+This analytics module is isolated from Nordic ID, WORK/TEST, stock, orders and dispatch logic.
 
 ## 2. Database objects
+
+### Visit journal
 
 Table:
 
@@ -33,14 +35,45 @@ Write RPC:
 
 `public.log_florivo_presentation_visit(p_page_key text, p_visitor_id uuid)`
 
+### Click journal
+
+Table:
+
+`public.florivo_presentation_clicks`
+
+Columns:
+
+- `id bigint` — internal event ID
+- `source_page text` — currently `presentasjon-hovedmeny`
+- `target_key text` — which presentation button was clicked
+- `visitor_id uuid` — same anonymous browser ID used by the visit journal
+- `clicked_at timestamptz` — server timestamp
+
+Allowed `target_key` values:
+
+- `video_presentasjon` — VIDEOPRESENTASJON
+- `kamera_cloud` — KAMERA CLOUD
+- `ut_kontor` — UT KONTOR
+- `ut_lager_utsending` — UT LAGER OG UTSENDING
+- `scanner_home` — SCANNER HOME
+
+Write RPC:
+
+`public.log_florivo_presentation_click(p_target_key text, p_visitor_id uuid)`
+
+Read/aggregate RPC used by the internal statistics page:
+
+`public.florivo_presentation_visit_stats()`
+
 Security:
 
-- RLS is enabled on the table
+- RLS is enabled on both journal tables
 - direct table access for `anon` and `authenticated` is revoked
-- browser can only execute the logging RPC
-- statistics are not exposed to the presentation page
+- browser can execute only the allowed logging/statistics RPCs
+- raw visitor IDs are not displayed on the presentation page or the internal statistics page
+- no name, phone number, email or IP address is stored in these journal tables
 
-## 3. Counting rules
+## 3. Visit counting rules
 
 One counted visit is an anonymous browser session-like visit.
 
@@ -60,20 +93,30 @@ Important limitation:
 - clearing browser storage, private/incognito mode, another browser or another device can create a new ID
 - therefore unique visitor counts are approximate
 
-No name, phone number, email or IP address is stored in this table.
+## 4. Click counting rules
 
-## 4. Browser storage
+A click is recorded only when one of the five tracked links is activated from `presentasjon-hovedmeny.html`.
 
-The page stores only a random UUID under:
+Rules:
+
+- every click on a tracked presentation button is counted
+- click totals are NOT subject to the 30-minute visit deduplication rule
+- `COUNT(DISTINCT visitor_id)` per `target_key` gives the approximate number of different browsers that clicked that button
+- opening `bestilling.html`, `scanner-home.html`, another work page, or the Drive video directly by URL does NOT count as a transition from the presentation page
+- direct use of the destination pages is not modified and does not write to this click journal
+
+## 5. Browser storage
+
+The presentation page stores only a random UUID under:
 
 `florivo_presentation_visitor_v1`
 
 Primary storage: `localStorage`.
 Fallback: `sessionStorage`.
 
-The logger is fail-silent: analytics failure must never block or visibly change the presentation page.
+The visit and click loggers are fail-silent: analytics failure must never block navigation or visibly change the presentation page.
 
-## 5. Timezone rule
+## 6. Timezone rule
 
 All user-facing daily statistics must use:
 
@@ -81,7 +124,7 @@ All user-facing daily statistics must use:
 
 Do not use UTC day boundaries when the user asks for “today”, “yesterday”, a Norwegian date, or daily statistics.
 
-## 6. Standard live queries
+## 7. Standard live queries — visits
 
 ### Today — visits + approximate unique browsers
 
@@ -176,9 +219,63 @@ group by 1
 order by 1;
 ```
 
-## 7. Rules for another ChatGPT conversation
+## 8. Standard live queries — button clicks
 
-When the user asks about Florivo presentation visits, ALWAYS query live Supabase. Do not answer from old protocol snapshots.
+### Today + total by presentation button
+
+```sql
+with bounds as (
+  select
+    date_trunc('day', now() at time zone 'Europe/Oslo') at time zone 'Europe/Oslo' as start_ts,
+    (date_trunc('day', now() at time zone 'Europe/Oslo') + interval '1 day') at time zone 'Europe/Oslo' as end_ts
+)
+select
+  target_key,
+  count(*) filter (where clicked_at >= start_ts and clicked_at < end_ts)::int as clicks_today,
+  count(distinct visitor_id) filter (where clicked_at >= start_ts and clicked_at < end_ts)::int as unique_today,
+  count(*)::int as clicks_total,
+  count(distinct visitor_id)::int as unique_total,
+  max(clicked_at) as latest_click
+from public.florivo_presentation_clicks, bounds
+where source_page = 'presentasjon-hovedmeny'
+group by target_key
+order by target_key;
+```
+
+### Last 30 click events
+
+```sql
+select
+  target_key,
+  to_char(clicked_at at time zone 'Europe/Oslo', 'YYYY-MM-DD HH24:MI:SS') as oslo_time,
+  left(visitor_id::text, 8) as anonymous_browser
+from public.florivo_presentation_clicks
+where source_page = 'presentasjon-hovedmeny'
+order by clicked_at desc
+limit 30;
+```
+
+## 9. Internal statistics page
+
+Unlinked page:
+
+`florivo-besok-oversikt.html`
+
+It is intentionally NOT linked from Florivo main menus or the presentation page.
+
+It displays aggregate statistics only:
+
+- visits today
+- approximate unique browsers today
+- visits for the last 7 days
+- total visits
+- daily visit breakdown
+- latest visit
+- expandable/open-by-default presentation-button list with today / total / approximate unique browsers / latest click for each tracked destination
+
+## 10. Rules for another ChatGPT conversation
+
+When the user asks about Florivo presentation visits OR presentation-button clicks, ALWAYS query live Supabase. Do not answer from old protocol snapshots.
 
 Examples of user requests:
 
@@ -188,22 +285,30 @@ Examples of user requests:
 - “Покажи за останні 7 днів.”
 - “Скільки всього відвідувань?”
 - “Коли були останні заходи?”
+- “Скільки разів відкривали відеопрезентацію?”
+- “Скільки переходів було в UT Kontor?”
+- “Які кнопки найчастіше натискали?”
+- “Покажи переходи по всіх сторінках сьогодні.”
 
-Default answer for “how many today” should include both:
+Default answer for “how many today” should include both counted visits and approximate unique browsers.
 
-1. counted visits today
-2. approximate unique browsers today
+For click questions, clearly distinguish:
 
-If the user asks “who visited”, explain that the journal intentionally does not identify people. It can only distinguish anonymous browser IDs approximately.
+- clicks / openings through the presentation page
+- approximate unique browsers that clicked
 
-## 8. Tracking start / historical limitation
+If the user asks “who visited/clicked”, explain that the journal intentionally does not identify people. It can only distinguish anonymous browser IDs approximately.
 
-Tracking was introduced on 14.08.2026.
+## 11. Tracking start / historical limitation
 
-Visits before the analytics deployment cannot be reconstructed from this table. Do not invent or estimate pre-tracking visits unless the user explicitly asks for an estimate based on another source.
+Visit tracking started on 14.08.2026.
 
-## 9. Do not change without explicit permission
+Click tracking for the five presentation links was added on 14.08.2026 after the visit journal. Clicks made before click tracking was deployed cannot be reconstructed from this table.
 
-Do not expose visit counts on `presentasjon-hovedmeny.html` unless the user explicitly asks.
-Do not add personal-data collection to this journal.
-Do not couple this analytics table/RPC to Nordic ID, WORK/TEST, stock, UT orders or dispatch logic.
+Do not invent or estimate historical data unless the user explicitly asks for an estimate based on another source.
+
+## 12. Do not change without explicit permission
+
+Do not expose visit/click counts on `presentasjon-hovedmeny.html` unless the user explicitly asks.
+Do not add personal-data collection to these journals.
+Do not couple this analytics module to Nordic ID, WORK/TEST, stock, UT orders or dispatch logic.
