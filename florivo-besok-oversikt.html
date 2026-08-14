@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="nb" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Florivo — Besøksoversikt</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--bad:#ff7373}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg)}
+    body{font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}
+    main{width:min(760px,100%);margin:auto;padding:18px 14px 54px}
+    .badge{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:900}
+    h1{margin:12px 0 5px;font-size:clamp(34px,9vw,50px)}
+    .sub{margin:0 0 18px;color:var(--muted);line-height:1.5}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .card{padding:15px;border:1px solid var(--line);border-radius:18px;background:rgba(21,28,48,.96)}
+    .card.primary{border-color:rgba(244,196,48,.65);background:rgba(244,196,48,.055)}
+    .card.info{border-color:rgba(117,183,255,.55);background:rgba(117,183,255,.05)}
+    .label{color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+    .value{margin-top:5px;font-size:clamp(30px,9vw,46px);font-weight:1000;line-height:1}
+    .small{margin-top:7px;color:var(--muted);font-size:11px;line-height:1.4}
+    .section{margin-top:16px;padding:15px;border:1px solid var(--line);border-radius:18px;background:rgba(13,20,38,.86)}
+    .section h2{margin:0 0 12px;font-size:21px}
+    .daily{display:grid;gap:8px}
+    .row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}
+    .row strong{font-size:14px}.row span{color:var(--muted);font-size:12px}.row b{font-size:15px}
+    .latest{margin-top:16px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--muted);line-height:1.5}
+    .latest strong{color:var(--text)}
+    button{width:100%;min-height:54px;margin-top:14px;border:2px solid var(--accent);border-radius:15px;background:var(--accent);color:#17130a;font:950 17px Arial,sans-serif;cursor:pointer}
+    .status{min-height:20px;margin-top:9px;color:var(--muted);font-size:12px;text-align:center}
+    .status.bad{color:var(--bad)}
+    .footer{margin-top:18px;color:var(--muted);font-size:10px;text-align:center;line-height:1.5}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr auto}.row span{grid-column:1/-1}}
+  </style>
+</head>
+<body class="notranslate">
+<main>
+  <div class="badge">INTERN BESØKSOVERSIKT</div>
+  <h1>Florivo</h1>
+  <p class="sub">Presentasjonsside · anonym besøksstatistikk</p>
+
+  <div class="grid">
+    <section class="card primary"><div class="label">Besøk i dag</div><div class="value" id="visitsToday">—</div><div class="small">Registrerte besøk med 30 min. duplikatfilter</div></section>
+    <section class="card primary"><div class="label">Unike i dag</div><div class="value" id="uniqueToday">—</div><div class="small">Omtrentlige unike nettlesere</div></section>
+    <section class="card info"><div class="label">Siste 7 dager</div><div class="value" id="visits7d">—</div><div class="small"><span id="unique7d">—</span> unike nettlesere</div></section>
+    <section class="card info"><div class="label">Totalt</div><div class="value" id="visitsTotal">—</div><div class="small"><span id="uniqueTotal">—</span> unike nettlesere</div></section>
+  </div>
+
+  <section class="section">
+    <h2>Siste 7 dager</h2>
+    <div class="daily" id="daily"><div class="small">Laster…</div></div>
+  </section>
+
+  <div class="latest">Siste registrerte besøk: <strong id="latestVisit">—</strong></div>
+  <button id="refreshBtn" type="button">↻ OPPDATER</button>
+  <div class="status" id="status"></div>
+  <div class="footer">Europe/Oslo · siden er ikke lenket fra Florivo-menyene</div>
+</main>
+<script>
+(()=>{
+  "use strict";
+  const ENDPOINT="https://hzjsatehehhpgpskckfi.supabase.co/rest/v1/rpc/florivo_presentation_visit_stats";
+  const API_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+  const $=id=>document.getElementById(id);
+
+  function formatDate(day){
+    try{return new Intl.DateTimeFormat("nb-NO",{weekday:"short",day:"2-digit",month:"2-digit"}).format(new Date(day+"T12:00:00"))}catch{return day}
+  }
+  function formatLatest(value){
+    if(!value)return "Ingen besøk registrert ennå";
+    try{return new Intl.DateTimeFormat("nb-NO",{timeZone:"Europe/Oslo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date(value))}catch{return value}
+  }
+  function render(data){
+    $("visitsToday").textContent=data.visits_today??0;
+    $("uniqueToday").textContent=data.unique_today??0;
+    $("visits7d").textContent=data.visits_7d??0;
+    $("unique7d").textContent=data.unique_7d??0;
+    $("visitsTotal").textContent=data.visits_total??0;
+    $("uniqueTotal").textContent=data.unique_total??0;
+    $("latestVisit").textContent=formatLatest(data.latest_visit);
+    const rows=Array.isArray(data.daily_7d)?data.daily_7d:[];
+    $("daily").innerHTML=rows.length?rows.map(r=>`<div class="row"><strong>${formatDate(r.day)}</strong><span>${Number(r.unique||0)} unike</span><b>${Number(r.visits||0)} besøk</b></div>`).join(""):'<div class="small">Ingen registrerte besøk de siste 7 dagene.</div>';
+  }
+  async function load(){
+    const status=$("status");
+    status.className="status";
+    status.textContent="Oppdaterer…";
+    try{
+      const res=await fetch(ENDPOINT,{method:"POST",headers:{"apikey":API_KEY,"Content-Type":"application/json","Accept":"application/json"},body:"{}",cache:"no-store"});
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      let data=await res.json();
+      if(Array.isArray(data))data=data[0]||{};
+      render(data||{});
+      status.textContent=`Oppdatert ${new Intl.DateTimeFormat("nb-NO",{timeZone:"Europe/Oslo",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())}`;
+    }catch(err){
+      status.className="status bad";
+      status.textContent="Kunne ikke hente statistikk. Prøv igjen.";
+    }
+  }
+  $("refreshBtn").addEventListener("click",load);
+  load();
+})();
+</script>
+</body>
+</html>
