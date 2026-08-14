@@ -93,5 +93,53 @@
 
   <div class="footer">Florivo · Presentasjonsside v1.0 · 14.08.2026</div>
 </main>
+<script>
+(()=>{
+  "use strict";
+  const ENDPOINT="https://hzjsatehehhpgpskckfi.supabase.co/rest/v1/rpc/log_florivo_presentation_visit";
+  const API_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+  const STORAGE_KEY="florivo_presentation_visitor_v1";
+
+  function makeVisitorId(){
+    try{
+      if(globalThis.crypto?.randomUUID)return crypto.randomUUID();
+      const bytes=new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+      bytes[6]=(bytes[6]&15)|64;
+      bytes[8]=(bytes[8]&63)|128;
+      const hex=[...bytes].map(v=>v.toString(16).padStart(2,"0")).join("");
+      return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+    }catch{return null}
+  }
+
+  function getVisitorId(){
+    for(const store of [localStorage,sessionStorage]){
+      try{
+        let id=store.getItem(STORAGE_KEY);
+        if(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||""))return id;
+        id=makeVisitorId();
+        if(id){store.setItem(STORAGE_KEY,id);return id}
+      }catch{}
+    }
+    return makeVisitorId();
+  }
+
+  function recordVisit(){
+    const visitorId=getVisitorId();
+    if(!visitorId)return;
+    try{
+      fetch(ENDPOINT,{
+        method:"POST",
+        headers:{"apikey":API_KEY,"Content-Type":"application/json","Accept":"application/json"},
+        body:JSON.stringify({p_page_key:"presentasjon-hovedmeny",p_visitor_id:visitorId}),
+        cache:"no-store",
+        keepalive:true
+      }).catch(()=>{});
+    }catch{}
+  }
+
+  addEventListener("pageshow",recordVisit,{passive:true});
+})();
+</script>
 </body>
 </html>
