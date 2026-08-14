@@ -339,3 +339,33 @@
     stampRelease();
   }
 })();
+
+(() => {
+  if (window.__FLORIVO_VERSION_LOG_LINK__) return;
+  window.__FLORIVO_VERSION_LOG_LINK__ = true;
+
+  function isMainPage() {
+    const file = location.pathname.split("/").filter(Boolean).pop() || "";
+    return !window.frameElement && (file === "index.html" || file === "Mottak" || file === "");
+  }
+
+  function ensureVersionLogLink() {
+    if (!isMainPage() || document.getElementById("florivoVersionLogLink")) return;
+    const presentation = document.querySelector("a.presentation-link");
+    if (!presentation) return;
+
+    const link = document.createElement("a");
+    link.id = "florivoVersionLogLink";
+    link.className = "presentation-link";
+    link.href = "teknisk-versjonslogg.html";
+    link.textContent = "📘 VERSJONSLOGG";
+    link.style.marginLeft = "8px";
+    link.style.borderColor = "rgba(117,183,255,.72)";
+    link.style.background = "rgba(117,183,255,.08)";
+    link.style.color = "#b9dcff";
+    presentation.insertAdjacentElement("afterend", link);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ensureVersionLogLink, { once: true });
+  else ensureVersionLogLink();
+})();
