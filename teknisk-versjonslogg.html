@@ -1,150 +1,67 @@
 <!DOCTYPE html>
-<html lang="nb" translate="no">
+<html lang="nb">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
-  <meta name="google" content="notranslate">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Teknisk utviklingslogg</title>
   <style>
-    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--warn:#f6a84b;--test:#c6a5ff}
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:var(--bg)}
-    body{font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,#0b1020,#11182a 38%,#0b1020)}
-    main{width:min(1180px,100%);margin:auto;padding:34px 24px 64px}
-    .eyebrow{display:inline-flex;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em}
-    h1{margin:14px 0 8px;font-size:clamp(38px,6vw,66px);line-height:1.02;letter-spacing:-.035em}
-    .lead{max-width:850px;margin:0;color:#cbd4e9;font-size:16px;line-height:1.6}
-    .legend{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 8px}
-    .tag{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);font-size:10px;font-weight:900;letter-spacing:.05em}
-    .tag.stabil{border-color:rgba(72,213,151,.55);color:#8cf0bd}.tag.work{border-color:rgba(117,183,255,.6);color:#9dcfff}.tag.test{border-color:rgba(198,165,255,.55);color:#dbc7ff}.tag.dev{border-color:rgba(246,168,75,.55);color:#ffc77e}.tag.old{color:var(--muted)}
-    .note{margin:14px 0 26px;padding:12px 14px;border-left:3px solid var(--accent);background:rgba(244,196,48,.045);color:var(--muted);font-size:12px;line-height:1.55}
-    .section{margin-top:34px}
-    .section-head{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--line)}
-    .section h2{margin:0;font-size:25px}.section-head p{margin:0;color:var(--muted);font-size:11px;text-align:right}
-    .timeline{display:grid;gap:10px}
-    .entry{display:grid;grid-template-columns:178px minmax(0,1fr);gap:18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(21,28,48,.94)}
-    .ver{font-size:18px;font-weight:1000;line-height:1.2}.module{margin-top:5px;color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
-    .entry h3{margin:0 0 7px;font-size:17px}.entry ul{margin:0;padding-left:18px;color:#d9e1f2;font-size:13px;line-height:1.55}.entry li+li{margin-top:3px}
-    .entry .status{margin-top:9px}
-    details.group{margin-top:12px;border:1px solid var(--line);border-radius:16px;background:rgba(13,20,38,.86);overflow:hidden}
-    details.group>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 16px;cursor:pointer;font-weight:1000}
-    details.group>summary::-webkit-details-marker{display:none}.sum-sub{display:block;margin-top:4px;color:var(--muted);font-size:10px;font-weight:400;line-height:1.4}.arrow{font-size:20px;color:var(--muted)}details[open] .arrow{transform:rotate(180deg)}
-    .group-body{padding:0 12px 12px}.group-body .entry{border-radius:12px;background:var(--panel)}
-    .footer{margin-top:38px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:10px;line-height:1.5;text-align:center}
-    @media(max-width:720px){main{padding:22px 14px 48px}.entry{grid-template-columns:1fr;gap:9px}.section-head{align-items:flex-start;flex-direction:column}.section-head p{text-align:left}}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1020}
+    iframe{display:block;width:100%;height:100%;border:0;background:#0b1020}
+    .langs{position:fixed;z-index:20;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));display:flex;gap:4px;padding:4px;border:1px solid rgba(48,59,89,.9);border-radius:10px;background:rgba(13,20,38,.9);box-shadow:0 4px 18px rgba(0,0,0,.24);backdrop-filter:blur(8px)}
+    .lang{width:31px;height:27px;display:grid;place-items:center;border:1px solid #303b59;border-radius:7px;background:#151c30;color:#aab4ce;font:900 10px/1 Arial,Helvetica,sans-serif;letter-spacing:.04em;cursor:pointer}
+    .lang.active{border-color:#75b7ff;background:#17304f;color:#d8ecff}
   </style>
 </head>
-<body class="notranslate">
-<main>
-  <div class="eyebrow">TEKNISK DOKUMENTASJON</div>
-  <h1>Teknisk utviklingslogg</h1>
-  <p class="lead"><strong>Hovedversjoner og tekniske milepæler.</strong> Oversikt over sentrale tekniske milepæler og hovedversjoner i systemets utvikling. Mindre rettelser, cache-endringer og mellombygg er samlet under nærmeste funksjonelle hovedversjon.</p>
-
-  <div class="legend">
-    <span class="tag stabil">STABIL</span><span class="tag work">WORK</span><span class="tag test">TEST</span><span class="tag dev">DEV / PROTOTYPE</span><span class="tag old">ERSTATTET</span>
+<body>
+  <div class="langs" aria-label="Language">
+    <button class="lang" type="button" data-lang="no" aria-label="Norsk">NO</button>
+    <button class="lang" type="button" data-lang="uk" aria-label="Українська">UK</button>
   </div>
-  <div class="note"><strong>Merk:</strong> Enkelte oppføringer samler flere nærliggende versjoner med samme utviklingsretning, for eksempel <b>v4.10–v4.12</b>, <b>V2.3–V2.3.5</b> og <b>v4.6.6–v4.6.9</b>. Hver versjon er en del av utviklingshistorikken, men mindre mellomsteg er gruppert for å gjøre loggen enklere å lese. Statusene beskriver teknisk utvikling og verifisert funksjon; test- og prototypeversjoner er beholdt som historiske utviklingsspor.</div>
+  <iframe id="logFrame" title="Teknisk utviklingslogg"></iframe>
+  <script>
+  (()=>{
+    "use strict";
+    const KEY="technical_version_log_lang_v1";
+    const frame=document.getElementById("logFrame");
+    const buttons=[...document.querySelectorAll("[data-lang]")];
+    const files={no:"teknisk-versjonslogg-no.html",uk:"teknisk-versjonslogg-uk.html"};
 
-  <section class="section">
-    <div class="section-head"><h2>1. Grunnlag: kamera, registrering og felles data</h2><p>Fra enkel registrering til delt skylagring</p></div>
-    <div class="timeline">
-      <article class="entry"><div><div class="ver">Scanner v1</div><div class="module">Mobil registrering</div><div class="status"><span class="tag stabil">STABIL BASE</span></div></div><div><h3>Første fungerende bilde → AI → nummerflyt</h3><ul><li>Kamerabilde av etikett fra mobil.</li><li>AI-lesing av de to definerte tekstlinjene.</li><li>Forhåndsvisning, gjenkjenning og kontroll før lagring.</li><li>Grunnlaget for videre produkt- og lagerflyt.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Scanner v2</div><div class="module">Mobil registrering</div><div class="status"><span class="tag stabil">STABIL</span></div></div><div><h3>Produkter, telling og duplikatkontroll</h3><ul><li>Produktvalg før registrering.</li><li>Egne tellere for Bunner, Hyller x30 og Hyller x60.</li><li>Historikk og tellere lagret lokalt.</li><li>Beskyttelse mot doble registreringer.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Tabell v1</div><div class="module">Lageroversikt</div><div class="status"><span class="tag old">ERSTATTET</span></div></div><div><h3>Lokal varetabell</h3><ul><li>Samlet lokal oversikt for tre hovedprodukter.</li><li>Telling, duplikatkontroll og CSV-eksport.</li><li>Ble senere erstattet av felles nettbasert database.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Live v1</div><div class="module">Sky / database</div><div class="status"><span class="tag old">ERSTATTET</span></div></div><div><h3>Første felles nettbaserte lager</h3><ul><li>Supabase Realtime koblet flere enheter mot samme datagrunnlag.</li><li>Lokal kø beholdt data ved korte nettverksbrudd.</li><li>Felles registrering erstattet separate lokale lister.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Live v2</div><div class="module">Kamera + scanner</div><div class="status"><span class="tag work">WORK-MILEPÆL</span></div></div><div><h3>Foto og scanner kobles til samme varepost</h3><ul><li>Mobilfoto og AI-resultat lagres sammen med varen.</li><li>Scanner kan finne eksisterende post og komplettere den.</li><li>Foto beholdes i historikken og oppdateringer vises i Realtime.</li><li>Ingen separat database per enhet.</li></ul></div></article>
-    </div>
-  </section>
+    function initialLanguage(){
+      const q=new URLSearchParams(location.search).get("lang");
+      if(q==="no"||q==="uk")return q;
+      try{
+        const saved=localStorage.getItem(KEY);
+        if(saved==="no"||saved==="uk")return saved;
+      }catch{}
+      return "no";
+    }
 
-  <section class="section">
-    <div class="section-head"><h2>2. Camera Cloud</h2><p>Mobil arbeidsflyt, AI/OCR og lagerinformasjon</p></div>
-    <div class="timeline">
-      <article class="entry"><div><div class="ver">v4.1</div><div class="module">Camera Cloud</div></div><div><h3>Kildestabilisering</h3><ul><li>Egen test for å sikre riktig lastet kilde og mer forutsigbar mobilkjøring.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.2</div><div class="module">Camera Cloud</div></div><div><h3>Produktbeholdning</h3><ul><li>Produktvise lagerverdier lastes inn i kameravisningen.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.3</div><div class="module">Camera Cloud</div></div><div><h3>Kombinerte totaler</h3><ul><li>Samlet lagerberegning og tydeligere totalsummer.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.4</div><div class="module">Camera Cloud</div><div class="status"><span class="tag test">TESTSPOR</span></div></div><div><h3>Alternativ OCR-reserve</h3><ul><li>Ekstra OCR-motor testet som reserve ved vanskelig lesing.</li><li>Primær arbeidsflyt beholdt uendret.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.7</div><div class="module">Camera Cloud</div></div><div><h3>Lagerfilter</h3><ul><li>Filtrering av lagerdata slik at aktive varer vises mer relevant.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.9</div><div class="module">Camera Cloud</div></div><div><h3>Produktfiltre</h3><ul><li>Produktvalg og visning ble strammet inn for raskere mobilbruk.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.10–v4.12</div><div class="module">Camera Cloud</div></div><div><h3>Flytende kamerakontroll og stegvis arbeidsflyt</h3><ul><li>Fast tilgjengelig fotoknapp på mobil.</li><li>Stegvis arbeidsflyt for foto, gjenkjenning og lagring.</li><li>Distribusjons-/cachevarianter ble samlet rundt samme funksjonelle linje.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.14</div><div class="module">Camera Cloud</div><div class="status"><span class="tag work">WORK BASE</span></div></div><div><h3>Mobil workflow-kontroller</h3><ul><li>Arbeidskontrollene ble optimalisert for telefonbruk.</li><li>Egen isolert TEST-kopi ble etablert for videre utvikling uten å påvirke arbeidsversjonen.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.16</div><div class="module">Camera Cloud</div></div><div><h3>Felles tilgjengelig lager</h3><ul><li>Kamera gikk over til samme tilgjengelig-lager-logikk som øvrige moduler.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.17</div><div class="module">Camera Cloud</div></div><div><h3>Forenklet nummermodell</h3><ul><li>Øvre nummer ble tatt ut av aktiv arbeidsflyt.</li><li>Nedre nummer ble den operative identifikatoren i kameraflyten.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.20</div><div class="module">Camera Cloud</div></div><div><h3>Ryddigere operatørvisning</h3><ul><li>Overflødig toppoppsummering av lager ble skjult.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.24</div><div class="module">Camera Cloud</div><div class="status"><span class="tag stabil">WORKING BASE</span></div></div><div><h3>Lager minus rampe</h3><ul><li>Lagerindikator ble knyttet til faktisk tilgjengelig mengde etter aktive rampebehov.</li><li>Ble brukt som arbeidsbase før neste mobilforbedringer.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.25</div><div class="module">Camera Cloud</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Reset etter lagring</h3><ul><li>Nedre nummer beholdes korrekt.</li><li>Etter lagring går siden tilbake til klar tilstand for neste bilde.</li><li>Mobilvisning stopper ikke i behandlingsstatus.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.26</div><div class="module">Camera Cloud</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Automatisk fokus på lagring</h3><ul><li>Etter gjenkjenning føres operatøren direkte til Lagre-handlingen.</li><li>Den godkjente post-save-flyten fra v4.25 beholdes.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.27</div><div class="module">Camera Cloud</div><div class="status"><span class="tag dev">DEV</span></div></div><div><h3>Fallback for flere RFID-produkter</h3><ul><li>Flere produkttyper kan registreres som kamerabasert reserve når RFID ikke brukes.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.28</div><div class="module">Camera Cloud</div><div class="status"><span class="tag dev">DEV</span></div></div><div><h3>Felles 8-produkt lageroversikt</h3><ul><li>Fysiske og tilgjengelige beholdninger samles for åtte produktgrupper.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">v4.29</div><div class="module">Camera Cloud</div><div class="status"><span class="tag dev">DEV / IKKE FULLT GODKJENT</span></div></div><div><h3>Manuelt mottak av plastforlengere</h3><ul><li>Quantity-only produkt kan mottas uten å konstruere RFID.</li><li>Beholder 8-produkt lageroversikt og tidligere kameraflyt.</li></ul></div></article>
-    </div>
-  </section>
+    function setLanguage(lang,writeUrl=true){
+      if(!files[lang])lang="no";
+      frame.src=files[lang];
+      document.documentElement.lang=lang==="uk"?"uk":"nb";
+      frame.title=lang==="uk"?"Технічний журнал розробки":"Teknisk utviklingslogg";
+      buttons.forEach(btn=>{
+        const active=btn.dataset.lang===lang;
+        btn.classList.toggle("active",active);
+        btn.setAttribute("aria-pressed",active?"true":"false");
+      });
+      try{localStorage.setItem(KEY,lang)}catch{}
+      if(writeUrl){
+        const url=new URL(location.href);
+        url.searchParams.set("lang",lang);
+        history.replaceState(null,"",url);
+      }
+    }
 
-  <section class="section">
-    <div class="section-head"><h2>3. UT: ordre, lager og utsending</h2><p>Fra lokal bestilling til transaksjonell lagerstatus</p></div>
-    <div class="timeline">
-      <article class="entry"><div><div class="ver">Kontor v5</div><div class="module">Ordrekontor</div><div class="status"><span class="tag old">TIDLIG BASE</span></div></div><div><h3>Første kontorbestilling</h3><ul><li>Valg av rampe, produkt og antall.</li><li>Automatisk beregning og oppsummering.</li><li>Tidlig lagring lokalt før full databaseintegrasjon.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">UT Lager v2 CLOUD</div><div class="module">Lager / utsending</div><div class="status"><span class="tag work">CLOUD</span></div></div><div><h3>Felles lagerflyt i database</h3><ul><li>Ordrestatus: new → received → in_progress → staged → completed/cancelled.</li><li>Konkrete vareposter reserveres, flyttes til rampe og sendes uten å slette historikk.</li><li>Realtime og serverfunksjoner erstattet lokal utsendingslogikk.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">UT Kontor v23</div><div class="module">Ordrekontor</div></div><div><h3>Bedre produktsynlighet</h3><ul><li>Produktkort og ordreinformasjon ble tydeligere for kontorbruk.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">UT Kontor v28</div><div class="module">Ordrekontor</div><div class="status"><span class="tag stabil">STABIL SNAPSHOT</span></div></div><div><h3>Stabilisert ordre- og totalvisning</h3><ul><li>Ordre- og skjemalayout ble samlet.</li><li>Produktpiktogrammer og avledede komponenttotaler ble gjort mer lesbare.</li><li>Bekreftede rampeverdier brukes i totaler.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">UT Kontor v29</div><div class="module">Ordrekontor</div><div class="status"><span class="tag test">PARALLELL UTVIKLING</span></div></div><div><h3>Produksjonsadapter fra stabil testlinje</h3><ul><li>Stabil ordrearkitektur ble koblet mot produksjonsdata gjennom separat adapter.</li><li>Test- og arbeidskopier ble holdt adskilt under migrering.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">UT Kontor v34</div><div class="module">Ordrekontor</div></div><div><h3>Lager minus rampe</h3><ul><li>Kompakt lagerindikator viser beholdning etter aktivt rampebehov.</li><li>Arbeidswrapper ble stabilisert mot cache- og observer-løkker.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">UT Kontor v37</div><div class="module">Ordrekontor</div><div class="status"><span class="tag dev">WORKING / ACCEPTANCE PENDING</span></div></div><div><h3>Felles 8-produkt fysisk og tilgjengelig lager</h3><ul><li>Åtte produktkort.</li><li>To standardiserte lagerverdier: fysisk og tilgjengelig.</li><li>Samme serverbaserte lagerberegning som øvrige moduler.</li><li>Full fysisk sluttgodkjenning av hele v37 er fortsatt utsatt.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">8-produkt lagermodell</div><div class="module">Database</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Én autoritativ lagerberegning</h3><ul><li>Fysisk lager og tilgjengelig lager skilles eksplisitt.</li><li>Aktive ordre reduserer tilgjengelig lager med én gang.</li><li>Flytting til rampe trekker ikke varen en gang til.</li><li>Vrak og quantity-only produkter inngår i samme oversikt.</li></ul></div></article>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2>4. Nordic ID / RFID</h2><p>Fra Wedge-eksperimenter til låst arbeidsflyt</p></div>
-
-    <details class="group">
-      <summary><span>Tidlig Wedge-utviklingslinje<span class="sum-sub">Historiske versjoner brukt for å forstå scanner-input, fokus og single-tag-adferd.</span></span><span class="arrow">⌄</span></summary>
-      <div class="group-body timeline">
-        <article class="entry"><div><div class="ver">v4.3–v4.5</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag old">HISTORISK</span></div></div><div><h3>Guidet scanning og første stabile scanner-side</h3><ul><li>Fokusert Wedge-input og guidet operatørflyt.</li><li>v4.5 ble publisert som stabil basis i den tidlige linjen.</li></ul></div></article>
-        <article class="entry"><div><div class="ver">v4.6–v4.6.5</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag test">TEST</span></div></div><div><h3>Single-tag-kontroll og capture-vindu</h3><ul><li>Én Bunner per operasjon.</li><li>Wedge-reset, recovery og inputdiagnostikk.</li><li>Lås mot sene RFID-signaler og kontrollert capture-vindu.</li><li>Utprøving av kandidatvalg blant de første RFID-signalene.</li></ul></div></article>
-        <article class="entry"><div><div class="ver">v4.6.6–v4.6.9</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag test">TEST</span></div></div><div><h3>Automatisk fokus og inputjournal</h3><ul><li>Automatisk scannerfokus.</li><li>Delbar inputjournal for fysisk feilsøking.</li><li>Single-focus-modus og global key capture med manuell fallback.</li></ul></div></article>
-        <article class="entry"><div><div class="ver">v4.9–v4.10</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag old">ERSTATTET</span></div></div><div><h3>Lower-only operativ identifikasjon</h3><ul><li>Øvre nummer fjernet fra aktiv RFID-flyt.</li><li>Denne forskningslinjen ble senere erstattet av den nye V2.x RFID-arkitekturen.</li></ul></div></article>
-      </div>
-    </details>
-
-    <div class="timeline" style="margin-top:12px">
-      <article class="entry"><div><div class="ver">V2.0</div><div class="module">RFID ny base</div><div class="status"><span class="tag test">TEST</span></div></div><div><h3>Focus Guard</h3><ul><li>Ny permanent RFID-testlinje med fokusbeskyttet Wedge-mottaker.</li><li>Startpunkt for dagens RFID-arkitektur.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.1</div><div class="module">RFID</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>First Tag Lock</h3><ul><li>Første gyldige 24-tegns EPC godtas.</li><li>600 ms lås stopper gjentatt mottak i samme trigger-syklus.</li><li>Stabil READY → ACCEPT/LOCK → READY.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.2</div><div class="module">RFID</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Produkt + RFID-mapping</h3><ul><li>Produktvalg før scanning.</li><li>Full EPC lagres som scannerkode.</li><li>Siste seks tegn brukes som operativt nedre nummer.</li><li>TEST-data isoleres fra arbeidsdata.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.2.1</div><div class="module">RFID</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Keyboard Guard</h3><ul><li>Produktvalg åpner ikke skjermtastaturet.</li><li>RFID-mottakeren beholder kompatibilitet med Wedge-tjenesten.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.3–V2.3.5</div><div class="module">RFID</div><div class="status"><span class="tag test">ITERASJON</span></div></div><div><h3>Bekreft før lagring og tastaturkontroll</h3><ul><li>Stor bekreftelse før databasehandling.</li><li>Flere fysiske rettelser for fokus, tastatur og RFID-input.</li><li>V2.3.4 ble valgt som stabil delbase; V2.3.5 var et alternativt testspor.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.4</div><div class="module">RFID</div><div class="status"><span class="tag stabil">HISTORISK STABIL</span></div></div><div><h3>Skjult RFID-mottaker</h3><ul><li>Teknisk inputfelt fjernet fra operatørvisningen.</li><li>Wedge-mottak fortsetter i bakgrunnen.</li><li>Bekreft/lagre-flyten beholdes.</li><li>Beholdt som rollback-basis for senere RFID-funksjoner.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.5</div><div class="module">RFID → UT</div><div class="status"><span class="tag test">SIMULATOR</span></div></div><div><h3>Én tag til utsendingssimulator</h3><ul><li>Første kobling mellom single-tag RFID og UT-avskrivningslogikk.</li><li>Brukt som kontrollert mellomsteg før full rampeflyt.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.9.7</div><div class="module">Til rampe</div><div class="status"><span class="tag stabil">FROZEN · PHYSICAL PASS</span></div></div><div><h3>Ferdig låst utsendingsapplikasjon</h3><ul><li>Skjult RFID-motor, 24-tegns EPC og first-tag lock.</li><li>TEST/WORK, smart fokus og input lock.</li><li>Bestilt / ferdig / gjenstår / neste.</li><li>Bekreftelse for hovedprodukter og antallsregistrering for korte/lange forlengere.</li><li>Staging og dispatch er låst som stabil forretningslogikk.</li><li>WORK kan åpnes som standard uten å endre den frosne kjernen.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.9.7 + count display</div><div class="module">Til rampe</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Faktisk stykkantall for forlengere</h3><ul><li>Viser reelt <b>NNN stk.</b> fra serverdata.</li><li>Kun visningslag i operatørgrensesnittet; ingen endring av RFID-, staging- eller dispatchlogikk.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">V2.9.8</div><div class="module">Til rampe</div><div class="status"><span class="tag dev">DEV</span></div></div><div><h3>8-produkt progressoverlay</h3><ul><li>Utvidet visuell progresjon for alle produktgrupper, inkludert Vrak.</li><li>Holdes separat fra stabil V2.9.7.</li><li>Ikke promotert uten fysisk slutt-test.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Til lager V1.0.4</div><div class="module">Nordic mottak</div><div class="status"><span class="tag dev">WORK DEFAULT · PASS PENDING</span></div></div><div><h3>Reelt RFID-mottak til lager</h3><ul><li>24-tegns EPC og last-six mapping.</li><li>Reelle arbeidsrader er bekreftet i databasen.</li><li>Felles 8-produkt lagerverdier.</li><li>Starter i WORK gjennom wrapper; siste visuelle startup-bekreftelse på fysisk enhet gjenstår.</li></ul></div></article>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2>5. Lager- og serverarkitektur</h2><p>Kontroll, sporbarhet og sikker manuell korrigering</p></div>
-    <div class="timeline">
-      <article class="entry"><div><div class="ver">TEST / WORK separation</div><div class="module">Database</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Felles tabeller med miljøskille</h3><ul><li>Samme datamodell kan brukes i TEST og WORK.</li><li>TEST kan gjenta EPC for utvikling.</li><li>WORK beskytter mot duplikater.</li><li>Kryssing mellom miljøene blokkeres.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Vrak lifecycle</div><div class="module">Database / utsending</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Full ordre → rampe → sendt-flyt</h3><ul><li>Vrak-produkter fikk samme transaksjonelle lagerlivssyklus som øvrige RFID-produkter.</li><li>Serveren validerer at ordre ikke fullføres med manglende produkter.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Quantity stock</div><div class="module">Database</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Produkter uten RFID</h3><ul><li>Antallsbasert lager for plastforlengere.</li><li>Reservasjon, staging, kansellering og ordredigering støttes uten falske RFID-numre.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Lager Admin v2.0</div><div class="module">Administrasjon</div><div class="status"><span class="tag dev">SERVER/UI ACTIVE · PHYSICAL PASS PENDING</span></div></div><div><h3>Sikker manuell lagerkorrigering</h3><ul><li>Manuell +/− og «sett faktisk» uten å lage RFID-poster.</li><li>Privilegert endring skjer server-side via Edge Function.</li><li>Admin-kode ligger ikke i HTML.</li><li>Audit-logg og kompenserende rollback ved feil.</li><li>Holdes utenfor vanlig operatørnavigasjon.</li></ul></div></article>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2>6. Utviklingsprinsipper som ble etablert</h2><p>Teknisk kontroll rundt senere versjoner</p></div>
-    <div class="timeline">
-      <article class="entry"><div><div class="ver">Stable lock</div><div class="module">Releasekontroll</div><div class="status"><span class="tag stabil">AKTIV PRAKSIS</span></div></div><div><h3>Frys fungerende kjernelogikk</h3><ul><li>Fysisk godkjente arbeidsversjoner låses i stedet for å omskrives.</li><li>Nye funksjoner utvikles i separate DEV-lag eller wrappers.</li><li>Rollback-punkter beholdes.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Shared product model</div><div class="module">Arkitektur</div><div class="status"><span class="tag work">WORK</span></div></div><div><h3>Felles produktdefinisjoner</h3><ul><li>Produktinformasjon samles sentralt i stedet for å kopieres mellom sider.</li><li>Samme produktmodell brukes av ordre, kamera, lager og scanner.</li></ul></div></article>
-      <article class="entry"><div><div class="ver">Server-side stock truth</div><div class="module">Arkitektur</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Én kilde for lagerstatus</h3><ul><li>Klienter viser serverberegnet fysisk og tilgjengelig beholdning.</li><li>Ordre, staging og manuelle overlays håndteres uten dobbel subtraksjon.</li><li>Historikk beholdes for sporbarhet.</li></ul></div></article>
-    </div>
-  </section>
-
-  <div class="footer">Teknisk utviklingslogg · hovedversjoner og tekniske milepæler · ingen dato- eller tidsangivelser</div>
-</main>
+    buttons.forEach(btn=>btn.addEventListener("click",()=>setLanguage(btn.dataset.lang)));
+    setLanguage(initialLanguage(),false);
+  })();
+  </script>
 </body>
 </html>

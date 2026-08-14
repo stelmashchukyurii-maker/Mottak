@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="uk" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Технічний журнал розробки</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--accent:#f4c430;--ok:#48d597;--info:#75b7ff;--warn:#f6a84b;--test:#c6a5ff}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg)}
+    body{font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(180deg,#0b1020,#11182a 38%,#0b1020)}
+    main{width:min(1180px,100%);margin:auto;padding:34px 24px 64px}
+    .eyebrow{display:inline-flex;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em}
+    h1{margin:14px 0 8px;font-size:clamp(38px,6vw,66px);line-height:1.02;letter-spacing:-.035em}
+    .lead{max-width:850px;margin:0;color:#cbd4e9;font-size:16px;line-height:1.6}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 8px}
+    .tag{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);font-size:10px;font-weight:900;letter-spacing:.05em}
+    .tag.stabil{border-color:rgba(72,213,151,.55);color:#8cf0bd}.tag.work{border-color:rgba(117,183,255,.6);color:#9dcfff}.tag.test{border-color:rgba(198,165,255,.55);color:#dbc7ff}.tag.dev{border-color:rgba(246,168,75,.55);color:#ffc77e}.tag.old{color:var(--muted)}
+    .note{margin:14px 0 26px;padding:12px 14px;border-left:3px solid var(--accent);background:rgba(244,196,48,.045);color:var(--muted);font-size:12px;line-height:1.55}
+    .section{margin-top:34px}
+    .section-head{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+    .section h2{margin:0;font-size:25px}.section-head p{margin:0;color:var(--muted);font-size:11px;text-align:right}
+    .timeline{display:grid;gap:10px}
+    .entry{display:grid;grid-template-columns:178px minmax(0,1fr);gap:18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(21,28,48,.94)}
+    .ver{font-size:18px;font-weight:1000;line-height:1.2}.module{margin-top:5px;color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    .entry h3{margin:0 0 7px;font-size:17px}.entry ul{margin:0;padding-left:18px;color:#d9e1f2;font-size:13px;line-height:1.55}.entry li+li{margin-top:3px}
+    .entry .status{margin-top:9px}
+    details.group{margin-top:12px;border:1px solid var(--line);border-radius:16px;background:rgba(13,20,38,.86);overflow:hidden}
+    details.group>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 16px;cursor:pointer;font-weight:1000}
+    details.group>summary::-webkit-details-marker{display:none}.sum-sub{display:block;margin-top:4px;color:var(--muted);font-size:10px;font-weight:400;line-height:1.4}.arrow{font-size:20px;color:var(--muted)}details[open] .arrow{transform:rotate(180deg)}
+    .group-body{padding:0 12px 12px}.group-body .entry{border-radius:12px;background:var(--panel)}
+    .footer{margin-top:38px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:10px;line-height:1.5;text-align:center}
+    @media(max-width:720px){main{padding:22px 14px 48px}.entry{grid-template-columns:1fr;gap:9px}.section-head{align-items:flex-start;flex-direction:column}.section-head p{text-align:left}}
+  </style>
+</head>
+<body class="notranslate">
+<main>
+  <div class="eyebrow">ТЕХНІЧНА ДОКУМЕНТАЦІЯ</div>
+  <h1>Технічний журнал розробки</h1>
+  <p class="lead"><strong>Основні версії та технічні етапи.</strong> Огляд ключових технічних етапів і головних версій у розвитку системи. Дрібні виправлення, зміни кешу та проміжні збірки згруповано біля найближчої функціональної основної версії.</p>
+
+  <div class="legend">
+    <span class="tag stabil">STABIL</span><span class="tag work">WORK</span><span class="tag test">TEST</span><span class="tag dev">DEV / PROTOTYPE</span><span class="tag old">ЗАМІНЕНО</span>
+  </div>
+  <div class="note"><strong>Примітка:</strong> деякі записи об’єднують кілька близьких версій одного напряму розвитку, наприклад <b>v4.10–v4.12</b>, <b>V2.3–V2.3.5</b> і <b>v4.6.6–v4.6.9</b>. Кожна версія є частиною історії розробки, але невеликі проміжні кроки згруповані, щоб журнал було легше читати. Статуси показують технічний стан і рівень перевірки; тестові та прототипні версії залишені як історичні етапи.</div>
+
+  <section class="section">
+    <div class="section-head"><h2>1. Основа: камера, реєстрація та спільні дані</h2><p>Від локальної реєстрації до спільного хмарного сховища</p></div>
+    <div class="timeline">
+      <article class="entry"><div><div class="ver">Scanner v1</div><div class="module">Мобільна реєстрація</div><div class="status"><span class="tag stabil">СТАБІЛЬНА БАЗА</span></div></div><div><h3>Перший робочий ланцюжок фото → AI → номер</h3><ul><li>Фото етикетки з мобільного телефона.</li><li>AI читає дві визначені текстові лінії.</li><li>Попередній перегляд, розпізнавання та контроль перед збереженням.</li><li>Основа для подальшої роботи з продуктами та складом.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Scanner v2</div><div class="module">Мобільна реєстрація</div><div class="status"><span class="tag stabil">СТАБІЛЬНА</span></div></div><div><h3>Продукти, підрахунок і захист від дублів</h3><ul><li>Вибір продукту перед реєстрацією.</li><li>Окремі лічильники для Bunner, Hyller x30 і Hyller x60.</li><li>Історія та лічильники зберігалися локально.</li><li>Захист від подвійної реєстрації.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Tabell v1</div><div class="module">Огляд складу</div><div class="status"><span class="tag old">ЗАМІНЕНО</span></div></div><div><h3>Локальна таблиця товарів</h3><ul><li>Спільний локальний огляд трьох основних продуктів.</li><li>Підрахунок, контроль дублів і CSV-експорт.</li><li>Пізніше замінено спільною мережевою базою даних.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Live v1</div><div class="module">Хмара / база даних</div><div class="status"><span class="tag old">ЗАМІНЕНО</span></div></div><div><h3>Перший спільний мережевий склад</h3><ul><li>Supabase Realtime об’єднав кілька пристроїв з одним джерелом даних.</li><li>Локальна черга зберігала дані при коротких перебоях мережі.</li><li>Спільна реєстрація замінила окремі локальні списки.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Live v2</div><div class="module">Камера + сканер</div><div class="status"><span class="tag work">WORK · ЕТАП</span></div></div><div><h3>Фото і сканер працюють з одним товарним записом</h3><ul><li>Мобільне фото та результат AI зберігаються разом із товаром.</li><li>Сканер може знайти наявний запис і доповнити його.</li><li>Фото залишається в історії, а оновлення видно через Realtime.</li><li>Немає окремої бази даних для кожного пристрою.</li></ul></div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>2. Camera Cloud</h2><p>Мобільний робочий процес, AI/OCR і складська інформація</p></div>
+    <div class="timeline">
+      <article class="entry"><div><div class="ver">v4.1</div><div class="module">Camera Cloud</div></div><div><h3>Стабілізація джерела</h3><ul><li>Окремий контроль правильно завантаженої версії та більш передбачуваної роботи на мобільному.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.2</div><div class="module">Camera Cloud</div></div><div><h3>Залишки по продуктах</h3><ul><li>У камерному інтерфейсі завантажуються складські значення для кожного продукту.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.3</div><div class="module">Camera Cloud</div></div><div><h3>Об’єднані підсумки</h3><ul><li>Спільний розрахунок складу та зрозуміліші загальні значення.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.4</div><div class="module">Camera Cloud</div><div class="status"><span class="tag test">TEST · ГІЛКА</span></div></div><div><h3>Резервний OCR</h3><ul><li>Додатковий OCR-двигун протестований як запасний варіант для складного читання.</li><li>Основний робочий процес не змінювався.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.7</div><div class="module">Camera Cloud</div></div><div><h3>Фільтр складу</h3><ul><li>Фільтрація складських даних, щоб активні товари показувалися доречніше.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.9</div><div class="module">Camera Cloud</div></div><div><h3>Фільтри продуктів</h3><ul><li>Вибір і відображення продуктів спрощено для швидшої мобільної роботи.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.10–v4.12</div><div class="module">Camera Cloud</div></div><div><h3>Плаваюче керування камерою і покроковий процес</h3><ul><li>Кнопка фото постійно доступна на мобільному.</li><li>Покрокова послідовність: фото, розпізнавання, збереження.</li><li>Варіанти розгортання та кешу зведено до однієї функціональної лінії.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.14</div><div class="module">Camera Cloud</div><div class="status"><span class="tag work">WORK · БАЗА</span></div></div><div><h3>Мобільні елементи керування процесом</h3><ul><li>Робочі елементи оптимізовано під телефон.</li><li>Створено окрему ізольовану TEST-копію для подальшої розробки без впливу на робочу версію.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.16</div><div class="module">Camera Cloud</div></div><div><h3>Спільний доступний склад</h3><ul><li>Камера перейшла на ту саму логіку доступного залишку, що й інші модулі.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.17</div><div class="module">Camera Cloud</div></div><div><h3>Спрощена модель номера</h3><ul><li>Верхній номер прибрано з активного робочого процесу.</li><li>Нижній номер став оперативним ідентифікатором у камерній лінії.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.20</div><div class="module">Camera Cloud</div></div><div><h3>Чистіший інтерфейс оператора</h3><ul><li>Зайвий верхній підсумок складу приховано.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.24</div><div class="module">Camera Cloud</div><div class="status"><span class="tag stabil">WORKING BASE</span></div></div><div><h3>Склад мінус рампа</h3><ul><li>Індикатор складу пов’язано з реально доступною кількістю після активних потреб рампи.</li><li>Версія стала робочою основою перед наступними мобільними покращеннями.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.25</div><div class="module">Camera Cloud</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Скидання після збереження</h3><ul><li>Нижній номер зберігається правильно.</li><li>Після збереження сторінка повертається у готовий стан для наступного фото.</li><li>Мобільний інтерфейс не зависає у статусі обробки.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.26</div><div class="module">Camera Cloud</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Автоматичний фокус на збереженні</h3><ul><li>Після розпізнавання оператор автоматично переходить до дії «Зберегти».</li><li>Підтверджений post-save процес із v4.25 збережено.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.27</div><div class="module">Camera Cloud</div><div class="status"><span class="tag dev">DEV</span></div></div><div><h3>Резерв для додаткових RFID-продуктів</h3><ul><li>Додаткові типи продуктів можна приймати через камеру як запасний варіант, коли RFID не використовується.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.28</div><div class="module">Camera Cloud</div><div class="status"><span class="tag dev">DEV</span></div></div><div><h3>Спільний огляд складу для 8 продуктів</h3><ul><li>Фізичні та доступні залишки об’єднано для восьми груп продуктів.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">v4.29</div><div class="module">Camera Cloud</div><div class="status"><span class="tag dev">DEV / НЕ ПОВНІСТЮ ПІДТВЕРДЖЕНО</span></div></div><div><h3>Ручне приймання пластикових продовжувачів</h3><ul><li>Продукт, що обліковується лише кількістю, можна прийняти без створення вигаданого RFID.</li><li>Збережено огляд 8 продуктів і попередній камерний процес.</li></ul></div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>3. UT: замовлення, склад і відправка</h2><p>Від локального замовлення до транзакційного складського статусу</p></div>
+    <div class="timeline">
+      <article class="entry"><div><div class="ver">Kontor v5</div><div class="module">Офіс замовлень</div><div class="status"><span class="tag old">РАННЯ БАЗА</span></div></div><div><h3>Перше офісне замовлення</h3><ul><li>Вибір рампи, продукту та кількості.</li><li>Автоматичний розрахунок і підсумок.</li><li>Раннє локальне збереження до повної інтеграції з базою даних.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">UT Lager v2 CLOUD</div><div class="module">Склад / відправка</div><div class="status"><span class="tag work">CLOUD</span></div></div><div><h3>Спільний складський процес у базі даних</h3><ul><li>Статуси замовлення: new → received → in_progress → staged → completed/cancelled.</li><li>Конкретні товарні записи резервуються, переміщуються на рампу й відправляються без видалення історії.</li><li>Realtime і серверні функції замінили локальну логіку відправки.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">UT Kontor v23</div><div class="module">Офіс замовлень</div></div><div><h3>Краща видимість продуктів</h3><ul><li>Картки продуктів та інформацію про замовлення зроблено зрозумілішими для офісної роботи.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">UT Kontor v28</div><div class="module">Офіс замовлень</div><div class="status"><span class="tag stabil">STABIL SNAPSHOT</span></div></div><div><h3>Стабілізоване відображення замовлень і підсумків</h3><ul><li>Макет замовлення та форми об’єднано.</li><li>Піктограми продуктів і похідні компонентні підсумки стали читабельнішими.</li><li>Підтверджені значення рампи використовуються в загальних підсумках.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">UT Kontor v29</div><div class="module">Офіс замовлень</div><div class="status"><span class="tag test">ПАРАЛЕЛЬНА РОЗРОБКА</span></div></div><div><h3>Робочий адаптер зі стабільної тестової лінії</h3><ul><li>Стабільну архітектуру замовлень підключено до робочих даних через окремий адаптер.</li><li>TEST і WORK копії залишались розділеними під час міграції.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">UT Kontor v34</div><div class="module">Офіс замовлень</div></div><div><h3>Склад мінус рампа</h3><ul><li>Компактний індикатор показує залишок після активної потреби рампи.</li><li>Робочий wrapper стабілізовано проти циклів кешу й observer.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">UT Kontor v37</div><div class="module">Офіс замовлень</div><div class="status"><span class="tag dev">WORKING / ACCEPTANCE PENDING</span></div></div><div><h3>Спільний фізичний і доступний склад для 8 продуктів</h3><ul><li>Вісім карток продуктів.</li><li>Два стандартизовані значення: фізичний залишок і доступний залишок.</li><li>Той самий серверний розрахунок складу, що й в інших модулях.</li><li>Повне фізичне фінальне підтвердження всієї v37 ще відкладене.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">8-produkt lagermodell</div><div class="module">База даних</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Один авторитетний розрахунок складу</h3><ul><li>Фізичний і доступний склад чітко розділені.</li><li>Активні замовлення одразу зменшують доступний залишок.</li><li>Переміщення на рампу не віднімає товар вдруге.</li><li>Vrak і продукти з quantity-only обліком входять у той самий огляд.</li></ul></div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>4. Nordic ID / RFID</h2><p>Від Wedge-експериментів до зафіксованого робочого процесу</p></div>
+
+    <details class="group">
+      <summary><span>Рання Wedge-лінія розробки<span class="sum-sub">Історичні версії, використані для розуміння scanner-input, фокусу та single-tag поведінки.</span></span><span class="arrow">⌄</span></summary>
+      <div class="group-body timeline">
+        <article class="entry"><div><div class="ver">v4.3–v4.5</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag old">ІСТОРИЧНА</span></div></div><div><h3>Кероване сканування і перша стабільна сторінка сканера</h3><ul><li>Сфокусований Wedge-input і керований процес оператора.</li><li>v4.5 була опублікована як стабільна база ранньої лінії.</li></ul></div></article>
+        <article class="entry"><div><div class="ver">v4.6–v4.6.5</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag test">TEST</span></div></div><div><h3>Контроль одного тега і capture-вікно</h3><ul><li>Один Bunner за одну операцію.</li><li>Wedge-reset, recovery та діагностика вводу.</li><li>Захист від пізніх RFID-сигналів і контрольоване capture-вікно.</li><li>Тестування вибору кандидата серед перших RFID-сигналів.</li></ul></div></article>
+        <article class="entry"><div><div class="ver">v4.6.6–v4.6.9</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag test">TEST</span></div></div><div><h3>Автоматичний фокус і журнал вводу</h3><ul><li>Автоматичний фокус сканера.</li><li>Журнал вводу, який можна було передати для фізичної діагностики.</li><li>Single-focus режим і global key capture з ручним fallback.</li></ul></div></article>
+        <article class="entry"><div><div class="ver">v4.9–v4.10</div><div class="module">Nordic Wedge</div><div class="status"><span class="tag old">ЗАМІНЕНО</span></div></div><div><h3>Оперативна ідентифікація тільки за lower-number</h3><ul><li>Верхній номер прибрано з активного RFID-процесу.</li><li>Цю дослідницьку лінію пізніше замінила нова RFID-архітектура V2.x.</li></ul></div></article>
+      </div>
+    </details>
+
+    <div class="timeline" style="margin-top:12px">
+      <article class="entry"><div><div class="ver">V2.0</div><div class="module">Нова RFID-база</div><div class="status"><span class="tag test">TEST</span></div></div><div><h3>Focus Guard</h3><ul><li>Нова постійна RFID-тестова лінія з Wedge-приймачем, захищеним від втрати фокусу.</li><li>Початкова точка сучасної RFID-архітектури.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.1</div><div class="module">RFID</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>First Tag Lock</h3><ul><li>Приймається перший валідний EPC довжиною 24 символи.</li><li>Блокування на 600 ms зупиняє повторний прийом у тому самому trigger-циклі.</li><li>Стабільний цикл READY → ACCEPT/LOCK → READY.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.2</div><div class="module">RFID</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Продукт + RFID mapping</h3><ul><li>Вибір продукту до сканування.</li><li>Повний EPC зберігається як scanner code.</li><li>Останні шість символів використовуються як оперативний нижній номер.</li><li>TEST-дані ізольовані від WORK-даних.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.2.1</div><div class="module">RFID</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Keyboard Guard</h3><ul><li>Вибір продукту не відкриває екранну клавіатуру.</li><li>RFID-приймач зберігає сумісність із Wedge-службою.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.3–V2.3.5</div><div class="module">RFID</div><div class="status"><span class="tag test">ІТЕРАЦІЯ</span></div></div><div><h3>Підтвердження перед збереженням і контроль клавіатури</h3><ul><li>Велике підтвердження перед дією з базою даних.</li><li>Кілька фізичних виправлень фокусу, клавіатури та RFID-input.</li><li>V2.3.4 обрана як стабільна підбаза; V2.3.5 була альтернативною тестовою гілкою.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.4</div><div class="module">RFID</div><div class="status"><span class="tag stabil">ІСТОРИЧНО СТАБІЛЬНА</span></div></div><div><h3>Прихований RFID-приймач</h3><ul><li>Технічне input-поле прибрано з інтерфейсу оператора.</li><li>Wedge-прийом продовжується у фоні.</li><li>Процес підтвердження/збереження збережено.</li><li>Версію залишено як rollback-базу для наступних RFID-функцій.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.5</div><div class="module">RFID → UT</div><div class="status"><span class="tag test">SIMULATOR</span></div></div><div><h3>Один тег у симулятор відправки</h3><ul><li>Перше з’єднання single-tag RFID з логікою списання UT.</li><li>Контрольований проміжний етап перед повним процесом рампи.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.9.7</div><div class="module">До рампи</div><div class="status"><span class="tag stabil">FROZEN · PHYSICAL PASS</span></div></div><div><h3>Завершений зафіксований застосунок відправки</h3><ul><li>Прихований RFID-двигун, 24-символьний EPC і first-tag lock.</li><li>TEST/WORK, smart focus та input lock.</li><li>Замовлено / готово / залишилось / наступне.</li><li>Підтвердження для основних продуктів і введення кількості для коротких/довгих продовжувачів.</li><li>Staging і dispatch зафіксовані як стабільна бізнес-логіка.</li><li>WORK може відкриватися за замовчуванням через wrapper без зміни frozen-ядра.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.9.7 + count display</div><div class="module">До рампи</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Фактична кількість штук для продовжувачів</h3><ul><li>Показує реальне <b>NNN stk.</b> із серверних даних.</li><li>Зміна тільки шару відображення; RFID, staging і dispatch логіка не змінювалися.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">V2.9.8</div><div class="module">До рампи</div><div class="status"><span class="tag dev">DEV</span></div></div><div><h3>Overlay прогресу для 8 продуктів</h3><ul><li>Розширене візуальне відображення прогресу для всіх груп продуктів, включно з Vrak.</li><li>Зберігається окремо від стабільної V2.9.7.</li><li>Не переводиться в робочу версію без фінального фізичного тесту.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Til lager V1.0.4</div><div class="module">Nordic · приймання</div><div class="status"><span class="tag dev">WORK DEFAULT · PASS PENDING</span></div></div><div><h3>Реальне RFID-приймання на склад</h3><ul><li>24-символьний EPC і mapping останніх шести символів.</li><li>Реальні WORK-записи підтверджені в базі даних.</li><li>Спільні складські значення для 8 продуктів.</li><li>Стартує у WORK через wrapper; фінальне візуальне підтвердження старту на фізичному пристрої ще очікується.</li></ul></div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>5. Складська та серверна архітектура</h2><p>Контроль, простежуваність і безпечне ручне коригування</p></div>
+    <div class="timeline">
+      <article class="entry"><div><div class="ver">TEST / WORK separation</div><div class="module">База даних</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Спільні таблиці з поділом середовищ</h3><ul><li>Одна модель даних може використовуватися в TEST і WORK.</li><li>TEST дозволяє повторювати EPC для розробки.</li><li>WORK захищає від дублів.</li><li>Перехресне змішування між середовищами блокується.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Vrak lifecycle</div><div class="module">База / відправка</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Повний процес замовлення → рампа → відправлено</h3><ul><li>Vrak-продукти отримали той самий транзакційний складський життєвий цикл, що й інші RFID-продукти.</li><li>Сервер перевіряє, щоб замовлення не завершувалось із відсутніми продуктами.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Quantity stock</div><div class="module">База даних</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Продукти без RFID</h3><ul><li>Кількісний облік для пластикових продовжувачів.</li><li>Резервування, staging, скасування та редагування замовлення підтримуються без фальшивих RFID-номерів.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Lager Admin v2.0</div><div class="module">Адміністрування</div><div class="status"><span class="tag dev">SERVER/UI ACTIVE · PHYSICAL PASS PENDING</span></div></div><div><h3>Безпечне ручне коригування складу</h3><ul><li>Ручне +/− і «встановити фактичну кількість» без створення RFID-записів.</li><li>Привілейована зміна виконується server-side через Edge Function.</li><li>Admin-код не знаходиться в HTML.</li><li>Audit-log і компенсуючий rollback у разі помилки.</li><li>Не входить у звичайну навігацію оператора.</li></ul></div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>6. Встановлені принципи розробки</h2><p>Технічний контроль для наступних версій</p></div>
+    <div class="timeline">
+      <article class="entry"><div><div class="ver">Stable lock</div><div class="module">Контроль release</div><div class="status"><span class="tag stabil">ЧИННА ПРАКТИКА</span></div></div><div><h3>Заморожування робочої логіки ядра</h3><ul><li>Фізично підтверджені робочі версії блокуються замість переписування.</li><li>Нові функції розробляються в окремих DEV-шарах або wrappers.</li><li>Rollback-точки зберігаються.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Shared product model</div><div class="module">Архітектура</div><div class="status"><span class="tag work">WORK</span></div></div><div><h3>Спільні визначення продуктів</h3><ul><li>Інформація про продукт зберігається централізовано, а не копіюється між сторінками.</li><li>Та сама модель продукту використовується замовленнями, камерою, складом і сканером.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Server-side stock truth</div><div class="module">Архітектура</div><div class="status"><span class="tag stabil">SERVER PASS</span></div></div><div><h3>Одне джерело істини для складського статусу</h3><ul><li>Клієнтські сторінки показують розраховані сервером фізичний і доступний залишки.</li><li>Замовлення, staging і ручні overlays обробляються без подвійного віднімання.</li><li>Історія зберігається для простежуваності.</li></ul></div></article>
+    </div>
+  </section>
+
+  <div class="footer">Технічний журнал розробки · основні версії та технічні етапи · без дат і часу</div>
+</main>
+</body>
+</html>
