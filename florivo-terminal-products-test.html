@@ -19,20 +19,17 @@
     .card{background:var(--card);color:var(--ink);border-radius:25px;padding:16px;box-shadow:0 12px 34px #0006;border:1px solid #fff7d6}
     .employee{display:flex;align-items:center;gap:13px;border:2px solid var(--line);border-radius:19px;background:#fff;padding:12px 13px;box-shadow:inset 0 1px 0 #fff,0 3px 8px #00000010}.avatar{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#fff0a7;color:#594600;font-size:22px;font-weight:900;flex:0 0 auto;border:2px solid #e0c34b}.empName{font-size:20px;font-weight:900}.empMeta{font-size:13px;color:var(--muted);margin-top:4px}
     .title{text-align:center;font-size:28px;font-weight:900;margin:18px 0 4px;color:#3d350d}.hint{text-align:center;color:var(--muted);font-size:14px;margin-bottom:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-
     .product{position:relative;overflow:hidden;min-height:126px;border:2px solid var(--yellowEdge);border-radius:22px;background:linear-gradient(180deg,var(--yellowTop) 0%,var(--yellowMid) 26%,var(--yellow) 62%,var(--yellowDeep) 100%);color:#2e2a12;padding:16px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;cursor:pointer;box-shadow:0 8px 0 var(--yellowEdge),0 14px 22px #0004,inset 0 2px 0 #ffffffd9,inset 0 -3px 0 #8a6c002b;transform:translateY(0);transition:transform .08s ease,box-shadow .08s ease,filter .12s ease}
     .product::before{content:"";position:absolute;left:0;right:0;top:0;height:42%;background:linear-gradient(180deg,#ffffff78,#ffffff00);pointer-events:none}
     .product>*{position:relative;z-index:1}.product:active{transform:translateY(6px);box-shadow:0 2px 0 var(--yellowEdge),0 6px 10px #0003,inset 0 2px 0 #ffffffb8}.product .icon{font-size:34px;line-height:1;text-shadow:0 1px 0 #fff8}.product .name{font-size:23px;font-weight:900;line-height:1.06;text-shadow:0 1px 0 #fff7}.product .desc{font-size:12px;color:#665713;margin-top:6px;font-weight:700}.product.wide{grid-column:1/-1;min-height:102px;flex-direction:row;align-items:center}.product.wide .icon{font-size:40px}.product.wide .name{font-size:25px}
     .secondary{background:linear-gradient(180deg,#fff8cf 0%,#ffe98a 33%,#ffd84b 72%,#eac000 100%);color:#352e0b;border-color:#9d7d00}
-
-    .dangerWrap{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.dangerBtn{position:relative;overflow:hidden;width:100%;min-height:66px;border-radius:18px;border:2px solid var(--redEdge);background:linear-gradient(180deg,#ffb8b1,#ef655d 55%,#c53b34);color:white;font-weight:900;font-size:18px;cursor:pointer;box-shadow:0 6px 0 var(--redEdge),0 10px 18px #0003,inset 0 2px 0 #ffffff70;transform:translateY(0);transition:.08s}.dangerBtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--redEdge),0 5px 8px #0002}
+    .dangerWrap{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.dangerBtn,.vrakChoice{position:relative;overflow:hidden;width:100%;border-radius:18px;border:2px solid var(--redEdge);background:linear-gradient(180deg,#ffb8b1,#ef655d 55%,#c53b34);color:white;font-weight:900;cursor:pointer;box-shadow:0 6px 0 var(--redEdge),0 10px 18px #0003,inset 0 2px 0 #ffffff70;transform:translateY(0);transition:.08s}.dangerBtn{min-height:66px;font-size:18px}.dangerBtn:active,.vrakChoice:active{transform:translateY(4px);box-shadow:0 2px 0 var(--redEdge),0 5px 8px #0002}
+    .vrakCard{display:none}.vrakCard.show{display:block}.vrakGrid{display:grid;gap:15px;margin-top:18px}.vrakChoice{min-height:96px;padding:18px;text-align:left;font-size:22px;display:flex;align-items:center;justify-content:space-between}.vrakChoice small{display:block;font-size:13px;font-weight:700;opacity:.85;margin-top:6px}.backBtn{width:100%;min-height:62px;border-radius:18px;border:2px solid #c7b96e;background:#fff8cf;color:#443a08;font-size:18px;font-weight:900;margin-top:18px;cursor:pointer}
     .footer{font-size:12px;color:#efe5b7;text-align:center;padding:2px 6px 15px;line-height:1.45}
-
-    .overlay{position:fixed;inset:0;z-index:50;background:#19180ff3;display:none;place-items:center;padding:22px}.overlay.show{display:grid}.result{text-align:center;max-width:620px;background:linear-gradient(180deg,#fff8cf,#ffe264 56%,#ffd43b);color:#332c08;border:3px solid #9b7900;border-radius:30px;padding:28px 24px;box-shadow:0 12px 0 #6f5600,0 28px 70px #0008,inset 0 2px 0 #fff}.check{font-size:74px}.okTitle{font-size:25px;font-weight:900}.numberLabel{font-size:15px;color:#685a16;margin-top:18px}.number{font-size:72px;font-weight:1000;line-height:1;margin:5px 0 16px;text-shadow:0 2px 0 #fff8}.meta{font-size:20px;color:#4f4518;line-height:1.4}.countdown{font-size:13px;color:#756620;margin-top:18px}
-
+    .overlay{position:fixed;inset:0;z-index:50;background:#19180ff3;display:none;place-items:center;padding:22px}.overlay.show{display:grid}.result{text-align:center;max-width:620px;background:linear-gradient(180deg,#fff8cf,#ffe264 56%,#ffd43b);color:#332c08;border:3px solid #9b7900;border-radius:30px;padding:28px 24px;box-shadow:0 12px 0 #6f5600,0 28px 70px #0008,inset 0 2px 0 #fff}.result.red{background:linear-gradient(180deg,#ffd0cc,#ef655d 58%,#c53b34);color:white;border-color:var(--redEdge);box-shadow:0 12px 0 var(--redEdge),0 28px 70px #0008,inset 0 2px 0 #fff6}.result.red .numberLabel,.result.red .meta,.result.red .countdown{color:#fff}.check{font-size:74px}.okTitle{font-size:25px;font-weight:900}.numberLabel{font-size:15px;color:#685a16;margin-top:18px}.number{font-size:72px;font-weight:1000;line-height:1;margin:5px 0 16px;text-shadow:0 2px 0 #fff8}.meta{font-size:20px;color:#4f4518;line-height:1.4}.countdown{font-size:13px;color:#756620;margin-top:18px}
     .locked{opacity:.48;pointer-events:none;filter:grayscale(.15)}.newCard{display:none;text-align:center}.newCard.show{display:block}.newIcon{font-size:62px}.newTitle{font-size:27px;font-weight:900;margin:7px 0;color:#3d350d}.newHint{color:var(--muted);line-height:1.45}.big{position:relative;overflow:hidden;width:100%;min-height:78px;border:2px solid var(--yellowEdge);border-radius:20px;background:linear-gradient(180deg,var(--yellowTop),var(--yellowMid) 32%,var(--yellow) 68%,var(--yellowDeep));color:#332b08;font-size:21px;font-weight:900;margin-top:16px;cursor:pointer;box-shadow:0 7px 0 var(--yellowEdge),0 12px 20px #0003,inset 0 2px 0 #fff;transform:translateY(0);transition:.08s}.big:active{transform:translateY(5px);box-shadow:0 2px 0 var(--yellowEdge),0 5px 10px #0002}
     .lang{display:flex;gap:6px;margin-left:auto}.lang button{border:0;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;background:#ffffff18;color:white;cursor:pointer}.lang button.active{background:var(--yellow);color:#3b3000;box-shadow:0 3px 0 #8d7000}
-    @media(max-width:520px){.brand{font-size:24px}.grid{gap:13px}.product{min-height:116px;padding:14px}.product .name{font-size:20px}.product.wide .name{font-size:22px}.number{font-size:58px}.title{font-size:25px}}
+    @media(max-width:520px){.brand{font-size:24px}.grid{gap:13px}.product{min-height:116px;padding:14px}.product .name{font-size:20px}.product.wide .name{font-size:22px}.number{font-size:58px}.title{font-size:25px}.vrakChoice{font-size:20px}}
   </style>
 </head>
 <body>
@@ -50,14 +47,25 @@
       <button class="product" data-key="forlengere_lange" data-name="FORLENGERE LANGE"><div class="icon">⟷</div><div><div class="name">FORLENGERE<br>LANGE</div><div class="desc" data-no="Registrer ferdig vare" data-uk="Зареєструвати готовий продукт">Registrer ferdig vare</div></div></button>
       <button class="product wide secondary" data-key="forlengere_plast" data-name="FORLENGERE PLAST"><div class="icon">▱</div><div style="flex:1;margin-left:16px"><div class="name">FORLENGERE PLAST</div><div class="desc" data-no="TEST-knapp · antallslogikk avklares senere" data-uk="TEST-кнопка · логіку кількості уточнимо пізніше">TEST-knapp · antallslogikk avklares senere</div></div><div style="font-size:34px">›</div></button>
     </div>
-    <div class="dangerWrap"><button class="dangerBtn" id="vrakBtn">VRAK / AVVIK · ikke i hovedflyten</button></div>
+    <div class="dangerWrap"><button class="dangerBtn" id="vrakBtn">VRAK / AVVIK</button></div>
+  </section>
+
+  <section class="card vrakCard" id="vrakCard">
+    <div class="employee"><div class="avatar" style="background:#ffd8d5;color:#8a241f;border-color:#e48b84">!</div><div><div class="empName">TEST ANSATT</div><div class="empMeta">VRAK / AVVIK · TEST</div></div></div>
+    <div class="title" id="vrakTitle" style="color:#8a241f">Velg avvik</div><div class="hint" id="vrakHint">Registreres separat fra ferdig produkt.</div>
+    <div class="vrakGrid">
+      <button class="vrakChoice" data-key="vrak_bunner" data-name="VRAK BUNNER"><div>VRAK BUNNER<small data-no="Bunner registrert som vrak +1" data-uk="Брак Bunner +1">Bunner registrert som vrak +1</small></div><div>›</div></button>
+      <button class="vrakChoice" data-key="vrak_hyller" data-name="VRAK HYLLER"><div>VRAK HYLLER<small data-no="Hyller registrert som vrak +1" data-uk="Брак Hyller +1">Hyller registrert som vrak +1</small></div><div>›</div></button>
+      <button class="vrakChoice" data-key="bunner_uten_brikk" data-name="BUNNER UTEN BRIKK"><div>BUNNER UTEN BRIKK<small data-no="Avvik · ferdig Bunner uten brikk +1" data-uk="Відхилення · готовий Bunner без бірки +1">Avvik · ferdig Bunner uten brikk +1</small></div><div>›</div></button>
+    </div>
+    <button class="backBtn" id="backBtn">← TILBAKE TIL PRODUKTER</button>
   </section>
 
   <section class="card newCard" id="newCard"><div class="newIcon">📶</div><div class="newTitle" id="newTitle">Legg neste kort mot telefonen</div><div class="newHint" id="newHint">I Android-appen venter terminalen her på neste NFC-kort. I denne webtesten kan du åpne produktvalget igjen.</div><button class="big" id="againBtn">TEST · ÅPNE PRODUKTER IGJEN</button></section>
-  <div class="footer">TEST v0.2 · 17.08.2026 22:07 Europe/Oslo · gul 3D produkt-UX · ingen WORK-data endres</div>
+  <div class="footer">TEST v0.3 · 17.08.2026 22:12 Europe/Oslo · gul 3D produkt-UX + VRAK/AVVIK · ingen WORK-data endres</div>
 </div>
 
-<div class="overlay" id="overlay"><div class="result"><div class="check">✅</div><div class="okTitle" id="okTitle">REGISTRERT +1</div><div class="numberLabel" id="numberLabel">Løpenummer</div><div class="number" id="number">000001</div><div class="meta" id="meta"></div><div class="countdown" id="countdown">Tilbake om 3 sekunder…</div></div></div>
+<div class="overlay" id="overlay"><div class="result" id="resultBox"><div class="check">✅</div><div class="okTitle" id="okTitle">REGISTRERT +1</div><div class="numberLabel" id="numberLabel">Løpenummer</div><div class="number" id="number">000001</div><div class="meta" id="meta"></div><div class="countdown" id="countdown">Tilbake om 3 sekunder…</div></div></div>
 
 <script>
 (() => {
@@ -65,16 +73,62 @@
   const SUPABASE_KEY='sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya';
   const BROWSER_KEY='florivo_terminal_browser_id', SEQ_KEY='florivo_terminal_product_seq_test';
   const browserId=getBrowserId(); let lang='no',locked=false;
-  const text={no:{title:'Velg produkt',hint:'Trykk én gang når ferdig produkt er klart.',ok:'REGISTRERT +1',number:'Løpenummer',back:'Tilbake om 3 sekunder…',next:'Legg neste kort mot telefonen',nextHint:'I Android-appen venter terminalen her på neste NFC-kort. I denne webtesten kan du åpne produktvalget igjen.',again:'TEST · ÅPNE PRODUKTER IGJEN'},uk:{title:'Вибери продукт',hint:'Натисни один раз, коли готовий продукт завершено.',ok:'ЗАРЕЄСТРОВАНО +1',number:'Порядковий номер',back:'Вихід через 3 секунди…',next:'Приклади наступний пропуск',nextHint:'В Android-апці термінал тут чекатиме наступну NFC-карту. У веб-тесті можна знову відкрити продукти.',again:'TEST · ЗНОВУ ВІДКРИТИ ПРОДУКТИ'}};
-  document.querySelectorAll('.product').forEach(btn=>btn.addEventListener('click',()=>selectProduct(btn.dataset.key,btn.dataset.name)));
-  document.getElementById('againBtn').onclick=()=>{document.getElementById('newCard').classList.remove('show');document.getElementById('productCard').style.display='block';locked=false;logServer('PRODUCT_SCREEN_REOPEN');};
-  document.getElementById('vrakBtn').onclick=()=>{alert(lang==='no'?'VRAK holdes utenfor hovedflyten foreløpig.':'VRAK поки залишаємо поза основним потоком.');logServer('VRAK_BUTTON_TEST');};
-  document.getElementById('noBtn').onclick=()=>setLang('no'); document.getElementById('ukBtn').onclick=()=>setLang('uk');
-  function selectProduct(key,name){if(locked)return;locked=true;document.getElementById('productGrid').classList.add('locked');const seq=nextSeq(),display=String(seq).padStart(6,'0');document.getElementById('number').textContent=display;document.getElementById('meta').textContent=name+' · TEST ANSATT';document.getElementById('overlay').classList.add('show');logServer('PRODUCT_TEST_SELECT',{product_key:key,display_number:display,employee_name:'TEST ANSATT',mode:'browser_product_test',detail:{product_name:name}});setTimeout(()=>{document.getElementById('overlay').classList.remove('show');document.getElementById('productGrid').classList.remove('locked');document.getElementById('productCard').style.display='none';document.getElementById('newCard').classList.add('show');logServer('PRODUCT_TEST_EXIT',{product_key:key,display_number:display,mode:'browser_product_test'});},3000);}
+  const text={
+    no:{title:'Velg produkt',hint:'Trykk én gang når ferdig produkt er klart.',ok:'REGISTRERT +1',number:'Løpenummer',back:'Tilbake om 3 sekunder…',next:'Legg neste kort mot telefonen',nextHint:'I Android-appen venter terminalen her på neste NFC-kort. I denne webtesten kan du åpne produktvalget igjen.',again:'TEST · ÅPNE PRODUKTER IGJEN',vrakTitle:'Velg avvik',vrakHint:'Registreres separat fra ferdig produkt.',backProducts:'← TILBAKE TIL PRODUKTER'},
+    uk:{title:'Вибери продукт',hint:'Натисни один раз, коли готовий продукт завершено.',ok:'ЗАРЕЄСТРОВАНО +1',number:'Порядковий номер',back:'Вихід через 3 секунди…',next:'Приклади наступний пропуск',nextHint:'В Android-апці термінал тут чекатиме наступну NFC-карту. У веб-тесті можна знову відкрити продукти.',again:'TEST · ЗНОВУ ВІДКРИТИ ПРОДУКТИ',vrakTitle:'Вибери брак / відхилення',vrakHint:'Реєструється окремо від готового продукту.',backProducts:'← НАЗАД ДО ПРОДУКТІВ'}
+  };
+
+  document.querySelectorAll('.product').forEach(btn=>btn.addEventListener('click',()=>selectItem(btn.dataset.key,btn.dataset.name,false)));
+  document.querySelectorAll('.vrakChoice').forEach(btn=>btn.addEventListener('click',()=>selectItem(btn.dataset.key,btn.dataset.name,true)));
+  document.getElementById('vrakBtn').onclick=()=>openVrak();
+  document.getElementById('backBtn').onclick=()=>closeVrak();
+  document.getElementById('againBtn').onclick=()=>{document.getElementById('newCard').classList.remove('show');document.getElementById('productCard').style.display='block';document.getElementById('vrakCard').classList.remove('show');locked=false;logServer('PRODUCT_SCREEN_REOPEN');};
+  document.getElementById('noBtn').onclick=()=>setLang('no');
+  document.getElementById('ukBtn').onclick=()=>setLang('uk');
+
+  function openVrak(){document.getElementById('productCard').style.display='none';document.getElementById('vrakCard').classList.add('show');logServer('VRAK_MENU_OPEN',{mode:'browser_product_test'});}
+  function closeVrak(){document.getElementById('vrakCard').classList.remove('show');document.getElementById('productCard').style.display='block';logServer('VRAK_MENU_BACK',{mode:'browser_product_test'});}
+
+  function selectItem(key,name,isVrak){
+    if(locked)return;
+    locked=true;
+    document.getElementById('productGrid').classList.add('locked');
+    const seq=nextSeq(),display=String(seq).padStart(6,'0');
+    document.getElementById('number').textContent=display;
+    document.getElementById('meta').textContent=name+' · TEST ANSATT';
+    document.getElementById('resultBox').classList.toggle('red',isVrak);
+    document.getElementById('overlay').classList.add('show');
+    logServer(isVrak?'AVVIK_TEST_SELECT':'PRODUCT_TEST_SELECT',{product_key:key,display_number:display,employee_name:'TEST ANSATT',mode:'browser_product_test',detail:{product_name:name,category:isVrak?'avvik':'finished_product'}});
+    setTimeout(()=>{
+      document.getElementById('overlay').classList.remove('show');
+      document.getElementById('productGrid').classList.remove('locked');
+      document.getElementById('productCard').style.display='none';
+      document.getElementById('vrakCard').classList.remove('show');
+      document.getElementById('newCard').classList.add('show');
+      logServer(isVrak?'AVVIK_TEST_EXIT':'PRODUCT_TEST_EXIT',{product_key:key,display_number:display,mode:'browser_product_test'});
+    },3000);
+  }
+
   function nextSeq(){const n=(parseInt(localStorage.getItem(SEQ_KEY)||'0',10)||0)+1;localStorage.setItem(SEQ_KEY,String(n));return n;}
-  function setLang(v){lang=v;document.getElementById('noBtn').classList.toggle('active',v==='no');document.getElementById('ukBtn').classList.toggle('active',v==='uk');document.getElementById('title').textContent=text[v].title;document.getElementById('hint').textContent=text[v].hint;document.getElementById('okTitle').textContent=text[v].ok;document.getElementById('numberLabel').textContent=text[v].number;document.getElementById('countdown').textContent=text[v].back;document.getElementById('newTitle').textContent=text[v].next;document.getElementById('newHint').textContent=text[v].nextHint;document.getElementById('againBtn').textContent=text[v].again;document.querySelectorAll('.desc').forEach(el=>el.textContent=el.dataset[v]||el.textContent);}
+  function setLang(v){
+    lang=v;
+    document.getElementById('noBtn').classList.toggle('active',v==='no');
+    document.getElementById('ukBtn').classList.toggle('active',v==='uk');
+    document.getElementById('title').textContent=text[v].title;
+    document.getElementById('hint').textContent=text[v].hint;
+    document.getElementById('okTitle').textContent=text[v].ok;
+    document.getElementById('numberLabel').textContent=text[v].number;
+    document.getElementById('countdown').textContent=text[v].back;
+    document.getElementById('newTitle').textContent=text[v].next;
+    document.getElementById('newHint').textContent=text[v].nextHint;
+    document.getElementById('againBtn').textContent=text[v].again;
+    document.getElementById('vrakTitle').textContent=text[v].vrakTitle;
+    document.getElementById('vrakHint').textContent=text[v].vrakHint;
+    document.getElementById('backBtn').textContent=text[v].backProducts;
+    document.querySelectorAll('.desc,[data-no][data-uk]').forEach(el=>{if(el.dataset[v])el.textContent=el.dataset[v];});
+  }
   function getBrowserId(){let id=localStorage.getItem(BROWSER_KEY);if(!id){id=crypto.randomUUID?crypto.randomUUID():('b-'+Date.now());localStorage.setItem(BROWSER_KEY,id);}return id;}
-  async function logServer(eventType,extra={}){try{const row={environment:'test',source:'florivo-terminal-products-test',browser_id:browserId,event_type:eventType,employee_name:extra.employee_name||null,uid:null,product_key:extra.product_key||null,display_number:extra.display_number||null,mode:extra.mode||null,detail:{version:'products-v0.2',local_time:new Date().toLocaleString('no-NO'),...(extra.detail||{})}};await fetch(SUPABASE_URL+'/rest/v1/florivo_terminal_test_log',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)});}catch(e){}}
+  async function logServer(eventType,extra={}){try{const row={environment:'test',source:'florivo-terminal-products-test',browser_id:browserId,event_type:eventType,employee_name:extra.employee_name||null,uid:null,product_key:extra.product_key||null,display_number:extra.display_number||null,mode:extra.mode||null,detail:{version:'products-v0.3',local_time:new Date().toLocaleString('no-NO'),...(extra.detail||{})}};await fetch(SUPABASE_URL+'/rest/v1/florivo_terminal_test_log',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)});}catch(e){}}
   logServer('PRODUCT_PAGE_OPEN',{mode:'browser_product_test'});
 })();
 </script>
