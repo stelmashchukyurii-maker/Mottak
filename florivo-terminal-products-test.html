@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#082b21" />
+  <title>TEST · Florivo Terminal · Produkter</title>
+  <style>
+    :root{--bg:#061812;--bg2:#0b3b2e;--card:#f8fbf9;--ink:#102a20;--muted:#61786e;--green:#0b7446;--green2:#075a37;--green3:#0e8a54;--line:#d6e5dd;--yellow:#f4c430;--red:#a92b26;--white:#fff}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),var(--bg2));color:white} body{min-height:100vh} button{font:inherit}
+    .app{max-width:760px;min-height:100vh;margin:auto;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);display:flex;flex-direction:column;gap:12px}
+    header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:14px 4px 2px}.brand{font-size:30px;font-weight:900;letter-spacing:.4px}.sub{font-size:13px;opacity:.78;margin-top:4px}.test{background:var(--yellow);color:#3d2d00;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:900;white-space:nowrap}
+    .card{background:var(--card);color:var(--ink);border-radius:25px;padding:16px;box-shadow:0 12px 34px #0005}.employee{display:flex;align-items:center;gap:13px;border:2px solid var(--line);border-radius:19px;background:white;padding:12px 13px}.avatar{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#e2f4ea;color:var(--green);font-size:22px;font-weight:900;flex:0 0 auto}.empName{font-size:20px;font-weight:900}.empMeta{font-size:13px;color:var(--muted);margin-top:4px}
+    .title{text-align:center;font-size:28px;font-weight:900;margin:18px 0 4px}.hint{text-align:center;color:var(--muted);font-size:14px;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+    .product{min-height:126px;border:0;border-radius:22px;background:linear-gradient(180deg,var(--green),var(--green2));color:white;padding:16px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;box-shadow:0 7px 18px #0753324d;cursor:pointer}.product:active{transform:translateY(1px)}.product .icon{font-size:34px;line-height:1}.product .name{font-size:23px;font-weight:900;line-height:1.06}.product .desc{font-size:12px;opacity:.82;margin-top:6px}.product.wide{grid-column:1/-1;min-height:102px;flex-direction:row;align-items:center}.product.wide .icon{font-size:40px}.product.wide .name{font-size:25px}.secondary{background:white;color:var(--green2);border:2px solid #b7d2c5;box-shadow:none}
+    .dangerWrap{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.dangerBtn{width:100%;min-height:62px;border-radius:18px;border:2px solid #e4b6b1;background:#fff7f6;color:var(--red);font-weight:900;font-size:18px;cursor:pointer}.footer{font-size:12px;color:#bad4c7;text-align:center;padding:2px 6px 15px;line-height:1.45}
+    .overlay{position:fixed;inset:0;z-index:50;background:#04160ff3;display:none;place-items:center;padding:22px}.overlay.show{display:grid}.result{text-align:center;max-width:620px}.check{font-size:74px}.okTitle{font-size:25px;font-weight:900}.numberLabel{font-size:15px;color:#b9d8ca;margin-top:18px}.number{font-size:72px;font-weight:1000;line-height:1;margin:5px 0 16px}.meta{font-size:20px;color:#d3eadf;line-height:1.4}.countdown{font-size:13px;color:#9fc5b4;margin-top:18px}
+    .locked{opacity:.48;pointer-events:none;filter:grayscale(.2)}.newCard{display:none;text-align:center}.newCard.show{display:block}.newIcon{font-size:62px}.newTitle{font-size:27px;font-weight:900;margin:7px 0}.newHint{color:var(--muted);line-height:1.45}.big{width:100%;min-height:76px;border:0;border-radius:20px;background:linear-gradient(180deg,var(--green3),var(--green2));color:white;font-size:21px;font-weight:900;margin-top:14px;cursor:pointer}
+    .lang{display:flex;gap:6px;margin-left:auto}.lang button{border:0;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;background:#ffffff18;color:white;cursor:pointer}.lang button.active{background:white;color:var(--green2)}
+    @media(max-width:520px){.brand{font-size:24px}.grid{gap:9px}.product{min-height:116px;padding:14px}.product .name{font-size:20px}.product.wide .name{font-size:22px}.number{font-size:58px}.title{font-size:25px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header><div><div class="brand">FLORIVO TERMINAL</div><div class="sub">Ferdig produkt · Browser TEST</div></div><div class="lang"><button id="noBtn" class="active">NO</button><button id="ukBtn">УКР</button></div><div class="test">TEST</div></header>
+
+  <section class="card" id="productCard">
+    <div class="employee"><div class="avatar">TA</div><div><div class="empName">TEST ANSATT</div><div class="empMeta">Web prototype · NFC kommer i Android-appen</div></div></div>
+    <div class="title" id="title">Velg produkt</div><div class="hint" id="hint">Trykk én gang når ferdig produkt er klart.</div>
+    <div class="grid" id="productGrid">
+      <button class="product wide" data-key="bunner" data-name="BUNNER"><div class="icon">▰</div><div style="flex:1;margin-left:16px"><div class="name">BUNNER</div><div class="desc" data-no="Ferdig produkt +1" data-uk="Готовий продукт +1">Ferdig produkt +1</div></div><div style="font-size:34px">›</div></button>
+      <button class="product" data-key="hyller30" data-name="HYLLER x30"><div class="icon">▤</div><div><div class="name">HYLLER x30</div><div class="desc" data-no="Ferdig produkt +1" data-uk="Готовий продукт +1">Ferdig produkt +1</div></div></button>
+      <button class="product" data-key="hyller60" data-name="HYLLER x60"><div class="icon">▤</div><div><div class="name">HYLLER x60</div><div class="desc" data-no="Ferdig produkt +1" data-uk="Готовий продукт +1">Ferdig produkt +1</div></div></button>
+      <button class="product" data-key="forlengere_korte" data-name="FORLENGERE KORTE"><div class="icon">↔</div><div><div class="name">FORLENGERE<br>KORTE</div><div class="desc" data-no="Registrer ferdig vare" data-uk="Зареєструвати готовий продукт">Registrer ferdig vare</div></div></button>
+      <button class="product" data-key="forlengere_lange" data-name="FORLENGERE LANGE"><div class="icon">⟷</div><div><div class="name">FORLENGERE<br>LANGE</div><div class="desc" data-no="Registrer ferdig vare" data-uk="Зареєструвати готовий продукт">Registrer ferdig vare</div></div></button>
+      <button class="product wide secondary" data-key="forlengere_plast" data-name="FORLENGERE PLAST"><div class="icon">▱</div><div style="flex:1;margin-left:16px"><div class="name">FORLENGERE PLAST</div><div class="desc" data-no="TEST-knapp · antallslogikk avklares senere" data-uk="TEST-кнопка · логіку кількості уточнимо пізніше">TEST-knapp · antallslogikk avklares senere</div></div><div style="font-size:34px">›</div></button>
+    </div>
+    <div class="dangerWrap"><button class="dangerBtn" id="vrakBtn">VRAK / AVVIK · ikke i hovedflyten</button></div>
+  </section>
+
+  <section class="card newCard" id="newCard"><div class="newIcon">📶</div><div class="newTitle" id="newTitle">Legg neste kort mot telefonen</div><div class="newHint" id="newHint">I Android-appen venter terminalen her på neste NFC-kort. I denne webtesten kan du åpne produktvalget igjen.</div><button class="big" id="againBtn">TEST · ÅPNE PRODUKTER IGJEN</button></section>
+  <div class="footer">TEST v0.1 · 17.08.2026 21:49 Europe/Oslo · separat produkt-UX · ingen WORK-data endres</div>
+</div>
+
+<div class="overlay" id="overlay"><div class="result"><div class="check">✅</div><div class="okTitle" id="okTitle">REGISTRERT +1</div><div class="numberLabel" id="numberLabel">Løpenummer</div><div class="number" id="number">000001</div><div class="meta" id="meta"></div><div class="countdown" id="countdown">Tilbake om 3 sekunder…</div></div></div>
+
+<script>
+(() => {
+  const SUPABASE_URL='https://hzjsatehehhpgpskckfi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya';
+  const BROWSER_KEY='florivo_terminal_browser_id', SEQ_KEY='florivo_terminal_product_seq_test';
+  const browserId=getBrowserId(); let lang='no',locked=false;
+  const text={no:{title:'Velg produkt',hint:'Trykk én gang når ferdig produkt er klart.',ok:'REGISTRERT +1',number:'Løpenummer',back:'Tilbake om 3 sekunder…',next:'Legg neste kort mot telefonen',nextHint:'I Android-appen venter terminalen her på neste NFC-kort. I denne webtesten kan du åpne produktvalget igjen.',again:'TEST · ÅPNE PRODUKTER IGJEN'},uk:{title:'Вибери продукт',hint:'Натисни один раз, коли готовий продукт завершено.',ok:'ЗАРЕЄСТРОВАНО +1',number:'Порядковий номер',back:'Вихід через 3 секунди…',next:'Приклади наступний пропуск',nextHint:'В Android-апці термінал тут чекатиме наступну NFC-карту. У веб-тесті можна знову відкрити продукти.',again:'TEST · ЗНОВУ ВІДКРИТИ ПРОДУКТИ'}};
+  document.querySelectorAll('.product').forEach(btn=>btn.addEventListener('click',()=>selectProduct(btn.dataset.key,btn.dataset.name)));
+  document.getElementById('againBtn').onclick=()=>{document.getElementById('newCard').classList.remove('show');document.getElementById('productCard').style.display='block';locked=false;logServer('PRODUCT_SCREEN_REOPEN');};
+  document.getElementById('vrakBtn').onclick=()=>{alert(lang==='no'?'VRAK holdes utenfor hovedflyten foreløpig.':'VRAK поки залишаємо поза основним потоком.');logServer('VRAK_BUTTON_TEST');};
+  document.getElementById('noBtn').onclick=()=>setLang('no'); document.getElementById('ukBtn').onclick=()=>setLang('uk');
+  function selectProduct(key,name){if(locked)return;locked=true;document.getElementById('productGrid').classList.add('locked');const seq=nextSeq(),display=String(seq).padStart(6,'0');document.getElementById('number').textContent=display;document.getElementById('meta').textContent=name+' · TEST ANSATT';document.getElementById('overlay').classList.add('show');logServer('PRODUCT_TEST_SELECT',{product_key:key,display_number:display,employee_name:'TEST ANSATT',mode:'browser_product_test',detail:{product_name:name}});setTimeout(()=>{document.getElementById('overlay').classList.remove('show');document.getElementById('productGrid').classList.remove('locked');document.getElementById('productCard').style.display='none';document.getElementById('newCard').classList.add('show');logServer('PRODUCT_TEST_EXIT',{product_key:key,display_number:display,mode:'browser_product_test'});},3000);}
+  function nextSeq(){const n=(parseInt(localStorage.getItem(SEQ_KEY)||'0',10)||0)+1;localStorage.setItem(SEQ_KEY,String(n));return n;}
+  function setLang(v){lang=v;document.getElementById('noBtn').classList.toggle('active',v==='no');document.getElementById('ukBtn').classList.toggle('active',v==='uk');document.getElementById('title').textContent=text[v].title;document.getElementById('hint').textContent=text[v].hint;document.getElementById('okTitle').textContent=text[v].ok;document.getElementById('numberLabel').textContent=text[v].number;document.getElementById('countdown').textContent=text[v].back;document.getElementById('newTitle').textContent=text[v].next;document.getElementById('newHint').textContent=text[v].nextHint;document.getElementById('againBtn').textContent=text[v].again;document.querySelectorAll('.desc').forEach(el=>el.textContent=el.dataset[v]||el.textContent);}
+  function getBrowserId(){let id=localStorage.getItem(BROWSER_KEY);if(!id){id=crypto.randomUUID?crypto.randomUUID():('b-'+Date.now());localStorage.setItem(BROWSER_KEY,id);}return id;}
+  async function logServer(eventType,extra={}){try{const row={environment:'test',source:'florivo-terminal-products-test',browser_id:browserId,event_type:eventType,employee_name:extra.employee_name||null,uid:null,product_key:extra.product_key||null,display_number:extra.display_number||null,mode:extra.mode||null,detail:{version:'products-v0.1',local_time:new Date().toLocaleString('no-NO'),...(extra.detail||{})}};await fetch(SUPABASE_URL+'/rest/v1/florivo_terminal_test_log',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)});}catch(e){}}
+  logServer('PRODUCT_PAGE_OPEN',{mode:'browser_product_test'});
+})();
+</script>
+</body>
+</html>
