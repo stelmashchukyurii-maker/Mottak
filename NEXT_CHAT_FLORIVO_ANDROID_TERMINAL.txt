@@ -1,0 +1,52 @@
+FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-17
+
+Continue Florivo native Android warehouse terminal.
+
+Read first:
+1. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
+2. florivo-terminal-products-test.html
+3. current Nordic/stock protocols only for isolation boundaries; do not modify frozen WORK flows.
+
+Current accepted direction:
+- Native Kotlin + Jetpack Compose, not WebView.
+- One shared Android warehouse phone.
+- First screen waits for NFC badge.
+- Native Android NFC reads Tag.id / UID with NfcAdapter reader mode; Web NFC was physically insufficient for MIFARE Plus/NfcA/IsoDep badge.
+- UID identifies employee; it is not a password/security credential.
+- Flow: badge -> employee name -> product -> +1 -> server number for ~3 sec -> full reset to next badge.
+- No persistent worker session.
+- UTEN KORT fallback remains.
+- Yellow 3D main product buttons; red 3D VRAK/AVVIK screen.
+
+Products:
+Main: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange, forlengere_plast.
+VRAK/AVVIK: vrak_bunner, vrak_hyller, bunner_uten_brikk.
+
+TEST server backend already prepared in Supabase:
+- florivo_terminal_test_employees
+- florivo_terminal_test_employee_nfc
+- florivo_terminal_test_finished_events
+- florivo_terminal_test_log
+RPCs:
+- florivo_terminal_test_lookup_uid
+- florivo_terminal_test_register_employee
+- florivo_terminal_test_register_finished
+A TEST employee mapping for the physically tested badge is seeded.
+
+Tomorrow's first milestone:
+ANDROID NFC UID READ — PHYSICAL PASS.
+Do not call it PASS until user tests the real badge on the real Android device.
+
+Then milestones:
+1. NFC UID physical PASS.
+2. UID -> TEST employee server lookup.
+3. Port yellow 3D product UX into Compose.
+4. Product +1 -> TEST server event -> returned running number.
+5. 3-second confirmation -> reset to NFC waiting.
+6. VRAK/AVVIK flow.
+7. UTEN KORT.
+8. Employee registration flow from web/office -> terminal waiting for card.
+9. Corrections as compensating -1, not deletion.
+10. Only after full browser/native TEST physical PASS: kiosk/Lock Task Mode.
+
+Never touch production Nordic TIL RAMPE/TIL LAGER or production stock/order logic during these TEST steps unless explicitly authorized.
