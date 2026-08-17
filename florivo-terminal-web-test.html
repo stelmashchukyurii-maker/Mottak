@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3b2e" />
+  <title>TEST · Florivo Terminal</title>
+  <style>
+    :root{--bg:#071a14;--bg2:#0b3b2e;--card:#f8fbf9;--ink:#102a20;--muted:#60776d;--green:#0b6f43;--green2:#095b38;--line:#d7e5dd;--yellow:#f4c430;--red:#b42318;--ok:#0f7a48}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),var(--bg2));color:white}
+    body{min-height:100vh} button,input{font:inherit}.app{max-width:760px;min-height:100vh;margin:auto;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);display:flex;flex-direction:column;gap:12px}
+    header{padding:14px 4px 2px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.brand{font-size:30px;font-weight:900;letter-spacing:.5px}.sub{font-size:13px;opacity:.8;margin-top:4px}.test{background:var(--yellow);color:#3a2b00;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:900;white-space:nowrap}
+    .card{background:var(--card);color:var(--ink);border-radius:24px;padding:16px;box-shadow:0 12px 32px #0005}.nfcHero{text-align:center;padding:18px 10px 8px}.nfcIcon{font-size:64px}.title{font-size:27px;font-weight:900;margin:6px 0}.hint{color:var(--muted);font-size:15px;line-height:1.4}
+    .status{margin-top:14px;padding:13px 14px;border:2px solid var(--line);border-radius:16px;background:white;text-align:left}.status strong{display:block;font-size:16px;margin-bottom:4px}.status.ok{border-color:#9ed9bb;background:#effbf5}.status.bad{border-color:#efb2ad;background:#fff3f2}.uid{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:19px;font-weight:900;word-break:break-all;margin-top:7px}
+    .big{width:100%;min-height:82px;border:0;border-radius:20px;background:linear-gradient(180deg,var(--green),var(--green2));color:white;font-size:23px;font-weight:900;padding:16px;box-shadow:0 7px 18px #07533255;cursor:pointer}.big:active{transform:translateY(1px)}.secondary{background:white;color:var(--green2);border:2px solid #b7d3c4;box-shadow:none}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.small{border:0;border-radius:14px;padding:12px 13px;font-weight:800;cursor:pointer;background:#e9f4ee;color:#174b35}.small.danger{background:#fff0ef;color:var(--red)}
+    .employee{display:flex;align-items:center;gap:12px;border:2px solid var(--line);padding:13px;border-radius:18px;background:white}.avatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#e3f4eb;color:var(--green);font-size:24px;font-weight:900}.empName{font-weight:900;font-size:19px}.empMeta{color:var(--muted);font-size:13px;margin-top:4px}.hidden{display:none!important}
+    .products{display:grid;gap:11px;margin-top:13px}.product{min-height:88px;border:0;border-radius:20px;background:linear-gradient(180deg,#0d7547,#085a37);color:white;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;text-align:left;cursor:pointer}.product .pname{font-size:25px;font-weight:900}.product .pdesc{font-size:13px;opacity:.85;margin-top:4px}.arrow{font-size:34px;opacity:.85}
+    .resultOverlay{position:fixed;inset:0;background:#061b14f2;z-index:50;display:none;place-items:center;padding:20px}.resultOverlay.show{display:grid}.resultBox{text-align:center}.check{font-size:70px}.resTitle{font-size:26px;font-weight:900}.number{font-size:62px;font-weight:1000;margin:16px 0;color:#fff}.resMeta{font-size:18px;color:#c9e7d8;line-height:1.45}
+    .modal{position:fixed;inset:0;background:#0009;z-index:60;display:none;place-items:center;padding:14px}.modal.show{display:grid}.modalBox{width:min(620px,100%);max-height:92vh;overflow:auto;background:white;color:var(--ink);border-radius:24px;padding:18px}.modal h2{margin:0 0 14px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-weight:800;font-size:13px;color:#365b4b}.field input{border:2px solid var(--line);border-radius:14px;padding:13px;min-height:50px}.modalActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .debug{font-size:13px;color:var(--muted);line-height:1.5}.log{margin-top:12px;max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:14px}.logItem{padding:10px 11px;border-bottom:1px solid var(--line);font-size:13px}.logItem:last-child{border-bottom:0}.version{text-align:center;font-size:12px;color:#b9d3c6;padding:2px 6px 14px}.warn{background:#fff6d8;color:#5e4700;border-radius:14px;padding:11px 12px;font-size:13px;line-height:1.4;margin-bottom:12px}
+    @media(max-width:520px){.brand{font-size:25px}.row{grid-template-columns:1fr}.number{font-size:48px}.title{font-size:24px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header><div><div class="brand">FLORIVO TERMINAL</div><div class="sub">Lagerregistrering · Browser prototype</div></div><div class="test">TEST</div></header>
+
+  <section class="card" id="startCard">
+    <div class="warn"><b>TEST:</b> Ingen WORK-data endres. Denne siden tester terminalflyt og om Chrome kan lese kortet via Web NFC.</div>
+    <div class="nfcHero">
+      <div class="nfcIcon">📶</div>
+      <div class="title">Legg kortet mot telefonen</div>
+      <div class="hint">Натисни кнопку нижче і приклади робочий пропуск.</div>
+    </div>
+    <button class="big" id="scanBtn">START NFC-LESING</button>
+    <div id="status" class="status"><strong>Klar</strong><span>Очікую запуск NFC.</span></div>
+    <div class="row" style="margin-top:10px">
+      <button class="big secondary" id="withoutBtn">UTEN KORT</button>
+      <button class="big secondary" id="registerBtn">REGISTRER ANSATT</button>
+    </div>
+  </section>
+
+  <section class="card hidden" id="workCard">
+    <div class="employee"><div class="avatar" id="avatar">?</div><div><div class="empName" id="empName">Ukjent</div><div class="empMeta" id="empMeta"></div></div></div>
+    <div class="title" style="text-align:center;margin-top:18px">Velg produkt</div>
+    <div class="products">
+      <button class="product" data-product="bunner"><div><div class="pname">BUNNER</div><div class="pdesc">Registrer ferdig produkt +1</div></div><div class="arrow">›</div></button>
+      <button class="product" data-product="hyller30"><div><div class="pname">HYLLER x30</div><div class="pdesc">Registrer ferdig produkt +1</div></div><div class="arrow">›</div></button>
+      <button class="product" data-product="hyller60"><div><div class="pname">HYLLER x60</div><div class="pdesc">Registrer ferdig produkt +1</div></div><div class="arrow">›</div></button>
+    </div>
+    <button class="big secondary" id="cancelWorker" style="margin-top:12px">AVBRYT / NYTT KORT</button>
+  </section>
+
+  <section class="card">
+    <div style="font-size:18px;font-weight:900">NFC TEST / DEBUG</div>
+    <div class="debug" id="supportText" style="margin-top:6px"></div>
+    <div class="log" id="log"></div>
+    <div class="row" style="margin-top:10px"><button class="small" id="copyUid">Kopier siste UID</button><button class="small danger" id="clearLog">Tøm TEST-logg</button></div>
+  </section>
+
+  <div class="version">TEST v0.1 · 17.08.2026 21:27 Europe/Oslo · Florivo</div>
+</div>
+
+<div class="resultOverlay" id="resultOverlay"><div class="resultBox"><div class="check">✅</div><div class="resTitle">REGISTRERT +1</div><div class="number" id="resultNumber">H001</div><div class="resMeta" id="resultMeta"></div></div></div>
+
+<div class="modal" id="registerModal"><div class="modalBox">
+  <h2>Registrer ansatt · TEST</h2>
+  <div class="field"><label>Fornavn / Ім'я</label><input id="firstName" autocomplete="off" /></div>
+  <div class="field"><label>Etternavn / Прізвище</label><input id="lastName" autocomplete="off" /></div>
+  <div class="field"><label>UID (можна вставити з NFC Tools)</label><input id="manualUid" placeholder="3D:50:67:E5:35:44:20" autocomplete="off" /></div>
+  <div class="warn">У фінальній системі ім'я надсилатиме UT Kontor, а термінал покаже «приклади карту». Тут це локальна TEST-імітація.</div>
+  <div class="modalActions"><button class="small" id="saveManual">Lagre med UID</button><button class="small" id="scanForReg">Les kort nå</button><button class="small danger" id="closeModal">Lukk</button></div>
+  <div id="regStatus" class="debug" style="margin-top:12px"></div>
+</div></div>
+
+<script>
+(() => {
+  const KEY='florivo_terminal_web_test_v01';
+  const $=id=>document.getElementById(id);
+  const state=load();
+  let current=null, pendingRegistration=null, lastUid='';
+
+  const productCfg={bunner:{label:'BUNNER',prefix:'B'},hyller30:{label:'HYLLER x30',prefix:'H30'},hyller60:{label:'HYLLER x60',prefix:'H60'}};
+  if(!state.seq) state.seq={bunner:0,hyller30:0,hyller60:0};
+  if(!state.employees) state.employees=[];
+  if(!state.log) state.log=[];
+
+  const supported='NDEFReader' in window;
+  $('supportText').innerHTML=supported
+    ? '<b>Web NFC API знайдено.</b> Chrome може спробувати прочитати NDEF-сумісну карту. Корпоративний MIFARE Plus може не віддати UID через Web NFC — це і перевіряємо.'
+    : '<b>Web NFC API не знайдено.</b> Відкрий сторінку в Chrome на Android через HTTPS. Нативний Android NFC від цього тесту не залежить.';
+
+  $('scanBtn').onclick=()=>scan('login');
+  $('withoutBtn').onclick=()=>activate({name:'UTEN KORT',uid:'',mode:'without'});
+  $('registerBtn').onclick=()=>{$('registerModal').classList.add('show');$('regStatus').textContent='';};
+  $('closeModal').onclick=()=>$('registerModal').classList.remove('show');
+  $('cancelWorker').onclick=reset;
+  $('clearLog').onclick=()=>{if(confirm('Очистити локальний TEST-журнал?')){state.log=[];save();renderLog();}};
+  $('copyUid').onclick=async()=>{if(!lastUid)return alert('UID ще не отримано');try{await navigator.clipboard.writeText(lastUid);alert('UID скопійовано');}catch(e){alert(lastUid)}};
+  $('saveManual').onclick=()=>registerManual();
+  $('scanForReg').onclick=()=>prepareAndScanRegistration();
+  document.querySelectorAll('.product').forEach(b=>b.onclick=()=>registerProduct(b.dataset.product));
+
+  function setStatus(kind,title,text,uid=''){
+    const s=$('status');s.className='status'+(kind?' '+kind:'');s.innerHTML='<strong>'+esc(title)+'</strong><span>'+esc(text)+'</span>'+(uid?'<div class="uid">'+esc(uid)+'</div>':'');
+  }
+
+  async function scan(mode){
+    if(!supported){setStatus('bad','Web NFC недоступний','Використай Chrome Android + HTTPS або Manual UID.');return;}
+    try{
+      const ndef=new NDEFReader();
+      setStatus('','Venter på kort...','Приклади пропуск до NFC-зони телефона.');
+      await ndef.scan();
+      ndef.onreading=ev=>{
+        const uid=normalize(ev.serialNumber||''); lastUid=uid;
+        const records=[...(ev.message?.records||[])].map(r=>r.recordType||'?').join(', ');
+        addLog(mode,uid||'(empty)',records||'no NDEF records');
+        if(mode==='register')finishRegistration(uid); else loginUid(uid);
+      };
+      ndef.onreadingerror=()=>{addLog(mode,'READING_ERROR','');setStatus('bad','Kort oppdaget, men ikke lest','Chrome зміг побачити NFC, але не прочитав NDEF. Для MIFARE Plus це можливий результат.');};
+    }catch(e){addLog(mode,'ERROR',String(e.message||e));setStatus('bad','NFC-feil',String(e.message||e));}
+  }
+
+  function loginUid(uid){
+    if(!uid){setStatus('bad','UID порожній','Chrome не віддав serialNumber. Android app все одно зможемо зробити через NfcA/IsoDep.');return;}
+    const emp=state.employees.find(e=>normalize(e.uid)===uid);
+    if(emp){setStatus('ok','Kort lest',emp.name,uid);activate({name:emp.name,uid,mode:'nfc'});}
+    else{setStatus('ok','Kort lest · ikke registrert','UID отримано. Можемо прив’язати його до працівника.',uid);activate({name:'UKJENT KORT',uid,mode:'unknown'});}
+  }
+
+  function prepareAndScanRegistration(){
+    const first=$('firstName').value.trim(),last=$('lastName').value.trim();
+    if(!first||!last){$('regStatus').textContent='Введи ім’я та прізвище.';return;}
+    pendingRegistration={first,last};$('regStatus').textContent='Venter på kort...';scan('register');
+  }
+
+  function finishRegistration(uid){
+    if(!pendingRegistration)return;
+    if(!uid){$('regStatus').textContent='Chrome не віддав UID. Встав його вручну з NFC Tools.';return;}
+    const name=(pendingRegistration.first+' '+pendingRegistration.last).trim();
+    upsertEmployee(name,uid);pendingRegistration=null;$('regStatus').textContent='✓ Registrert: '+name+' · '+uid;setStatus('ok','Ansatt registrert',name,uid);
+  }
+
+  function registerManual(){
+    const first=$('firstName').value.trim(),last=$('lastName').value.trim(),uid=normalize($('manualUid').value);
+    if(!first||!last||!uid){$('regStatus').textContent='Потрібні ім’я, прізвище та UID.';return;}
+    const name=(first+' '+last).trim();upsertEmployee(name,uid);lastUid=uid;$('regStatus').textContent='✓ Registrert lokalt: '+name+' · '+uid;setStatus('ok','Ansatt registrert lokalt',name,uid);
+  }
+
+  function upsertEmployee(name,uid){
+    const existing=state.employees.find(e=>normalize(e.uid)===uid);
+    if(existing)existing.name=name;else state.employees.push({name,uid,created:new Date().toISOString()});save();
+  }
+
+  function activate(emp){
+    current=emp;$('startCard').classList.add('hidden');$('workCard').classList.remove('hidden');$('empName').textContent=emp.name;$('empMeta').textContent=(emp.mode==='nfc'?'NFC':'TEST')+(emp.uid?' · '+emp.uid:'');$('avatar').textContent=initials(emp.name);
+  }
+  function reset(){current=null;$('workCard').classList.add('hidden');$('startCard').classList.remove('hidden');setStatus('','Klar','Очікую нову карту.');window.scrollTo({top:0,behavior:'smooth'});}
+
+  function registerProduct(key){
+    if(!current)return; const cfg=productCfg[key];state.seq[key]=(state.seq[key]||0)+1;
+    const number=cfg.prefix+String(state.seq[key]).padStart(3,'0');
+    state.log.unshift({time:new Date().toLocaleString('no-NO'),mode:'PRODUCT +1',uid:current.uid||'',extra:cfg.label+' · '+number+' · '+current.name});save();renderLog();
+    $('resultNumber').textContent=number;$('resultMeta').textContent=cfg.label+' · '+current.name;$('resultOverlay').classList.add('show');
+    setTimeout(()=>{$('resultOverlay').classList.remove('show');reset();},3000);
+  }
+
+  function addLog(mode,uid,extra){state.log.unshift({time:new Date().toLocaleString('no-NO'),mode,uid,extra});state.log=state.log.slice(0,40);save();renderLog();}
+  function renderLog(){const l=$('log');if(!state.log.length){l.innerHTML='<div class="logItem">Ingen TEST-data ennå.</div>';return;}l.innerHTML=state.log.map(x=>'<div class="logItem"><b>'+esc(x.time)+'</b> · '+esc(x.mode)+'<br><span class="uid">'+esc(x.uid||'—')+'</span><br>'+esc(x.extra||'')+'</div>').join('');}
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}} function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+  function normalize(v){return String(v||'').trim().toUpperCase()} function initials(n){return String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'?'}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  renderLog();
+})();
+</script>
+</body>
+</html>
