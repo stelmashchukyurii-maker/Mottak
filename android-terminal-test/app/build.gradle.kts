@@ -13,7 +13,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "0.1-test"
+        versionName = "0.1-ui-local-test"
     }
 
     buildFeatures {
