@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.florivo.terminaltest"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.florivo.terminaltest"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1-ui-local-test"
     }
