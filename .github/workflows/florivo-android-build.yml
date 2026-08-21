@@ -1,6 +1,12 @@
 name: Florivo Android Build
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'android-terminal-test/**'
+      - '.github/workflows/florivo-android-build.yml'
   pull_request:
     paths:
       - 'android-terminal-test/**'
@@ -24,7 +30,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android platform
-        run: sdkmanager 'platforms;android-36'
+        run: sdkmanager 'platforms;android-37'
 
       - name: Set up Gradle 9.6
         uses: gradle/actions/setup-gradle@v4
@@ -38,6 +44,6 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Florivo-Android-debug
+          name: Florivo-Android-v0.4-live-stock
           path: android-terminal-test/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
