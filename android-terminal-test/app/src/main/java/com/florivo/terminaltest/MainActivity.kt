@@ -14,11 +14,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,13 +51,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val FlorivoBg = Color(0xFF10291F)
-private val FlorivoBg2 = Color(0xFF28553B)
+private val FlorivoBg = Color(0xFF0F2D22)
+private val FlorivoBg2 = Color(0xFF1E4935)
 private val Card = Color(0xFFFFFDF4)
-private val Ink = Color(0xFF24261D)
-private val Muted = Color(0xFF6D6B58)
-private val GreenEdge = Color(0xFF245D35)
-private val RedEdge = Color(0xFF6F1C18)
+private val Ink = Color(0xFF203429)
+private val Muted = Color(0xFF767364)
+private val GreenEdge = Color(0xFF1C5C37)
+private val RedEdge = Color(0xFF7D2A25)
 
 private data class Product(
     val key: String,
@@ -71,14 +68,13 @@ private data class Product(
 
 @Composable
 private fun FlorivoLocalTestApp() {
-    var lang by remember { mutableStateOf("NO") }
     var vrakMode by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Product?>(null) }
     var localNumber by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(selected) {
         if (selected != null) {
-            delay(3000)
+            delay(8000)
             selected = null
             vrakMode = false
         }
@@ -88,9 +84,9 @@ private fun FlorivoLocalTestApp() {
         Product("bunner", "BUNNER", "▰", wide = true),
         Product("hyller30", "HYLLER x30", "▤"),
         Product("hyller60", "HYLLER x60", "▤"),
-        Product("forlengere_korte", "FORLENGERE\nKORTE", "↔"),
-        Product("forlengere_lange", "FORLENGERE\nLANGE", "⟷"),
-        Product("forlengere_plast", "FORLENGERE\nPLAST", "◫", wide = true)
+        Product("forlengere_korte", "FORLENGERE KORTE", "↔"),
+        Product("forlengere_lange", "FORLENGERE LANGE", "⟷"),
+        Product("forlengere_plast", "FORLENGERE PLAST", "◫", wide = true)
     )
 
     val vrakProducts = listOf(
@@ -107,91 +103,67 @@ private fun FlorivoLocalTestApp() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp)
         ) {
-            Header(lang = lang, onLang = { lang = it })
+            Header()
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(12.dp, RoundedCornerShape(25.dp))
-                    .background(Card, RoundedCornerShape(25.dp))
-                    .padding(16.dp)
+                    .shadow(8.dp, RoundedCornerShape(22.dp))
+                    .background(Card, RoundedCornerShape(22.dp))
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
-                EmployeeCard(lang)
-
-                Text(
-                    text = if (vrakMode) "VRAK / AVVIK" else if (lang == "NO") "Velg produkt" else "Оберіть продукт",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 18.dp, bottom = 4.dp),
-                    color = if (vrakMode) Color(0xFF8B241F) else Color(0xFF29411E),
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Black,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = if (vrakMode) {
-                        if (lang == "NO") "Velg type avvik. Dette er bare lokal TEST." else "Оберіть тип відхилення. Це лише локальний TEST."
-                    } else {
-                        if (lang == "NO") "Trykk én gang når ferdig produkt er klart. Ingen data sendes." else "Натисніть один раз для готового продукту. Дані нікуди не надсилаються."
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    color = Muted,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
-                )
+                EmployeeCard()
 
                 if (!vrakMode) {
-                    ProductGrid(products) { product ->
+                    CompactProductGrid(products) { product ->
                         localNumber += 1
                         selected = product
                     }
-
-                    Spacer(Modifier.height(18.dp))
 
                     FlorivoActionButton(
                         text = "VRAK / AVVIK",
-                        subText = if (lang == "NO") "Åpne rødt avviksskjermbilde" else "Відкрити червоний екран відхилень",
                         icon = "!",
                         danger = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp),
                         onClick = { vrakMode = true }
                     )
                 } else {
-                    ProductGrid(vrakProducts, danger = true) { product ->
+                    Text(
+                        text = "VRAK / AVVIK",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color(0xFF8A2C27),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black,
+                        textAlign = TextAlign.Center
+                    )
+
+                    CompactProductGrid(vrakProducts, danger = true) { product ->
                         localNumber += 1
                         selected = product
                     }
 
-                    Spacer(Modifier.height(18.dp))
-
                     FlorivoActionButton(
-                        text = if (lang == "NO") "TILBAKE" else "НАЗАД",
-                        subText = if (lang == "NO") "Til produkter" else "До продуктів",
+                        text = "TILBAKE",
                         icon = "←",
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp),
                         onClick = { vrakMode = false }
                     )
                 }
             }
 
             Text(
-                text = if (lang == "NO") {
-                    "Florivo Android · LOKAL TEST v0.1 · Ingen NFC · Ingen server · Ingen WORK-data"
-                } else {
-                    "Florivo Android · ЛОКАЛЬНИЙ TEST v0.1 · Без NFC · Без сервера · Без WORK-даних"
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                color = Color(0xFFD9EDC9),
-                fontSize = 12.sp,
+                text = "Florivo Android · TEST v0.2 · Ingen NFC · Ingen server",
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFD7E7DA),
+                fontSize = 10.sp,
                 textAlign = TextAlign.Center
             )
         }
@@ -200,7 +172,6 @@ private fun FlorivoLocalTestApp() {
             ConfirmationOverlay(
                 product = product,
                 number = localNumber,
-                lang = lang,
                 danger = product.key.startsWith("vrak_") || product.key == "bunner_uten_brikk"
             )
         }
@@ -208,107 +179,74 @@ private fun FlorivoLocalTestApp() {
 }
 
 @Composable
-private fun Header(lang: String, onLang: (String) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "FLORIVO TERMINAL",
-                color = Color.White,
-                fontSize = 27.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                text = "Ferdig produkt · Android lokal TEST",
-                color = Color.White.copy(alpha = 0.78f),
-                fontSize = 13.sp
-            )
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            LangPill("NO", lang == "NO") { onLang("NO") }
-            LangPill("УКР", lang == "UK") { onLang("UK") }
-        }
-
-        Spacer(Modifier.padding(3.dp))
-
-        Box(
-            modifier = Modifier
-                .background(
-                    Brush.radialGradient(listOf(Color(0xFFFFF57A), Color(0xFFD8E94D), Color(0xFF4D9952))),
-                    RoundedCornerShape(50)
-                )
-                .border(1.dp, Color(0xFF24623A), RoundedCornerShape(50))
-                .padding(horizontal = 10.dp, vertical = 7.dp)
-        ) {
-            Text("TEST", color = Color(0xFF173B24), fontSize = 12.sp, fontWeight = FontWeight.Black)
-        }
-    }
-}
-
-@Composable
-private fun LangPill(text: String, active: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(if (active) Color(0xFFD9E94D) else Color.White.copy(alpha = 0.10f))
-            .border(1.dp, if (active) Color(0xFF2F7042) else Color.White.copy(alpha = 0.22f), RoundedCornerShape(50))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 7.dp)
-    ) {
-        Text(
-            text = text,
-            color = if (active) Color(0xFF17371F) else Color.White,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Black
-        )
-    }
-}
-
-@Composable
-private fun EmployeeCard(lang: String) {
+private fun Header() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(19.dp))
-            .border(2.dp, Color(0xFFE7DDB8), RoundedCornerShape(19.dp))
-            .padding(12.dp),
+            .height(54.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "FLORIVO TERMINAL",
+            modifier = Modifier.weight(1f),
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Black,
+            maxLines = 1
+        )
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(Brush.horizontalGradient(listOf(Color(0xFFB8D96B), Color(0xFF55A761))))
+                .border(1.dp, Color(0xFF9ED27B), RoundedCornerShape(50))
+                .padding(horizontal = 13.dp, vertical = 7.dp)
+        ) {
+            Text("TEST", color = Color(0xFF123923), fontSize = 12.sp, fontWeight = FontWeight.Black)
+        }
+    }
+}
+
+@Composable
+private fun EmployeeCard() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(62.dp)
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .border(1.dp, Color(0xFFDED7B6), RoundedCornerShape(16.dp))
+            .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .background(
-                    Brush.radialGradient(listOf(Color.White, Color(0xFFD8E94E), Color(0xFF5AA25B))),
-                    RoundedCornerShape(50)
-                )
-                .border(2.dp, Color(0xFF2E7443), RoundedCornerShape(50))
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .clip(RoundedCornerShape(50))
+                .background(Brush.horizontalGradient(listOf(Color(0xFFD5E992), Color(0xFF72B66A))))
+                .border(1.dp, Color(0xFF3C8650), RoundedCornerShape(50))
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("TEST", color = Color(0xFF173A23), fontSize = 13.sp, fontWeight = FontWeight.Black)
+            Text("TEST", color = Color(0xFF173E26), fontSize = 11.sp, fontWeight = FontWeight.Black)
         }
 
-        Column(modifier = Modifier.padding(start = 13.dp)) {
+        Column(modifier = Modifier.padding(start = 10.dp)) {
             Text(
-                text = if (lang == "NO") "UTEN KORT · LOKAL TEST" else "БЕЗ КАРТКИ · ЛОКАЛЬНИЙ TEST",
+                text = "UTEN KORT · LOKAL TEST",
                 color = Ink,
-                fontSize = 19.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Black
             )
             Text(
-                text = if (lang == "NO") "Ingen innlogging eller tillatelser i denne versjonen" else "У цій версії немає входу чи дозволів",
+                text = "Ingen innlogging · ingen tillatelser",
                 color = Muted,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 3.dp)
+                fontSize = 10.sp
             )
         }
     }
 }
 
 @Composable
-private fun ProductGrid(
+private fun CompactProductGrid(
     products: List<Product>,
     danger: Boolean = false,
     onClick: (Product) -> Unit
@@ -319,42 +257,43 @@ private fun ProductGrid(
         if (first.wide) {
             FlorivoActionButton(
                 text = first.name,
-                subText = if (danger) "Lokal avvikstest" else "Ferdig produkt +1 · lokal test",
                 icon = first.icon,
                 danger = danger,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(66.dp),
                 onClick = { onClick(first) }
             )
-            Spacer(Modifier.height(14.dp))
             index += 1
         } else {
             val second = products.getOrNull(index + 1)?.takeIf { !it.wide }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 FlorivoActionButton(
                     text = first.name,
-                    subText = if (danger) "Lokal avvikstest" else "Ferdig produkt +1",
                     icon = first.icon,
                     danger = danger,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(74.dp),
                     onClick = { onClick(first) }
                 )
                 if (second != null) {
                     FlorivoActionButton(
                         text = second.name,
-                        subText = if (danger) "Lokal avvikstest" else "Ferdig produkt +1",
                         icon = second.icon,
                         danger = danger,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(74.dp),
                         onClick = { onClick(second) }
                     )
                 } else {
                     Spacer(Modifier.weight(1f))
                 }
             }
-            Spacer(Modifier.height(14.dp))
             index += if (second != null) 2 else 1
         }
     }
@@ -363,112 +302,111 @@ private fun ProductGrid(
 @Composable
 private fun FlorivoActionButton(
     text: String,
-    subText: String,
     icon: String,
     modifier: Modifier = Modifier,
     danger: Boolean = false,
     onClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(23.dp)
+    val shape = RoundedCornerShape(18.dp)
     val colors = if (danger) {
-        listOf(Color(0xFFFF9C91), Color(0xFFEE6359), Color(0xFFBD332D), Color(0xFF731E1A))
+        listOf(Color(0xFFCF6159), Color(0xFFAA403A), Color(0xFF86302B))
     } else {
-        listOf(Color(0xFFFFF96B), Color(0xFFF7E84C), Color(0xFF8FC449), Color(0xFF2D7140))
+        listOf(Color(0xFF3F9557), Color(0xFF2F7E49), Color(0xFF276A40))
     }
+    val edge = if (danger) RedEdge else GreenEdge
 
     Box(
         modifier = modifier
-            .heightIn(min = if (text.contains("\n")) 122.dp else 104.dp)
-            .shadow(8.dp, shape)
+            .shadow(4.dp, shape)
             .clip(shape)
-            .background(Brush.radialGradient(colors))
-            .border(2.dp, if (danger) RedEdge else GreenEdge, shape)
+            .background(Brush.horizontalGradient(colors))
+            .border(1.5.dp, edge, shape)
             .clickable(onClick = onClick)
-            .padding(16.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = icon,
-                color = if (danger) Color.White else Color(0xFF17341F),
-                fontSize = 31.sp,
+                color = Color.White.copy(alpha = 0.92f),
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Black
             )
-            Column {
-                Text(
-                    text = text,
-                    color = if (danger) Color.White else Color(0xFF18341F),
-                    fontSize = 21.sp,
-                    fontWeight = FontWeight.Black,
-                    lineHeight = 22.sp
-                )
-                Text(
-                    text = subText,
-                    color = if (danger) Color.White.copy(alpha = 0.90f) else Color(0xFF315329),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 5.dp)
-                )
-            }
+            Text(
+                text = text,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 9.dp),
+                color = Color.White,
+                fontSize = if (text.length > 16) 14.sp else 17.sp,
+                fontWeight = FontWeight.Black,
+                lineHeight = 17.sp,
+                maxLines = 2
+            )
         }
     }
 }
 
 @Composable
-private fun ConfirmationOverlay(product: Product, number: Int, lang: String, danger: Boolean) {
+private fun ConfirmationOverlay(product: Product, number: Int, danger: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xF20C2119))
+            .background(Color(0xE80B2017))
             .padding(22.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(14.dp, RoundedCornerShape(30.dp))
+                .shadow(12.dp, RoundedCornerShape(28.dp))
                 .background(
                     if (danger) {
-                        Brush.radialGradient(listOf(Color(0xFFFFAAA0), Color(0xFFEB6258), Color(0xFF6C1D1A)))
+                        Brush.verticalGradient(listOf(Color(0xFFCF635B), Color(0xFF8E332E)))
                     } else {
-                        Brush.radialGradient(listOf(Color(0xFFFFF97C), Color(0xFFE2E94F), Color(0xFF326F43)))
+                        Brush.verticalGradient(listOf(Color(0xFFE7F29A), Color(0xFF79B767), Color(0xFF356E45)))
                     },
-                    RoundedCornerShape(30.dp)
+                    RoundedCornerShape(28.dp)
                 )
-                .border(3.dp, if (danger) RedEdge else Color(0xFF245C37), RoundedCornerShape(30.dp))
-                .padding(28.dp),
+                .border(2.dp, if (danger) RedEdge else GreenEdge, RoundedCornerShape(28.dp))
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(if (danger) "!" else "✓", fontSize = 68.sp, fontWeight = FontWeight.Black, color = if (danger) Color.White else Color(0xFF17351F))
             Text(
-                text = if (lang == "NO") "LOKAL TEST REGISTRERT" else "ЛОКАЛЬНИЙ TEST ЗАРЕЄСТРОВАНО",
-                color = if (danger) Color.White else Color(0xFF17351F),
-                fontSize = 23.sp,
+                text = if (danger) "!" else "✓",
+                fontSize = 56.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+            Text(
+                text = "LOKAL TEST REGISTRERT",
+                color = Color.White,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "%06d".format(number),
-                color = if (danger) Color.White else Color(0xFF17351F),
-                fontSize = 58.sp,
+                color = Color.White,
+                fontSize = 54.sp,
                 fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 6.dp)
             )
             Text(
-                text = product.name.replace("\n", " "),
-                color = if (danger) Color.White else Color(0xFF25442B),
-                fontSize = 20.sp,
+                text = product.name,
+                color = Color.White,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = if (lang == "NO") "Ingen data er sendt. Tilbake om 3 sekunder." else "Дані нікуди не надіслані. Повернення через 3 секунди.",
-                color = if (danger) Color.White.copy(alpha = 0.90f) else Color(0xFF34573B),
-                fontSize = 12.sp,
+                text = "Vises i 8 sekunder · ingen data sendt",
+                color = Color.White.copy(alpha = 0.90f),
+                fontSize = 11.sp,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 12.dp)
             )
         }
     }
