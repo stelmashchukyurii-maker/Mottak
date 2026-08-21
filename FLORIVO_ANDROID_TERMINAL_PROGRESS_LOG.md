@@ -32,21 +32,41 @@ No production stock/order/Nordic data was changed.
 ### Native Android starter prepared
 Folder: `android-terminal-test/`
 Package: `com.florivo.terminaltest`
-Starter includes:
-- Kotlin + Compose project config
-- NFC + INTERNET manifest permissions
-- native NfcAdapter reader mode
-- NFC-A polling + skip NDEF check
-- displays Tag.id and tech list for TEST diagnostics
-- calls TEST server UID lookup
-- yellow terminal visual direction
+Starter includes Kotlin + Compose configuration and an earlier NFC/server prototype.
 
 ### Not yet physically passed
-- Android starter has not yet been built/installed on the real phone.
 - No native app NFC PASS yet.
 - No product +1 from native APK yet.
 - No kiosk mode yet.
 
-### Next physical milestone
-ANDROID NFC UID READ — PHYSICAL PASS
-Only mark PASS after real APK + real phone + real badge repeated-read test.
+## 2026-08-21 — ACCEPTED UI-FIRST ORDER
+
+User explicitly changed the immediate build order:
+1. First deliver a ready-looking Android app based on `florivo-terminal-products-test.html`.
+2. First APK must be LOCAL TEST only: no card/NFC gate, no login, no INTERNET permission, no server write, no production access.
+3. User physically checks the app UI and button behavior on the phone.
+4. Only after UI physical acceptance, add NFC/card as the entry gate in front of the same product screen.
+5. Then connect TEST employee lookup and TEST product +1.
+6. Production Nordic/TIL RAMPE/TIL LAGER remain frozen and isolated.
+
+Implementation branch: `florivo-android-ui-v01`
+Pull request: #16
+
+Current v0.1 scope:
+- Native Kotlin + Jetpack Compose.
+- NO / UK language switch.
+- Green/yellow product screen matching browser prototype direction.
+- Main product buttons and separate red VRAK/AVVIK screen.
+- Local 6-digit test counter only.
+- 3-second local confirmation overlay.
+- No NFC permission.
+- No INTERNET permission.
+- No server calls.
+- No WORK/production writes.
+
+Google Drive release folder created under `Florivo`:
+- `Florivo Android App`
+
+### Next milestone
+Build CI APK -> upload APK to Google Drive -> physical phone UI PASS.
+Do not call UI PASS until user installs and confirms the APK on a real phone.
