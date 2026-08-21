@@ -1,52 +1,74 @@
-FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-17
-
-Continue Florivo native Android warehouse terminal.
+FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-21
 
 Read first:
-1. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
-2. florivo-terminal-products-test.html
-3. current Nordic/stock protocols only for isolation boundaries; do not modify frozen WORK flows.
+1. FLORIVO_ANDROID_V071_STABLE_2026-08-21.md
+2. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
+3. FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md
+4. FLORIVO_TERMINAL_USERS_ACCESS_PROTOCOL.md
+5. PROJECT_CANONICAL_RULES.md
+6. BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md
+7. FLORIVO_NUMBER_PROTOCOL.md
 
-Current accepted direction:
-- Native Kotlin + Jetpack Compose, not WebView.
-- One shared Android warehouse phone.
-- First screen waits for NFC badge.
-- Native Android NFC reads Tag.id / UID with NfcAdapter reader mode; Web NFC was physically insufficient for MIFARE Plus/NfcA/IsoDep badge.
-- UID identifies employee; it is not a password/security credential.
-- Flow: badge -> employee name -> product -> +1 -> server number for ~3 sec -> full reset to next badge.
-- No persistent worker session.
-- UTEN KORT fallback remains.
-- Yellow 3D main product buttons; red 3D VRAK/AVVIK screen.
+CURRENT STABLE ANDROID BASELINE
+- Version: v0.7.1
+- Status: normal stable baseline for continued physical testing.
+- Branch: florivo-v07-role-quantity-autologout
+- Commit: 9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d
+- Workflow run: 32525627283
+- APK Drive id: 197aIDwnhH3ypp2_J4aC41BdwiVLEBPN_
+- Do not edit stable v0.7.1 in place; new changes get a new version/branch.
 
-Products:
-Main: bunner, hyller30, hyller60, forlengere_korte, forlengere_lange, forlengere_plast.
-VRAK/AVVIK: vrak_bunner, vrak_hyller, bunner_uten_brikk.
+PHYSICAL PASS ALREADY ACHIEVED
+- NFC card read works in native Android.
+- Web creates terminal user and role.
+- KOBLE KORT creates pending link.
+- Existing terminal reads card and server binds it.
+- Admin card physically logged in successfully and showed name/admin/KORT GODKJENT.
+- Web showed KORT TILKOBLET.
+- Card/user mapping is server-side, so reinstall/another terminal using same backend does not require re-registering the card.
 
-TEST server backend already prepared in Supabase:
-- florivo_terminal_test_employees
-- florivo_terminal_test_employee_nfc
-- florivo_terminal_test_finished_events
-- florivo_terminal_test_log
-RPCs:
-- florivo_terminal_test_lookup_uid
-- florivo_terminal_test_register_employee
-- florivo_terminal_test_register_finished
-A TEST employee mapping for the physically tested badge is seeded.
+PRIVACY
+- Never display raw card UID in admin, even last digits.
+- Android hashes Tag.id with SHA-256 locally; server works with card hash.
 
-Tomorrow's first milestone:
-ANDROID NFC UID READ — PHYSICAL PASS.
-Do not call it PASS until user tests the real badge on the real Android device.
+ROLES
+- lager: +1 only, no ANTALL.
+- produksjon: ANTALL 1..500.
+- admin: ANTALL 1..500 + admin role.
+- test: reserved isolated test role.
+- Server enforces no qty>1 for lager.
 
-Then milestones:
-1. NFC UID physical PASS.
-2. UID -> TEST employee server lookup.
-3. Port yellow 3D product UX into Compose.
-4. Product +1 -> TEST server event -> returned running number.
-5. 3-second confirmation -> reset to NFC waiting.
-6. VRAK/AVVIK flow.
-7. UTEN KORT.
-8. Employee registration flow from web/office -> terminal waiting for card.
-9. Corrections as compensating -1, not deletion.
-10. Only after full browser/native TEST physical PASS: kiosk/Lock Task Mode.
+SESSION UX
+- After login with no useful action: auto logout after 12 sec.
+- Successful product result: 8 sec.
+- Then 4 sec grace; no new action -> VENTER PÅ KORT.
+- Relevant interaction resets inactivity.
+- BYTT = immediate logout.
 
-Never touch production Nordic TIL RAMPE/TIL LAGER or production stock/order logic during these TEST steps unless explicitly authorized.
+BULK QUANTITY BACKEND
+- RPC florivo_terminal_register_stock_qty.
+- android_bulk registration method allowed.
+- finished-event qty constraint updated to nonzero -500..500.
+- Normal bulk product creates real stock rows/F-numbers.
+- forlengere_plast stays quantity-ledger based.
+
+UT KONTOR USER ADMIN
+- page florivo-terminal-users.html
+- button in bestilling.html: BRUKERE / TILGANGER
+- roles/cards managed there.
+
+NEXT REQUEST / DESIGN
+User wants one more web function before moving on:
+A no-scan alternative for moving warehouse goods to ramp with one button.
+Important: do NOT alter frozen Nordic TIL RAMPE V2.9.7 RFID/scanning logic. Implement as a separate explicit action/path.
+Recommended scope: current selected order / current ramp requirement only, not blindly every item in warehouse. Show exact quantities before confirmation; then one confirm action moves those items to staged/ramp using existing lifecycle/audit semantics.
+Need resolve whether user means:
+A) all goods required by the currently selected order/ramp, OR
+B) literally all stock currently in warehouse.
+A is recommended and safest.
+
+NEXT BIG AREAS AFTER THAT
+- physical test v0.7.1 over more users/roles/products;
+- photo capture/user photo;
+- dedicated working phone Device Owner / Lock Task kiosk mode;
+- stronger per-terminal enrollment/authorization for production.
