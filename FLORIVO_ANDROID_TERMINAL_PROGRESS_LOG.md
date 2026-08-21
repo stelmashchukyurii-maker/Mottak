@@ -9,19 +9,17 @@
 
 ### Browser UX prepared
 - `florivo-terminal-web-test.html`: Web NFC diagnostics + server TEST log.
-- `florivo-terminal-products-test.html`: yellow 3D product UX.
+- `florivo-terminal-products-test.html`: initial product UX.
 - Main products: BUNNER, HYLLER x30, HYLLER x60, FORLENGERE KORTE, FORLENGERE LANGE, FORLENGERE PLAST.
 - Separate red VRAK/AVVIK: VRAK BUNNER, VRAK HYLLER, BUNNER UTEN BRIKK.
 
-### TEST server prepared
-New isolated tables:
-- florivo_terminal_test_employees
-- florivo_terminal_test_employee_nfc
-- florivo_terminal_test_finished_events
-Existing:
-- florivo_terminal_test_log
+### Initial TEST server prepared
+Prototype identity/diagnostic tables:
+- `florivo_terminal_test_employees`
+- `florivo_terminal_test_employee_nfc`
+- `florivo_terminal_test_log`
 
-TEST RPCs created and validated transactionally:
+Initial TEST RPCs created:
 - lookup UID
 - register employee + UID
 - register finished product +1 and return 6-digit server number
@@ -29,24 +27,73 @@ TEST RPCs created and validated transactionally:
 A TEST mapping exists for the physically tested badge -> TEST ANSATT.
 No production stock/order/Nordic data was changed.
 
-### Native Android starter prepared
-Folder: `android-terminal-test/`
-Package: `com.florivo.terminaltest`
-Starter includes:
-- Kotlin + Compose project config
-- NFC + INTERNET manifest permissions
-- native NfcAdapter reader mode
-- NFC-A polling + skip NDEF check
-- displays Tag.id and tech list for TEST diagnostics
-- calls TEST server UID lookup
-- yellow terminal visual direction
+## 2026-08-21 — NATIVE UI PHYSICAL TEST + CANONICAL BACKEND
 
-### Not yet physically passed
-- Android starter has not yet been built/installed on the real phone.
-- No native app NFC PASS yet.
-- No product +1 from native APK yet.
-- No kiosk mode yet.
+### Native app state
+- Native Kotlin/Jetpack Compose app builds successfully.
+- Compact one-screen product UI installed and physically viewed on Android phone.
+- Product screen direction accepted for continued testing.
+- Confirmation display changed to about 8 seconds.
+- Current UI still uses `UTEN KORT`; NFC gate is intentionally postponed until product/backend flow passes.
+
+### APK update/signing issue found
+- A GitHub-generated debug build could not update the previously installed APK because debug signing was not stable between builds.
+- Build workflow was changed to restore one persistent TEST signing key.
+- This creates a stable TEST update line for subsequent Florivo TEST APK builds.
+
+### Canonical TEST/LIVE rule fixed
+Project-wide rule is now documented in:
+- `PROJECT_CANONICAL_RULES.md`
+- `BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md`
+- `TEST_LIVE_LEGACY_AUDIT_2026-08-21.md`
+
+Rules:
+- process/form/order/workflow -> `mode='test'|'live'`
+- concrete tag/product in `mottak_scans` -> `is_test=true|false`
+- TEST must not affect LIVE stock/statistics/orders/Nordic WORK.
+
+### Finished-event backend migrated
+Old table name:
+- `florivo_terminal_test_finished_events`
+
+Canonical shared table now:
+- `florivo_terminal_finished_events`
+
+It contains canonical `mode` with allowed values `test/live`.
+Current TEST RPC `florivo_terminal_test_register_finished(...)` now writes to the shared table with `mode='test'`.
+
+No LIVE write path is enabled in the Android TEST app.
+
+### Android v0.3 DB TEST
+Branch:
+- `florivo-android-ui-v01`
+
+Build content:
+- INTERNET permission enabled;
+- product button calls narrow Supabase TEST RPC;
+- server returns global event/display number;
+- confirmation overlay shows server number for about 8 seconds;
+- footer identifies `TEST v0.3` and server TEST connection;
+- publishable Supabase key only; no service-role/admin secret in APK.
+
+GitHub Actions run:
+- run `32455736434`
+- workflow `Florivo Android TEST`
+- build result: SUCCESS
+- artifact: `Florivo-Android-v0.3-db-test`
+
+### Still NOT physically passed
+- Native Android -> Supabase product +1 from the real phone is not yet PHYSICAL PASS.
+- Server number display on the real phone is not yet PHYSICAL PASS.
+- NFC card gate is not yet PHYSICAL PASS in this current app line.
+- No LIVE/production promotion.
+- No kiosk mode.
 
 ### Next physical milestone
-ANDROID NFC UID READ — PHYSICAL PASS
-Only mark PASS after real APK + real phone + real badge repeated-read test.
+`ANDROID PRODUCT EVENT -> mode=test -> SERVER NUMBER — PHYSICAL PASS`
+
+Only after that pass:
+1. add/restore native NFC employee gate;
+2. test same badge UID repeatedly;
+3. map employee and product event;
+4. continue TEST until explicit promotion decision.
