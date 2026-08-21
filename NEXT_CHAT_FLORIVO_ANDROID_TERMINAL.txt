@@ -1,74 +1,45 @@
-FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-21
+FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-21-2326
 
-Read first:
-1. FLORIVO_ANDROID_V071_STABLE_2026-08-21.md
-2. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
-3. FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md
-4. FLORIVO_TERMINAL_USERS_ACCESS_PROTOCOL.md
-5. PROJECT_CANONICAL_RULES.md
-6. BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md
-7. FLORIVO_NUMBER_PROTOCOL.md
+READ FIRST:
+1. FLORIVO_SESSION_ARCHIVE_2026-08-21_2326.md
+2. FLORIVO_ANDROID_V071_STABLE_2026-08-21.md
+3. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
+4. FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md
+5. FLORIVO_NFC_SECURITY_AUDIT_2026-08-21.md
+6. PROJECT_CANONICAL_RULES.md
+7. BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md
 
-CURRENT STABLE ANDROID BASELINE
-- Version: v0.7.1
-- Status: normal stable baseline for continued physical testing.
-- Branch: florivo-v07-role-quantity-autologout
-- Commit: 9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d
-- Workflow run: 32525627283
-- APK Drive id: 197aIDwnhH3ypp2_J4aC41BdwiVLEBPN_
-- Do not edit stable v0.7.1 in place; new changes get a new version/branch.
+STABLE ANDROID BASELINE:
+- Florivo Android v0.7.1 is the stable TEST baseline.
+- NFC login works physically.
+- Lager = +1 only.
+- Produksjon/Admin = ANTALL 1–500.
+- confirmation 8 sec + 4 sec grace, then logout.
+- idle login timeout 12 sec.
+- card link/users survive reinstall/new phone because they are server-side.
+- active Android sends SHA-256 card identifier, not raw UID.
+- DO NOT modify v0.7.1 in place; next Android change = new version.
 
-PHYSICAL PASS ALREADY ACHIEVED
-- NFC card read works in native Android.
-- Web creates terminal user and role.
-- KOBLE KORT creates pending link.
-- Existing terminal reads card and server binds it.
-- Admin card physically logged in successfully and showed name/admin/KORT GODKJENT.
-- Web showed KORT TILKOBLET.
-- Card/user mapping is server-side, so reinstall/another terminal using same backend does not require re-registering the card.
+NFC SECURITY CLEANUP COMPLETED:
+- old Web NFC raw-UID prototype archived/inert;
+- legacy raw UID DB rows/log UID values cleared;
+- legacy raw UID RPC access revoked;
+- live card table direct anon/auth access revoked;
+- current live bindings are SHA-256 only.
+- old public Git history is not rewritten; do not reintroduce raw UID anywhere.
 
-PRIVACY
-- Never display raw card UID in admin, even last digits.
-- Android hashes Tag.id with SHA-256 locally; server works with card hash.
+UT KONTOR:
+- bestilling.html = WORKING v37.3.
+- Brukere / Tilganger button remains active.
+- New option A implemented ONLY for one selected NEW order:
+  FLYTT HELE ORDREN TIL RAMPE · UTEN SKANNING
+- NEVER move whole warehouse.
+- Backend RPC: office_stage_order_without_scanning(uuid)
+- UI module: ut-kontor-stage-all-no-scan.js
+- Existing Nordic TIL RAMPE V2.9.7 is frozen and untouched.
 
-ROLES
-- lager: +1 only, no ANTALL.
-- produksjon: ANTALL 1..500.
-- admin: ANTALL 1..500 + admin role.
-- test: reserved isolated test role.
-- Server enforces no qty>1 for lager.
+NEXT PHYSICAL PASS:
+UT KONTOR NO-SCAN WHOLE ORDER — PHYSICAL PASS.
+Create/use one small NEW order, note stock before, press the no-scan button, confirm, then verify exactly that order quantity becomes staged and no unrelated stock/order changes.
 
-SESSION UX
-- After login with no useful action: auto logout after 12 sec.
-- Successful product result: 8 sec.
-- Then 4 sec grace; no new action -> VENTER PÅ KORT.
-- Relevant interaction resets inactivity.
-- BYTT = immediate logout.
-
-BULK QUANTITY BACKEND
-- RPC florivo_terminal_register_stock_qty.
-- android_bulk registration method allowed.
-- finished-event qty constraint updated to nonzero -500..500.
-- Normal bulk product creates real stock rows/F-numbers.
-- forlengere_plast stays quantity-ledger based.
-
-UT KONTOR USER ADMIN
-- page florivo-terminal-users.html
-- button in bestilling.html: BRUKERE / TILGANGER
-- roles/cards managed there.
-
-NEXT REQUEST / DESIGN
-User wants one more web function before moving on:
-A no-scan alternative for moving warehouse goods to ramp with one button.
-Important: do NOT alter frozen Nordic TIL RAMPE V2.9.7 RFID/scanning logic. Implement as a separate explicit action/path.
-Recommended scope: current selected order / current ramp requirement only, not blindly every item in warehouse. Show exact quantities before confirmation; then one confirm action moves those items to staged/ramp using existing lifecycle/audit semantics.
-Need resolve whether user means:
-A) all goods required by the currently selected order/ramp, OR
-B) literally all stock currently in warehouse.
-A is recommended and safest.
-
-NEXT BIG AREAS AFTER THAT
-- physical test v0.7.1 over more users/roles/products;
-- photo capture/user photo;
-- dedicated working phone Device Owner / Lock Task kiosk mode;
-- stronger per-terminal enrollment/authorization for production.
+Do not call this new no-scan option stable/physical PASS until the real phone/web + real database test succeeds.
