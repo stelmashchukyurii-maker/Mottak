@@ -13,124 +13,59 @@
 - Main products: BUNNER, HYLLER x30, HYLLER x60, FORLENGERE KORTE, FORLENGERE LANGE, FORLENGERE PLAST.
 - Separate red VRAK/AVVIK: VRAK BUNNER, VRAK HYLLER, BUNNER UTEN BRIKK.
 
-### Initial TEST server prepared
-Prototype identity/diagnostic tables:
-- `florivo_terminal_test_employees`
-- `florivo_terminal_test_employee_nfc`
-- `florivo_terminal_test_log`
+## 2026-08-21 — LIVE BASELINE / F-NUMBER
+- Obsolete WORK physical baseline was audit-reset with history preserved.
+- `florivo_number` and `registration_method` added to `mottak_scans`.
+- LIVE Android stock registration RPC created.
+- FIFO later RFID binding prepared.
+- Android v0.4 physically registered real stock/F-number successfully.
 
-Initial TEST RPCs created for UID/employee and finished-product TEST events.
+## 2026-08-21 — NFC USER ACCESS PASS
+- Native v0.6 physically read an NFC access card.
+- Unknown-card path reached server correctly.
+- Web user administration page `florivo-terminal-users.html` created and linked from UT Kontor via `BRUKERE / TILGANGER`.
+- User creation + role + pending card-link flow implemented server-side.
+- Card UID is never shown in admin UI.
+- Android sends SHA-256 card identifier, not displayed raw UID.
+- Existing v0.6 was made compatible with pending card-link by server-side `florivo_terminal_resolve_nfc` integration.
+- Physical PASS: admin user card was linked; terminal displayed user name, `admin`, `KORT GODKJENT`; web displayed `KORT TILKOBLET`.
+- User/card mapping is server-side and therefore survives reinstall / another terminal using same backend.
 
-## 2026-08-21 — NATIVE UI + CANONICAL TEST/LIVE
+## 2026-08-21 — ROLES + QUANTITY + SHORT SESSION
+Accepted role behavior:
+- `lager`: no manual quantity, each product action = +1.
+- `produksjon`: manual quantity allowed.
+- `admin`: manual quantity allowed.
+- `test`: isolated test role reserved.
 
-### Native app
-- Kotlin/Jetpack Compose app builds and was physically viewed on Android phone.
-- Compact one-screen direction accepted.
-- Confirmation duration = about 8 seconds.
-- NFC employee gate intentionally postponed until stock registration path passes.
+Android v0.7 introduced `ANTALL` 1..500 for produksjon/admin and a server-enforced role check.
+Bulk normal-product registration creates actual stock units/F-numbers; quantity-only plastic extenders stay on the quantity ledger.
 
-### APK packaging/signing findings
-- Failed v0.2 Drive file was a GitHub artifact ZIP incorrectly named `.apk`.
-- v0.3 used the extracted real `app-debug.apk`.
-- A temporary signing key used around v0.3 was removed from the repository; secure permanent CI signing is still pending.
-- Until secure signing is configured, some test APK changes may require uninstall/reinstall.
+Server fixes after physical test:
+- allow `registration_method='android_bulk'` in `mottak_scans`;
+- allow finished-event qty non-zero -500..500;
+- fix visible quantity field colors so entered digits are readable.
 
-### Canonical governance
-Active rules:
-- `PROJECT_CANONICAL_RULES.md`
-- `BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md`
-- `TEST_LIVE_LEGACY_AUDIT_2026-08-21.md`
-- `FLORIVO_NUMBER_PROTOCOL.md`
+Session policy accepted:
+- successful result visible 8 seconds;
+- 4-second grace after result, then logout if no next product action;
+- user who logs in and does nothing is logged out after 12 seconds;
+- interaction resets inactivity;
+- `BYTT` remains immediate logout.
 
-Canonical semantics:
-- process/form/order/workflow -> `mode='test'|'live'`
-- concrete `mottak_scans` item -> `is_test=true|false`
-- `florivo_number` = permanent internal sequence
-- `scanner_code` = long physical RFID/EPC
-- `lower_number` = final 6 chars of physical EPC only
+## 2026-08-21 — v0.7.1 STABLE TEST BASELINE
+User accepted latest Android build as normal stable baseline for ongoing testing.
 
-## 2026-08-21 — CONTROLLED LIVE STOCK BASELINE + v0.4
+Canonical stable reference:
+- branch `florivo-v07-role-quantity-autologout`
+- commit `9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d`
+- workflow run `32525627283`
+- APK `Florivo-Android-v0.7.1.apk`
+- Drive id `197aIDwnhH3ypp2_J4aC41BdwiVLEBPN_`
+- protocol `FLORIVO_ANDROID_V071_STABLE_2026-08-21.md`
 
-### User decision
-User confirmed all previously recorded goods shown on WORK warehouse/ramp had physically left long ago and authorized clearing the obsolete current WORK baseline, preserving history, then trying Android as a real stock intake path.
+Rule: do not edit stable v0.7.1 in place. New features go to a later version/branch; preserve v0.7.1 for rollback/testing comparison.
 
-### LIVE baseline reset completed
-Reset key:
-- `2026-08-21-live-baseline-reset`
-
-Audit table:
-- `public.bama_reset_audit`
-
-Method:
-- snapshot saved before mutation;
-- all active WORK orders cancelled through existing `cancel_ut_order(...)` logic;
-- all remaining verified WORK `in_stock/staged` RFID rows received stock audit events and were changed to `dispatched`;
-- WORK quantity stock was audit-adjusted to zero;
-- no historical tag/EPC rows were deleted.
-
-Verified after reset:
-- `bama_stock_summary()` returns physical_count=0 for every product;
-- on_ramp_count=0 for every product;
-- order_remaining=0 for every product.
-
-### Florivo number schema implemented
-`public.mottak_scans` now includes:
-- `florivo_number bigint`
-- `registration_method text`
-
-Old tag fields remain unchanged.
-Rows with a Florivo number are allowed to exist before RFID is bound.
-The WORK unique-tag index was adjusted so multiple new rows with empty RFID fields are valid; real non-empty RFID uniqueness remains protected.
-
-### New LIVE stock RPC
-`florivo_terminal_register_stock(p_mode,p_product_key,p_device_id,p_employee_name)`
-
-For tagged products and `p_mode='live'`:
-- creates verified WORK `mottak_scans` row;
-- `is_test=false`;
-- `stock_status='in_stock'`;
-- allocates `florivo_number`;
-- `registration_method='android_button'`;
-- no fake RFID is generated;
-- shared finished-event audit records `mode='live'`.
-
-For `forlengere_plast`:
-- keeps quantity-only architecture;
-- adds +1 to quantity stock/events;
-- still receives a Florivo display number;
-- no fake `mottak_scans` RFID row.
-
-### Prepared later RFID FIFO binding
-RPC:
-- `florivo_terminal_bind_rfid_fifo(p_mode,p_product_key,p_scanner_code)`
-
-Rule:
-- validates 24-HEX EPC;
-- binds only to oldest unbound row of same product/environment;
-- writes full EPC to `scanner_code`;
-- writes final 6 to `lower_number`;
-- never changes `florivo_number`.
-
-### Android v0.4 LIVE STOCK
-Branch:
-- `florivo-android-ui-v01`
-
-Version:
-- versionCode 4
-- versionName `0.4-live-stock`
-
-Behavior:
-- clearly shows LIVE state;
-- normal product button calls `florivo_terminal_register_stock` with `mode='live'`;
-- success shows `F-000001` style number for about 8 seconds;
-- app states RFID is not yet bound;
-- `bunner_uten_brikk` is intentionally not stock-mutating in v0.4.
-
-### Next physical PASS
-`ANDROID LIVE STOCK + FLORIVO NUMBER — PHYSICAL PASS`
-
-Test exactly one normal product first and verify:
-1. phone shows F-number;
-2. stock summary +1 only for that product;
-3. new row has same Florivo number, no invented RFID, `registration_method='android_button'`;
-4. no unrelated stock/order/ramp mutation.
+## Next idea accepted for design
+Add a separate web option for moving goods from warehouse to ramp without RFID scanning: one-button bulk move. This must remain an explicit alternative path and must not modify frozen Nordic TIL RAMPE V2.9.7 scan behavior.
+Open design point: button scope should be the current/selected order or ramp requirement, not blindly the whole warehouse, unless explicitly chosen.
