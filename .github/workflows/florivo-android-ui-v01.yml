@@ -31,10 +31,6 @@ jobs:
         with:
           gradle-version: '9.6.0'
 
-      - name: Restore persistent TEST signing key
-        working-directory: android-terminal-test
-        run: base64 -d florivo-test.keystore.b64 > florivo-test.keystore
-
       - name: Build debug APK
         working-directory: android-terminal-test
         run: gradle :app:assembleDebug --stacktrace
