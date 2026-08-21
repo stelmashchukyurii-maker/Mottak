@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="nb" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="google" content="notranslate">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Florivo · Brukere / Tilganger</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--ok:#48d597;--yellow:#f4c430;--bad:#ff7373;--info:#75b7ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--bg),#11182a);color:var(--text)}button,input,select{font:inherit}.app{width:min(920px,100%);margin:auto;padding:14px 14px 56px}.top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.back{display:inline-flex;align-items:center;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);text-decoration:none;font-weight:900}.version{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-size:11px}h1{margin:16px 0 4px;font-size:clamp(28px,7vw,44px)}.subtitle{margin:0 0 14px;color:var(--muted);line-height:1.45}.card{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(21,28,48,.94)}.card h2{margin:0 0 12px;font-size:20px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{display:grid;gap:5px}.field.full{grid-column:1/-1}label{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase}input,select{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text)}.btn{min-height:48px;padding:10px 13px;border:0;border-radius:12px;background:var(--yellow);color:#17130a;font-weight:950;cursor:pointer}.btn.secondary{background:#1e4d3a;color:#eafff2;border:1px solid #2d805b}.btn:disabled{opacity:.5;cursor:not-allowed}.msg{min-height:20px;margin-top:9px;color:var(--muted);font-size:12px}.pending{display:none;margin-top:12px;padding:14px;border:2px solid rgba(244,196,48,.78);border-radius:16px;background:rgba(244,196,48,.08);text-align:center}.pending.show{display:block}.pending strong{display:block;font-size:18px;color:#ffe17a}.pending small{display:block;margin-top:6px;color:var(--muted)}.users{display:grid;gap:9px}.user{padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--panel2)}.user-top{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center}.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#203c31;border:1px solid #3b6b55;font-weight:950;font-size:18px}.name{font-size:17px;font-weight:950}.meta{margin-top:3px;color:var(--muted);font-size:11px}.status{font-size:11px;font-weight:950;padding:6px 8px;border-radius:999px;white-space:nowrap}.status.ok{background:rgba(72,213,151,.15);color:#8ff0bf;border:1px solid rgba(72,213,151,.45)}.status.wait{background:rgba(244,196,48,.12);color:#ffe17a;border:1px solid rgba(244,196,48,.45)}.status.none{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--line)}.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.photo-note{font-size:11px;color:var(--muted);margin-top:8px}.empty{padding:18px;text-align:center;color:var(--muted)}.security{margin-top:12px;padding:12px;border:1px solid rgba(117,183,255,.4);border-radius:14px;background:rgba(117,183,255,.06);color:#dbeaff;font-size:12px;line-height:1.5}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.user-top{grid-template-columns:44px minmax(0,1fr)}.status{grid-column:2;justify-self:start}.avatar{width:44px;height:44px}.btn{width:100%}}
+</style>
+</head>
+<body class="notranslate">
+<main class="app">
+  <div class="top"><a class="back" href="bestilling.html">← UT KONTOR</a><span class="version">Brukere / Tilganger v0.1 · 21.08.2026</span></div>
+  <h1>Brukere / Tilganger</h1>
+  <p class="subtitle">Opprett bruker, velg rolle og koble adgangskort via Florivo-terminalen.</p>
+
+  <section class="card">
+    <h2>+ Ny bruker</h2>
+    <div class="grid">
+      <div class="field"><label for="firstName">Fornavn</label><input id="firstName" autocomplete="off" placeholder="Fornavn"></div>
+      <div class="field"><label for="lastName">Etternavn</label><input id="lastName" autocomplete="off" placeholder="Etternavn"></div>
+      <div class="field full"><label for="role">Rolle</label><select id="role"><option value="lager">Lager</option><option value="produksjon">Produksjon</option><option value="admin">Admin</option><option value="test">Test</option></select></div>
+      <div class="field full"><button class="btn" id="createUser" type="button">OPPRETT BRUKER</button></div>
+    </div>
+    <div class="msg" id="createMsg"></div>
+  </section>
+
+  <section class="pending" id="pendingBox">
+    <strong id="pendingTitle">VENTER PÅ KORT</strong>
+    <small id="pendingText">Legg adgangskortet mot Florivo-terminalen. Forespørselen varer i 5 minutter.</small>
+  </section>
+
+  <section class="card">
+    <h2>Brukere</h2>
+    <div class="users" id="users"><div class="empty">Laster…</div></div>
+  </section>
+
+  <div class="security">Kortnummer / UID vises aldri på denne siden. Admin ser kun om kort er koblet eller ikke. Florivo bruker kortets SHA-256-identifikator mot serveren.</div>
+</main>
+<script>
+"use strict";
+const SB_URL="https://hzjsatehehhpgpskckfi.supabase.co";
+const SB_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+const DEVICE_ID="android-terminal-test-01";
+let pollTimer=null;
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+async function rpc(name,payload={}){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${name}`,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json","apikey":SB_KEY},body:JSON.stringify(payload)});
+  const t=await r.text();
+  if(!r.ok)throw new Error(`HTTP ${r.status} ${t.slice(0,180)}`);
+  if(!t)return null;
+  try{return JSON.parse(t)}catch{return t}
+}
+async function loadUsers(){
+  const root=$("users");
+  try{
+    const rows=await rpc("florivo_terminal_admin_list_users")||[];
+    if(!rows.length){root.innerHTML='<div class="empty">Ingen brukere ennå.</div>';return}
+    root.innerHTML=rows.map(u=>{
+      const initials=((u.first_name||"").slice(0,1)+(u.last_name||"").slice(0,1)).toUpperCase();
+      const card=u.has_card?'<span class="status ok">KORT TILKOBLET</span>':(u.link_status==='pending'?'<span class="status wait">VENTER PÅ KORT</span>':'<span class="status none">INGEN KORT</span>');
+      return `<article class="user"><div class="user-top"><div class="avatar">${esc(initials||"?")}</div><div><div class="name">${esc(u.first_name)} ${esc(u.last_name)}</div><div class="meta">Rolle: ${esc(u.role)} · ${u.active?'AKTIV':'INAKTIV'}</div></div>${card}</div><div class="actions"><button class="btn secondary link-card" data-id="${esc(u.user_id)}" data-name="${esc(u.first_name+' '+u.last_name)}" type="button">${u.has_card?'KOBLE NYTT KORT':'KOBLE KORT'}</button></div><div class="photo-note">Foto: kan legges til senere / tas i terminalen i neste trinn.</div></article>`
+    }).join("");
+    root.querySelectorAll(".link-card").forEach(b=>b.addEventListener("click",()=>requestCard(b.dataset.id,b.dataset.name,b)));
+  }catch(e){root.innerHTML=`<div class="empty">Feil: ${esc(e.message)}</div>`}
+}
+async function createUser(){
+  const fn=$("firstName").value.trim(),ln=$("lastName").value.trim(),role=$("role").value,btn=$("createUser"),msg=$("createMsg");
+  if(!fn||!ln){msg.textContent="Fyll inn fornavn og etternavn.";return}
+  btn.disabled=true;msg.textContent="Oppretter…";
+  try{
+    await rpc("florivo_terminal_admin_create_user",{p_first_name:fn,p_last_name:ln,p_role:role});
+    $("firstName").value="";$("lastName").value="";msg.textContent="Bruker opprettet.";await loadUsers();
+  }catch(e){msg.textContent=`Feil: ${e.message}`}finally{btn.disabled=false}
+}
+async function requestCard(userId,name,btn){
+  btn.disabled=true;
+  try{
+    const rows=await rpc("florivo_terminal_admin_request_card_link",{p_user_id:userId,p_device_id:DEVICE_ID});
+    const row=Array.isArray(rows)?rows[0]:rows;
+    if(!row?.request_id)throw new Error("Tomt serversvar");
+    $("pendingBox").classList.add("show");$("pendingTitle").textContent=`VENTER PÅ KORT · ${name}`;$("pendingText").textContent="Legg adgangskortet mot Florivo-terminalen. Forespørselen varer i 5 minutter.";
+    startPoll(row.request_id,name);await loadUsers();
+  }catch(e){alert(`Kunne ikke starte kortkobling: ${e.message}`)}finally{btn.disabled=false}
+}
+function startPoll(requestId,name){
+  if(pollTimer)clearInterval(pollTimer);
+  let tries=0;
+  pollTimer=setInterval(async()=>{
+    tries++;
+    try{
+      const rows=await rpc("florivo_terminal_admin_link_status",{p_request_id:requestId});
+      const row=Array.isArray(rows)?rows[0]:rows;
+      if(row?.status==="completed"){
+        clearInterval(pollTimer);pollTimer=null;$("pendingTitle").textContent=`✓ KORT TILKOBLET · ${name}`;$("pendingText").textContent="Kortet er registrert. Kortnummeret vises ikke.";await loadUsers();setTimeout(()=>$("pendingBox").classList.remove("show"),5000);
+      }else if(row?.status&&row.status!=="pending"){
+        clearInterval(pollTimer);pollTimer=null;$("pendingTitle").textContent=`KORTKOBLING: ${String(row.status).toUpperCase()}`;await loadUsers();
+      }
+    }catch{}
+    if(tries>180){clearInterval(pollTimer);pollTimer=null;$("pendingTitle").textContent="KORTKOBLING UTLØPT";$("pendingText").textContent="Start koblingen på nytt.";await loadUsers();}
+  },1500);
+}
+$("createUser").addEventListener("click",createUser);
+loadUsers();
+</script>
+</body>
+</html>
