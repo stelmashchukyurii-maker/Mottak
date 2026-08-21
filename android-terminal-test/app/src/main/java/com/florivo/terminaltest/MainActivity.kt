@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -241,7 +242,7 @@ private fun NfcGate(state: GateState, message: String, nfcAvailable: Boolean, nf
                 Text("Kortnummer / UID vises ikke. Florivo bruker kun en SHA-256 hash av kort-ID mot serveren.", color = Muted, fontSize = 13.sp, lineHeight = 18.sp)
             }
             Spacer(Modifier.weight(1f))
-            Text("Florivo Android v0.7 ROLE + ANTALL + AUTO LOGOUT · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
+            Text("Florivo Android v0.7.1 ROLE + ANTALL FIX · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
         }
     }
 }
@@ -254,7 +255,7 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
     var lastResult by remember { mutableStateOf<RegisterResult?>(null) }
     var sending by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("KORT GODKJENT · ${session.fullName}") }
-    var quantityText by remember { mutableStateOf("1") }
+    var quantityText by remember { mutableStateOf("") }
     var autoLogoutSignal by remember { mutableIntStateOf(0) }
     var graceActive by remember { mutableStateOf(false) }
 
@@ -317,7 +318,7 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                 } else {
                     "PÅ LAGER · +${result.quantity} ${product.name} · ${result.displayRange}"
                 }
-                if (session.canEnterQuantity) quantityText = "1"
+                if (session.canEnterQuantity) quantityText = ""
                 autoLogoutSignal++
             } catch (e: Exception) {
                 status = "FEIL · ${e.message ?: "ukjent feil"}"
@@ -351,7 +352,17 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                             modifier = Modifier.weight(1f),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            label = { Text("1–500") }
+                            label = { Text("1–500") },
+                            placeholder = { Text("1", color = Muted) },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Ink,
+                                unfocusedTextColor = Ink,
+                                cursorColor = GreenEdge,
+                                focusedBorderColor = GreenEdge,
+                                unfocusedBorderColor = Muted,
+                                focusedLabelColor = GreenEdge,
+                                unfocusedLabelColor = Muted
+                            )
                         )
                     }
                 }
