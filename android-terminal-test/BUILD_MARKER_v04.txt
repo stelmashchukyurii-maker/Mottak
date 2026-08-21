@@ -1,0 +1,3 @@
+Florivo Android v0.4 LIVE stock build marker
+Created: 2026-08-21 Europe/Oslo
+Purpose: trigger a clean pull-request CI build from current main without changing application behavior.
