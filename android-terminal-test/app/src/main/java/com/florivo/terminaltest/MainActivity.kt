@@ -1,5 +1,7 @@
 package com.florivo.terminaltest
 
+import android.nfc.NfcAdapter
+import android.nfc.Tag
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -44,19 +46,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = FlorivoBg) {
-                    FlorivoLiveStockApp()
-                }
-            }
-        }
-    }
-}
+import java.security.MessageDigest
+import kotlin.concurrent.thread
 
 private const val SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co"
 private const val SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya"
@@ -70,24 +61,181 @@ private val Ink = Color(0xFF203429)
 private val Muted = Color(0xFF767364)
 private val GreenEdge = Color(0xFF1C5C37)
 private val RedEdge = Color(0xFF7D2A25)
+private val Yellow = Color(0xFFFFC857)
 
-private data class Product(
-    val key: String,
-    val name: String,
-    val icon: String,
-    val wide: Boolean = false
-)
+private data class UserSession(
+    val id: String,
+    val firstName: String,
+    val lastName: String,
+    val role: String,
+    val photoUrl: String?
+) {
+    val fullName: String get() = "$firstName $lastName".trim()
+}
 
+private data class Product(val key: String, val name: String, val icon: String, val wide: Boolean = false)
 private data class RegisterResult(val displayNumber: String)
 
+enum class GateState { WAITING, CHECKING, UNKNOWN, ERROR }
+
+class MainActivity : ComponentActivity() {
+    private var adapter: NfcAdapter? = null
+    private var session by mutableStateOf<UserSession?>(null)
+    private var gateState by mutableStateOf(GateState.WAITING)
+    private var gateMessage by mutableStateOf("Legg adgangskortet mot terminalen")
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        adapter = NfcAdapter.getDefaultAdapter(this)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize(), color = FlorivoBg) {
+                    FlorivoV06App(
+                        session = session,
+                        gateState = gateState,
+                        gateMessage = gateMessage,
+                        nfcAvailable = adapter != null,
+                        nfcEnabled = adapter?.isEnabled == true,
+                        onLogout = {
+                            session = null
+                            gateState = GateState.WAITING
+                            gateMessage = "Legg adgangskortet mot terminalen"
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        adapter?.enableReaderMode(
+            this,
+            { tag -> handleTag(tag) },
+            NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
+            null
+        )
+    }
+
+    override fun onPause() {
+        adapter?.disableReaderMode(this)
+        super.onPause()
+    }
+
+    private fun handleTag(tag: Tag) {
+        val cardHash = sha256(tag.id)
+        runOnUiThread {
+            gateState = GateState.CHECKING
+            gateMessage = "Kontrollerer kort…"
+        }
+        thread {
+            try {
+                val user = resolveNfc(cardHash)
+                runOnUiThread {
+                    if (user != null) {
+                        session = user
+                        gateState = GateState.WAITING
+                        gateMessage = "Kort godkjent"
+                    } else {
+                        session = null
+                        gateState = GateState.UNKNOWN
+                        gateMessage = "KORT IKKE REGISTRERT"
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    session = null
+                    gateState = GateState.ERROR
+                    gateMessage = "FEIL · ${e.message ?: "ukjent feil"}"
+                }
+            }
+        }
+    }
+
+    private fun sha256(bytes: ByteArray): String =
+        MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+}
+
 @Composable
-private fun FlorivoLiveStockApp() {
+private fun FlorivoV06App(
+    session: UserSession?,
+    gateState: GateState,
+    gateMessage: String,
+    nfcAvailable: Boolean,
+    nfcEnabled: Boolean,
+    onLogout: () -> Unit
+) {
+    if (session == null) {
+        NfcGate(gateState, gateMessage, nfcAvailable, nfcEnabled)
+    } else {
+        FlorivoLiveStockApp(session, onLogout)
+    }
+}
+
+@Composable
+private fun NfcGate(state: GateState, message: String, nfcAvailable: Boolean, nfcEnabled: Boolean) {
+    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(FlorivoBg, FlorivoBg2))).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            Header("LIVE")
+            Column(
+                modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(24.dp)).background(Card, RoundedCornerShape(24.dp)).padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text("ADGANG", color = Ink, fontSize = 28.sp, fontWeight = FontWeight.Black)
+                Text(
+                    when {
+                        !nfcAvailable -> "Denne telefonen har ikke NFC"
+                        !nfcEnabled -> "Slå på NFC i Android"
+                        else -> message
+                    },
+                    color = if (state == GateState.UNKNOWN || state == GateState.ERROR || !nfcEnabled) Color(0xFF9B2E27) else Ink,
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(210.dp).clip(RoundedCornerShape(24.dp))
+                        .background(
+                            when (state) {
+                                GateState.UNKNOWN, GateState.ERROR -> Brush.verticalGradient(listOf(Color(0xFFF2C7BE), Color(0xFFD67E72)))
+                                GateState.CHECKING -> Brush.verticalGradient(listOf(Color(0xFFFFE7A7), Color(0xFFFFC857)))
+                                else -> Brush.verticalGradient(listOf(Color(0xFFEAF4C0), Color(0xFFAAD887)))
+                            }
+                        )
+                        .border(2.dp, if (state == GateState.UNKNOWN || state == GateState.ERROR) RedEdge else GreenEdge, RoundedCornerShape(24.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(if (state == GateState.UNKNOWN || state == GateState.ERROR) "!" else ")))", fontSize = 54.sp, fontWeight = FontWeight.Black, color = Ink)
+                        Text(
+                            when (state) {
+                                GateState.CHECKING -> "KONTROLLERER"
+                                GateState.UNKNOWN -> "KORT IKKE REGISTRERT"
+                                GateState.ERROR -> "FEIL"
+                                else -> "VENTER PÅ KORT"
+                            },
+                            color = Ink,
+                            fontSize = 21.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                Text("Kortnummer / UID vises ikke. Florivo bruker kun en SHA-256 hash av kort-ID mot serveren.", color = Muted, fontSize = 13.sp, lineHeight = 18.sp)
+            }
+            Spacer(Modifier.weight(1f))
+            Text("Florivo Android v0.6 NFC LIVE · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+@Composable
+private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
     val scope = rememberCoroutineScope()
     var vrakMode by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Product?>(null) }
     var displayNumber by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
-    var status by remember { mutableStateOf("LAGER LIVE · mode=live") }
+    var status by remember { mutableStateOf("KORT GODKJENT · ${session.fullName}") }
 
     LaunchedEffect(selected) {
         if (selected != null) {
@@ -99,18 +247,17 @@ private fun FlorivoLiveStockApp() {
     }
 
     val products = listOf(
-        Product("bunner", "BUNNER", "▰", wide = true),
+        Product("bunner", "BUNNER", "▰", true),
         Product("hyller30", "HYLLER x30", "▤"),
         Product("hyller60", "HYLLER x60", "▤"),
         Product("forlengere_korte", "FORLENGERE KORTE", "↔"),
         Product("forlengere_lange", "FORLENGERE LANGE", "⟷"),
-        Product("forlengere_plast", "FORLENGERE PLAST", "◫", wide = true)
+        Product("forlengere_plast", "FORLENGERE PLAST", "◫", true)
     )
-
     val vrakProducts = listOf(
         Product("vrak_bunner", "VRAK BUNNER", "✕"),
         Product("vrak_hyller", "VRAK HYLLER", "✕"),
-        Product("bunner_uten_brikk", "BUNNER UTEN BRIKK", "!", wide = true)
+        Product("bunner_uten_brikk", "BUNNER UTEN BRIKK", "!", true)
     )
 
     fun register(product: Product) {
@@ -123,265 +270,144 @@ private fun FlorivoLiveStockApp() {
         status = "Registrerer LIVE på lager…"
         scope.launch {
             try {
-                val result = registerStockLive(product.key)
+                val result = registerStockLive(product.key, session.fullName)
                 displayNumber = result.displayNumber
                 selected = product
                 status = "PÅ LAGER · F-${result.displayNumber}"
             } catch (e: Exception) {
                 status = "FEIL · ${e.message ?: "ukjent feil"}"
-            } finally {
-                sending = false
-            }
+            } finally { sending = false }
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(FlorivoBg, FlorivoBg2)))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp)
-        ) {
-            Header()
-
+    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(FlorivoBg, FlorivoBg2)))) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Header("LIVE")
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(8.dp, RoundedCornerShape(22.dp))
-                    .background(Card, RoundedCornerShape(22.dp))
-                    .padding(10.dp),
+                modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(22.dp)).background(Card, RoundedCornerShape(22.dp)).padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
-                EmployeeCard()
-
+                EmployeeCard(session, onLogout)
                 if (!vrakMode) {
                     CompactProductGrid(products, enabled = !sending) { register(it) }
-                    FlorivoActionButton(
-                        text = "VRAK / AVVIK",
-                        icon = "!",
-                        danger = true,
-                        enabled = !sending,
-                        modifier = Modifier.fillMaxWidth().height(58.dp),
-                        onClick = { vrakMode = true }
-                    )
+                    FlorivoActionButton("VRAK / AVVIK", "!", danger = true, enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) { vrakMode = true }
                 } else {
-                    Text(
-                        text = "VRAK / AVVIK",
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color(0xFF8A2C27),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center
-                    )
+                    Text("VRAK / AVVIK", modifier = Modifier.fillMaxWidth(), color = Color(0xFF8A2C27), fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
                     CompactProductGrid(vrakProducts, danger = true, enabled = !sending) { register(it) }
-                    FlorivoActionButton(
-                        text = "TILBAKE",
-                        icon = "←",
-                        enabled = !sending,
-                        modifier = Modifier.fillMaxWidth().height(58.dp),
-                        onClick = { vrakMode = false }
-                    )
+                    FlorivoActionButton("TILBAKE", "←", enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) { vrakMode = false }
                 }
             }
-
-            Text(
-                text = status,
-                modifier = Modifier.fillMaxWidth(),
-                color = if (status.startsWith("FEIL")) Color(0xFFFFB4AC) else Color(0xFFD7E7DA),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                maxLines = 1
-            )
+            Text(status, modifier = Modifier.fillMaxWidth(), color = if (status.startsWith("FEIL")) Color(0xFFFFB4AC) else Color(0xFFD7E7DA), fontSize = 10.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 1)
         }
+        selected?.let { ConfirmationOverlay(it, displayNumber, it.key.startsWith("vrak_")) }
+    }
+}
 
-        selected?.let { product ->
-            ConfirmationOverlay(
-                product = product,
-                number = displayNumber,
-                danger = product.key.startsWith("vrak_")
-            )
+@Composable
+private fun Header(badge: String) {
+    Row(modifier = Modifier.fillMaxWidth().height(54.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("FLORIVO TERMINAL", modifier = Modifier.weight(1f), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black, maxLines = 1)
+        Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(Yellow).border(1.dp, Color(0xFFFFE09A), RoundedCornerShape(50)).padding(horizontal = 13.dp, vertical = 7.dp)) {
+            Text(badge, color = Color(0xFF3A2A00), fontSize = 12.sp, fontWeight = FontWeight.Black)
         }
     }
 }
 
 @Composable
-private fun Header() {
+private fun EmployeeCard(session: UserSession, onLogout: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(54.dp),
+        modifier = Modifier.fillMaxWidth().height(66.dp).background(Color.White, RoundedCornerShape(16.dp)).border(1.dp, Color(0xFFDED7B6), RoundedCornerShape(16.dp)).clickable { onLogout() }.padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "FLORIVO TERMINAL",
-            modifier = Modifier.weight(1f),
-            color = Color.White,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Black,
-            maxLines = 1
-        )
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(Color(0xFFFFC857))
-                .border(1.dp, Color(0xFFFFE09A), RoundedCornerShape(50))
-                .padding(horizontal = 13.dp, vertical = 7.dp)
-        ) {
-            Text("LIVE", color = Color(0xFF3A2A00), fontSize = 12.sp, fontWeight = FontWeight.Black)
+        Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(Yellow).padding(horizontal = 12.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
+            Text("NFC", color = Color(0xFF3A2A00), fontSize = 11.sp, fontWeight = FontWeight.Black)
         }
+        Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
+            Text(session.fullName.uppercase(), color = Ink, fontSize = 15.sp, fontWeight = FontWeight.Black, maxLines = 1)
+            Text("${session.role} · KORT GODKJENT", color = Muted, fontSize = 10.sp)
+        }
+        Text("BYTT", color = GreenEdge, fontSize = 10.sp, fontWeight = FontWeight.Black)
     }
 }
 
 @Composable
-private fun EmployeeCard() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(62.dp)
-            .background(Color.White, RoundedCornerShape(16.dp))
-            .border(1.dp, Color(0xFFDED7B6), RoundedCornerShape(16.dp))
-            .padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(Color(0xFFFFC857))
-                .border(1.dp, Color(0xFFD99A00), RoundedCornerShape(50))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("LIVE", color = Color(0xFF3A2A00), fontSize = 11.sp, fontWeight = FontWeight.Black)
-        }
-        Column(modifier = Modifier.padding(start = 10.dp)) {
-            Text("UTEN KORT · LIVE", color = Ink, fontSize = 15.sp, fontWeight = FontWeight.Black)
-            Text("Android-knapp → lager · RFID kan bindes senere", color = Muted, fontSize = 10.sp)
-        }
-    }
-}
-
-@Composable
-private fun CompactProductGrid(
-    products: List<Product>,
-    danger: Boolean = false,
-    enabled: Boolean = true,
-    onClick: (Product) -> Unit
-) {
-    var index = 0
-    while (index < products.size) {
-        val first = products[index]
+private fun CompactProductGrid(products: List<Product>, danger: Boolean = false, enabled: Boolean = true, onClick: (Product) -> Unit) {
+    var i = 0
+    while (i < products.size) {
+        val first = products[i]
         if (first.wide) {
-            FlorivoActionButton(
-                text = first.name,
-                icon = first.icon,
-                danger = danger,
-                enabled = enabled,
-                modifier = Modifier.fillMaxWidth().height(66.dp),
-                onClick = { onClick(first) }
-            )
-            index += 1
+            FlorivoActionButton(first.name, first.icon, danger = danger, enabled = enabled, modifier = Modifier.fillMaxWidth().height(66.dp)) { onClick(first) }
+            i++
         } else {
-            val second = products.getOrNull(index + 1)?.takeIf { !it.wide }
+            val second = products.getOrNull(i + 1)?.takeIf { !it.wide }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                FlorivoActionButton(
-                    text = first.name,
-                    icon = first.icon,
-                    danger = danger,
-                    enabled = enabled,
-                    modifier = Modifier.weight(1f).height(74.dp),
-                    onClick = { onClick(first) }
-                )
-                if (second != null) {
-                    FlorivoActionButton(
-                        text = second.name,
-                        icon = second.icon,
-                        danger = danger,
-                        enabled = enabled,
-                        modifier = Modifier.weight(1f).height(74.dp),
-                        onClick = { onClick(second) }
-                    )
-                } else {
-                    Spacer(Modifier.weight(1f))
-                }
+                FlorivoActionButton(first.name, first.icon, danger = danger, enabled = enabled, modifier = Modifier.weight(1f).height(74.dp)) { onClick(first) }
+                if (second != null) FlorivoActionButton(second.name, second.icon, danger = danger, enabled = enabled, modifier = Modifier.weight(1f).height(74.dp)) { onClick(second) } else Spacer(Modifier.weight(1f))
             }
-            index += if (second != null) 2 else 1
+            i += if (second != null) 2 else 1
         }
     }
 }
 
 @Composable
-private fun FlorivoActionButton(
-    text: String,
-    icon: String,
-    modifier: Modifier = Modifier,
-    danger: Boolean = false,
-    enabled: Boolean = true,
-    onClick: () -> Unit
-) {
+private fun FlorivoActionButton(text: String, icon: String, modifier: Modifier = Modifier, danger: Boolean = false, enabled: Boolean = true, onClick: () -> Unit) {
     val shape = RoundedCornerShape(18.dp)
-    val colors = if (danger) {
-        listOf(Color(0xFFCF6159), Color(0xFFAA403A), Color(0xFF86302B))
-    } else {
-        listOf(Color(0xFF3F9557), Color(0xFF2F7E49), Color(0xFF276A40))
-    }
-    val edge = if (danger) RedEdge else GreenEdge
-
-    Box(
-        modifier = modifier
-            .shadow(4.dp, shape)
-            .clip(shape)
-            .background(Brush.horizontalGradient(colors))
-            .border(1.5.dp, edge, shape)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
+    val colors = if (danger) listOf(Color(0xFFCF6159), Color(0xFFAA403A), Color(0xFF86302B)) else listOf(Color(0xFF3F9557), Color(0xFF2F7E49), Color(0xFF276A40))
+    Box(modifier = modifier.shadow(4.dp, shape).clip(shape).background(Brush.horizontalGradient(colors)).border(1.5.dp, if (danger) RedEdge else GreenEdge, shape).clickable(enabled = enabled, onClick = onClick).padding(horizontal = 12.dp, vertical = 8.dp)) {
         Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
             Text(icon, color = Color.White.copy(alpha = if (enabled) 0.92f else 0.55f), fontSize = 22.sp, fontWeight = FontWeight.Black)
-            Text(
-                text = text,
-                modifier = Modifier.weight(1f).padding(start = 9.dp),
-                color = Color.White.copy(alpha = if (enabled) 1f else 0.55f),
-                fontSize = if (text.length > 16) 14.sp else 17.sp,
-                fontWeight = FontWeight.Black,
-                lineHeight = 17.sp,
-                maxLines = 2
-            )
+            Text(text, modifier = Modifier.weight(1f).padding(start = 9.dp), color = Color.White.copy(alpha = if (enabled) 1f else 0.55f), fontSize = if (text.length > 16) 14.sp else 17.sp, fontWeight = FontWeight.Black, lineHeight = 17.sp, maxLines = 2)
         }
     }
 }
 
 @Composable
 private fun ConfirmationOverlay(product: Product, number: String, danger: Boolean) {
-    Box(
-        modifier = Modifier.fillMaxSize().background(Color(0xE80B2017)).padding(22.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xE80B2017)).padding(22.dp), contentAlignment = Alignment.Center) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(12.dp, RoundedCornerShape(28.dp))
-                .background(
-                    if (danger) Brush.verticalGradient(listOf(Color(0xFFCF635B), Color(0xFF8E332E)))
-                    else Brush.verticalGradient(listOf(Color(0xFFE7F29A), Color(0xFF79B767), Color(0xFF356E45))),
-                    RoundedCornerShape(28.dp)
-                )
-                .border(2.dp, if (danger) RedEdge else GreenEdge, RoundedCornerShape(28.dp))
-                .padding(24.dp),
+            modifier = Modifier.fillMaxWidth().shadow(12.dp, RoundedCornerShape(28.dp)).background(if (danger) Brush.verticalGradient(listOf(Color(0xFFCF635B), Color(0xFF8E332E))) else Brush.verticalGradient(listOf(Color(0xFFE7F29A), Color(0xFF79B767), Color(0xFF356E45))), RoundedCornerShape(28.dp)).border(2.dp, if (danger) RedEdge else GreenEdge, RoundedCornerShape(28.dp)).padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(if (danger) "!" else "✓", fontSize = 56.sp, fontWeight = FontWeight.Black, color = Color.White)
             Text("REGISTRERT PÅ LAGER", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
             Text("F-$number", color = Color.White, fontSize = 50.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 6.dp))
             Text(product.name, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            Text("mode=live · RFID ikke bundet ennå · 8 sek", color = Color.White.copy(alpha = 0.90f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
+            Text("mode=live · bruker registrert via NFC · 8 sek", color = Color.White.copy(alpha = 0.90f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
         }
     }
 }
 
-private suspend fun registerStockLive(productKey: String): RegisterResult = withContext(Dispatchers.IO) {
+private fun resolveNfc(cardHash: String): UserSession? {
+    val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_resolve_nfc")
+    val connection = (url.openConnection() as HttpURLConnection).apply {
+        requestMethod = "POST"
+        connectTimeout = 10000
+        readTimeout = 10000
+        doOutput = true
+        setRequestProperty("Content-Type", "application/json")
+        setRequestProperty("Accept", "application/json")
+        setRequestProperty("apikey", SUPABASE_PUBLISHABLE_KEY)
+    }
+    val payload = JSONObject().put("p_card_hash", cardHash).put("p_device_id", DEVICE_ID).toString()
+    connection.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) }
+    val code = connection.responseCode
+    val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+    val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+    connection.disconnect()
+    if (code !in 200..299) throw IllegalStateException("HTTP $code ${body.take(120).replace('\n',' ')}")
+    val array = JSONArray(body)
+    if (array.length() == 0) return null
+    val row = array.getJSONObject(0)
+    return UserSession(
+        id = row.optString("user_id"),
+        firstName = row.optString("first_name"),
+        lastName = row.optString("last_name"),
+        role = row.optString("role", "lager"),
+        photoUrl = row.optString("photo_url").takeIf { it.isNotBlank() && it != "null" }
+    )
+}
+
+private suspend fun registerStockLive(productKey: String, employeeName: String): RegisterResult = withContext(Dispatchers.IO) {
     val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_register_stock")
     val connection = (url.openConnection() as HttpURLConnection).apply {
         requestMethod = "POST"
@@ -392,27 +418,14 @@ private suspend fun registerStockLive(productKey: String): RegisterResult = with
         setRequestProperty("Accept", "application/json")
         setRequestProperty("apikey", SUPABASE_PUBLISHABLE_KEY)
     }
-
-    val payload = JSONObject()
-        .put("p_mode", MODE)
-        .put("p_product_key", productKey)
-        .put("p_device_id", DEVICE_ID)
-        .put("p_employee_name", JSONObject.NULL)
-        .toString()
-
+    val payload = JSONObject().put("p_mode", MODE).put("p_product_key", productKey).put("p_device_id", DEVICE_ID).put("p_employee_name", employeeName).toString()
     connection.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) }
-
     val code = connection.responseCode
     val stream = if (code in 200..299) connection.inputStream else connection.errorStream
     val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
     connection.disconnect()
-
-    if (code !in 200..299) {
-        throw IllegalStateException("HTTP $code ${body.take(160).replace('\n',' ')}")
-    }
-
+    if (code !in 200..299) throw IllegalStateException("HTTP $code ${body.take(160).replace('\n',' ')}")
     val array = JSONArray(body)
     if (array.length() == 0) throw IllegalStateException("Tomt serversvar")
-    val row = array.getJSONObject(0)
-    RegisterResult(displayNumber = row.optString("display_number", "------"))
+    return@withContext RegisterResult(array.getJSONObject(0).optString("display_number", "------"))
 }
