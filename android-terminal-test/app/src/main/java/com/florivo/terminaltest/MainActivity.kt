@@ -18,12 +18,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,6 +38,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +57,8 @@ private const val SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co"
 private const val SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya"
 private const val DEVICE_ID = "android-terminal-test-01"
 private const val MODE = "live"
+private const val CONFIRM_SECONDS = 8L
+private const val GRACE_SECONDS = 4L
 
 private val FlorivoBg = Color(0xFF0F2D22)
 private val FlorivoBg2 = Color(0xFF1E4935)
@@ -71,10 +77,22 @@ private data class UserSession(
     val photoUrl: String?
 ) {
     val fullName: String get() = "$firstName $lastName".trim()
+    val canEnterQuantity: Boolean get() = role.lowercase() in setOf("produksjon", "admin")
 }
 
 private data class Product(val key: String, val name: String, val icon: String, val wide: Boolean = false)
-private data class RegisterResult(val displayNumber: String)
+private data class RegisterResult(
+    val quantity: Int,
+    val firstDisplayNumber: String,
+    val lastDisplayNumber: String
+) {
+    val displayRange: String
+        get() = if (firstDisplayNumber == lastDisplayNumber) {
+            "F-$firstDisplayNumber"
+        } else {
+            "F-$firstDisplayNumber – F-$lastDisplayNumber"
+        }
+}
 
 enum class GateState { WAITING, CHECKING, UNKNOWN, ERROR }
 
@@ -90,7 +108,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = FlorivoBg) {
-                    FlorivoV06App(
+                    FlorivoV07App(
                         session = session,
                         gateState = gateState,
                         gateMessage = gateMessage,
@@ -157,7 +175,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun FlorivoV06App(
+private fun FlorivoV07App(
     session: UserSession?,
     gateState: GateState,
     gateMessage: String,
@@ -223,7 +241,7 @@ private fun NfcGate(state: GateState, message: String, nfcAvailable: Boolean, nf
                 Text("Kortnummer / UID vises ikke. Florivo bruker kun en SHA-256 hash av kort-ID mot serveren.", color = Muted, fontSize = 13.sp, lineHeight = 18.sp)
             }
             Spacer(Modifier.weight(1f))
-            Text("Florivo Android v0.6 NFC LIVE · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
+            Text("Florivo Android v0.7 ROLE + ANTALL + AUTO LOGOUT · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
         }
     }
 }
@@ -233,17 +251,23 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
     val scope = rememberCoroutineScope()
     var vrakMode by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Product?>(null) }
-    var displayNumber by remember { mutableStateOf("") }
+    var lastResult by remember { mutableStateOf<RegisterResult?>(null) }
     var sending by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("KORT GODKJENT · ${session.fullName}") }
+    var quantityText by remember { mutableStateOf("1") }
+    var autoLogoutSignal by remember { mutableIntStateOf(0) }
+    var graceActive by remember { mutableStateOf(false) }
 
-    LaunchedEffect(selected) {
-        if (selected != null) {
-            delay(8000)
-            selected = null
-            displayNumber = ""
-            vrakMode = false
-        }
+    LaunchedEffect(autoLogoutSignal) {
+        if (autoLogoutSignal <= 0 || selected == null) return@LaunchedEffect
+        graceActive = false
+        delay(CONFIRM_SECONDS * 1000)
+        selected = null
+        lastResult = null
+        vrakMode = false
+        graceActive = true
+        delay(GRACE_SECONDS * 1000)
+        onLogout()
     }
 
     val products = listOf(
@@ -262,21 +286,44 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
 
     fun register(product: Product) {
         if (sending) return
+        autoLogoutSignal++
+        graceActive = false
+        selected = null
+        lastResult = null
+
         if (product.key == "bunner_uten_brikk") {
             status = "AVVIK · ikke lagerført i denne versjonen"
             return
         }
+
+        val quantity = if (session.canEnterQuantity) {
+            quantityText.trim().ifBlank { "1" }.toIntOrNull()
+        } else 1
+
+        if (quantity == null || quantity < 1 || quantity > 500) {
+            status = "FEIL · ANTALL må være 1–500"
+            return
+        }
+
         sending = true
-        status = "Registrerer LIVE på lager…"
+        status = if (quantity == 1) "Registrerer LIVE på lager…" else "Registrerer $quantity stk LIVE på lager…"
         scope.launch {
             try {
-                val result = registerStockLive(product.key, session.fullName)
-                displayNumber = result.displayNumber
+                val result = registerStockLiveQty(product.key, quantity, session.id)
+                lastResult = result
                 selected = product
-                status = "PÅ LAGER · F-${result.displayNumber}"
+                status = if (result.quantity == 1) {
+                    "PÅ LAGER · ${result.displayRange}"
+                } else {
+                    "PÅ LAGER · +${result.quantity} ${product.name} · ${result.displayRange}"
+                }
+                if (session.canEnterQuantity) quantityText = "1"
+                autoLogoutSignal++
             } catch (e: Exception) {
                 status = "FEIL · ${e.message ?: "ukjent feil"}"
-            } finally { sending = false }
+            } finally {
+                sending = false
+            }
         }
     }
 
@@ -288,6 +335,27 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 EmployeeCard(session, onLogout)
+
+                if (session.canEnterQuantity) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text("ANTALL", color = Ink, fontSize = 14.sp, fontWeight = FontWeight.Black)
+                        OutlinedTextField(
+                            value = quantityText,
+                            onValueChange = { value ->
+                                if (value.length <= 3 && value.all { it.isDigit() }) quantityText = value
+                            },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            label = { Text("1–500") }
+                        )
+                    }
+                }
+
                 if (!vrakMode) {
                     CompactProductGrid(products, enabled = !sending) { register(it) }
                     FlorivoActionButton("VRAK / AVVIK", "!", danger = true, enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) { vrakMode = true }
@@ -297,9 +365,19 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                     FlorivoActionButton("TILBAKE", "←", enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) { vrakMode = false }
                 }
             }
-            Text(status, modifier = Modifier.fillMaxWidth(), color = if (status.startsWith("FEIL")) Color(0xFFFFB4AC) else Color(0xFFD7E7DA), fontSize = 10.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 1)
+            Text(
+                if (graceActive) "4 SEK · velg nytt produkt eller økten avsluttes" else status,
+                modifier = Modifier.fillMaxWidth(),
+                color = if (status.startsWith("FEIL")) Color(0xFFFFB4AC) else Color(0xFFD7E7DA),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
         }
-        selected?.let { ConfirmationOverlay(it, displayNumber, it.key.startsWith("vrak_")) }
+        if (selected != null && lastResult != null) {
+            ConfirmationOverlay(selected!!, lastResult!!, selected!!.key.startsWith("vrak_"))
+        }
     }
 }
 
@@ -342,7 +420,11 @@ private fun CompactProductGrid(products: List<Product>, danger: Boolean = false,
             val second = products.getOrNull(i + 1)?.takeIf { !it.wide }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                 FlorivoActionButton(first.name, first.icon, danger = danger, enabled = enabled, modifier = Modifier.weight(1f).height(74.dp)) { onClick(first) }
-                if (second != null) FlorivoActionButton(second.name, second.icon, danger = danger, enabled = enabled, modifier = Modifier.weight(1f).height(74.dp)) { onClick(second) } else Spacer(Modifier.weight(1f))
+                if (second != null) {
+                    FlorivoActionButton(second.name, second.icon, danger = danger, enabled = enabled, modifier = Modifier.weight(1f).height(74.dp)) { onClick(second) }
+                } else {
+                    Spacer(Modifier.weight(1f))
+                }
             }
             i += if (second != null) 2 else 1
         }
@@ -350,29 +432,65 @@ private fun CompactProductGrid(products: List<Product>, danger: Boolean = false,
 }
 
 @Composable
-private fun FlorivoActionButton(text: String, icon: String, modifier: Modifier = Modifier, danger: Boolean = false, enabled: Boolean = true, onClick: () -> Unit) {
+private fun FlorivoActionButton(
+    text: String,
+    icon: String,
+    modifier: Modifier = Modifier,
+    danger: Boolean = false,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
     val shape = RoundedCornerShape(18.dp)
-    val colors = if (danger) listOf(Color(0xFFCF6159), Color(0xFFAA403A), Color(0xFF86302B)) else listOf(Color(0xFF3F9557), Color(0xFF2F7E49), Color(0xFF276A40))
-    Box(modifier = modifier.shadow(4.dp, shape).clip(shape).background(Brush.horizontalGradient(colors)).border(1.5.dp, if (danger) RedEdge else GreenEdge, shape).clickable(enabled = enabled, onClick = onClick).padding(horizontal = 12.dp, vertical = 8.dp)) {
+    val colors = if (danger) {
+        listOf(Color(0xFFCF6159), Color(0xFFAA403A), Color(0xFF86302B))
+    } else {
+        listOf(Color(0xFF3F9557), Color(0xFF2F7E49), Color(0xFF276A40))
+    }
+    Box(
+        modifier = modifier.shadow(4.dp, shape).clip(shape).background(Brush.horizontalGradient(colors))
+            .border(1.5.dp, if (danger) RedEdge else GreenEdge, shape)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
         Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
             Text(icon, color = Color.White.copy(alpha = if (enabled) 0.92f else 0.55f), fontSize = 22.sp, fontWeight = FontWeight.Black)
-            Text(text, modifier = Modifier.weight(1f).padding(start = 9.dp), color = Color.White.copy(alpha = if (enabled) 1f else 0.55f), fontSize = if (text.length > 16) 14.sp else 17.sp, fontWeight = FontWeight.Black, lineHeight = 17.sp, maxLines = 2)
+            Text(
+                text,
+                modifier = Modifier.weight(1f).padding(start = 9.dp),
+                color = Color.White.copy(alpha = if (enabled) 1f else 0.55f),
+                fontSize = if (text.length > 16) 14.sp else 17.sp,
+                fontWeight = FontWeight.Black,
+                lineHeight = 17.sp,
+                maxLines = 2
+            )
         }
     }
 }
 
 @Composable
-private fun ConfirmationOverlay(product: Product, number: String, danger: Boolean) {
+private fun ConfirmationOverlay(product: Product, result: RegisterResult, danger: Boolean) {
     Box(modifier = Modifier.fillMaxSize().background(Color(0xE80B2017)).padding(22.dp), contentAlignment = Alignment.Center) {
         Column(
-            modifier = Modifier.fillMaxWidth().shadow(12.dp, RoundedCornerShape(28.dp)).background(if (danger) Brush.verticalGradient(listOf(Color(0xFFCF635B), Color(0xFF8E332E))) else Brush.verticalGradient(listOf(Color(0xFFE7F29A), Color(0xFF79B767), Color(0xFF356E45))), RoundedCornerShape(28.dp)).border(2.dp, if (danger) RedEdge else GreenEdge, RoundedCornerShape(28.dp)).padding(24.dp),
+            modifier = Modifier.fillMaxWidth().shadow(12.dp, RoundedCornerShape(28.dp))
+                .background(
+                    if (danger) Brush.verticalGradient(listOf(Color(0xFFCF635B), Color(0xFF8E332E)))
+                    else Brush.verticalGradient(listOf(Color(0xFFE7F29A), Color(0xFF79B767), Color(0xFF356E45))),
+                    RoundedCornerShape(28.dp)
+                )
+                .border(2.dp, if (danger) RedEdge else GreenEdge, RoundedCornerShape(28.dp))
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(if (danger) "!" else "✓", fontSize = 56.sp, fontWeight = FontWeight.Black, color = Color.White)
             Text("REGISTRERT PÅ LAGER", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-            Text("F-$number", color = Color.White, fontSize = 50.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 6.dp))
+            if (result.quantity > 1) {
+                Text("+${result.quantity} stk", color = Color.White, fontSize = 44.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 6.dp))
+                Text(result.displayRange, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            } else {
+                Text(result.displayRange, color = Color.White, fontSize = 50.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 6.dp))
+            }
             Text(product.name, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            Text("mode=live · bruker registrert via NFC · 8 sek", color = Color.White.copy(alpha = 0.90f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
+            Text("mode=live · NFC-bruker · 8 sek + 4 sek til auto-utlogging", color = Color.White.copy(alpha = 0.90f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
         }
     }
 }
@@ -407,25 +525,40 @@ private fun resolveNfc(cardHash: String): UserSession? {
     )
 }
 
-private suspend fun registerStockLive(productKey: String, employeeName: String): RegisterResult = withContext(Dispatchers.IO) {
-    val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_register_stock")
+private suspend fun registerStockLiveQty(
+    productKey: String,
+    quantity: Int,
+    userId: String
+): RegisterResult = withContext(Dispatchers.IO) {
+    val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_register_stock_qty")
     val connection = (url.openConnection() as HttpURLConnection).apply {
         requestMethod = "POST"
-        connectTimeout = 10000
-        readTimeout = 10000
+        connectTimeout = 15000
+        readTimeout = 20000
         doOutput = true
         setRequestProperty("Content-Type", "application/json")
         setRequestProperty("Accept", "application/json")
         setRequestProperty("apikey", SUPABASE_PUBLISHABLE_KEY)
     }
-    val payload = JSONObject().put("p_mode", MODE).put("p_product_key", productKey).put("p_device_id", DEVICE_ID).put("p_employee_name", employeeName).toString()
+    val payload = JSONObject()
+        .put("p_mode", MODE)
+        .put("p_product_key", productKey)
+        .put("p_quantity", quantity)
+        .put("p_device_id", DEVICE_ID)
+        .put("p_user_id", userId)
+        .toString()
     connection.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) }
     val code = connection.responseCode
     val stream = if (code in 200..299) connection.inputStream else connection.errorStream
     val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
     connection.disconnect()
-    if (code !in 200..299) throw IllegalStateException("HTTP $code ${body.take(160).replace('\n',' ')}")
+    if (code !in 200..299) throw IllegalStateException("HTTP $code ${body.take(180).replace('\n',' ')}")
     val array = JSONArray(body)
     if (array.length() == 0) throw IllegalStateException("Tomt serversvar")
-    return@withContext RegisterResult(array.getJSONObject(0).optString("display_number", "------"))
+    val row = array.getJSONObject(0)
+    return@withContext RegisterResult(
+        quantity = row.optInt("quantity", quantity),
+        firstDisplayNumber = row.optString("first_display_number", "------"),
+        lastDisplayNumber = row.optString("last_display_number", "------")
+    )
 }
