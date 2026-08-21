@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nb" translate="no">
+<html lang="nb" translate="no">">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v37.1</title>
+<title>UT Kontor WORKING v37.2</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--text:#f5f7ff}
 *{box-sizing:border-box}
@@ -20,11 +20,11 @@ iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:v
 <script src="products.js?v=20260811-0810"></script>
 </head>
 <body class="notranslate">
-<div id="loader">Laster UT Kontor WORKING v37.1…</div>
-<iframe id="app" title="UT Kontor WORKING v37.1"></iframe>
+<div id="loader">Laster UT Kontor WORKING v37.2…</div>
+<iframe id="app" title="UT Kontor WORKING v37.2"></iframe>
 <script>
 "use strict";
-const BUILD="20260813-1544";
+const BUILD="20260821-2134";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 
 function inject(doc,src,mark){
@@ -50,7 +50,6 @@ async function waitForProducts(w){
 function enableStockSectionsCollapse(doc){
   const root=doc.getElementById("bamaStockSummary8");
   if(!root)return false;
-
   if(!doc.getElementById("utStockSectionsCollapseStyle")){
     const style=doc.createElement("style");
     style.id="utStockSectionsCollapseStyle";
@@ -62,27 +61,19 @@ function enableStockSectionsCollapse(doc){
     `;
     doc.head.appendChild(style);
   }
-
   root.querySelectorAll(".bs8-section.physical,.bs8-section.available").forEach(section=>{
     const head=section.querySelector(".bs8-head");
     if(!head||section.dataset.utCollapseReady==="1")return;
     section.dataset.utCollapseReady="1";
-
     const chevron=doc.createElement("span");
     chevron.className="ut-stock-chevron";
     head.appendChild(chevron);
-
     const setCollapsed=collapsed=>{
       section.classList.toggle("ut-stock-collapsed",collapsed);
       chevron.textContent=collapsed?"▼":"▲";
       head.setAttribute("aria-expanded",collapsed?"false":"true");
     };
-
-    head.addEventListener("click",event=>{
-      event.preventDefault();
-      setCollapsed(!section.classList.contains("ut-stock-collapsed"));
-    });
-
+    head.addEventListener("click",event=>{event.preventDefault();setCollapsed(!section.classList.contains("ut-stock-collapsed"));});
     setCollapsed(true);
   });
   return true;
@@ -91,38 +82,38 @@ function enableStockSectionsCollapse(doc){
 function ensureTopActions(doc){
   const top=doc.querySelector(".top");
   if(!top)return false;
-
   if(!doc.getElementById("utTopActionsStyle")){
     const style=doc.createElement("style");
     style.id="utTopActionsStyle";
     style.textContent=`
-      .top{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"home presentation" "version version";gap:6px 8px;align-items:center!important}
+      .top{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"home users presentation" "version version version";gap:6px 8px;align-items:center!important}
       .top>a.home{grid-area:home;justify-self:start}
+      .top>.ut-users-link{grid-area:users;justify-self:end;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 11px;border:1px solid rgba(72,213,151,.62);border-radius:12px;background:rgba(72,213,151,.1);color:#9df0c8;text-decoration:none;font-size:11px;font-weight:950;white-space:nowrap}
       .top>.ut-presentation-link{grid-area:presentation;justify-self:end;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 11px;border:1px solid rgba(244,196,48,.72);border-radius:12px;background:rgba(244,196,48,.1);color:#ffe17a;text-decoration:none;font-size:11px;font-weight:950;white-space:nowrap}
       .top>.version{grid-area:version;justify-self:end;text-align:right}
-      @media(max-width:560px){.top>.ut-presentation-link,.top>a.home{min-height:38px;padding:7px 9px;font-size:10px}}
+      @media(max-width:700px){.top{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"home users" "presentation presentation" "version version"}.top>.ut-presentation-link{justify-self:end}.top>.ut-users-link,.top>a.home,.top>.ut-presentation-link{min-height:38px;padding:7px 9px;font-size:10px}}
     `;
     doc.head.appendChild(style);
   }
-
   let home=top.querySelector("a.home");
-  if(!home){
-    home=doc.createElement("a");
-    home.className="home";
-    top.prepend(home);
+  if(!home){home=doc.createElement("a");home.className="home";top.prepend(home)}
+  home.href="index.html";home.target="_top";home.textContent="⌂ HOVEDMENY";
+
+  let users=top.querySelector(".ut-users-link");
+  if(!users){
+    users=doc.createElement("a");
+    users.className="ut-users-link";
+    users.href="florivo-terminal-users.html";
+    users.target="_top";
+    users.textContent="👥 BRUKERE / TILGANGER";
+    top.insertBefore(users,top.querySelector(".ut-presentation-link")||top.querySelector(".version")||null);
   }
-  home.href="index.html";
-  home.target="_top";
-  home.textContent="⌂ HOVEDMENY";
 
   let presentation=top.querySelector(".ut-presentation-link");
   if(!presentation){
-    presentation=doc.createElement("a");
-    presentation.className="ut-presentation-link";
+    presentation=doc.createElement("a");presentation.className="ut-presentation-link";
     presentation.href="https://drive.google.com/file/d/1Js2sVvUDo_nLFwx3oOtfXgt6GYsQQVZS/view?usp=drivesdk";
-    presentation.target="_blank";
-    presentation.rel="noopener noreferrer";
-    presentation.textContent="▶ PRESENTASJON";
+    presentation.target="_blank";presentation.rel="noopener noreferrer";presentation.textContent="▶ PRESENTASJON";
     top.insertBefore(presentation,top.querySelector(".version")||null);
   }
   return true;
@@ -130,74 +121,36 @@ function ensureTopActions(doc){
 
 function applyWorkingBrand(){
   try{
-    const d=frame.contentDocument;
-    if(!d?.body)return;
-    ensureTopActions(d);
+    const d=frame.contentDocument;if(!d?.body)return;ensureTopActions(d);
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v37.1 · 8 PRODUKTER · 2 LAGERTELLERE<br>Oppdatert 13.08.2026 kl. 19:34";
+    if(version)version.innerHTML="UT Kontor WORKING v37.2 · BRUKERE / TILGANGER<br>Oppdatert 21.08.2026 kl. 21:34";
   }catch{}
 }
-
 async function refreshInner(){
   try{
     const w=frame.contentWindow;
-    await w.UT_KONTOR_HISTORY_VISUALS?.refreshProgress?.();
-    w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
-    await w.BAMA_STOCK_SUMMARY_REFRESH?.();
-    enableStockSectionsCollapse(frame.contentDocument);
-    applyWorkingBrand();
+    await w.UT_KONTOR_HISTORY_VISUALS?.refreshProgress?.();w.UT_KONTOR_HISTORY_VISUALS?.decorate?.();
+    await w.BAMA_STOCK_SUMMARY_REFRESH?.();enableStockSectionsCollapse(frame.contentDocument);applyWorkingBrand();
   }catch{}
 }
-
 function applyLanguage(){
   try{
-    const w=frame.contentWindow;
-    w.UT_TEST_LANG?.apply?.();
-    w.BAMA_STOCK_SUMMARY_REFRESH?.();
-    enableStockSectionsCollapse(frame.contentDocument);
-    applyWorkingBrand();
-    refreshInner();
+    const w=frame.contentWindow;w.UT_TEST_LANG?.apply?.();w.BAMA_STOCK_SUMMARY_REFRESH?.();enableStockSectionsCollapse(frame.contentDocument);applyWorkingBrand();refreshInner();
   }catch{}
 }
-
 function hookStockRefreshAfterLoadUt(w){
   if(w.__BAMA_STOCK_SUMMARY_LOADUT_HOOK__||typeof w.loadUt!=="function")return;
-  w.__BAMA_STOCK_SUMMARY_LOADUT_HOOK__=true;
-  const base=w.loadUt;
-  w.loadUt=async function(...args){
-    const result=await base.apply(this,args);
-    await w.BAMA_STOCK_SUMMARY_REFRESH?.();
-    enableStockSectionsCollapse(frame.contentDocument);
-    return result;
-  };
+  w.__BAMA_STOCK_SUMMARY_LOADUT_HOOK__=true;const base=w.loadUt;
+  w.loadUt=async function(...args){const result=await base.apply(this,args);await w.BAMA_STOCK_SUMMARY_REFRESH?.();enableStockSectionsCollapse(frame.contentDocument);return result};
 }
-
 frame.addEventListener("load",async()=>{
   loader.style.display="none";
   try{
-    const d=frame.contentDocument,w=frame.contentWindow;
-    ensureTopActions(d);
-    w.BAMA_HOME_TARGET="";
-    w.localStorage.setItem("mottak_ut_language","no");
-    await inject(d,"ut-kontor-products.js","products");
-    await waitForProducts(w);
-    await inject(d,"ut-kontor-vrak-products.js","vrak-products");
-    await inject(d,"ut-kontor-history-visuals.js","history");
-    await inject(d,"ut-test-language.js","language");
-    await inject(d,"stock-summary-8-v1.js","stock-summary-8");
-    enableStockSectionsCollapse(d);
-    hookStockRefreshAfterLoadUt(w);
-    await refreshInner();
-    applyLanguage();
-    setTimeout(()=>{enableStockSectionsCollapse(d);refreshInner()},350);
-    setTimeout(()=>{enableStockSectionsCollapse(d);applyWorkingBrand()},1200);
-  }catch(e){
-    console.error(e);
-    loader.style.display="flex";
-    loader.textContent=`UT Kontor startfeil: ${e.message||e}`;
-  }
+    const d=frame.contentDocument,w=frame.contentWindow;ensureTopActions(d);w.BAMA_HOME_TARGET="";w.localStorage.setItem("mottak_ut_language","no");
+    await inject(d,"ut-kontor-products.js","products");await waitForProducts(w);await inject(d,"ut-kontor-vrak-products.js","vrak-products");await inject(d,"ut-kontor-history-visuals.js","history");await inject(d,"ut-test-language.js","language");await inject(d,"stock-summary-8-v1.js","stock-summary-8");
+    enableStockSectionsCollapse(d);hookStockRefreshAfterLoadUt(w);await refreshInner();applyLanguage();setTimeout(()=>{enableStockSectionsCollapse(d);refreshInner()},350);setTimeout(()=>{enableStockSectionsCollapse(d);applyWorkingBrand()},1200);
+  }catch(e){console.error(e);loader.style.display="flex";loader.textContent=`UT Kontor startfeil: ${e.message||e}`}
 });
-
 frame.src=`bestilling-core-v29.html?v=${BUILD}`;
 </script>
 </body>
