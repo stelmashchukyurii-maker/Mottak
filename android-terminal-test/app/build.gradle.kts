@@ -37,3 +37,5 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
+
+// v0.4 LIVE stock trial build trigger — 2026-08-21
