@@ -36,10 +36,16 @@ No production stock/order/Nordic data was changed.
 - Confirmation display changed to about 8 seconds.
 - Current UI still uses `UTEN KORT`; NFC gate is intentionally postponed until product/backend flow passes.
 
-### APK update/signing issue found
-- A GitHub-generated debug build could not update the previously installed APK because debug signing was not stable between builds.
-- Build workflow was changed to restore one persistent TEST signing key.
-- This creates a stable TEST update line for subsequent Florivo TEST APK builds.
+### APK packaging/install issue clarified
+- The failed v0.2 Drive file was not a valid raw APK: a GitHub Actions artifact ZIP had been uploaded/renamed as `.apk` instead of extracting `app-debug.apk` first.
+- The mislabeled v0.2 Drive APK was deleted.
+- For v0.3 the GitHub artifact ZIP was explicitly extracted and the contained `app-debug.apk` was verified as an Android package before Drive upload.
+
+### Signing status
+- A temporary TEST signing key was used for the successful v0.3 build.
+- That key material was removed from the repository immediately after the build; it must NOT be treated as the permanent production/test signing solution.
+- Permanent update-safe signing must later be configured through protected CI secrets or another secure signing store; never commit private signing keys to the repository.
+- Until that secure setup is complete, APK updates may require uninstall/reinstall between differently signed test builds.
 
 ### Canonical TEST/LIVE rule fixed
 Project-wide rule is now documented in:
@@ -76,7 +82,7 @@ Build content:
 - footer identifies `TEST v0.3` and server TEST connection;
 - publishable Supabase key only; no service-role/admin secret in APK.
 
-GitHub Actions run:
+GitHub Actions build used for the physical TEST APK:
 - run `32455736434`
 - workflow `Florivo Android TEST`
 - build result: SUCCESS
