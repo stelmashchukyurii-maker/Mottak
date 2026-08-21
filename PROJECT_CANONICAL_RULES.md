@@ -4,7 +4,7 @@ Status: ACTIVE
 Fixed: 2026-08-21 Europe/Oslo
 
 ## Purpose
-This file defines which project documents win when multiple protocols, archives, DEV notes, or old implementation details disagree.
+This file defines which project documents win when multiple protocols, archives, DEV notes, audit snapshots, or old implementation details disagree.
 
 ## 1. Precedence order
 When there is a conflict, use this order:
@@ -13,7 +13,8 @@ When there is a conflict, use this order:
 3. `PROTOCOLS.md` — current project index and current-state map.
 4. The active feature protocol for the exact subsystem being changed.
 5. The feature progress log / NEXT_CHAT handoff.
-6. Archived protocols and old session snapshots — history only, never authoritative for current behavior.
+6. Audit records — factual snapshots of schema/data/dependencies at a specific time; useful evidence, but they do not override a newer canonical rule.
+7. Archived protocols and old session snapshots — history only, never authoritative for current behavior.
 
 A newer explicit user decision recorded in a canonical protocol supersedes an older conflicting protocol line.
 
@@ -21,6 +22,7 @@ A newer explicit user decision recorded in a canonical protocol supersedes an ol
 Every active protocol should use one of these labels near the top:
 - `ACTIVE RULE` — current rule that must be followed.
 - `ACTIVE DEV` — current development contract; may still be under test.
+- `ACTIVE AUDIT RECORD` — factual snapshot/check of current implementation; not a policy override.
 - `FROZEN / PHYSICAL PASS` — working behavior; do not change without explicit authorization.
 - `CONCEPT` — design only; not implemented or approved for WORK.
 - `ARCHIVE / HISTORICAL` — context only; must not override active rules.
@@ -38,6 +40,9 @@ For a concrete tag/product row in `public.mottak_scans` use:
 Do not use these meanings interchangeably.
 
 `environment=test/work` is now a LEGACY implementation pattern. Existing production tables/functions that still physically contain `environment` must NOT be renamed or migrated casually. Any migration from legacy `environment` to canonical `mode` requires a separate audited migration plan and physical regression test so WORK data is not damaged.
+
+Current legacy audit reference:
+- `TEST_LIVE_LEGACY_AUDIT_2026-08-21.md`
 
 ## 4. Production isolation
 TEST data must never affect:
@@ -59,7 +64,8 @@ Do not leave a new rule only in chat.
 ## 6. Database reality vs protocol target
 Documentation must distinguish:
 - **canonical target semantics** — what new code must use;
-- **legacy physical schema** — old columns/functions still present in production.
+- **legacy physical schema** — old columns/functions still present in production;
+- **audit snapshot** — what was verified at a specific date/time.
 
 Never assume that because the canonical name is `mode`, every existing table has already been migrated. Verify the live schema before writes.
 
@@ -69,6 +75,7 @@ Before changing an existing subsystem:
 2. read `BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md` when TEST/LIVE is relevant;
 3. read `PROTOCOLS.md`;
 4. read the subsystem protocol + progress log/NEXT_CHAT;
-5. query live DB state when the task depends on current stock/schema.
+5. read the latest relevant audit record when schema/migration is involved;
+6. query live DB state when the task depends on current stock/schema.
 
 This is mandatory specifically to prevent old archived decisions from overriding newer project-wide rules.
