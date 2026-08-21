@@ -1,64 +1,57 @@
 # FLORIVO ANDROID TERMINAL PROTOCOL
 
-Status: ACTIVE DEV — CONTROLLED LIVE STOCK TRIAL
+Status: STABLE TEST BASELINE + CONTROLLED LIVE PILOT
 Prepared: 2026-08-17 Europe/Oslo
 Updated: 2026-08-21 Europe/Oslo
 
 ## Goal
-Native Android warehouse terminal for finished-product registration on one shared warehouse phone.
+Native Android warehouse terminal for finished-product registration on a shared warehouse phone.
 
-## Project-wide rules
-Read first:
+## Read first
 - `PROJECT_CANONICAL_RULES.md`
 - `BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md`
 - `FLORIVO_NUMBER_PROTOCOL.md`
+- `FLORIVO_TERMINAL_USERS_ACCESS_PROTOCOL.md`
+- `FLORIVO_ANDROID_V071_STABLE_2026-08-21.md`
 
-TEST/LIVE:
-- whole form/order/process -> `mode='test'|'live'`
-- concrete item/tag in `mottak_scans` -> `is_test=true|false`
+## Stable Android baseline
+Canonical stable build for further physical testing:
+- version: `v0.7.1`
+- branch: `florivo-v07-role-quantity-autologout`
+- commit: `9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d`
+- workflow run: `32525627283`
+- Drive APK id: `197aIDwnhH3ypp2_J4aC41BdwiVLEBPN_`
 
-Item identity:
-- `florivo_number` is the permanent internal Florivo sequence number;
-- `scanner_code` is the real long RFID/EPC when known;
-- `lower_number` remains only the last 6 characters of real RFID/EPC;
-- never store Florivo number in `lower_number`.
+Do not modify this stable source in place. New Android changes must use a new version/branch.
 
-## Current controlled LIVE stock trial — 21.08.2026
-User explicitly authorized clearing the obsolete WORK physical baseline because all previously recorded warehouse/ramp goods had already physically left, then using the Android terminal to put new finished product on the real stock ledger.
+## Canonical identity
+- `florivo_number` = permanent internal Florivo sequence number.
+- `scanner_code` = real long RFID/EPC when known.
+- `lower_number` = last 6 chars of real RFID/EPC only.
+- Never store Florivo number in `lower_number`.
 
-This is a limited LIVE stock trial, not a full production/kiosk/NFC promotion.
+## User / card access
+Users and card permissions live on the Florivo server, not on a particular phone installation.
+Therefore registered users/cards survive reinstall and work on another Florivo terminal connected to the same backend.
 
-LIVE baseline reset was performed without deleting history:
-- all active WORK orders were cancelled through the existing cancellation logic;
-- active `mottak_scans` rows were audit-marked dispatched;
-- WORK quantity stock was audit-adjusted to zero;
-- pre-reset state was saved in `public.bama_reset_audit` under reset key `2026-08-21-live-baseline-reset`.
+Admin UI never displays card UID, even partially.
+Android computes SHA-256 of `Tag.id` locally and sends the hash to server.
+Current pilot rule: one active card per user; new binding replaces old active card.
 
-Post-reset canonical `bama_stock_summary()` = zero for all product groups, zero ramp demand and zero active order demand.
+Web administration:
+- page: `florivo-terminal-users.html`
+- UT Kontor button: `BRUKERE / TILGANGER`
+- flow: create user -> role -> KOBLE KORT -> tap card on terminal -> KORT TILKOBLET.
 
-## Android LIVE intake
-Current v0.4 design:
-1. Worker presses a product button.
-2. Android calls `florivo_terminal_register_stock(...)` with `p_mode='live'`.
-3. Server allocates permanent `florivo_number` from `florivo_number_seq`.
-4. For tagged product types, server creates a verified `mottak_scans` row with:
-   - `environment='work'` legacy compatibility;
-   - `is_test=false`;
-   - `stock_status='in_stock'`;
-   - `scanner_code=''` and `lower_number=''` until RFID is later bound;
-   - `registration_method='android_button'`.
-5. Shared finished-event audit is also written to `florivo_terminal_finished_events` with `mode='live'`.
-6. Android displays `F-000001` style confirmation for about 8 seconds.
+## Roles
+- `lager`: +1 product registration only; no manual quantity field.
+- `produksjon`: may use manual `ANTALL`.
+- `admin`: may use manual `ANTALL` and administrative functions.
+- `test`: reserved for isolated test behavior.
 
-`forlengere_plast` remains quantity-only and does not create a fake RFID row. Its +1 is written to the quantity ledger and still receives a Florivo display number from the shared sequence/event flow.
+Server also enforces that quantity >1 is allowed only for `produksjon` or `admin`.
 
-## Later RFID binding
-Prepared RPC:
-`florivo_terminal_bind_rfid_fifo(p_mode, p_product_key, p_scanner_code)`.
-
-It binds a validated 24-HEX EPC to the oldest unbound Florivo row of the same product and same TEST/LIVE environment. It writes full EPC to `scanner_code`, its final 6 chars to `lower_number`, and never changes `florivo_number`.
-
-## Accepted product UX
+## Android stock registration
 Main products:
 - bunner
 - hyller30
@@ -72,35 +65,51 @@ VRAK / AVVIK:
 - vrak_hyller
 - bunner_uten_brikk
 
-`bunner_uten_brikk` is not stock-mutating in Android v0.4 yet; it remains an AVVIK path to finish separately.
+`produksjon` and `admin`:
+- quantity field `ANTALL` 1..500;
+- empty field means 1;
+- bulk operation uses `florivo_terminal_register_stock_qty`;
+- normal tagged products create real stock rows/F-numbers;
+- `forlengere_plast` remains quantity-ledger based.
 
-## Native NFC
-NFC employee gate is still postponed until the product -> stock -> server-number path has physical PASS.
-Future native reader mode remains:
-- `NfcAdapter.enableReaderMode`
-- NFC-A
-- skip NDEF check
+Backend compatibility updates already applied:
+- `mottak_scans.registration_method` accepts `android_bulk`;
+- finished-event quantity accepts non-zero values from -500 through 500.
 
-## Security
-- No service-role/admin secret in APK.
-- Current LIVE trial uses a narrow publishable-key RPC and is temporary development exposure.
-- Before operational LIVE use, replace this with terminal enrollment/device authorization or an authenticated Edge Function/backend gate.
-- Corporate badge UID is identification metadata only, not authorization proof.
+## Session behavior
+The terminal is intentionally short-session for shared use:
+- login by NFC card;
+- if no useful action after login: automatic logout after 12 seconds;
+- after successful registration: result shown for 8 seconds;
+- then 4-second grace period;
+- if no next product action: automatic logout to `VENTER PÅ KORT`;
+- relevant interaction resets inactivity;
+- `BYTT` = immediate logout.
 
-## Frozen production isolation
-This Android trial does not authorize arbitrary changes to frozen Nordic WORK forms/logic.
-Do not modify:
-- Nordic TIL LAGER frozen operator behavior;
-- Nordic TIL RAMPE V2.9.7 frozen behavior;
-- unrelated UT Kontor production logic.
+This supports the physical pattern: approach -> tap card -> choose product -> receive F-number -> leave terminal safe for next worker.
 
-## Next physical PASS
-`ANDROID LIVE STOCK + FLORIVO NUMBER — PHYSICAL PASS`
+## Current backend RPC family
+- `florivo_terminal_admin_create_user`
+- `florivo_terminal_admin_list_users`
+- `florivo_terminal_admin_request_card_link`
+- `florivo_terminal_try_link_card`
+- `florivo_terminal_admin_link_status`
+- `florivo_terminal_resolve_nfc`
+- `florivo_terminal_register_stock_qty`
+- `florivo_terminal_register_stock`
+- `florivo_terminal_bind_rfid_fifo`
 
-Success:
-- install v0.4 on real phone;
-- press one normal product once;
-- Android displays F-number;
-- `bama_stock_summary()` increases by exactly +1 for that product;
-- `mottak_scans` row has same `florivo_number`, `registration_method='android_button'`, no invented RFID;
-- no unrelated product/order/ramp mutation.
+## LIVE baseline history
+On 2026-08-21 obsolete WORK physical baseline was audit-reset with history preserved under reset key `2026-08-21-live-baseline-reset` in `public.bama_reset_audit`.
+No historical tag/EPC rows were deleted.
+
+## Frozen Nordic isolation
+Stable Nordic TIL RAMPE V2.9.7 RFID/scanning behavior and TIL LAGER frozen behavior remain protected.
+Any no-scan / bulk movement option must be implemented as an explicit separate path and must not silently rewrite frozen scanning logic.
+
+## Next development areas
+- dedicated Device Owner / Lock Task kiosk mode;
+- user photo capture/upload;
+- stronger terminal enrollment / production authorization;
+- no-scan bulk move-to-ramp option as a separate controlled web action;
+- further physical testing of v0.7.1.
