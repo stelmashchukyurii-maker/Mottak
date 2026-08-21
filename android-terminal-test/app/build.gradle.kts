@@ -11,8 +11,8 @@ android {
         applicationId = "com.florivo.terminaltest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3-db-test"
+        versionCode = 4
+        versionName = "0.4-live-stock"
     }
 
     buildFeatures {
