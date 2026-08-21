@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = FlorivoBg) {
-                    FlorivoTestApp()
+                    FlorivoLiveStockApp()
                 }
             }
         }
@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
 private const val SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co"
 private const val SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya"
 private const val DEVICE_ID = "android-terminal-test-01"
+private const val MODE = "live"
 
 private val FlorivoBg = Color(0xFF0F2D22)
 private val FlorivoBg2 = Color(0xFF1E4935)
@@ -77,19 +78,16 @@ private data class Product(
     val wide: Boolean = false
 )
 
-private data class RegisterResult(
-    val displayNumber: String,
-    val employeeName: String
-)
+private data class RegisterResult(val displayNumber: String)
 
 @Composable
-private fun FlorivoTestApp() {
+private fun FlorivoLiveStockApp() {
     val scope = rememberCoroutineScope()
     var vrakMode by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Product?>(null) }
     var displayNumber by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
-    var status by remember { mutableStateOf("BASE TEST · mode=test") }
+    var status by remember { mutableStateOf("LAGER LIVE · mode=live") }
 
     LaunchedEffect(selected) {
         if (selected != null) {
@@ -117,14 +115,18 @@ private fun FlorivoTestApp() {
 
     fun register(product: Product) {
         if (sending) return
+        if (product.key == "bunner_uten_brikk") {
+            status = "AVVIK · ikke lagerført i denne versjonen"
+            return
+        }
         sending = true
-        status = "Sender TEST til base…"
+        status = "Registrerer LIVE på lager…"
         scope.launch {
             try {
-                val result = registerFinishedTest(product.key)
+                val result = registerStockLive(product.key)
                 displayNumber = result.displayNumber
                 selected = product
-                status = "TEST lagret · #${result.displayNumber}"
+                status = "PÅ LAGER · F-${result.displayNumber}"
             } catch (e: Exception) {
                 status = "FEIL · ${e.message ?: "ukjent feil"}"
             } finally {
@@ -157,16 +159,13 @@ private fun FlorivoTestApp() {
                 EmployeeCard()
 
                 if (!vrakMode) {
-                    CompactProductGrid(products, enabled = !sending) { product -> register(product) }
-
+                    CompactProductGrid(products, enabled = !sending) { register(it) }
                     FlorivoActionButton(
                         text = "VRAK / AVVIK",
                         icon = "!",
                         danger = true,
                         enabled = !sending,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(58.dp),
+                        modifier = Modifier.fillMaxWidth().height(58.dp),
                         onClick = { vrakMode = true }
                     )
                 } else {
@@ -178,16 +177,12 @@ private fun FlorivoTestApp() {
                         fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Center
                     )
-
-                    CompactProductGrid(vrakProducts, danger = true, enabled = !sending) { product -> register(product) }
-
+                    CompactProductGrid(vrakProducts, danger = true, enabled = !sending) { register(it) }
                     FlorivoActionButton(
                         text = "TILBAKE",
                         icon = "←",
                         enabled = !sending,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(58.dp),
+                        modifier = Modifier.fillMaxWidth().height(58.dp),
                         onClick = { vrakMode = false }
                     )
                 }
@@ -208,7 +203,7 @@ private fun FlorivoTestApp() {
             ConfirmationOverlay(
                 product = product,
                 number = displayNumber,
-                danger = product.key.startsWith("vrak_") || product.key == "bunner_uten_brikk"
+                danger = product.key.startsWith("vrak_")
             )
         }
     }
@@ -217,9 +212,7 @@ private fun FlorivoTestApp() {
 @Composable
 private fun Header() {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(54.dp),
+        modifier = Modifier.fillMaxWidth().height(54.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -230,15 +223,14 @@ private fun Header() {
             fontWeight = FontWeight.Black,
             maxLines = 1
         )
-
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
-                .background(Brush.horizontalGradient(listOf(Color(0xFFB8D96B), Color(0xFF55A761))))
-                .border(1.dp, Color(0xFF9ED27B), RoundedCornerShape(50))
+                .background(Color(0xFFFFC857))
+                .border(1.dp, Color(0xFFFFE09A), RoundedCornerShape(50))
                 .padding(horizontal = 13.dp, vertical = 7.dp)
         ) {
-            Text("TEST", color = Color(0xFF123923), fontSize = 12.sp, fontWeight = FontWeight.Black)
+            Text("LIVE", color = Color(0xFF3A2A00), fontSize = 12.sp, fontWeight = FontWeight.Black)
         }
     }
 }
@@ -257,26 +249,16 @@ private fun EmployeeCard() {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
-                .background(Brush.horizontalGradient(listOf(Color(0xFFD5E992), Color(0xFF72B66A))))
-                .border(1.dp, Color(0xFF3C8650), RoundedCornerShape(50))
+                .background(Color(0xFFFFC857))
+                .border(1.dp, Color(0xFFD99A00), RoundedCornerShape(50))
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("TEST", color = Color(0xFF173E26), fontSize = 11.sp, fontWeight = FontWeight.Black)
+            Text("LIVE", color = Color(0xFF3A2A00), fontSize = 11.sp, fontWeight = FontWeight.Black)
         }
-
         Column(modifier = Modifier.padding(start = 10.dp)) {
-            Text(
-                text = "UTEN KORT · TEST",
-                color = Ink,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                text = "Serverregistrering · mode=test",
-                color = Muted,
-                fontSize = 10.sp
-            )
+            Text("UTEN KORT · LIVE", color = Ink, fontSize = 15.sp, fontWeight = FontWeight.Black)
+            Text("Android-knapp → lager · RFID kan bindes senere", color = Muted, fontSize = 10.sp)
         }
     }
 }
@@ -297,26 +279,19 @@ private fun CompactProductGrid(
                 icon = first.icon,
                 danger = danger,
                 enabled = enabled,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(66.dp),
+                modifier = Modifier.fillMaxWidth().height(66.dp),
                 onClick = { onClick(first) }
             )
             index += 1
         } else {
             val second = products.getOrNull(index + 1)?.takeIf { !it.wide }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(7.dp)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                 FlorivoActionButton(
                     text = first.name,
                     icon = first.icon,
                     danger = danger,
                     enabled = enabled,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(74.dp),
+                    modifier = Modifier.weight(1f).height(74.dp),
                     onClick = { onClick(first) }
                 )
                 if (second != null) {
@@ -325,9 +300,7 @@ private fun CompactProductGrid(
                         icon = second.icon,
                         danger = danger,
                         enabled = enabled,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(74.dp),
+                        modifier = Modifier.weight(1f).height(74.dp),
                         onClick = { onClick(second) }
                     )
                 } else {
@@ -365,21 +338,11 @@ private fun FlorivoActionButton(
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = icon,
-                color = Color.White.copy(alpha = if (enabled) 0.92f else 0.55f),
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Black
-            )
+        Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+            Text(icon, color = Color.White.copy(alpha = if (enabled) 0.92f else 0.55f), fontSize = 22.sp, fontWeight = FontWeight.Black)
             Text(
                 text = text,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 9.dp),
+                modifier = Modifier.weight(1f).padding(start = 9.dp),
                 color = Color.White.copy(alpha = if (enabled) 1f else 0.55f),
                 fontSize = if (text.length > 16) 14.sp else 17.sp,
                 fontWeight = FontWeight.Black,
@@ -393,10 +356,7 @@ private fun FlorivoActionButton(
 @Composable
 private fun ConfirmationOverlay(product: Product, number: String, danger: Boolean) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xE80B2017))
-            .padding(22.dp),
+        modifier = Modifier.fillMaxSize().background(Color(0xE80B2017)).padding(22.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -404,57 +364,25 @@ private fun ConfirmationOverlay(product: Product, number: String, danger: Boolea
                 .fillMaxWidth()
                 .shadow(12.dp, RoundedCornerShape(28.dp))
                 .background(
-                    if (danger) {
-                        Brush.verticalGradient(listOf(Color(0xFFCF635B), Color(0xFF8E332E)))
-                    } else {
-                        Brush.verticalGradient(listOf(Color(0xFFE7F29A), Color(0xFF79B767), Color(0xFF356E45)))
-                    },
+                    if (danger) Brush.verticalGradient(listOf(Color(0xFFCF635B), Color(0xFF8E332E)))
+                    else Brush.verticalGradient(listOf(Color(0xFFE7F29A), Color(0xFF79B767), Color(0xFF356E45))),
                     RoundedCornerShape(28.dp)
                 )
                 .border(2.dp, if (danger) RedEdge else GreenEdge, RoundedCornerShape(28.dp))
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = if (danger) "!" else "✓",
-                fontSize = 56.sp,
-                fontWeight = FontWeight.Black,
-                color = Color.White
-            )
-            Text(
-                text = "TEST REGISTRERT I BASE",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = number,
-                color = Color.White,
-                fontSize = 54.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(vertical = 6.dp)
-            )
-            Text(
-                text = product.name,
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = "mode=test · vises i 8 sekunder",
-                color = Color.White.copy(alpha = 0.90f),
-                fontSize = 11.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp)
-            )
+            Text(if (danger) "!" else "✓", fontSize = 56.sp, fontWeight = FontWeight.Black, color = Color.White)
+            Text("REGISTRERT PÅ LAGER", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+            Text("F-$number", color = Color.White, fontSize = 50.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 6.dp))
+            Text(product.name, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Text("mode=live · RFID ikke bundet ennå · 8 sek", color = Color.White.copy(alpha = 0.90f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
         }
     }
 }
 
-private suspend fun registerFinishedTest(productKey: String): RegisterResult = withContext(Dispatchers.IO) {
-    val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_test_register_finished")
+private suspend fun registerStockLive(productKey: String): RegisterResult = withContext(Dispatchers.IO) {
+    val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_register_stock")
     val connection = (url.openConnection() as HttpURLConnection).apply {
         requestMethod = "POST"
         connectTimeout = 10000
@@ -466,7 +394,7 @@ private suspend fun registerFinishedTest(productKey: String): RegisterResult = w
     }
 
     val payload = JSONObject()
-        .put("p_uid", "")
+        .put("p_mode", MODE)
         .put("p_product_key", productKey)
         .put("p_device_id", DEVICE_ID)
         .put("p_employee_name", JSONObject.NULL)
@@ -480,15 +408,11 @@ private suspend fun registerFinishedTest(productKey: String): RegisterResult = w
     connection.disconnect()
 
     if (code !in 200..299) {
-        val shortBody = body.take(180).replace('\n', ' ')
-        throw IllegalStateException("HTTP $code $shortBody")
+        throw IllegalStateException("HTTP $code ${body.take(160).replace('\n',' ')}")
     }
 
     val array = JSONArray(body)
     if (array.length() == 0) throw IllegalStateException("Tomt serversvar")
     val row = array.getJSONObject(0)
-    RegisterResult(
-        displayNumber = row.optString("display_number", "------"),
-        employeeName = row.optString("employee_name", "UTEN KORT")
-    )
+    RegisterResult(displayNumber = row.optString("display_number", "------"))
 }
