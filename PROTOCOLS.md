@@ -2,7 +2,32 @@
 
 **Репозиторій:** `stelmashchukyurii-maker/Mottak`  
 **Гілка:** `main`  
-**Оновлено:** 14.08.2026 19:28 Europe/Oslo
+**Оновлено:** 21.08.2026 Europe/Oslo
+
+## 0. READ FIRST — canonical rules
+Before changing any existing subsystem, read in this order:
+1. `PROJECT_CANONICAL_RULES.md`
+2. `BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md` when TEST/LIVE is relevant
+3. this file: `PROTOCOLS.md`
+4. the exact subsystem protocol
+5. its progress log / NEXT_CHAT handoff
+
+Conflict rule: newer canonical project rules override older feature notes and archives. Archived/session files are history only.
+
+### Canonical TEST/LIVE semantics
+Whole form / order / workflow / process:
+- `mode = 'test'`
+- `mode = 'live'`
+
+Concrete tag/product row in `public.mottak_scans`:
+- `is_test = true`
+- `is_test = false`
+
+Do not mix these meanings.
+
+`environment=test/work` is a LEGACY implementation pattern still physically present in parts of the current database. Do not rename or remove legacy production columns/functions casually. Any migration must be separate, audited, and regression-tested.
+
+TEST data must never affect live stock, live statistics, production orders, Nordic WORK, reservations, dispatch, availability calculations, or other production mutations.
 
 ## 1. Start here — Nordic/RFID
 1. `NEXT_CHAT_NORDIC_ID.txt`
@@ -11,7 +36,7 @@
 4. `NORDIC_TIL_RAMPE_STABLE_LOCK.md`
 5. `NORDIC_TIL_LAGER_DEV_PROTOCOL.md`
 6. `NORDIC_TIL_RAMPE_V298_DEV_PROTOCOL.md` only when resuming Vrak/all-8 outgoing DEV
-7. `NORDIC_SESSION_ARCHIVE_2026-08-11_2243.md` for the closed 11.08 session snapshot.
+7. `NORDIC_SESSION_ARCHIVE_2026-08-11_2243.md` for the closed 11.08 session snapshot
 
 Historical Nordic snapshot:
 `NORDIC_ID_RFID_PROTOCOL_ARCHIVE_2026-08-09.md`
@@ -65,19 +90,15 @@ Rules:
 - Vrak hyller = 30/stack
 - short/long counts entered only at outgoing
 - all products may be ordered to RAMPE
-- plastic never gets fake RFID.
+- plastic never gets fake RFID
 
 ## 4. RFID mapping
 - full 24 HEX EPC → `scanner_code`
 - last 6 → `lower_number`
 - `upper_number=''`
-- no read → no invented RFID.
+- no read → no invented RFID
 
-## 5. Shared TEST / WORK environment
-Common operational tables use `environment=test/work` isolation.
-TEST duplicate EPC allowed. WORK duplicate protection remains active.
-
-## 6. Unified stock model
+## 5. Unified stock model
 RPC:
 `bama_stock_summary()`
 
@@ -89,7 +110,7 @@ Create/edit order reduces available immediately. Stage does not double-subtract.
 
 Never use an old protocol stock snapshot as current stock. Always query live via `bama_stock_summary()`.
 
-## 7. Confirmed WORK trial — RAMPE 28
+## 6. Confirmed WORK trial — RAMPE 28
 Order:
 `34113828-6904-4254-bc85-7c2cd8e8bbd1`
 
@@ -97,12 +118,12 @@ Real partial Nordic flow passed for Bunner + korte/lange.
 Both extension confirmations stored 15 hyller + 150 forlengere.
 The trial was then cancelled/released and is not active.
 
-## 8. Manual WORK H30 receipt
+## 7. Manual WORK H30 receipt
 3 × H30 manually received:
 `000012`, `000013`, `000014`.
 No fake EPC.
 
-## 9. Vrak outgoing
+## 8. Vrak outgoing
 Server full lifecycle PASS.
 Separate UI DEV V2.9.8 provides all-product/Vrak visual progress but is:
 - not linked from home;
@@ -111,7 +132,7 @@ Separate UI DEV V2.9.8 provides all-product/Vrak visual progress but is:
 
 Do not promote without a separate test and explicit decision.
 
-## 10. Plastic stock
+## 9. Plastic stock
 Quantity-only architecture:
 - `mottak_quantity_stock`
 - `mottak_quantity_stock_events`
@@ -119,16 +140,16 @@ Quantity-only architecture:
 
 No RFID/lower is generated for plastic.
 
-## 11. Camera
+## 10. Camera
 Last physical rollback PASS:
 v4.26.
 
 Current v4.29 remains not fully physically accepted.
 
-## 12. UT Kontor
+## 11. UT Kontor
 Current v37 remains preserved; full current acceptance is deferred/unconfirmed.
 
-## 13. Lager Admin — current active development
+## 12. Lager Admin — current active development
 Protocol:
 `LAGER_ADMIN_DEV_PROTOCOL.md`
 
@@ -146,19 +167,30 @@ Current direct entry:
 
 WORK PHYSICAL PASS still pending user test from phone.
 
+## 13. Florivo Android Terminal — ACTIVE TEST DEV
+Current protocol:
+`FLORIVO_ANDROID_TERMINAL_PROTOCOL.md`
+
+Progress log:
+`FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md`
+
+Current status 21.08.2026:
+- native Kotlin/Jetpack Compose APK builds and installs on real Android phone;
+- compact one-screen product UI accepted as direction;
+- no NFC gate yet in the current UI-only APK;
+- next backend connection must use canonical process-level `mode = 'test'`;
+- do not create a new parallel TEST architecture merely because older protocol text used isolated TEST tables;
+- production Nordic/stock mutations remain untouched until physical PASS and explicit promotion.
+
+Important: old dedicated `florivo_terminal_test_*` tables/RPCs are legacy prototype infrastructure. They may be used only if explicitly required for migration/diagnostics, not as the canonical future TEST/LIVE architecture.
+
 ## 14. Florivo Android Scanner — CONCEPT
 Concept protocol:
 `FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md`
 
 Status:
-- architecture / idea only;
-- no APK yet;
-- no pairing API/tables yet;
-- no WORK changes;
-- does not unfreeze Nordic production.
-
-Core concept:
-- Android Scanner is a thin client;
+- architecture / idea;
+- scanner is a thin client;
 - scanner reads RFID/QR/camera and sends action + factual scan data to server;
 - server owns validation, stock/order logic, permissions and audit;
 - scanner pairing uses a short-lived one-time QR → pending device → APPROVE/DENY and optional matching control number;
@@ -168,11 +200,8 @@ Core concept:
 Critical UT rule:
 - `UT Kontor` creates the order;
 - customer/recipient/destination data belongs to the server-side UT order;
-- Android scanner does **not** choose or recreate the customer;
-- for TIL RAMPE / DISPATCH scanner sends `order_id` + physical RFID/action, and server resolves who/where the order is for.
-
-First recommended future stage only after explicit user decision:
-`Android V0.1 — DEVICE + RFID LAB`, without production stock writes.
+- Android scanner does not choose or recreate the customer;
+- for TIL RAMPE / DISPATCH scanner sends `order_id` + physical RFID/action, and server resolves destination.
 
 ## 15. Florivo Inventory / Inventering — CONCEPT
 Concept protocol:
@@ -182,32 +211,34 @@ Next-chat handoff:
 `NEXT_CHAT_FLORIVO_INVENTORY.txt`
 
 Status:
-- concept / TEST design only;
-- Browser TEST not yet implemented;
-- no inventory DB tables yet;
-- no WORK changes;
-- no Android inventory implementation yet.
+- concept / TEST design;
+- monthly/periodic physical warehouse count;
+- inventory records physical evidence without automatically changing WORK stock;
+- duplicate RFID inside one inventory session must not count twice;
+- mismatch becomes AVVIK, not silent stock mutation;
+- any later WORK correction must be separate, audited and human-approved.
 
-Core concept:
-- monthly/periodic physical warehouse count in a separate inventory session;
-- inventory session records what is physically seen without automatically changing WORK-stock;
-- Bunner stack defaults to 10 but is editable;
-- Bunner + Hyller records the actual physical shelf count, including non-standard counts such as 57;
-- duplicate RFID within one session must not count twice;
-- broken/missing tag uses manual `MAN-xxx` inventory reference plus a physical sticker/mark on the counted asset;
-- unknown RFID or server-state mismatch is recorded as physical evidence and becomes an AVVIK, not an automatic stock mutation;
-- session completion compares SERVER FORVENTET ↔ FAKTISK TELT and creates discrepancy groups;
-- any later WORK correction must be a separate audited, human-approved step.
+## 16. Protocol governance / change-control
+Already working production behavior must not be changed on a guess.
 
-Development rule:
-- first implementation must be a separate Browser TEST form;
-- do not experiment inside frozen Nordic WORK production forms;
-- only after Browser PHYSICAL PASS should successful inventory UX/logic move into Florivo Android Scanner as `📋 INVENTERING`.
+Whenever a new project-wide decision is made:
+1. record it in the canonical protocol;
+2. update this index if status/architecture changed;
+3. update the affected subsystem protocol;
+4. only then modify code/database behavior.
 
-## 16. Change-control rule
-Already working production behavior must not be changed on a guess. Explain the problem first and get explicit user authorization.
+Do not leave important architecture decisions only in chat.
 
-## 17. Archive status
+## 17. Database schema warning
+Live schema inspection on 21.08.2026 shows legacy `environment` columns still exist in several operational tables, while `mottak_scans` already contains `is_test`.
+
+Therefore:
+- canonical naming for NEW process/workflow design is `mode = test/live`;
+- `mottak_scans` tag/product identity uses `is_test`;
+- legacy `environment` columns are not to be removed during ordinary feature work;
+- a future cleanup/migration must be planned separately so existing WORK logic remains stable.
+
+## 18. Archive status
 The 11.08.2026 Nordic session remains closed after:
 - Til rampe WORK-default physical PASS;
 - real partial RAMPE 28 WORK test;
