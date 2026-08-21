@@ -11,8 +11,8 @@ android {
         applicationId = "com.florivo.terminaltest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "0.4-live-stock"
+        versionCode = 5
+        versionName = "0.5-nfc-test"
     }
 
     buildFeatures {
@@ -38,4 +38,4 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
 
-// v0.4 LIVE stock trial build trigger — 2026-08-21
+// v0.5 NFC TEST — 2026-08-21
