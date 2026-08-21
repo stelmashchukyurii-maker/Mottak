@@ -1,6 +1,12 @@
 name: Florivo Android v0.4 LIVE Stock
 
 on:
+  push:
+    branches:
+      - florivo-v04-build-clean
+    paths:
+      - 'android-terminal-test/**'
+      - '.github/workflows/florivo-android-ui-v01.yml'
   pull_request:
     paths:
       - 'android-terminal-test/**'
