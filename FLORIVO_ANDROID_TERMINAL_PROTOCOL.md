@@ -1,6 +1,6 @@
 # FLORIVO ANDROID TERMINAL PROTOCOL
 
-Status: TEST preparation
+Status: ACTIVE DEV
 Prepared: 2026-08-17 Europe/Oslo
 Updated: 2026-08-21 Europe/Oslo
 
@@ -34,6 +34,23 @@ Do not mix the meanings:
 - specific tag / product in `mottak_scans` -> `is_test`
 
 Test data must not affect real stock balances, production statistics, production orders, Nordic WORK flows, or other live production calculations/mutations.
+
+## Current finished-event backend
+Canonical table for Florivo Terminal finished-product events:
+- `public.florivo_terminal_finished_events`
+
+The table is shared for future TEST/LIVE use and contains:
+- `mode = 'test' | 'live'`
+- immutable `qty = +1` normal event or compensating `qty = -1` correction
+- product key
+- employee metadata when available
+- device/source/detail metadata
+- server-generated human-readable running number derived from event id.
+
+Current Android TEST RPC:
+- `florivo_terminal_test_register_finished(...)`
+
+Despite its legacy TEST name, the RPC now writes to the canonical shared table with `mode='test'`. It must not write LIVE during this phase.
 
 ## Accepted product UX
 Main products:
@@ -70,19 +87,15 @@ Recommended first TEST flags:
 Read UID from `Tag.id` / `Tag.getId()` and tech list from `Tag.techList`.
 Known physical badge test showed stable UID across repeated reads and technologies including NfcA/IsoDep. Exact UID should not be displayed in normal worker-facing UI after commissioning.
 
-## Legacy isolated TEST backend prepared 2026-08-17
-The following isolated TEST tables/RPCs were created during initial prototype preparation:
+## Legacy prototype infrastructure
+The following were created during initial prototype preparation and are now legacy support/identity/diagnostic infrastructure:
 - `public.florivo_terminal_test_employees`
 - `public.florivo_terminal_test_employee_nfc`
-- `public.florivo_terminal_test_finished_events`
 - `public.florivo_terminal_test_log`
 
-Legacy TEST RPCs:
-- `florivo_terminal_test_lookup_uid(p_uid text)`
-- `florivo_terminal_test_register_employee(p_first_name text, p_last_name text, p_uid text)`
-- `florivo_terminal_test_register_finished(p_uid text, p_product_key text, p_device_id text, p_employee_name text)`
+The old finished-events table name `public.florivo_terminal_test_finished_events` has been migrated to the canonical shared name `public.florivo_terminal_finished_events`.
 
-These remain historical/prototype infrastructure. They do NOT override the project-wide TEST/LIVE rule fixed on 2026-08-21. New integration decisions must respect `mode = test/live`, and individual `mottak_scans` tags/products must use `is_test`.
+Legacy-named RPCs may remain temporarily for compatibility, but new architecture decisions must follow canonical `mode=test/live` semantics.
 
 ## Event rules
 - Finished production event is immutable +1.
@@ -103,7 +116,7 @@ Android terminal remains `mode = 'test'` until physical PASS is explicitly confi
 
 ## Security
 - Never put service-role/admin secrets in APK.
-- Publishable/anon access may be used only against intentionally exposed narrow prototype endpoints during TEST.
+- Publishable access may be used only against intentionally exposed narrow prototype endpoints during TEST.
 - Before LIVE: add proper terminal enrollment/device token or authenticated backend/Edge Function and remove broad prototype access.
 - Corporate badge UID is identification metadata only, not authorization proof.
 
