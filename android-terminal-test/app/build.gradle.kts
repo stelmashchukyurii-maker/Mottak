@@ -11,8 +11,8 @@ android {
         applicationId = "com.florivo.terminaltest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.6-nfc-live"
+        versionCode = 7
+        versionName = "0.7-role-quantity-autologout"
     }
 
     buildFeatures { compose = true }
@@ -35,4 +35,4 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
 
-// Florivo Android v0.6 NFC LIVE — 2026-08-21
+// Florivo Android v0.7 ROLE + ANTALL + AUTO LOGOUT — 2026-08-21
