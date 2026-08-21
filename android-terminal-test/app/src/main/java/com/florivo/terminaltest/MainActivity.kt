@@ -22,9 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +36,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,12 +51,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = FlorivoBg) {
-                    FlorivoLocalTestApp()
+                    FlorivoTestApp()
                 }
             }
         }
     }
 }
+
+private const val SUPABASE_URL = "https://hzjsatehehhpgpskckfi.supabase.co"
+private const val SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya"
+private const val DEVICE_ID = "android-terminal-test-01"
 
 private val FlorivoBg = Color(0xFF0F2D22)
 private val FlorivoBg2 = Color(0xFF1E4935)
@@ -66,16 +77,25 @@ private data class Product(
     val wide: Boolean = false
 )
 
+private data class RegisterResult(
+    val displayNumber: String,
+    val employeeName: String
+)
+
 @Composable
-private fun FlorivoLocalTestApp() {
+private fun FlorivoTestApp() {
+    val scope = rememberCoroutineScope()
     var vrakMode by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Product?>(null) }
-    var localNumber by remember { mutableIntStateOf(0) }
+    var displayNumber by remember { mutableStateOf("") }
+    var sending by remember { mutableStateOf(false) }
+    var status by remember { mutableStateOf("BASE TEST · mode=test") }
 
     LaunchedEffect(selected) {
         if (selected != null) {
             delay(8000)
             selected = null
+            displayNumber = ""
             vrakMode = false
         }
     }
@@ -94,6 +114,24 @@ private fun FlorivoLocalTestApp() {
         Product("vrak_hyller", "VRAK HYLLER", "✕"),
         Product("bunner_uten_brikk", "BUNNER UTEN BRIKK", "!", wide = true)
     )
+
+    fun register(product: Product) {
+        if (sending) return
+        sending = true
+        status = "Sender TEST til base…"
+        scope.launch {
+            try {
+                val result = registerFinishedTest(product.key)
+                displayNumber = result.displayNumber
+                selected = product
+                status = "TEST lagret · #${result.displayNumber}"
+            } catch (e: Exception) {
+                status = "FEIL · ${e.message ?: "ukjent feil"}"
+            } finally {
+                sending = false
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -119,15 +157,13 @@ private fun FlorivoLocalTestApp() {
                 EmployeeCard()
 
                 if (!vrakMode) {
-                    CompactProductGrid(products) { product ->
-                        localNumber += 1
-                        selected = product
-                    }
+                    CompactProductGrid(products, enabled = !sending) { product -> register(product) }
 
                     FlorivoActionButton(
                         text = "VRAK / AVVIK",
                         icon = "!",
                         danger = true,
+                        enabled = !sending,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(58.dp),
@@ -143,14 +179,12 @@ private fun FlorivoLocalTestApp() {
                         textAlign = TextAlign.Center
                     )
 
-                    CompactProductGrid(vrakProducts, danger = true) { product ->
-                        localNumber += 1
-                        selected = product
-                    }
+                    CompactProductGrid(vrakProducts, danger = true, enabled = !sending) { product -> register(product) }
 
                     FlorivoActionButton(
                         text = "TILBAKE",
                         icon = "←",
+                        enabled = !sending,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(58.dp),
@@ -160,18 +194,20 @@ private fun FlorivoLocalTestApp() {
             }
 
             Text(
-                text = "Florivo Android · TEST v0.2 · Ingen NFC · Ingen server",
+                text = status,
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFFD7E7DA),
+                color = if (status.startsWith("FEIL")) Color(0xFFFFB4AC) else Color(0xFFD7E7DA),
                 fontSize = 10.sp,
-                textAlign = TextAlign.Center
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 1
             )
         }
 
         selected?.let { product ->
             ConfirmationOverlay(
                 product = product,
-                number = localNumber,
+                number = displayNumber,
                 danger = product.key.startsWith("vrak_") || product.key == "bunner_uten_brikk"
             )
         }
@@ -231,13 +267,13 @@ private fun EmployeeCard() {
 
         Column(modifier = Modifier.padding(start = 10.dp)) {
             Text(
-                text = "UTEN KORT · LOKAL TEST",
+                text = "UTEN KORT · TEST",
                 color = Ink,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Black
             )
             Text(
-                text = "Ingen innlogging · ingen tillatelser",
+                text = "Serverregistrering · mode=test",
                 color = Muted,
                 fontSize = 10.sp
             )
@@ -249,6 +285,7 @@ private fun EmployeeCard() {
 private fun CompactProductGrid(
     products: List<Product>,
     danger: Boolean = false,
+    enabled: Boolean = true,
     onClick: (Product) -> Unit
 ) {
     var index = 0
@@ -259,6 +296,7 @@ private fun CompactProductGrid(
                 text = first.name,
                 icon = first.icon,
                 danger = danger,
+                enabled = enabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(66.dp),
@@ -275,6 +313,7 @@ private fun CompactProductGrid(
                     text = first.name,
                     icon = first.icon,
                     danger = danger,
+                    enabled = enabled,
                     modifier = Modifier
                         .weight(1f)
                         .height(74.dp),
@@ -285,6 +324,7 @@ private fun CompactProductGrid(
                         text = second.name,
                         icon = second.icon,
                         danger = danger,
+                        enabled = enabled,
                         modifier = Modifier
                             .weight(1f)
                             .height(74.dp),
@@ -305,6 +345,7 @@ private fun FlorivoActionButton(
     icon: String,
     modifier: Modifier = Modifier,
     danger: Boolean = false,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(18.dp)
@@ -321,7 +362,7 @@ private fun FlorivoActionButton(
             .clip(shape)
             .background(Brush.horizontalGradient(colors))
             .border(1.5.dp, edge, shape)
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
@@ -330,7 +371,7 @@ private fun FlorivoActionButton(
         ) {
             Text(
                 text = icon,
-                color = Color.White.copy(alpha = 0.92f),
+                color = Color.White.copy(alpha = if (enabled) 0.92f else 0.55f),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Black
             )
@@ -339,7 +380,7 @@ private fun FlorivoActionButton(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 9.dp),
-                color = Color.White,
+                color = Color.White.copy(alpha = if (enabled) 1f else 0.55f),
                 fontSize = if (text.length > 16) 14.sp else 17.sp,
                 fontWeight = FontWeight.Black,
                 lineHeight = 17.sp,
@@ -350,7 +391,7 @@ private fun FlorivoActionButton(
 }
 
 @Composable
-private fun ConfirmationOverlay(product: Product, number: Int, danger: Boolean) {
+private fun ConfirmationOverlay(product: Product, number: String, danger: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -381,14 +422,14 @@ private fun ConfirmationOverlay(product: Product, number: Int, danger: Boolean) 
                 color = Color.White
             )
             Text(
-                text = "LOKAL TEST REGISTRERT",
+                text = "TEST REGISTRERT I BASE",
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Black,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "%06d".format(number),
+                text = number,
                 color = Color.White,
                 fontSize = 54.sp,
                 fontWeight = FontWeight.Black,
@@ -402,7 +443,7 @@ private fun ConfirmationOverlay(product: Product, number: Int, danger: Boolean) 
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Vises i 8 sekunder · ingen data sendt",
+                text = "mode=test · vises i 8 sekunder",
                 color = Color.White.copy(alpha = 0.90f),
                 fontSize = 11.sp,
                 textAlign = TextAlign.Center,
@@ -410,4 +451,44 @@ private fun ConfirmationOverlay(product: Product, number: Int, danger: Boolean) 
             )
         }
     }
+}
+
+private suspend fun registerFinishedTest(productKey: String): RegisterResult = withContext(Dispatchers.IO) {
+    val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_test_register_finished")
+    val connection = (url.openConnection() as HttpURLConnection).apply {
+        requestMethod = "POST"
+        connectTimeout = 10000
+        readTimeout = 10000
+        doOutput = true
+        setRequestProperty("Content-Type", "application/json")
+        setRequestProperty("Accept", "application/json")
+        setRequestProperty("apikey", SUPABASE_PUBLISHABLE_KEY)
+    }
+
+    val payload = JSONObject()
+        .put("p_uid", "")
+        .put("p_product_key", productKey)
+        .put("p_device_id", DEVICE_ID)
+        .put("p_employee_name", JSONObject.NULL)
+        .toString()
+
+    connection.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) }
+
+    val code = connection.responseCode
+    val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+    val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+    connection.disconnect()
+
+    if (code !in 200..299) {
+        val shortBody = body.take(180).replace('\n', ' ')
+        throw IllegalStateException("HTTP $code $shortBody")
+    }
+
+    val array = JSONArray(body)
+    if (array.length() == 0) throw IllegalStateException("Tomt serversvar")
+    val row = array.getJSONObject(0)
+    RegisterResult(
+        displayNumber = row.optString("display_number", "------"),
+        employeeName = row.optString("employee_name", "UTEN KORT")
+    )
 }
