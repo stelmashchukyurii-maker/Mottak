@@ -1,4 +1,4 @@
-name: Florivo Android TEST
+name: Florivo Android v0.4 LIVE Stock
 
 on:
   pull_request:
