@@ -2,6 +2,7 @@
 
 Status: TEST preparation
 Prepared: 2026-08-17 Europe/Oslo
+Updated: 2026-08-21 Europe/Oslo
 
 ## Goal
 Native Android warehouse terminal for finished-product registration on one shared warehouse phone.
@@ -12,10 +13,27 @@ Core flow:
 3. Server maps UID to employee. Badge UID is an identifier, not a password/security credential.
 4. Show employee name + product screen.
 5. Worker presses one product once.
-6. Server creates immutable +1 TEST event and returns a global human-readable running number.
-7. Show confirmation/number for about 3 seconds.
+6. Server creates immutable +1 event and returns a global human-readable running number.
+7. Show confirmation/number for about 8 seconds during current UI TEST.
 8. Return to full waiting-for-next-card screen. No persistent worker session.
 9. `UTEN KORT` remains a fallback path.
+
+## Project-wide TEST / LIVE rule — ACTIVE
+Canonical rule: `BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md`.
+
+For a whole form, order, workflow, terminal process, or equivalent process-level record use:
+- `mode = 'test'` — test mode
+- `mode = 'live'` — live/working mode
+
+For a specific tag/product record in `public.mottak_scans` use:
+- `is_test = true` — test tag/product
+- `is_test = false` — real/live tag/product
+
+Do not mix the meanings:
+- form / order / process -> `mode`
+- specific tag / product in `mottak_scans` -> `is_test`
+
+Test data must not affect real stock balances, production statistics, production orders, Nordic WORK flows, or other live production calculations/mutations.
 
 ## Accepted product UX
 Main products:
@@ -31,15 +49,16 @@ Separate VRAK / AVVIK screen:
 - vrak_hyller
 - bunner_uten_brikk
 
-Current browser prototype visual direction:
-- yellow 3D product buttons
-- dark/olive background
-- red 3D VRAK/AVVIK buttons
-- NO / UK language switch during TEST
-- large touch targets for standing warehouse use
-
-Browser prototype source:
+Current browser prototype source:
 - `florivo-terminal-products-test.html`
+
+Current native TEST UI direction:
+- compact single-screen terminal layout;
+- green product buttons;
+- red VRAK/AVVIK;
+- no scroll on target terminal screen;
+- TEST marker visible;
+- sequential confirmation number visible about 8 seconds.
 
 ## Native NFC
 Use Android `NfcAdapter.enableReaderMode` in the foreground.
@@ -51,26 +70,19 @@ Recommended first TEST flags:
 Read UID from `Tag.id` / `Tag.getId()` and tech list from `Tag.techList`.
 Known physical badge test showed stable UID across repeated reads and technologies including NfcA/IsoDep. Exact UID should not be displayed in normal worker-facing UI after commissioning.
 
-## TEST backend prepared 2026-08-17
-Supabase project: BaMavaremottak.
-
-Separate TEST tables only:
+## Legacy isolated TEST backend prepared 2026-08-17
+The following isolated TEST tables/RPCs were created during initial prototype preparation:
 - `public.florivo_terminal_test_employees`
 - `public.florivo_terminal_test_employee_nfc`
 - `public.florivo_terminal_test_finished_events`
-- existing diagnostics: `public.florivo_terminal_test_log`
+- `public.florivo_terminal_test_log`
 
-Narrow TEST RPCs:
+Legacy TEST RPCs:
 - `florivo_terminal_test_lookup_uid(p_uid text)`
 - `florivo_terminal_test_register_employee(p_first_name text, p_last_name text, p_uid text)`
 - `florivo_terminal_test_register_finished(p_uid text, p_product_key text, p_device_id text, p_employee_name text)`
 
-`register_finished` returns:
-- event_id
-- display_number, zero-padded to 6 digits
-- employee_name
-
-A TEST employee mapping for the physically tested badge is seeded for tomorrow's native UID test. No production employee data is created.
+These remain historical/prototype infrastructure. They do NOT override the project-wide TEST/LIVE rule fixed on 2026-08-21. New integration decisions must respect `mode = test/live`, and individual `mottak_scans` tags/products must use `is_test`.
 
 ## Event rules
 - Finished production event is immutable +1.
@@ -87,26 +99,19 @@ Do NOT touch or reuse these frozen flows while developing Android terminal:
 - UT Kontor production order flow
 - production stock ledger mutation functions
 
-Android terminal remains TEST until physical PASS is explicitly confirmed.
+Android terminal remains `mode = 'test'` until physical PASS is explicitly confirmed.
 
 ## Security
 - Never put service-role/admin secrets in APK.
-- Publishable/anon access may be used only against intentionally exposed narrow TEST RPCs during prototype phase.
-- Before WORK: add proper terminal enrollment/device token or authenticated backend/Edge Function and remove broad prototype access.
+- Publishable/anon access may be used only against intentionally exposed narrow prototype endpoints during TEST.
+- Before LIVE: add proper terminal enrollment/device token or authenticated backend/Edge Function and remove broad prototype access.
 - Corporate badge UID is identification metadata only, not authorization proof.
 
 ## Kiosk
 Do not implement kiosk before NFC + server + product UX physical PASS.
 Final kiosk direction: Android dedicated-device / Lock Task Mode, not merely fullscreen.
 
-## Tomorrow first milestone
-`ANDROID NFC UID READ — PHYSICAL PASS`
-
-Success criteria:
-- install/open native TEST app on warehouse Android phone;
-- page is waiting for badge;
-- tap same corporate badge repeatedly;
-- app gets the same UID each time using native Android NFC;
-- no browser/Web NFC dependency;
-- app can look up TEST ANSATT from server;
-- no WORK data changes.
+## Next physical milestones
+1. Android product event -> backend in `mode = 'test'` -> server running number -> confirmation visible about 8 seconds.
+2. Native NFC UID READ — PHYSICAL PASS.
+3. Only after explicit PASS may the relevant process be switched to `mode = 'live'`.
