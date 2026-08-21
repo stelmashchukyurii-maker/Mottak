@@ -60,6 +60,7 @@ private const val DEVICE_ID = "android-terminal-test-01"
 private const val MODE = "live"
 private const val CONFIRM_SECONDS = 8L
 private const val GRACE_SECONDS = 4L
+private const val IDLE_SECONDS = 12L
 
 private val FlorivoBg = Color(0xFF0F2D22)
 private val FlorivoBg2 = Color(0xFF1E4935)
@@ -242,7 +243,7 @@ private fun NfcGate(state: GateState, message: String, nfcAvailable: Boolean, nf
                 Text("Kortnummer / UID vises ikke. Florivo bruker kun en SHA-256 hash av kort-ID mot serveren.", color = Muted, fontSize = 13.sp, lineHeight = 18.sp)
             }
             Spacer(Modifier.weight(1f))
-            Text("Florivo Android v0.7.1 ROLE + ANTALL FIX · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
+            Text("Florivo Android v0.7.1 ROLE + ANTALL FIX + IDLE LOGOUT · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
         }
     }
 }
@@ -257,7 +258,15 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
     var status by remember { mutableStateOf("KORT GODKJENT · ${session.fullName}") }
     var quantityText by remember { mutableStateOf("") }
     var autoLogoutSignal by remember { mutableIntStateOf(0) }
+    var idleSignal by remember { mutableIntStateOf(0) }
     var graceActive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(idleSignal, selected, sending) {
+        if (selected == null && !sending) {
+            delay(IDLE_SECONDS * 1000)
+            if (selected == null && !sending) onLogout()
+        }
+    }
 
     LaunchedEffect(autoLogoutSignal) {
         if (autoLogoutSignal <= 0 || selected == null) return@LaunchedEffect
@@ -287,6 +296,7 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
 
     fun register(product: Product) {
         if (sending) return
+        idleSignal++
         autoLogoutSignal++
         graceActive = false
         selected = null
@@ -347,7 +357,10 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                         OutlinedTextField(
                             value = quantityText,
                             onValueChange = { value ->
-                                if (value.length <= 3 && value.all { it.isDigit() }) quantityText = value
+                                if (value.length <= 3 && value.all { it.isDigit() }) {
+                                    quantityText = value
+                                    idleSignal++
+                                }
                             },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
@@ -369,11 +382,17 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
 
                 if (!vrakMode) {
                     CompactProductGrid(products, enabled = !sending) { register(it) }
-                    FlorivoActionButton("VRAK / AVVIK", "!", danger = true, enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) { vrakMode = true }
+                    FlorivoActionButton("VRAK / AVVIK", "!", danger = true, enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) {
+                        idleSignal++
+                        vrakMode = true
+                    }
                 } else {
                     Text("VRAK / AVVIK", modifier = Modifier.fillMaxWidth(), color = Color(0xFF8A2C27), fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
                     CompactProductGrid(vrakProducts, danger = true, enabled = !sending) { register(it) }
-                    FlorivoActionButton("TILBAKE", "←", enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) { vrakMode = false }
+                    FlorivoActionButton("TILBAKE", "←", enabled = !sending, modifier = Modifier.fillMaxWidth().height(58.dp)) {
+                        idleSignal++
+                        vrakMode = false
+                    }
                 }
             }
             Text(
