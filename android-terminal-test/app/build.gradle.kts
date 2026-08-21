@@ -7,12 +7,27 @@ android {
     namespace = "com.florivo.terminaltest"
     compileSdk = 36
 
+    signingConfigs {
+        create("florivoTest") {
+            storeFile = rootProject.file("florivo-test.keystore")
+            storePassword = "florivo-test-2026"
+            keyAlias = "florivo-test"
+            keyPassword = "florivo-test-2026"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.florivo.terminaltest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1-ui-local-test"
+        versionCode = 3
+        versionName = "0.3-db-test"
+    }
+
+    buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("florivoTest")
+        }
     }
 
     buildFeatures {
