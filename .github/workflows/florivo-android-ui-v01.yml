@@ -1,9 +1,9 @@
-name: Florivo Android v0.4 LIVE Stock
+name: Florivo Android v0.5 NFC TEST
 
 on:
   push:
     branches:
-      - florivo-v04-build-clean
+      - florivo-v05-nfc-test
     paths:
       - 'android-terminal-test/**'
       - '.github/workflows/florivo-android-ui-v01.yml'
@@ -44,6 +44,6 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Florivo-Android-v0.4-live-stock
+          name: Florivo-Android-v0.5-nfc-test
           path: android-terminal-test/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
