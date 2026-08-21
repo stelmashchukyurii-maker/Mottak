@@ -38,6 +38,6 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Florivo-Android-v0.3-db-test
+          name: Florivo-Android-v0.4-live-stock
           path: android-terminal-test/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
