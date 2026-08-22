@@ -8,7 +8,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>UT Kontor WORKING v37.4</title>
+<title>UT Kontor WORKING v37.5</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--text:#f5f7ff}
 *{box-sizing:border-box}
@@ -20,11 +20,11 @@ iframe{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;background:v
 <script src="products.js?v=20260811-0810"></script>
 </head>
 <body class="notranslate">
-<div id="loader">Laster UT Kontor WORKING v37.4…</div>
-<iframe id="app" title="UT Kontor WORKING v37.4"></iframe>
+<div id="loader">Laster UT Kontor WORKING v37.5…</div>
+<iframe id="app" title="UT Kontor WORKING v37.5"></iframe>
 <script>
 "use strict";
-const BUILD="20260822-0540";
+const BUILD="20260822-0915";
 const frame=document.getElementById("app"),loader=document.getElementById("loader");
 
 function inject(doc,src,mark){
@@ -123,7 +123,7 @@ function applyWorkingBrand(){
   try{
     const d=frame.contentDocument;if(!d?.body)return;ensureTopActions(d);
     const version=d.querySelector(".version");
-    if(version)version.innerHTML="UT Kontor WORKING v37.4 · BRUKERE / TILGANGER · UTEN SKANNING<br>Oppdatert 22.08.2026 kl. 05:40";
+    if(version)version.innerHTML="UT Kontor WORKING v37.5 · BRUKERE / TILGANGER · UTEN SKANNING<br>Oppdatert 22.08.2026 kl. 09:15";
   }catch{}
 }
 async function refreshInner(){
