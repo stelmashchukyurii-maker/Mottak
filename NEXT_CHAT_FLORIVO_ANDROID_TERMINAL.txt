@@ -1,6 +1,13 @@
 FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-21-2326
 
-READ FIRST:
+IMPORTANT SOURCE LOCATION:
+All files listed below are stored in GitHub repository:
+`stelmashchukyurii-maker/Mottak`
+branch: `main`
+Do NOT look for them first in File Library or Google Drive.
+Use the connected GitHub source / repository file fetch.
+
+READ FIRST FROM GITHUB MAIN:
 1. FLORIVO_SESSION_ARCHIVE_2026-08-21_2326.md
 2. FLORIVO_ANDROID_V071_STABLE_2026-08-21.md
 3. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
