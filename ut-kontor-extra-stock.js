@@ -5,13 +5,12 @@
   window.__UT_KONTOR_EXTRA_STOCK__ = true;
 
   const EXTRA_IDS = ["forlengere_korte", "forlengere_lange", "forlengere_plast"];
-  const VERSION = "1.0.0";
-  const UPDATED_AT = "2026-08-22T05:40:00+02:00";
+  const VERSION = "1.1.0";
+  const UPDATED_AT = "2026-08-22T09:15:00+02:00";
   let lastRows = [];
 
   const isUk = () => localStorage.getItem("mottak_ut_language") === "uk";
   const n = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-  const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
   function unitText(id, value) {
     if (id === "forlengere_plast") {
@@ -29,22 +28,8 @@
 
   function copy() {
     return isUk()
-      ? {
-          physical: "На складі",
-          available: "Доступно зараз",
-          ordering: "Замовляєте зараз",
-          remaining: "Залишиться на складі",
-          missing: "Бракує",
-          waiting: "чекає на INN",
-        }
-      : {
-          physical: "På lager",
-          available: "Tilgjengelig nå",
-          ordering: "Bestiller nå",
-          remaining: "Igjen på lager",
-          missing: "Mangler",
-          waiting: "venter på INN",
-        };
+      ? { physical: "На складі", ordering: "Замовляєте зараз", remaining: "Залишиться на складі", missing: "Бракує", waiting: "чекає на INN" }
+      : { physical: "På lager", ordering: "Bestiller nå", remaining: "Igjen på lager", missing: "Mangler", waiting: "venter på INN" };
   }
 
   function injectStyle() {
@@ -52,29 +37,23 @@
     const style = document.createElement("style");
     style.id = "utExtraStockStyle";
     style.textContent = `
-      .ut-extra-stock-info{display:grid;gap:8px;margin:10px 0 8px}
-      .ut-extra-stock-line{padding:10px 12px;border:1px solid #303b59;border-radius:13px;background:#0b1020;color:#e8edf8;font-size:12px;font-weight:850;line-height:1.35}
-      .ut-extra-stock-line strong{font-weight:1000}
-      .ut-extra-stock-line.available{border-color:rgba(117,183,255,.48);color:#cce4ff}
-      .ut-extra-stock-line.good{border-color:rgba(72,213,151,.55);background:rgba(72,213,151,.07);color:#63dca5}
-      .ut-extra-stock-line.bad{border-color:rgba(255,107,107,.72);background:rgba(255,107,107,.09);color:#ff8e8e}
-      .ut-extra-stock-line.reserve{font-size:11px}
+      .ut-extra-product .ut-extra-unit{display:none!important}
+      .ut-extra-product .ramp-product-head>div{width:100%}
+      .ut-extra-product .ramp-product-head{align-items:flex-start}
+      .ut-extra-product .ramp-product-head output.stock-balance{display:grid;gap:8px;min-width:250px;font-size:12px;line-height:1.35;text-align:left}
+      .ut-extra-product .stock-balance span{display:block;width:100%;padding:9px 11px;border:1px solid rgba(48,59,89,.95);border-radius:11px;background:#070b14;overflow-wrap:anywhere}
+      .ut-extra-product .stock-balance .stock-now{color:var(--text);font-weight:950}
+      .ut-extra-product .stock-balance .stock-demand{color:#d8deef;font-weight:900}
+      .ut-extra-product .stock-balance .stock-after{color:var(--ok);border-color:rgba(72,213,151,.55);background:rgba(72,213,151,.07);font-weight:950}
+      .ut-extra-product .stock-balance .stock-after.warn{color:var(--bad);border-color:rgba(255,115,115,.62);background:rgba(255,115,115,.09);font-weight:950}
+      .ut-extra-product.over-stock{border-color:var(--bad)!important;box-shadow:0 0 0 2px rgba(255,115,115,.10)}
+      .ut-extra-product.over-stock input{border-color:var(--bad)}
+      @media(max-width:560px){
+        .ut-extra-product .ramp-product-head{display:block}
+        .ut-extra-product .ramp-product-head output.stock-balance{min-width:0;width:100%;margin-top:7px;text-align:left}
+      }
     `;
     document.head.appendChild(style);
-  }
-
-  function ensureBlocks() {
-    injectStyle();
-    EXTRA_IDS.forEach(id => {
-      const card = document.querySelector(`[data-ut-product-id="${id}"]`);
-      if (!card || card.querySelector(`[data-ut-extra-stock="${id}"]`)) return;
-      const block = document.createElement("div");
-      block.className = "ut-extra-stock-info";
-      block.dataset.utExtraStock = id;
-      const note = card.querySelector(".ut-extra-note");
-      if (note) note.insertAdjacentElement("beforebegin", block);
-      else card.querySelector(".ramp-product-head")?.insertAdjacentElement("afterend", block);
-    });
   }
 
   function currentOrderQty(id) {
@@ -94,35 +73,29 @@
   }
 
   function renderOne(id, row) {
-    const block = document.querySelector(`[data-ut-extra-stock="${id}"]`);
-    if (!block) return;
-
+    const output = document.getElementById(`${id}Output`);
+    if (!output) return;
+    const card = output.closest(".ramp-product");
     const c = copy();
-    const physical = Math.max(0, n(row?.physical_count));
-    const available = Math.max(0, n(row?.available_count ?? row?.physical_count));
+    const warehouse = Math.max(0, n(row?.physical_count));
     const ordering = currentOrderQty(id);
-    const remaining = available - ordering;
-    const shortage = Math.max(0, -remaining);
+    const remaining = warehouse - ordering;
+    const shortage = remaining < 0;
 
-    const reserveLine = available !== physical
-      ? `<div class="ut-extra-stock-line available reserve">${esc(c.available)}: <strong>${esc(amountText(id, available))}</strong></div>`
-      : "";
-
-    const resultLine = shortage > 0
-      ? `<div class="ut-extra-stock-line bad">${esc(c.missing)}: <strong>${esc(amountText(id, shortage))}</strong> · ${esc(c.waiting)}</div>`
-      : `<div class="ut-extra-stock-line good">${esc(c.remaining)}: <strong>${esc(amountText(id, remaining))}</strong></div>`;
-
-    block.innerHTML = `
-      <div class="ut-extra-stock-line">${esc(c.physical)}: <strong>${esc(amountText(id, physical))}</strong></div>
-      ${reserveLine}
-      <div class="ut-extra-stock-line">${esc(c.ordering)}: <strong>${esc(amountText(id, ordering))}</strong></div>
-      ${resultLine}`;
+    output.className = "stock-balance";
+    output.innerHTML = `
+      <span class="stock-now">${c.physical}: ${amountText(id, warehouse)}</span>
+      <span class="stock-demand">${c.ordering}: ${amountText(id, ordering)}</span>
+      <span class="stock-after ${shortage ? "warn" : ""}">${shortage ? `${c.missing}: ${amountText(id, Math.abs(remaining))} · ${c.waiting}` : `${c.remaining}: ${amountText(id, remaining)}`}</span>
+    `;
+    card?.classList.toggle("over-stock", shortage);
   }
 
   function render() {
-    ensureBlocks();
+    injectStyle();
+    document.querySelectorAll(".ut-extra-stock-info").forEach(el => el.remove());
     const map = new Map((rows() || []).map(row => [String(row.product_id), row]));
-    EXTRA_IDS.forEach(id => renderOne(id, map.get(id) || { product_id: id, physical_count: 0, available_count: 0 }));
+    EXTRA_IDS.forEach(id => renderOne(id, map.get(id) || { product_id: id, physical_count: 0 }));
   }
 
   window.addEventListener("bama-stock-summary-updated", event => {
