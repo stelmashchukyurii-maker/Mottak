@@ -1,31 +1,84 @@
-FLORIVO-INVENTORY-HANDOFF-2026-08-14
+FLORIVO-INVENTORY-HANDOFF-2026-08-23
 
 Продовжуємо окремий напрямок Florivo Inventory / Inventering.
 
-Спочатку прочитай:
-1. FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md
-2. FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md — лише для загальної server-first архітектури scanner
-3. PROTOCOLS.md — щоб не порушити FROZEN production правила
+READ FIRST:
+1. PROJECT_CANONICAL_RULES.md
+2. BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md
+3. PROTOCOLS.md
+4. FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md
+5. FLORIVO_NUMBER_PROTOCOL.md
+6. NORDIC_ID_RFID_PROTOCOL.md — лише RFID/Wedge behavior
+7. FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md — server-first architecture
 
-Мета цієї розмови:
-створити і фізично протестувати окрему Browser TEST-форму для щомісячної інвентаризації складу.
+CURRENT PAGE:
+florivo-inventory-test.html
 
-Основна логіка:
-- inventory створює незалежну session/snapshot;
-- під час обходу НЕ змінює WORK-stock;
-- RFID scan → фактично що бачимо;
-- Bunner stabel: default 10, можна змінити;
-- Bunner + Hyller: ввести фактичну кількість полиць, не обмежувати лише 30/60;
-- повторний RFID у тій самій session не рахується вдруге;
-- неробоча/відсутня бірка → MANUELL → MAN-xxx → працівник відмічає товар фізично наліпкою/маркером;
-- unknown RFID або server-status mismatch треба дозволити записати як physical evidence, але не змінювати WORK автоматично;
-- після AVSLUTT порівняти SERVER FORVENTET ↔ FAKTISK TELT та сформувати AVVIK report;
-- будь-яке майбутнє коригування WORK — лише окремо, audited, після людського підтвердження.
+CURRENT STATUS:
+Browser TEST implemented and evolved to V0.11.
+Real Nordic ID physical UX has been exercised.
+Inventory is still TEST-only/localStorage and makes NO LIVE/WORK stock mutations.
+No Inventory DB tables/RPCs or PC report page exist yet.
 
-Перший етап:
-Browser TEST only. Не вносити inventory експеримент у заморожені Nordic WORK production-форми.
+CURRENT V0.11 UX:
+- TEST default; WORK/LIVE inactive;
+- Norsk + Українська;
+- Nordic RFID Wedge capture;
+- persistent current product mode;
+- duplicate RFID block inside current local session;
+- manual MAN-xxx;
+- compact journal/search/filters;
+- 1 Bunner + Hyller: quick 3/4/5, -/input/+, 30/60;
+- Bunner stabel default 10;
+- Bunner vrak default 10;
+- Forlengere lange/korte: separate manual antall forlengere + separate hyller count with 15/16;
+- Bunner uten brikke = manual-only.
 
-Після PHYSICAL PASS браузерної версії успішний UX/logic можна переносити в Florivo Android Scanner як окрему кнопку 📋 INVENTERING.
+NEW ACCEPTED DESIGN — ZONES / WORKSHOPS:
+Inventory session must be split into physical zones/rooms. Initial names:
+- Varemottak
+- Plukk
+- Produksjon
+- Kald
+- Varm
 
-Поточний статус:
-CONCEPT CREATED / Browser TEST NOT YET IMPLEMENTED / NO WORK CHANGES / NO INVENTORY DB CHANGES YET.
+Every scan/manual observation belongs to one zone.
+Current zone stays active until changed.
+PC reporting must work for whole warehouse and per-zone.
+A zone can later be recounted/revised without silently overwriting other zones; preserve recount history.
+
+Produksjon has many repeated configurations. Add a per-zone/current profile so operator can set e.g.:
+1 Bunner + 3 Hyller
+and every following RFID in that zone opens with Hyller=3 by default. Each RFID remains an individual record and duplicate protection remains active.
+
+A hand-drawn warehouse map may later be supplied. Use it as basis for visual PC zone map; do not invent real geometry without evidence.
+
+CANONICAL SAFETY:
+- New Inventory session/process uses mode='test'|'live'.
+- Do not create a new legacy environment column for Inventory.
+- TEST never affects live stock/statistics/orders/Nordic WORK.
+- scanner_code = full real EPC.
+- lower_number = last 6 of real EPC only.
+- florivo_number = separate permanent internal number.
+- no fake RFID/lower.
+- if large printed physical tag number is distinct, investigate and create a separate field rather than overloading lower_number/florivo_number.
+
+NEXT ORDER:
+1. Update Browser TEST with zone selection + zone journal + zone recount UX.
+2. Add per-zone/current-profile default quantity, especially Produksjon repeated patterns.
+3. Physical Nordic test of zone flow.
+4. Then inspect live DB and design server Inventory schema with mode=test/live.
+5. Build PC page INVENTERINGER with zone map/history/report.
+6. Build SERVER EXPECTED ↔ FAKTISK and AVVIK categories.
+7. Only after review design separate audited LIVE correction flow.
+
+AVVIK CATEGORIES:
+- MANGLER
+- FUNNET MEN IKKE FORVENTET
+- UKJENT RFID
+- MANUELT TELT
+- FEIL ANTALL
+- zone/recount discrepancy history
+
+IMPORTANT:
+AVSLUTT INVENTERING never silently corrects LIVE stock. Any future correction must be separate, audited and human-approved.
