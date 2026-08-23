@@ -1,469 +1,334 @@
-# Florivo Inventory / Inventering — КОНЦЕПТУАЛЬНИЙ ПРОТОКОЛ
+# Florivo Inventory / Inventering — ACTIVE DEV PROTOCOL
 
 **Проєкт:** Florivo / BaMavaremottak  
-**Дата фіксації:** 14.08.2026 19:28 Europe/Oslo  
-**Статус:** CONCEPT / TEST DESIGN — БЕЗ ЗМІН PRODUCTION  
-**Призначення:** зафіксувати задум окремого режиму щомісячної інвентаризації складу з Nordic ID / Florivo Scanner.
+**Оновлено:** 23.08.2026 09:25 Europe/Oslo  
+**Статус:** ACTIVE DEV · Browser TEST V0.11 · PHYSICAL UX TESTING · NO LIVE MUTATION  
+**Поточна сторінка:** `florivo-inventory-test.html`
 
-> Цей документ НЕ змінює WORK-stock, Nordic production-форми або заморожену production-логіку. Перший етап — окрема браузерна TEST-форма. Після фізичного тесту успішна логіка може бути перенесена у Florivo Android Scanner.
+> Inventering є окремим контуром фізичної інвентаризації. Під час обходу вона фіксує те, що реально бачить працівник, але НЕ змінює LIVE/WORK-stock автоматично. Чинні Nordic production-форми лишаються FROZEN.
 
----
+## 0. Canonical dependencies
+Перед змінами читати в такому порядку:
+1. `PROJECT_CANONICAL_RULES.md`
+2. `BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md`
+3. `PROTOCOLS.md`
+4. цей файл
+5. `NEXT_CHAT_FLORIVO_INVENTORY.txt`
+6. `FLORIVO_NUMBER_PROTOCOL.md`
+7. `NORDIC_ID_RFID_PROTOCOL.md` — лише для RFID/Wedge поведінки
+8. `FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md` — для server-first архітектури
 
-## 1. Головна мета
+Для нових inventory process/session використовувати `mode='test'|'live'`. Новий `environment` для Inventory не створювати. TEST ніколи не впливає на live stock/statistics/orders/Nordic WORK.
 
-Раз на місяць або за потреби працівник проходить весь склад зі сканером і фіксує **фактичний фізичний стан**.
-
-Ключова ідея:
+## 1. Мета
+Раз на місяць або за потреби працівник проходить склад і створює незалежний фізичний snapshot:
 
 ```text
-ЩО СЕРВЕР ОЧІКУЄ ПОБАЧИТИ
-            ↕
-ЩО ФАКТИЧНО ПОРАХОВАНО НА СКЛАДІ
+SERVER EXPECTED
+      ↕
+PHYSICAL REALITY
 ```
 
-Інвентаризація повинна створювати незалежний snapshot / inventory session і під час обходу НЕ повинна автоматично:
-- додавати товар у WORK-stock;
-- списувати товар із WORK-stock;
+Inventering під час обходу не повинна автоматично:
+- додавати або списувати LIVE stock;
 - змінювати `stock_status`;
-- виправляти серверні залишки;
-- створювати fake RFID/EPC.
+- виправляти залишки;
+- створювати fake RFID/EPC;
+- приховувати невідомі або несподівані фізичні знахідки.
 
-Будь-яке майбутнє коригування WORK після інвентаризації — окремий підтверджений крок після перегляду розбіжностей.
+Після завершення формується AVVIK. Будь-яке подальше коригування LIVE — окрема audited дія з людським підтвердженням.
 
----
-
-## 2. Окрема inventory session
-
-Старт:
-
-```text
-INVENTERING
-Dato: <date>
-Location: <warehouse/location>
-
-[ START INVENTERING ]
-```
-
-Сервер створює одну inventory session, наприклад:
+## 2. Inventory session
+Майбутня серверна session повинна мати щонайменше:
 
 ```text
 inventory_session_id
+mode = test | live
 started_at
 started_by
 device_id
-location
-status = open
-```
-
-Усі наступні RFID/manual записи належать саме цій session.
-
-Після завершення:
-
-```text
-status = completed
+warehouse/location
+status = open | completed
 completed_at
 ```
 
-Потрібно зберігати історію кожної інвентаризації, а не перезаписувати попередню.
+Історію попередніх інвентаризацій не перезаписувати.
 
----
+Поточна Browser V0.11 ще зберігає TEST-session локально в браузері (`localStorage`). Це тимчасовий UX-прототип, не фінальна серверна архітектура.
 
-## 3. Основний фізичний flow
+## 3. НОВЕ ПРАВИЛО: інвентаризація по зонах / цехах
+Уся inventory session ділиться на фізичні зони. Кожен count/scan/manual record ОБОВ'ЯЗКОВО належить до однієї зони.
 
-```text
-START INVENTERING
-        ↓
-ходимо по складу
-        ↓
-RFID scan / manual fallback
-        ↓
-оператор фіксує, що реально бачить
-        ↓
-CONFIRM
-        ↓
-наступний товар
-        ↓
-...
-        ↓
-AVSLUTT INVENTERING
-        ↓
-SERVER EXPECTED ↔ PHYSICAL COUNT
-        ↓
-AVVIK REPORT
-```
+Початковий перелік зон, назви можна уточнити пізніше:
+- `Varemottak`
+- `Plukk`
+- `Produksjon`
+- `Kald`
+- `Varm`
 
----
-
-## 4. Bunner — стопка
-
-Після RFID оператор може вибрати:
+Концептуально:
 
 ```text
-BUNNER STABEL
+INVENTORY SESSION
+  ├─ Varemottak
+  ├─ Plukk
+  ├─ Produksjon
+  ├─ Kald
+  └─ Varm
 ```
 
-Фактична кількість Bunner у стопці:
+Правила:
+1. Перед початком рахунку оператор вибирає поточну зону.
+2. Поточна зона лишається активною, доки оператор її не змінить.
+3. У журналі сканера кожен запис має показувати/зберігати зону.
+4. На ПК звіт можна дивитися по всьому складу або окремо по кожній зоні.
+5. Якщо помилка виявлена лише в останньому цеху, можна повторно перевірити/перерахувати саме цю зону, не втрачаючи інші зони.
+6. Завершення всієї inventory session не повинно стирати попередній zone history.
+7. Майбутній повторний перерахунок зони повинен мати revision/recount history, а не silent overwrite.
+
+### 3.1. Візуальна карта складу
+Бажаний майбутній PC UX: графічна схема складу, де зони розміщені приблизно як у реальному приміщенні. Клік по зоні відкриває її inventory summary / AVVIK / записи.
+
+Користувач може надати намальовану схему. Її треба використати як основу для web-візуалізації; не вигадувати геометрію складу без фактичної схеми.
+
+## 4. НОВЕ ПРАВИЛО: повторюваний шаблон кількості всередині зони
+У деяких цехах, особливо `Produksjon`, може бути багато однакових фізичних конфігурацій, наприклад:
 
 ```text
-Antall Bunner
-[-]  10  [+]
+50 × (1 Bunner + 3 Hyller)
 ```
 
-Правило:
-- значення за замовчуванням = **10**;
-- оператор може змінити його, якщо фактична стопка має іншу кількість;
-- inventory зберігає фактичне число, а не примусово 10.
+Не треба змушувати оператора 50 разів вводити `3`.
 
-Приклад:
+Потрібен zone/current-profile режим:
 
 ```text
-RFID = <EPC>
-physical_type = bunner_stack
-physical_bunner_count = 10
+POTOCZNY / CURRENT PROFILE
+1 Bunner + Hyller
+Default Hyller = 3
 ```
 
----
+Після цього кожен наступний RFID у цій зоні відкривається вже з `3` у полі. Оператор бачить число і підтверджує або змінює його для конкретного Bunner.
 
-## 5. Bunner + Hyller
+Критично:
+- кожен RFID все одно зберігається окремо;
+- duplicate protection лишається;
+- групова цифра `50 × ...` не повинна знищити individual tag identity;
+- можна додати швидший confirmation UX після фізичного тесту, але не silent auto-save без окремого рішення.
 
-Другий основний варіант після RFID:
+## 5. Browser TEST V0.11 — фактично реалізовано
+Поточна форма вже має:
+- окрему кнопку `🧪 TEST · INVENTERING` на `scanner-home.html`;
+- TEST default, WORK/LIVE неактивний;
+- Norsk + Українська;
+- Nordic ID RFID Wedge capture, сумісний із перевіреним Nordic flow;
+- persistent current product mode між сканами;
+- duplicate EPC/lower block у межах поточної локальної session;
+- manual `MAN-xxx` flow;
+- compact journal із пошуком та фільтрами;
+- завершення локальної TEST-session;
+- усі записи поки лише localStorage, без inventory DB і без LIVE mutation.
 
-```text
-BUNNER + HYLLER
-```
+### 5.1. Поточні типи/UX
+RFID/current modes:
+- `1 Bunner + Hyller`
+- `Bare 1 Bunner`
+- `Bunner stabel`
+- `Hyller vrak`
+- `Bunner vrak`
+- `Forlengere lange`
+- `Forlengere korte`
 
-Оператор фіксує фактичну кількість полиць:
+Manual-only:
+- `Bunner uten brikke`
 
-```text
-Antall hyller
-[ 30 ]
-```
+`1 Bunner + Hyller`:
+- quick `3 / 4 / 5`;
+- `− / manual input / +`;
+- quick `30 / 60`;
+- велика OK/TELT кнопка.
 
-Інвентаризація не повинна обмежувати факт тільки стандартними x30 або x60.
+`Bunner stabel`:
+- default 10, editable.
 
-Якщо фізично є:
+`Bunner vrak`:
+- default 10, editable.
 
-```text
-1 Bunner + 57 Hyller
-```
+`Forlengere lange/korte`:
+- окреме manual поле `antall forlengere` — зараз без default;
+- окремо `antall hyller` з `− / 15 / +` і quick `15 / 16`;
+- обидва значення мають зберігатися окремо.
 
-так і зберігати:
+`Bunner uten brikke`:
+- тільки manual;
+- `MAN-xxx`;
+- ручний count/calculator типу `10+10+3`.
 
-```text
-physical_bunner_count = 1
-physical_hyller_count = 57
-```
+## 6. Product = physical observation, not permanent tag identity
+Inventory не повинна трактувати історичний `hyller30/hyller60/...` як незмінну фізичну істину.
 
-Це важливо, бо Inventering повинна показувати реальність, навіть якщо сервер очікував H60.
+Під час inventory оператор фіксує реальний стан зараз. Наприклад якщо історично tag був H60, але фізично сьогодні є `1 Bunner + 57 Hyller`, inventory записує 57 і створює AVVIK/history, а не блокує count.
 
----
+## 7. RFID / number identity
+Canonical number rules:
+- `scanner_code` = повний реальний EPC;
+- `lower_number` = тільки останні 6 символів реального EPC;
+- `florivo_number` = окремий постійний внутрішній Florivo number;
+- не записувати `florivo_number` у `lower_number`;
+- no RFID read = no invented EPC/lower.
 
-## 6. Захист від подвійного рахунку
+Окреме питання, яке треба дослідити перед DB schema: якщо великий фізично надрукований номер на бірці НЕ є `lower_number` і НЕ є `florivo_number`, для нього потрібне окреме поле на кшталт `physical_tag_number`. Не repurpose existing fields без доказу.
 
-В межах однієї inventory session той самий RFID/EPC не можна зарахувати двічі автоматично.
+## 8. Duplicate protection
+У межах однієї inventory session той самий реальний EPC не рахується двічі.
 
-При повторному скануванні:
+При повторному scan:
 
 ```text
 ⚠ ALLEREDE TELT
-<EPC / lower>
-Bunner stabel · 10 stk
-Telt: <time>
+<tag/lower>
+<zone>
+<physical observation>
+<telt time>
 ```
 
-Повторний scan не додає нову одиницю.
+Майбутня `ENDRE` повинна редагувати наявний record із audit/revision, а не створювати другий count.
 
-Майбутня можливість `ENDRE` може дозволяти відкрити вже порахований запис і виправити кількість без створення дубля.
+## 9. Manual / no-tag
+Коли RFID відсутній/пошкоджений/не читається:
+- створити inventory-only `MAN-xxx`;
+- MAN не є RFID і не є `lower_number`;
+- запис має містити zone + physical type/count;
+- worker може фізично позначити товар MAN-number, щоб не порахувати його повторно.
 
----
+## 10. Unknown / unexpected RFID
+Inventory повинна дозволити записати фізичний факт навіть якщо server не очікує tag.
 
-## 7. Неробоча / відсутня бірка — MANUELL
+Варіанти:
+- `UKJENT I SYSTEMET` — EPC відсутній у current server asset model;
+- `FUNNET PÅ LAGER` — server має, наприклад, `dispatched`, але фізично товар знайдено.
 
-Обов’язковий fallback:
+Це evidence/AVVIK, а не автоматичний LIVE stock mutation.
+
+## 11. Server-side target architecture
+Після UX/zone design наступний етап — окремі server-side inventory records, орієнтовно:
+- inventory sessions;
+- inventory zone runs / zone recount revisions;
+- inventory observations/items;
+- discrepancy/AVVIK result or view;
+- audit trail for any later correction.
+
+Точну Supabase schema спочатку перевірити проти live database reality; не вигадувати production columns/functions і не торкатися frozen Nordic logic.
+
+## 12. Завершення session
+Перед `AVSLUTT INVENTERING` показувати мінімум:
+- зони та їхній статус (не почато / в процесі / завершено / перераховано);
+- unique RFID count;
+- manual count;
+- Bunner total;
+- Hyller total;
+- Forlengere long/short totals;
+- Vrak;
+- unknown/unexpected warnings;
+- незавершені записи/зони.
+
+Після confirm session стає `completed`; історія лишається доступною.
+
+## 13. PC page `INVENTERINGER` — REQUIRED
+На scanner лишається швидке collection UX. На ПК має бути повна сторінка:
 
 ```text
-[ + MANUELL ]
+INVENTERINGER
+  → inventory date/session
+  → warehouse map / zones
+  → SAMMENDRAG
+  → AVVIK
+  → ALLE TELTE
+  → MANUELLE
+  → IKKE FUNNET
+  → zone-specific views
 ```
 
-Використовується, коли:
-- RFID не читається;
-- бірка пошкоджена;
-- бірки фізично немає;
-- є товар, який треба порахувати, але немає надійного RFID.
+Пошук щонайменше по EPC/lower, Florivo number, MAN-number і, якщо буде окремий physical tag number, по ньому теж.
 
-Оператор вибирає фізичний тип і кількість:
+## 14. SERVER EXPECTED ↔ FAKTISK
+Після завершення сервер формує discrepancy report.
 
-```text
-BUNNER STABEL
-або
-BUNNER + HYLLER
-```
+Категорії:
+- `MANGLER` — очікувався, але не знайдений;
+- `FUNNET MEN IKKE FORVENTET` — фізично знайдений, але server не очікував;
+- `UKJENT RFID`;
+- `MANUELT TELT`;
+- `FEIL ANTALL`;
+- zone-specific discrepancy / recount history.
 
-Після підтвердження система створює **тільки inventory manual reference**, наприклад:
+Порівняння має бути доступне для всього warehouse і для кожної zone окремо.
 
-```text
-MAN-001
-MAN-002
-MAN-003
-```
-
-Це НЕ RFID і НЕ `lower_number` для основного складу.
-
-На екрані великими цифрами показується manual number.
-
-Працівник фізично відмічає вже порахований товар наліпкою / маркером з цим номером, щоб не порахувати його вдруге.
-
-Приклад:
-
-```text
-MAN-027
-Bunner stabel
-10 stk
-```
-
----
-
-## 8. Невідомий RFID
-
-Якщо RFID фізично знайдений, але сервер не знає його як поточний складський актив:
-
-```text
-⚠ UKJENT I SYSTEMET
-<EPC>
-
-[ REGISTRER SOM FUNNET ]
-```
-
-Для інвентаризації його потрібно дозволити зафіксувати як фізично знайдений.
-
-Але ця дія:
-- НЕ додає його автоматично у WORK-stock;
-- НЕ змінює `mottak_scans` без окремого рішення;
-- лише створює inventory evidence / discrepancy.
-
----
-
-## 9. Товар зі статусом, який не відповідає фізичній реальності
-
-Наприклад сервер має:
-
-```text
-stock_status = dispatched
-```
-
-але товар фізично знайдено на складі.
-
-У звичайному production-flow це може бути блокуюча проблема.
-
-В INVENTERING навпаки треба дозволити зафіксувати факт:
-
-```text
-⚠ FUNNET PÅ LAGER
-Serverstatus: DISPATCHED
-```
-
-Цей товар потрапляє до AVVIK report.
-
-Принцип:
-
-> Inventering не приховує помилки server state — вона повинна їх знаходити.
-
----
-
-## 10. Підтримка всіх продуктів — майбутня повна версія
-
-Початковий фізичний TEST можна сфокусувати на Bunner / Hyller.
-
-Повна Florivo Inventory повинна в перспективі підтримувати весь актуальний product model:
-
-### RFID products
-- `bunner`
-- `hyller30`
-- `hyller60`
-- `forlengere_korte`
-- `forlengere_lange`
-- `vrak_bunner`
-- `vrak_hyller`
-
-### Quantity-only
-- `forlengere_plast`
-
-Принципи:
-- Forlengere korte/lange — під час inventory фіксувати фактичний фізичний count, який потрібен для реального звіряння;
-- Vrak — рахувати фактичну кількість;
-- Plast — quantity-only/manual count, без fake RFID.
-
-Точний UX цих продуктів визначити після першого Browser TEST Bunner/Hyller.
-
----
-
-## 11. Завершення інвентаризації
-
-Кнопка:
-
-```text
-[ AVSLUTT INVENTERING ]
-```
-
-Перед завершенням бажано показати:
-- кількість унікальних RFID;
-- кількість manual records;
-- загальну кількість Bunner;
-- загальну кількість Hyller;
-- невідомі RFID;
-- попередження про можливі незавершені записи.
-
-Після підтвердження session закривається та сервер формує звіт.
-
----
-
-## 12. Порівняння SERVER ↔ FAKTISK
-
-Після завершення сервер порівнює очікуваний stock state із фактичною inventory session.
-
-Приклад summary:
-
-```text
-INVENTERING <date>
-
-SERVER FORVENTET
-Bunner: 250
-Hyller: 1830
-
-FAKTISK TELT
-Bunner: 247
-Hyller: 1827
-
-AVVIK
-Bunner: -3
-Hyller: -3
-```
-
-Окремі групи розбіжностей:
-
-### MANGLER
-Товар, який сервер очікує на складі, але під час inventory не знайдений.
-
-### FUNNET MEN IKKE FORVENTET
-Фізично знайдений товар, якого сервер не очікує на складі.
-
-### UKJENT RFID
-RFID фізично знайдений, але відсутній у базі/поточному stock model.
-
-### MANUELT TELT
-Записи типу `MAN-xxx` через неробочу/відсутню бірку.
-
-### FEIL ANTALL
-RFID/asset знайдений, але фактична кількість Bunner/Hyller відрізняється від того, що очікує server/product model.
-
----
-
-## 13. WORK correction — тільки після окремого підтвердження
-
-Inventory report сам НЕ коригує основний склад.
+## 15. LIVE correction — окремий audited flow
+`AVSLUTT INVENTERING` ніколи сам не виправляє LIVE stock.
 
 Майбутній flow:
 
 ```text
 INVENTORY COMPLETED
-       ↓
-AVVIK REPORT
-       ↓
-людина перевіряє
-       ↓
-APPROVE CORRECTION
-       ↓
-окремі server-side audited adjustments
+→ AVVIK REPORT
+→ HUMAN REVIEW
+→ APPROVE CORRECTION
+→ AUDITED SERVER-SIDE ADJUSTMENT
 ```
 
-Усі коригування повинні мати audit trail:
-- хто;
-- коли;
-- яка inventory session;
-- старе значення/state;
-- нове значення/state;
-- причина.
+Для кожної correction зберігати:
+- inventory session;
+- zone/record;
+- хто і коли;
+- old state/value;
+- new state/value;
+- reason;
+- approved_by.
 
-Не можна робити silent overwrite залишків.
+Silent overwrite заборонений.
 
----
-
-## 14. Browser TEST — рекомендований перший етап
-
-Перед Android реалізацією створити окрему браузерну TEST-сторінку.
-
-Мета Browser TEST:
-- перевірити реальний обхід складу зі Nordic ID;
-- зрозуміти оптимальну кількість кнопок;
-- перевірити Bunner stabel default 10 + editable;
-- перевірити Bunner + Hyller із довільною фактичною кількістю полиць;
-- перевірити duplicate RFID block;
-- перевірити manual `MAN-xxx` + фізичну наліпку;
-- перевірити unknown RFID;
-- перевірити resume session після випадкового refresh/закриття;
-- перевірити фінальний discrepancy report.
-
-Перший Browser TEST повинен бути TEST-only і не змінювати WORK-stock.
-
----
-
-## 15. Після Browser PHYSICAL PASS → Android
-
-Тільки після фізичного успішного тесту UX/logic переносити в Florivo Android Scanner.
-
-Майбутня Android кнопка:
-
-```text
-📋 INVENTERING
-```
-
-Android-клієнт залишається простим:
-- читає RFID;
-- передає scan + фактичні counts;
-- отримує server validation;
-- показує already counted / unknown / saved;
-- не вирішує сам, як виправляти WORK-stock.
-
-Це узгоджується з `FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md`:
+## 16. Android future
+Після Browser/Web physical pass успішна логіка переноситься в Florivo Android Scanner як тонкий клієнт:
 
 ```text
 SCANNER READS + REQUESTS
-        ↓
-SERVER VALIDATES + DECIDES
-        ↓
-SCANNER SHOWS RESULT
+→ SERVER VALIDATES + DECIDES
+→ SCANNER SHOWS RESULT
 ```
 
----
+Android не стає окремим джерелом складської істини.
 
-## 16. Критичні правила LOCK для майбутньої реалізації
+## 17. FROZEN boundaries
+1. Nordic TIL RAMPE frozen production logic не змінювати.
+2. Nordic TIL LAGER production behavior не змінювати в рамках Inventory.
+3. Inventory TEST не впливає на LIVE stock/statistics/orders.
+4. Не створювати fake RFID/lower.
+5. Не робити global `environment -> mode` migration під виглядом Inventory.
+6. Будь-який LIVE correction — тільки окремо, audited, human-approved.
 
-1. Inventory session є окремою від operational stock.
-2. Scan під час inventory не змінює WORK-stock автоматично.
-3. Один RFID = максимум один активний count у session.
-4. Manual record ніколи не генерує fake RFID/EPC/lower.
-5. Unknown/unexpected RFID треба дозволити записати як physical evidence.
-6. Фактична кількість важливіша за стандартну продуктову норму при inventory.
-7. Bunner stack default = 10, але editable.
-8. Bunner + Hyller дозволяє довільну фактичну кількість Hyller.
-9. Завершена inventory session зберігається в історії.
-10. WORK correction — тільки окремо, audited і після людського підтвердження.
-11. Перший етап — Browser TEST; Android тільки після PHYSICAL PASS.
-12. Чинні Nordic/WORK production-форми залишаються FROZEN і не використовуються як місце для експерименту.
-
----
-
-## 17. Поточний статус
-
-Станом на 14.08.2026:
+## 18. Поточний статус / next sequence
+Станом на 23.08.2026:
 
 ```text
-IDEA CONFIRMED
-→ CONCEPT PROTOCOL CREATED
-→ Browser TEST NOT YET IMPLEMENTED
-→ NO WORK CHANGES
-→ NO DB CHANGES FOR INVENTORY YET
-→ Android Inventory NOT YET IMPLEMENTED
+CONCEPT CREATED
+→ Browser TEST implemented
+→ Browser TEST evolved to V0.11
+→ Nordic physical UX exercised on real device
+→ product/count UX partially refined
+→ zone/workshop segmentation ACCEPTED FOR NEXT DESIGN
+→ server Inventory DB NOT YET CREATED
+→ PC Inventering history/report page NOT YET CREATED
+→ AVVIK engine NOT YET CREATED
+→ LIVE correction flow NOT YET CREATED
+→ NO LIVE INVENTORY MUTATION
 ```
 
-Наступна окрема розмова може почати з проектування Browser TEST, не торкаючись Florivo Android Scanner DEV та поточної Nordic production лінії.
+Рекомендований наступний порядок:
+1. додати zone selection + zone journal + zone recount UX у Browser TEST;
+2. додати current-profile/default quantity per zone (наприклад Produksjon = 1 Bunner + 3 Hyller);
+3. фізично протестувати zone flow на Nordic;
+4. після UX PASS спроектувати server inventory schema (`mode=test/live`);
+5. створити PC `INVENTERINGER` + zone map/report;
+6. додати SERVER EXPECTED ↔ FAKTISK / AVVIK;
+7. лише потім проєктувати audited LIVE correction.
