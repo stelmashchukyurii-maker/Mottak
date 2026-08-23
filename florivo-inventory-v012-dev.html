@@ -39,10 +39,48 @@ async function reconcileAndPush(force=false){if(pushing)return;pushing=true;try{
 async function pullRemote(){if(pushing)return;try{const e=await latestServer();if(!e||!e.payload)return;const local=currentSession();let chosen=local?mergeSameSession(local,e.payload):e.payload;if(local&&local.id!==e.payload.id)chosen=newerSession(local,e.payload);if(!local||JSON.stringify(local)!==JSON.stringify(chosen)){storeSession(chosen);const frame=document.getElementById('ui');try{const modal=frame.contentDocument?.getElementById('modal');if(!modal||!modal.classList.contains('show'))frame.contentWindow.location.reload()}catch{}}lastServerId=e.id}catch(err){console.error('Inventory remote pull failed',err)}}
 function startUi(){if(uiStarted)return;uiStarted=true;const q=location.search||'';document.getElementById('ui').src='florivo-inventory-v012-ui.html'+q}
 async function bootstrap(){try{const e=await latestServer();const local=currentSession();if(e?.payload){const chosen=local?(local.id===e.payload.id?mergeSameSession(local,e.payload):newerSession(local,e.payload)):e.payload;storeSession(chosen)}}catch(err){console.error('Inventory sync bootstrap failed',err)}startUi();setTimeout(()=>reconcileAndPush(true),500)}
+function patchCompletedZoneRecount(){
+  const frame=document.getElementById('ui');
+  try{
+    const d=frame.contentDocument;
+    if(!d||!d.body||d.getElementById('florivo-recount-patch'))return;
+    const s=d.createElement('script');
+    s.id='florivo-recount-patch';
+    s.textContent=`
+      (function(){
+        const oldRenderZoneChooser=renderZoneChooser;
+        renderZoneChooser=function(){
+          oldRenderZoneChooser();
+          if(pendingZone && zoneMeta(pendingZone).status==='completed'){
+            const b=document.getElementById('startZoneBtn');
+            if(b){b.hidden=false;b.textContent=(lang==='uk'?'↻ ПЕРЕРАХУВАТИ ЗОНУ':'↻ RECOUNT SONE')+' · '+pendingZone.toUpperCase();}
+          }
+        };
+        startPendingZone=function(){
+          if(!pendingZone)return;
+          const z=pendingZone,m=zoneMeta(z);
+          if(m.status==='completed'){
+            if(!confirm(t('confirmRecount')))return;
+            selectedZone=z;pendingZone='';
+            m.revision=(m.revision||1)+1;
+            m.status='in_progress';
+            m.startedAt=new Date().toISOString();
+            m.completedAt=null;
+            persist();render();return;
+          }
+          selectedZone=z;pendingZone='';
+          if(m.status==='not_started'){m.status='in_progress';m.startedAt=new Date().toISOString()}
+          persist();render();
+        };
+        render();
+      })();`;
+    d.body.appendChild(s);
+  }catch(e){console.error('Inventory recount patch failed',e)}
+}
 window.addEventListener('storage',e=>{if(e.key===STORE||e.key===CURRENT)setTimeout(()=>reconcileAndPush(),30)});
 setInterval(()=>reconcileAndPush(),1000);
 setInterval(()=>pullRemote(),2500);
-document.getElementById('ui').addEventListener('load',()=>{try{const w=document.getElementById('ui').contentWindow;if(!w)return;const p=w.location.pathname||'';if(!p.endsWith('/florivo-inventory-v012-ui.html'))location.href=w.location.href}catch{}});
+document.getElementById('ui').addEventListener('load',()=>{try{const w=document.getElementById('ui').contentWindow;if(!w)return;const p=w.location.pathname||'';if(!p.endsWith('/florivo-inventory-v012-ui.html')){location.href=w.location.href;return}patchCompletedZoneRecount()}catch{}});
 bootstrap();
 </script>
 </body>
