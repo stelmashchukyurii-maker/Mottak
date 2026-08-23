@@ -2,7 +2,7 @@
 
 **Репозиторій:** `stelmashchukyurii-maker/Mottak`  
 **Гілка:** `main`  
-**Оновлено:** 21.08.2026 Europe/Oslo
+**Оновлено:** 23.08.2026 Europe/Oslo
 
 ## 0. READ FIRST — canonical rules
 Before changing any existing subsystem, read in this order:
@@ -203,20 +203,50 @@ Critical UT rule:
 - Android scanner does not choose or recreate the customer;
 - for TIL RAMPE / DISPATCH scanner sends `order_id` + physical RFID/action, and server resolves destination.
 
-## 15. Florivo Inventory / Inventering — CONCEPT
-Concept protocol:
+## 15. Florivo Inventory / Inventering — ACTIVE DEV
+Active protocol:
 `FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md`
 
 Next-chat handoff:
 `NEXT_CHAT_FLORIVO_INVENTORY.txt`
 
-Status:
-- concept / TEST design;
-- monthly/periodic physical warehouse count;
-- inventory records physical evidence without automatically changing WORK stock;
-- duplicate RFID inside one inventory session must not count twice;
-- mismatch becomes AVVIK, not silent stock mutation;
-- any later WORK correction must be separate, audited and human-approved.
+Current page:
+`florivo-inventory-test.html`
+
+Status 23.08.2026:
+- Browser TEST implemented and evolved to V0.11;
+- real Nordic ID physical UX has been exercised;
+- TEST/localStorage only; no Inventory DB and no LIVE mutation yet;
+- persistent product mode, duplicate RFID block, MAN-xxx, bilingual UI, compact journal;
+- 1 Bunner + Hyller quick 3/4/5 + 30/60;
+- Bunner stabel default 10;
+- Bunner vrak default 10;
+- Forlengere lange/korte store separate `antall forlengere` and `antall hyller` (15/16 quick hyller);
+- Bunner uten brikke is manual-only.
+
+New accepted architecture:
+- one inventory session is split into physical warehouse zones;
+- initial zones: Varemottak, Plukk, Produksjon, Kald, Varm;
+- every observation belongs to a zone;
+- zone may be recounted/revised without silently overwriting other zones;
+- PC reporting must support whole warehouse and per-zone views;
+- future warehouse map should follow a real user-supplied floor sketch;
+- repeated configuration in a zone may use a persistent current profile/default count, e.g. Produksjon = `1 Bunner + 3 Hyller`, while each RFID remains an individual record.
+
+Safety:
+- new Inventory session/process uses `mode='test'|'live'`;
+- TEST never affects LIVE stock;
+- mismatch becomes AVVIK, not silent mutation;
+- any later LIVE correction is separate, audited and human-approved.
+
+Next sequence:
+1. Browser zone selection / zone journal / recount UX;
+2. per-zone current profile/default count;
+3. Nordic physical test;
+4. server Inventory schema;
+5. PC `INVENTERINGER` with zone map/history;
+6. SERVER EXPECTED ↔ FAKTISK / AVVIK;
+7. separate audited LIVE correction flow.
 
 ## 16. Protocol governance / change-control
 Already working production behavior must not be changed on a guess.
