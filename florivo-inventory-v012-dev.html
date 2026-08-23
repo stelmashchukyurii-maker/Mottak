@@ -72,6 +72,8 @@ function patchCompletedZoneRecount(){
           if(m.status==='not_started'){m.status='in_progress';m.startedAt=new Date().toISOString()}
           persist();render();
         };
+        const recountButton=document.getElementById('startZoneBtn');
+        if(recountButton)recountButton.onclick=startPendingZone;
         render();
       })();`;
     d.body.appendChild(s);
