@@ -369,3 +369,54 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ensureVersionLogLink, { once: true });
   else ensureVersionLogLink();
 })();
+
+(() => {
+  if (window.__FLORIVO_SCANNER_HOME_MAIN_LINK__) return;
+  window.__FLORIVO_SCANNER_HOME_MAIN_LINK__ = true;
+
+  function isMainPage() {
+    const file = location.pathname.split("/").filter(Boolean).pop() || "";
+    return !window.frameElement && (file === "index.html" || file === "Mottak" || file === "");
+  }
+
+  function ensureScannerHome() {
+    if (!isMainPage()) return;
+
+    if (!document.getElementById("florivoScannerHomeLink")) {
+      const anchor = document.getElementById("florivoInventoryScannerLink") || document.querySelector("a.presentation-link");
+      if (anchor) {
+        const link = document.createElement("a");
+        link.id = "florivoScannerHomeLink";
+        link.className = "presentation-link";
+        link.href = "scanner-home.html";
+        link.textContent = "📡 NORDIC SCANNER HOME";
+        link.style.marginLeft = "8px";
+        link.style.borderColor = "rgba(117,183,255,.82)";
+        link.style.background = "rgba(117,183,255,.1)";
+        link.style.color = "#cce6ff";
+        anchor.insertAdjacentElement("afterend", link);
+      }
+    }
+
+    if (typeof pages !== "undefined" && Array.isArray(pages) && !pages.some(page => page.id === "scanner-home")) {
+      const page = {
+        id: "scanner-home",
+        section: "latest",
+        title: "NORDIC ID — SCANNER HOME",
+        description: "Hovedmeny for Nordic-skanneren: TIL LAGER, TIL RAMPE og Inventering.",
+        href: "scanner-home.html",
+        file: "scanner-home.html",
+        icon: "📡",
+        type: "approved",
+        status: "HOVEDMENY SCANNER",
+        tags: ["NORDIC ID", "TIL LAGER", "TIL RAMPE", "INVENTERING"]
+      };
+      const i = pages.findIndex(p => p.section === "latest");
+      pages.splice(i >= 0 ? i : 0, 0, page);
+      if (typeof render === "function") render();
+    }
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ensureScannerHome, { once: true });
+  else ensureScannerHome();
+})();
