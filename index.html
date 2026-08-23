@@ -96,13 +96,13 @@
 </head>
 <body class="notranslate">
 <main class="app">
-  <span class="version">Hovedmeny v22.3 STABIL · Oppdatert 23.08.2026 kl. 10:16</span>
+  <span class="version">Hovedmeny v22.4 STABIL · Oppdatert 23.08.2026 kl. 10:47</span>
   <h1>Florivo</h1>
   <a class="presentation-link" href="https://drive.google.com/file/d/1Js2sVvUDo_nLFwx3oOtfXgt6GYsQQVZS/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">▶ PRESENTASJON</a>
   <a id="florivoVersionLogLink" class="presentation-link" href="teknisk-versjonslogg.html" style="margin-left:8px;border-color:rgba(117,183,255,.72);background:rgba(117,183,255,.08);color:#b9dcff">📘 VERSJONSLOGG</a>
   <a id="florivoInventeringerLink" class="presentation-link" href="florivo-inventeringer.html" style="margin-left:8px;border-color:rgba(72,213,151,.72);background:rgba(72,213,151,.08);color:#bff5dc">📋 INVENTERINGER</a>
   <p class="subtitle">De viktigste sidene ligger øverst. Alt annet kan skjules.</p>
-  <div class="help">Tre festede sider vises alltid øverst. Resten av hovedmenyen er skjult som standard og åpnes med pilen nedenfor.</div>
+  <div class="help">Inventeringer ligger også under <strong>Siste arbeidslenke</strong> med 📌-knapp, slik at siden kan festes øverst. Resten av hovedmenyen åpnes med pilen nedenfor.</div>
 
   <section class="pinned" id="pinned" hidden>
     <h2>📌 Festede sider</h2>
@@ -149,6 +149,7 @@ const DEFAULT_PINS=["camera-v4","ut-office","ut-warehouse"];
 
 const pages=[
 {id:"camera-v4",section:"latest",title:"SISTE ARBEIDSLENKE — KAMERA CLOUD v4.6",description:"Siste korrigerte kameraversjon. Foto kobles til eksisterende Nordic ID-post uten å opprette duplikat.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"SISTE VERSJON",tags:["FELLES SKY / TABELL"]},
+{id:"inventory-web",section:"latest",title:"INVENTERINGER — KART / TABELL",description:"Ny PC/web-side for inventering per sone. Bytt mellom visuelt lagerkart og tallvisning. DEV/TEST uten LIVE-mutasjon.",href:"florivo-inventeringer.html",file:"florivo-inventeringer.html",icon:"📋",type:"info",status:"DEV / TEST",tags:["SONER","KART","TABELL"]},
 {id:"inn-camera",section:"inn",title:"INN — KAMERA / TELEFON",description:"Fotografer etiketten, les numrene med Gemini og arbeid mot den felles Mottak-tabellen.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"GODKJENT",tags:["TELEFON","FELLES SKY"]},
 {id:"inn-nordic",section:"inn",title:"INN — NORDIC ID-SKANNER",description:"Firmaskanner Nordic ID. Skanningen opprettes som pending og kan kompletteres med foto fra telefonen.",href:"mottak-live-v2.html",file:"mottak-live-v2.html",icon:"▥",type:"test",status:"TEST",tags:["FIRMASKANNER","PENDING"]},
 {id:"inn-menu",section:"inn",title:"INN — MENY / KONTROLL",description:"Samlet INN-meny for kamera, Nordic ID, kontroll og historikk.",href:"inn.html",file:"inn.html",icon:"✓",type:"approved",status:"GODKJENT",tags:["MENY","KONTROLL"]},
@@ -158,7 +159,7 @@ const pages=[
 {id:"review",section:"overview",title:"TESTER — ALLE SIDER OG KOMMENTARER",description:"Oversikt over tidligere sider, status, kommentarer og utført arbeid.",href:"shared-page.html?src=review-pages.html",file:"review-pages.html",icon:"🧪",type:"info",status:"OVERSIKT",tags:["KOMMENTARER","STATUS"]},
 {id:"presentation",section:"overview",title:"PROSJEKTPRESENTASJON",description:"Presentasjon og oversikt over publiserte sider i prosjektet.",href:"shared-page.html?src=presentasjon.html",file:"presentasjon.html",icon:"📊",type:"info",status:"PRESENTASJON",tags:["PROSJEKT"]},
 {id:"old-start",section:"archive",title:"TEST — GAMMEL HOVEDMENY",description:"Tidligere hovedmeny.",href:"start.html",file:"start.html",icon:"🏠",type:"test",status:"TEST / ARKIV",tags:["GAMMEL"]},
-{id:"old-phone",section:"archive",title:"TEST — LOKAL TELEFONSKANNER",description:"Tidligere telefonside med lokal lagring.",href:"mottak.html",file:"mottak.html",icon:"📱",type:"test",status:"TEST / RESERVE",tags:["LOCALSTORAGE"]},
+{id:"old-phone",section:"archive",title:"TEST — LOKAL TELEFОНSKANNER",description:"Tidligere telefonside med lokal lagring.",href:"mottak.html",file:"mottak.html",icon:"📱",type:"test",status:"TEST / RESERVE",tags:["LOCALSTORAGE"]},
 {id:"camera-v2",section:"archive",title:"TEST — CAMERA LIVE v2",description:"Eldre skytilkoblet kameraversjon.",href:"camera-live.html",file:"camera-live.html",icon:"📷",type:"test",status:"TEST / ARKIV",tags:["GAMMEL KAMERA"]},
 {id:"mottak-live-v1",section:"archive",title:"TEST — MOTTAK LIVE v1",description:"Første eksperimentelle versjon.",href:"mottak-live.html",file:"mottak-live.html",icon:"☁️",type:"test",status:"TEST / ARKIV",tags:["GAMMEL"]},
 {id:"bulk-v2",section:"archive",title:"TEST — NORDIC ID BULK v2",description:"Tidligere test av masseskanning.",href:"nordic-id-bulk-scanner-v2.html",file:"nordic-id-bulk-scanner-v2.html",icon:"▥",type:"test",status:"TEST",tags:["BULK"]},
