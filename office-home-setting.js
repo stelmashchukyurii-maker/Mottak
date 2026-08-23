@@ -420,3 +420,11 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ensureScannerHome, { once: true });
   else ensureScannerHome();
 })();
+
+(() => {
+  function cleanTopShortcuts() {
+    ["florivoInventeringerLink","florivoInventoryScannerLink","florivoScannerHomeLink"].forEach(id => document.getElementById(id)?.remove());
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", cleanTopShortcuts, { once: true });
+  else cleanTopShortcuts();
+})();
