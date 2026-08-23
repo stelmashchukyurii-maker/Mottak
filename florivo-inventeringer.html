@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="nb" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="google" content="notranslate">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Florivo — Inventeringer</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151c30;--panel2:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--line:#303b59;--yellow:#f4c430;--green:#48d597;--red:#ff7373;--blue:#79b8ff;--plukk:#203d5a;--varm:#514422;--kald:#203a58;--roz:#3b3f4a;--prod:#244b38;--cc:#42345c;--dem:#4b3854}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}body{background:linear-gradient(180deg,#0b1020,#11182a)}button,a{font:inherit}.app{width:min(1120px,100%);margin:auto;padding:14px 12px 54px}.version{color:var(--muted);font-size:10px;text-align:center;margin:2px 0 7px}h1{margin:4px 0;color:var(--yellow);font-size:clamp(30px,7vw,50px)}.sub{margin:0;color:var(--muted);line-height:1.45}.banner{margin:12px 0;padding:11px 13px;border:1px solid var(--green);border-radius:14px;background:rgba(72,213,151,.06);color:#c9f7e2;font-weight:900;font-size:12px}.modebar{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;background:rgba(11,16,32,.96)}.mode{min-height:58px;border:2px solid var(--line);border-radius:16px;background:var(--panel);color:var(--muted);font-size:17px;font-weight:1000}.mode.active{border-color:var(--yellow);background:rgba(244,196,48,.10);color:#fff3b0}.panel{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.panel[hidden]{display:none}.panelHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.panelHead strong{color:var(--yellow);font-size:18px}.status{padding:6px 9px;border:1px solid var(--blue);border-radius:999px;color:#bdddff;background:rgba(121,184,255,.08);font-size:10px;font-weight:900}.warehouse{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:110px 145px 165px 210px;gap:6px;border:2px solid var(--line);border-radius:18px;padding:6px;background:#080d18;overflow:hidden}.zone{position:relative;display:flex;align-items:center;justify-content:center;min-height:80px;padding:12px;border:2px solid rgba(255,255,255,.18);border-radius:14px;color:white;text-align:center;font-size:clamp(18px,3.5vw,31px);font-weight:1000;cursor:pointer;transition:.12s}.zone:hover,.zone.selected{outline:3px solid var(--yellow);outline-offset:-3px}.zone small{display:block;margin-top:5px;color:#dce4f5;font-size:10px;font-weight:800}.plukk{grid-column:1/3;background:var(--plukk)}.varm{background:var(--varm)}.kald{background:var(--kald)}.roz{grid-row:3/5;background:var(--roz);display:block;padding-top:26px}.produksjon{background:var(--prod)}.cc{background:var(--cc)}.dem{position:absolute;left:13%;right:18%;bottom:12%;height:38%;min-height:92px;background:var(--dem);font-size:clamp(16px,2.7vw,25px)}.rampsTitle{margin:14px 0 7px;text-align:center;color:var(--muted);font-size:12px;font-weight:1000}.ramps{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.ramp{min-height:62px;display:grid;place-items:center;border:2px solid var(--line);border-radius:13px;background:var(--panel2);color:#fff;font-size:20px;font-weight:1000}.selection{margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--muted)}.selection b{color:#fff3b0}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:900px;background:var(--panel2)}th,td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:right;font-size:12px}th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:#10182b;font-weight:1000}th{color:#fff3b0;background:#10182b;font-size:10px;text-transform:uppercase}td{color:#dfe7ff}.notready{color:var(--muted);font-style:italic}.hint{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.5}.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.nav a{min-height:48px;display:grid;place-items:center;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);text-decoration:none;font-weight:900}.nav a:first-child{border-color:var(--yellow);color:#fff3b0}.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.legend span{padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px}@media(max-width:620px){.warehouse{grid-template-rows:86px 112px 135px 175px;gap:4px;padding:4px}.zone{padding:7px;border-radius:10px}.dem{left:8%;right:8%;bottom:8%;height:39%;min-height:70px}.ramps{gap:4px}.ramp{min-height:48px;font-size:15px}.mode{min-height:52px;font-size:14px}.nav{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="notranslate">
+<main class="app">
+<div class="version">Florivo Inventeringer · PC/WEB DEV V0.1 · 23.08.2026 · NO LIVE MUTATION</div>
+<h1>📋 INVENTERINGER</h1>
+<p class="sub">Fysisk inventering per sone. Visuelt lagerkart og tabell er to visninger av samme fremtidige serverdata.</p>
+<div class="banner">🧪 DEV / TEST · Denne siden viser foreløpig struktur og soner. Ingen LIVE/WORK-lagerdata endres her.</div>
+<div class="modebar">
+<button class="mode active" id="visualBtn" type="button">🗺 VISUALISERING</button>
+<button class="mode" id="tableBtn" type="button">☷ TABELL</button>
+</div>
+<section class="panel" id="visualPanel">
+<div class="panelHead"><strong>LAGERKART</strong><span class="status">SERVERDATA KOMMER</span></div>
+<div class="warehouse" id="warehouse">
+<div class="zone plukk" data-zone="Plukk">PLUKK<small>øverst i lageret</small></div>
+<div class="zone varm" data-zone="Varm">VARM</div>
+<div class="zone kald" data-zone="Kald">KALD</div>
+<div class="zone roz" data-zone="Rozbirka">ROZBIRKA<small>arbeidsområde</small><div class="zone dem" data-zone="Demontering">DEMONTERING</div></div>
+<div class="zone produksjon" data-zone="Produksjon">PRODUKSJON</div>
+<div class="zone cc" data-zone="CC">CC</div>
+</div>
+<div class="rampsTitle">RAMPER · samme nummer som i UT KONTOR</div>
+<div class="ramps" aria-label="Ramper 28 til 34"><div class="ramp">28</div><div class="ramp">29</div><div class="ramp">30</div><div class="ramp">31</div><div class="ramp">32</div><div class="ramp">33</div><div class="ramp">34</div></div>
+<div class="selection" id="selection">Velg en sone på kartet. <b>Ingen tall vises som om de var ekte før serverkoblingen er klar.</b></div>
+<div class="legend"><span>PLUKK</span><span>VARM</span><span>KALD</span><span>ROZBIRKA</span><span>DEMONTERING</span><span>PRODUKSJON</span><span>CC</span></div>
+</section>
+<section class="panel" id="tablePanel" hidden>
+<div class="panelHead"><strong>SONER · TALLVISNING</strong><span class="status">IKKE TILKOBLET</span></div>
+<div class="tableWrap"><table>
+<thead><tr><th>Sone</th><th>Status</th><th>RFID</th><th>Manuell</th><th>Bunner</th><th>Hyller</th><th>Forl. korte</th><th>Forl. lange</th><th>Avvik</th></tr></thead>
+<tbody id="zoneRows"></tbody>
+</table></div>
+<p class="hint">Når server-session er koblet til, skal denne tabellen vise samme inventering som kartet: hele lageret eller valgt sone/recount. Inntil da bruker vi «—» i stedet for falske 0-tall.</p>
+</section>
+<div class="nav"><a href="index.html">⌂ FLORIVO HOVEDMENY</a><a href="scanner-home.html">📡 NORDIC ID SCANNER</a></div>
+</main>
+<script>
+'use strict';
+const zones=['Plukk','Varm','Kald','Rozbirka','Demontering','Produksjon','CC'];
+const visualBtn=document.getElementById('visualBtn'),tableBtn=document.getElementById('tableBtn'),visualPanel=document.getElementById('visualPanel'),tablePanel=document.getElementById('tablePanel'),selection=document.getElementById('selection');
+function show(mode){const visual=mode==='visual';visualBtn.classList.toggle('active',visual);tableBtn.classList.toggle('active',!visual);visualPanel.hidden=!visual;tablePanel.hidden=visual;try{localStorage.setItem('florivo_inventory_pc_view_v01',mode)}catch{}}
+visualBtn.onclick=()=>show('visual');tableBtn.onclick=()=>show('table');
+document.getElementById('zoneRows').innerHTML=zones.map(z=>`<tr><td>${z}</td><td class="notready">ikke koblet</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>`).join('');
+document.getElementById('warehouse').addEventListener('click',e=>{const el=e.target.closest('[data-zone]');if(!el)return;e.stopPropagation();document.querySelectorAll('[data-zone]').forEach(x=>x.classList.toggle('selected',x===el));selection.innerHTML=`Valgt sone: <b>${el.dataset.zone}</b> · tall, AVVIK og recount kobles inn når server-session er klar.`;});
+let saved='visual';try{saved=localStorage.getItem('florivo_inventory_pc_view_v01')||'visual'}catch{}show(saved==='table'?'table':'visual');
+</script>
+</body>
+</html>
