@@ -96,13 +96,14 @@
 </head>
 <body class="notranslate">
 <main class="app">
-  <span class="version">Hovedmeny v22.4 STABIL · Oppdatert 23.08.2026 kl. 10:47</span>
+  <span class="version">Hovedmeny v22.5 STABIL · Oppdatert 23.08.2026 kl. 14:47</span>
   <h1>Florivo</h1>
   <a class="presentation-link" href="https://drive.google.com/file/d/1Js2sVvUDo_nLFwx3oOtfXgt6GYsQQVZS/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">▶ PRESENTASJON</a>
   <a id="florivoVersionLogLink" class="presentation-link" href="teknisk-versjonslogg.html" style="margin-left:8px;border-color:rgba(117,183,255,.72);background:rgba(117,183,255,.08);color:#b9dcff">📘 VERSJONSLOGG</a>
   <a id="florivoInventeringerLink" class="presentation-link" href="florivo-inventeringer.html" style="margin-left:8px;border-color:rgba(72,213,151,.72);background:rgba(72,213,151,.08);color:#bff5dc">📋 INVENTERINGER</a>
+  <a id="florivoInventoryScannerLink" class="presentation-link" href="florivo-inventory-v012-dev.html" style="margin-left:8px;border-color:rgba(244,196,48,.82);background:rgba(244,196,48,.1);color:#ffe17a">📡 INVENTERING SCANNER</a>
   <p class="subtitle">De viktigste sidene ligger øverst. Alt annet kan skjules.</p>
-  <div class="help">Inventeringer ligger også under <strong>Siste arbeidslenke</strong> med 📌-knapp, slik at siden kan festes øverst. Resten av hovedmenyen åpnes med pilen nedenfor.</div>
+  <div class="help">Både <strong>Inventeringer — kart/tabell</strong> og <strong>Inventering — scanner/manuell</strong> ligger under <strong>Siste arbeidslenke</strong> med 📌-knapp, slik at de kan festes øverst. Resten av hovedmenyen åpnes med pilen nedenfor.</div>
 
   <section class="pinned" id="pinned" hidden>
     <h2>📌 Festede sider</h2>
@@ -149,7 +150,8 @@ const DEFAULT_PINS=["camera-v4","ut-office","ut-warehouse"];
 
 const pages=[
 {id:"camera-v4",section:"latest",title:"SISTE ARBEIDSLENKE — KAMERA CLOUD v4.6",description:"Siste korrigerte kameraversjon. Foto kobles til eksisterende Nordic ID-post uten å opprette duplikat.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"SISTE VERSJON",tags:["FELLES SKY / TABELL"]},
-{id:"inventory-web",section:"latest",title:"INVENTERINGER — KART / TABELL",description:"Ny PC/web-side for inventering per sone. Bytt mellom visuelt lagerkart og tallvisning. DEV/TEST uten LIVE-mutasjon.",href:"florivo-inventeringer.html",file:"florivo-inventeringer.html",icon:"📋",type:"info",status:"DEV / TEST",tags:["SONER","KART","TABELL"]},
+{id:"inventory-web",section:"latest",title:"INVENTERINGER — KART / TABELL",description:"PC/web-side for inventering per sone. Bytt mellom visuelt lagerkart og tallvisning.",href:"florivo-inventeringer.html",file:"florivo-inventeringer.html",icon:"📋",type:"info",status:"OVERSIKT",tags:["SONER","KART","TABELL"]},
+{id:"inventory-scanner",section:"latest",title:"INVENTERING — SCANNER / MANUELL",description:"Arbeidssiden for Nordic og telefon: soner, manuell telling, RFID og recount.",href:"florivo-inventory-v012-dev.html",file:"florivo-inventory-v012-dev.html",icon:"📡",type:"approved",status:"ARBEID",tags:["SONER","MANUELL","RFID","RECOUNT"]},
 {id:"inn-camera",section:"inn",title:"INN — KAMERA / TELEFON",description:"Fotografer etiketten, les numrene med Gemini og arbeid mot den felles Mottak-tabellen.",href:"camera-live-v4.html",file:"camera-live-v4.html",icon:"📷",type:"approved",status:"GODKJENT",tags:["TELEFON","FELLES SKY"]},
 {id:"inn-nordic",section:"inn",title:"INN — NORDIC ID-SKANNER",description:"Firmaskanner Nordic ID. Skanningen opprettes som pending og kan kompletteres med foto fra telefonen.",href:"mottak-live-v2.html",file:"mottak-live-v2.html",icon:"▥",type:"test",status:"TEST",tags:["FIRMASKANNER","PENDING"]},
 {id:"inn-menu",section:"inn",title:"INN — MENY / KONTROLL",description:"Samlet INN-meny for kamera, Nordic ID, kontroll og historikk.",href:"inn.html",file:"inn.html",icon:"✓",type:"approved",status:"GODKJENT",tags:["MENY","KONTROLL"]},
