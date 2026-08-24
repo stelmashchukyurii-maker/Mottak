@@ -144,6 +144,16 @@
     </div>
   </section>
 
+  <section class="section">
+    <div class="section-head"><h2>7. Android-terminal og tilgang</h2><p>Native registrering, NFC-identitet og kontrollert brukerøkt</p></div>
+    <div class="timeline">
+      <article class="entry"><div><div class="ver">Android v0.4</div><div class="module">Mobil lagerregistrering</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Reell lagerregistrering fra native Android</h3><ul><li>Native app registrerte reell vare på lager mot server.</li><li>Serveren tildelte varen et permanent internt løpenummer.</li><li>Intern vareidentitet og fysisk RFID-identitet holdes som separate data.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Android v0.6</div><div class="module">NFC / tilgang</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>NFC-basert brukerinnlogging med serverkobling</h3><ul><li>Native NFC-lesing kobler adgangskort til bruker og rolle på server.</li><li>Kort-/brukerkoblingen overlever reinstallasjon og kan brukes fra en annen terminal mot samme backend.</li><li>Webadministrasjon støtter oppretting av bruker, rollevalg og kontrollert kortkobling.</li><li>Rå kort-ID vises ikke; terminalen sender en SHA-256-basert identifikator til serveren.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Android v0.7.1</div><div class="module">Roller / lager</div><div class="status"><span class="tag stabil">STABIL TESTBASE</span></div></div><div><h3>Rollestyrt registrering og automatisk utlogging</h3><ul><li>Lagerrolle registrerer +1, mens produksjon og admin kan angi antall 1–500; regelen håndheves også server-side.</li><li>Bulkregistrering av ordinære produkter oppretter reelle lagerenheter og interne varenummer, mens quantity-only produkt beholdes i eget antallsregister.</li><li>Resultatvisning, kort grace-periode og automatisk utlogging ved inaktivitet gir en kort kontrollert brukerøkt; BYTT logger ut umiddelbart.</li><li>Versjonen er bevart som stabil test- og rollback-base for videre Android-utvikling.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Android build pipeline</div><div class="module">CI / release</div><div class="status"><span class="tag work">AKTIV</span></div></div><div><h3>Automatisert APK-bygging</h3><ul><li>GitHub Actions bygger Android debug-APK automatisk ved relevante terminalendringer.</li><li>Byggartefakt lagres per kjøring, slik at versjoner kan testes og sammenlignes reproducerbart.</li><li>Stabile versjonsgrener beholdes separat fra videre utviklingsgrener.</li></ul></div></article>
+    </div>
+  </section>
+
   <div class="footer">Teknisk utviklingslogg · hovedversjoner og tekniske milepæler · ingen dato- eller tidsangivelser</div>
 </main>
 </body>
