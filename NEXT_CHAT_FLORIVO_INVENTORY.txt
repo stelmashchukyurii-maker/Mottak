@@ -1,36 +1,42 @@
-FLORIVO-INVENTORY-HANDOFF-2026-08-23-SERVER-SYNC
+FLORIVO-INVENTORY-HANDOFF-2026-08-24-ACTIVE-V012-SERVER-SYNC
 
 READ FIRST:
 1. PROJECT_CANONICAL_RULES.md
 2. BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md
 3. PROTOCOLS.md
-4. FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md
-5. FLORIVO_NUMBER_PROTOCOL.md
-6. NORDIC_ID_RFID_PROTOCOL.md
-7. FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md
+4. FLORIVO_ACTIVE_STATE_AUDIT_2026-08-24.md
+5. FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md
+6. FLORIVO_NUMBER_PROTOCOL.md
+7. NORDIC_ID_RFID_PROTOCOL.md
+8. FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md
 
-CURRENT PAGES:
-- florivo-inventory-sync.html — shared server-synced Inventory scanner/client
-- florivo-inventeringer.html — PC/web visual + table dashboard, reads same server session
-- florivo-inventory-test-v011-stable.html — frozen rollback copy
-- florivo-inventory-v012-dev.html — prior localStorage V0.12 prototype
+CURRENT ACTIVE PAGES:
+- `florivo-inventory-v012-dev.html` — active shared server-synced Inventory scanner/manual client and synchronization bridge.
+- `florivo-inventory-v012-ui.html` — UI loaded inside the active V0.12 bridge.
+- `florivo-inventeringer.html` — PC/web visual + table + printable A4 report, reads the same server session.
+- `florivo-inventory-sync.html` — compatibility redirect to `florivo-inventory-v012-dev.html`; do not describe it as the implementation itself.
+
+ROLLBACK/HISTORY:
+- `florivo-inventory-test-v011-stable.html` — frozen V0.11 rollback copy.
+- old V0.11/localStorage-only architecture is not the current active state.
 
 CURRENT SERVER MILESTONE:
 - Supabase project: BaMavaremottak
-- New append-only table: public.florivo_inventory_events
-- Migration: create_florivo_inventory_event_sync
+- append-only table: `public.florivo_inventory_events`
 - RLS enabled
-- anon/authenticated can SELECT inventory events and INSERT only source='florivo-inventory', mode test/live, event_type='snapshot'
-- No update/delete policy; history is append-only.
-- Current development mode remains mode='test' per canonical safety rule until explicit physical PASS.
+- verified anon/authenticated SELECT policy
+- verified anon/authenticated INSERT policy
+- no UPDATE/DELETE policy
+- current active client writes only `mode='test'`, `source='florivo-inventory'`, `event_type='snapshot'`
 - Inventory server sync does NOT mutate WORK stock, orders, production counters or Nordic WORK flows.
 
 SYNC MODEL:
-- scanner/phone writes a full inventory-session snapshot as an append-only event after each meaningful change;
+- scanner/phone writes a full inventory-session snapshot after meaningful changes;
+- localStorage remains fallback/cache;
+- bootstrap reconciles local and server state;
+- same-session records/zones are merged by the current bridge;
 - PC/web polls latest snapshot approximately every 2.5 seconds;
-- all devices therefore see the same latest inventory session;
-- existing V0.12 localStorage session is uploaded on first use if server has no snapshot, preserving current manual test data;
-- localStorage remains a local fallback/cache.
+- current server session can therefore be shared across phone/scanner/PC when network is available.
 
 CURRENT ZONES:
 - Plukk
@@ -39,7 +45,8 @@ CURRENT ZONES:
 - Demontering
 - Produksjon
 - CC
-Ramper 28–34 are visual orientation references and match UT Kontor ramp numbering.
+
+Ramper 28–34 are visual orientation references matching UT Kontor numbering; they are not current count zones.
 
 CURRENT INVENTORY UX:
 - NO / UK
@@ -51,26 +58,46 @@ CURRENT INVENTORY UX:
 - simulated RFID for non-Nordic testing
 - zone journal and counters
 - zone FULLFØR
-- zone RECOUNT with revision
-- manual batch for 1 Bunner + Hyller: e.g. 50 Bunner × 3 Hyller = 150 Hyller in one manual observation
-- RFID individual identity remains individual; batch manual must never fabricate RFID/EPC.
+- completed-zone RECOUNT with revision
+- manual batch for repeated counts, e.g. 50 Bunner × 3 Hyller = 150 Hyller
+- batch/manual observation never fabricates RFID/EPC
+- individual real RFID identity remains individual
+
+PC/WEB CURRENT:
+`florivo-inventeringer.html` has:
+- visual warehouse map
+- per-zone table
+- recent records
+- same server session
+- A4 printable inventory report
+- detailed registrations
+- signature fields
 
 IMPORTANT RULES:
 - Inventering records physical reality and compares later; it does not silently correct WORK stock.
-- Duplicate RFID in one inventory session must be blocked and point to prior zone/revision.
-- scanner_code = full real EPC.
-- lower_number = last 6 of real EPC only.
-- florivo_number is a separate permanent identity.
+- Duplicate real RFID in one inventory session must be blocked/point to prior record.
+- `scanner_code` = full real EPC.
+- `lower_number` = last 6 of real EPC only.
+- `florivo_number` is separate permanent identity.
+- MAN-xxx is not RFID/lower.
 - no fake RFID/lower.
-- if printed physical tag number is distinct, create a separate field after verification.
+
+PHYSICAL PASS BOUNDARY:
+Current server-sync V0.12 is ACTIVE DEV / TEST, not full PHYSICAL PASS yet.
+Required controlled test:
+1. enter records on phone/Nordic;
+2. verify PC sees same server session/records;
+3. verify duplicate/recount behavior;
+4. verify no unrelated WORK stock/order changes;
+5. verify full Nordic RFID path against current V0.12.
 
 NEXT:
-1. User test: enter on phone/scanner and verify PC sees same records.
-2. Validate full Nordic physical RFID flow against florivo-inventory-sync.html before PHYSICAL PASS.
-3. Improve server architecture from snapshot-events to normalized inventory sessions/observations if concurrency/multi-scanner writing is needed.
-4. Add historical inventory list on PC.
-5. Build SERVER EXPECTED ↔ FAKTISK and AVVIK.
-6. Add separate audited correction flow only after review.
+1. controlled phone/scanner <-> PC physical sync test;
+2. full Nordic RFID physical verification;
+3. historical inventory/session list on PC;
+4. SERVER EXPECTED <-> FAKTISK / AVVIK;
+5. normalized sessions/observations only if concurrency/multi-scanner need is proven;
+6. separate audited LIVE correction flow only after review.
 
 IMPORTANT:
-AVSLUTT INVENTERING never silently corrects LIVE/WORK stock.
+`AVSLUTT INVENTERING` never silently corrects LIVE/WORK stock.
