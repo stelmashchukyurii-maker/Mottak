@@ -2,7 +2,7 @@
 
 Status: STABLE TEST BASELINE + CONTROLLED LIVE PILOT
 Prepared: 2026-08-17 Europe/Oslo
-Updated: 2026-08-21 Europe/Oslo
+Updated: 2026-08-24 Europe/Oslo
 
 ## Goal
 Native Android warehouse terminal for finished-product registration on a shared warehouse phone.
@@ -13,9 +13,10 @@ Native Android warehouse terminal for finished-product registration on a shared 
 - `FLORIVO_NUMBER_PROTOCOL.md`
 - `FLORIVO_TERMINAL_USERS_ACCESS_PROTOCOL.md`
 - `FLORIVO_ANDROID_V071_STABLE_2026-08-21.md`
+- `FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md`
 
 ## Stable Android baseline
-Canonical stable build for further physical testing:
+Canonical stable build for further physical testing remains:
 - version: `v0.7.1`
 - branch: `florivo-v07-role-quantity-autologout`
 - commit: `9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d`
@@ -29,6 +30,15 @@ Do not modify this stable source in place. New Android changes must use a new ve
 - `scanner_code` = real long RFID/EPC when known.
 - `lower_number` = last 6 chars of real RFID/EPC only.
 - Never store Florivo number in `lower_number`.
+
+## Worker-facing number display
+The internal value remains `florivo_number`, but worker-facing Android UI should show it in a simplified form:
+- no `F-` prefix;
+- no leading zeros;
+- example: internal/display legacy `F-000093` -> worker sees `93`.
+
+For a bulk registration, show a plain number range when multiple Florivo numbers were allocated, e.g. `63–92`.
+This is a display rule only; it does not change stored identity or database semantics.
 
 ## User / card access
 Users and card permissions live on the Florivo server, not on a particular phone installation.
@@ -76,6 +86,20 @@ Backend compatibility updates already applied:
 - `mottak_scans.registration_method` accepts `android_bulk`;
 - finished-event quantity accepts non-zero values from -500 through 500.
 
+## Last three own registrations
+Accepted worker UI rule for the next Android version:
+- every logged-in user sees only their own latest three registrations for the current day in Europe/Oslo;
+- server-backed, not local-phone-only;
+- refresh after a successful registration;
+- compact row format: `18:23 · VRAK BUNNER · +1 · 93`;
+- bulk example: `09:40 · BUNNER · +30 · 63–92`.
+
+The user should not see other workers' history through this low-level terminal view.
+Admin-wide journal remains a separate future/admin function and is not part of this worker last-three block.
+
+Prepared read-only RPC:
+- `florivo_terminal_last3_today`.
+
 ## Session behavior
 The terminal is intentionally short-session for shared use:
 - login by NFC card;
@@ -86,7 +110,7 @@ The terminal is intentionally short-session for shared use:
 - relevant interaction resets inactivity;
 - `BYTT` = immediate logout.
 
-This supports the physical pattern: approach -> tap card -> choose product -> receive F-number -> leave terminal safe for next worker.
+This supports the physical pattern: approach -> tap card -> choose product -> receive Florivo number -> leave terminal safe for next worker.
 
 ## Current backend RPC family
 - `florivo_terminal_admin_create_user`
@@ -98,6 +122,31 @@ This supports the physical pattern: approach -> tap card -> choose product -> re
 - `florivo_terminal_register_stock_qty`
 - `florivo_terminal_register_stock`
 - `florivo_terminal_bind_rfid_fifo`
+- `florivo_terminal_last3_today`
+
+## v0.8.0 development state
+Prepared development build:
+- version: `v0.8.0`
+- branch: `florivo-v08-last3-plain-number`
+- successful workflow run: `32754428199`
+- artifact: `Florivo-Android-v0.8.0`
+- Drive APK: `Florivo-Android-v0.8.0.apk`
+- Drive file id: `1OSuRF9R2kNdEMVIWoJxzhjpq-1Fn7Gm-`.
+
+Implemented scope:
+- plain worker number display without `F-` and leading zeros;
+- last three own current-day registrations from server.
+
+Status: BUILD COMPLETE, NOT PHYSICAL PASS.
+Installation on the current test phone has not yet succeeded. Do not promote v0.8.0 to stable until real install and physical behavior are confirmed by the user.
+
+## APK signing/update rule
+Current debug builds may fail to install over an older Florivo Terminal if the APK signing certificate differs.
+For a failed update install:
+- old app may need to be uninstalled before installing the new debug build;
+- server-side Florivo users and NFC card bindings remain intact after reinstall.
+
+Production-ready Android delivery should use one persistent signing key so future versions update in place reliably.
 
 ## LIVE baseline history
 On 2026-08-21 obsolete WORK physical baseline was audit-reset with history preserved under reset key `2026-08-21-live-baseline-reset` in `public.bama_reset_audit`.
@@ -108,8 +157,9 @@ Stable Nordic TIL RAMPE V2.9.7 RFID/scanning behavior and TIL LAGER frozen behav
 Any no-scan / bulk movement option must be implemented as an explicit separate path and must not silently rewrite frozen scanning logic.
 
 ## Next development areas
+- physically install/test v0.8.0;
+- persistent APK signing key/update path;
 - dedicated Device Owner / Lock Task kiosk mode;
 - user photo capture/upload;
 - stronger terminal enrollment / production authorization;
-- no-scan bulk move-to-ramp option as a separate controlled web action;
-- further physical testing of v0.7.1.
+- no-scan bulk move-to-ramp option as a separate controlled web action.
