@@ -1,10 +1,9 @@
 "use strict";
 
 // UT Lager compact stock counter.
-// Business rule 09.08.2026:
-// displayed = current verified in_stock - still-unscanned quantity on active ramp orders.
-// Once an item is scanned to the ramp it becomes staged, leaves in_stock, and also fulfils
-// one unit of that order, so the displayed balance is not subtracted twice.
+// Canonical rule 24.08.2026:
+// use bama_stock_summary() so manual quantity overlay and active-order demand are
+// calculated exactly like UT Kontor. Do not count raw RFID rows independently.
 (() => {
   if (window.__UT_PRODUCT_STOCK_V273__) return;
   window.__UT_PRODUCT_STOCK_V273__ = true;
@@ -24,6 +23,8 @@
     #utProductStockV273 .ups-cell span{display:block;color:#aab4ce;font-size:10px;font-weight:950;line-height:1.1}
     #utProductStockV273 .ups-cell strong{display:block;margin-top:5px;color:#f5f7ff;font-size:24px;line-height:1;font-weight:950}
     #utProductStockV273 .ups-cell:first-child{border-color:#48d597}
+    #utProductStockV273 .ups-cell.shortage{border-color:#ff7373;background:rgba(255,115,115,.06)}
+    #utProductStockV273 .ups-cell.shortage strong{color:#ff9d9d}
     #utProductStockV273 .ups-error{display:none;margin-top:7px;color:#ff9c9c;font-size:10px;text-align:center}
     #utProductStockV273 .ups-error.show{display:block}
   `;
@@ -40,9 +41,9 @@
 
   function titleText(){
     const l = language();
-    if (l === "uk") return "НА СКЛАДІ · МІНУС РАМПИ";
-    if (l === "pl") return "MAGAZYN · MINUS RAMPY";
-    return "PÅ LAGER · MINUS RAMPER";
+    if (l === "uk") return "ДОСТУПНО · СКЛАД − ЗАМОВЛЕННЯ";
+    if (l === "pl") return "DOSTĘPNE · MAGAZYN − ZAMÓWIENIA";
+    return "TILGJENGELIG · PÅ LAGER − BESTILLINGER";
   }
 
   function ensureCard() {
@@ -53,9 +54,9 @@
     card.innerHTML = `
       <div class="ups-head"><span id="upsTitle"></span><span id="upsTime">Laster…</span></div>
       <div class="ups-grid">
-        <div class="ups-cell"><span>B</span><strong id="upsB">—</strong></div>
-        <div class="ups-cell"><span>H×30</span><strong id="upsH30">—</strong></div>
-        <div class="ups-cell"><span>H×60</span><strong id="upsH60">—</strong></div>
+        <div class="ups-cell" data-ups-cell="bunner"><span>B</span><strong id="upsB">—</strong></div>
+        <div class="ups-cell" data-ups-cell="hyller30"><span>H×30</span><strong id="upsH30">—</strong></div>
+        <div class="ups-cell" data-ups-cell="hyller60"><span>H×60</span><strong id="upsH60">—</strong></div>
       </div>
       <div class="ups-error" id="upsError"></div>`;
     const ramps = document.querySelector(".ramps-card");
@@ -64,59 +65,32 @@
     return card;
   }
 
-  async function getJson(path){
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,Accept:"application/json"},
-      cache:"no-store"
+  async function fetchSummary(){
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/bama_stock_summary`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "x-bama-environment": "work"
+      },
+      body: "{}",
+      cache: "no-store"
     });
     const body = await response.json().catch(() => []);
     if (!response.ok) throw new Error(body?.message || `HTTP ${response.status}`);
     return Array.isArray(body) ? body : [];
   }
 
-  function qty(order,key){
-    if (key === "bunner") return Number(order.bunner_stacks) || 0;
-    if (key === "hyller30") return Number(order.hyller30_sets) || 0;
-    return Number(order.hyller60_sets) || 0;
-  }
-
-  function calculate(scans,orders){
-    const verified = (scans || []).filter(row => row.status === "verified");
-    const activeOrders = (orders || []).filter(order => !["completed","cancelled"].includes(order.status));
-
-    const inStock = {
-      bunner: verified.filter(row => row.product === "bunner" && (row.stock_status || "in_stock") === "in_stock").length,
-      hyller30: verified.filter(row => row.product === "hyller30" && (row.stock_status || "in_stock") === "in_stock").length,
-      hyller60: verified.filter(row => row.product === "hyller60" && (row.stock_status || "in_stock") === "in_stock").length
-    };
-
-    const stagedByOrder = new Map();
-    verified.forEach(row => {
-      if (!row.ut_order_id || row.stock_status !== "staged") return;
-      const id = String(row.ut_order_id);
-      if (!stagedByOrder.has(id)) stagedByOrder.set(id,{bunner:0,hyller30:0,hyller60:0});
-      const bucket = stagedByOrder.get(id);
-      if (Object.prototype.hasOwnProperty.call(bucket,row.product)) bucket[row.product] += 1;
-    });
-
-    const outstanding = {bunner:0,hyller30:0,hyller60:0};
-    activeOrders.forEach(order => {
-      const staged = stagedByOrder.get(String(order.id)) || {bunner:0,hyller30:0,hyller60:0};
-      outstanding.bunner += Math.max(0, qty(order,"bunner") - staged.bunner);
-      outstanding.hyller30 += Math.max(0, qty(order,"hyller30") - staged.hyller30);
-      outstanding.hyller60 += Math.max(0, qty(order,"hyller60") - staged.hyller60);
-    });
-
-    return {
-      bunner: Math.max(0, inStock.bunner - outstanding.bunner),
-      hyller30: Math.max(0, inStock.hyller30 - outstanding.hyller30),
-      hyller60: Math.max(0, inStock.hyller60 - outstanding.hyller60)
-    };
-  }
-
   function set(id,value){
     const node = document.getElementById(id);
     if (node && node.textContent !== String(value)) node.textContent = String(value);
+  }
+
+  function applyCell(productId, value, shortage){
+    const cell = document.querySelector(`[data-ups-cell="${productId}"]`);
+    cell?.classList.toggle("shortage", Number(shortage) > 0 || Number(value) < 0);
   }
 
   async function load() {
@@ -126,28 +100,35 @@
     const error = document.getElementById("upsError");
     try {
       set("upsTitle", titleText());
-      const [scans,orders] = await Promise.all([
-        getJson("mottak_scans?select=product,status,stock_status,ut_order_id&limit=10000"),
-        getJson("ut_orders?select=id,status,bunner_stacks,hyller30_sets,hyller60_sets&limit=1000")
-      ]);
-      const values = calculate(scans,orders);
-      set("upsB", values.bunner);
-      set("upsH30", values.hyller30);
-      set("upsH60", values.hyller60);
+      const rows = await fetchSummary();
+      const map = new Map(rows.map(row => [String(row.product_id), row]));
+      const b = map.get("bunner") || {};
+      const h30 = map.get("hyller30") || {};
+      const h60 = map.get("hyller60") || {};
+      set("upsB", Number(b.available_count) || 0);
+      set("upsH30", Number(h30.available_count) || 0);
+      set("upsH60", Number(h60.available_count) || 0);
+      applyCell("bunner", b.available_count, b.shortage_count);
+      applyCell("hyller30", h30.available_count, h30.shortage_count);
+      applyCell("hyller60", h60.available_count, h60.shortage_count);
       set("upsTime", new Intl.DateTimeFormat("nb-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date()));
       if (error) { error.textContent=""; error.classList.remove("show"); }
+      window.dispatchEvent(new CustomEvent("ut-canonical-stock-updated", { detail: { rows } }));
     } catch (e) {
       if (error) { error.textContent="Kunne ikke oppdatere lagerantall."; error.classList.add("show"); }
-      console.warn("UT product stock refresh failed", e);
+      console.warn("UT canonical product stock refresh failed", e);
     } finally {
       busy = false;
     }
   }
 
   window.UT_PRODUCT_STOCK_REFRESH = load;
+  window.UT_PRODUCT_STOCK_CANONICAL = { refresh: load, version: "2.74" };
   document.addEventListener("click", event => {
     if (event.target.closest?.("#utLanguageSwitch,[data-lang],[data-language]")) setTimeout(load,80);
   }, true);
+  window.addEventListener("focus", load);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
   ensureCard();
   load();
   setInterval(load, REFRESH_MS);
