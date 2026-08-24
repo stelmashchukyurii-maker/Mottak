@@ -1,52 +1,69 @@
-FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-21-2326
+FLORIVO-ANDROID-TERMINAL-HANDOFF-2026-08-24-ACTIVE-STATE
 
 IMPORTANT SOURCE LOCATION:
-All files listed below are stored in GitHub repository:
+All files below are stored in GitHub repository:
 `stelmashchukyurii-maker/Mottak`
 branch: `main`
-Do NOT look for them first in File Library or Google Drive.
-Use the connected GitHub source / repository file fetch.
+Use connected GitHub first.
 
 READ FIRST FROM GITHUB MAIN:
-1. FLORIVO_SESSION_ARCHIVE_2026-08-21_2326.md
-2. FLORIVO_ANDROID_V071_STABLE_2026-08-21.md
-3. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
-4. FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md
-5. FLORIVO_NFC_SECURITY_AUDIT_2026-08-21.md
-6. PROJECT_CANONICAL_RULES.md
-7. BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md
+1. PROJECT_CANONICAL_RULES.md
+2. BAMAVAREMOTTAK_TEST_LIVE_PROTOCOL.md
+3. PROTOCOLS.md
+4. FLORIVO_ACTIVE_STATE_AUDIT_2026-08-24.md
+5. FLORIVO_ANDROID_TERMINAL_PROTOCOL.md
+6. FLORIVO_ANDROID_V071_STABLE_2026-08-21.md
+7. FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md
+8. FLORIVO_NFC_SECURITY_AUDIT_2026-08-21.md
+9. FLORIVO_RAMP_NO_SCAN_BULK_PROTOCOL.md
 
 STABLE ANDROID BASELINE:
 - Florivo Android v0.7.1 is the stable TEST baseline.
-- NFC login works physically.
+- branch: florivo-v07-role-quantity-autologout
+- commit: 9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d
+- NFC login physically works.
 - Lager = +1 only.
 - Produksjon/Admin = ANTALL 1–500.
-- confirmation 8 sec + 4 sec grace, then logout.
+- confirmation 8 sec + 4 sec grace, then logout if no next action.
 - idle login timeout 12 sec.
-- card link/users survive reinstall/new phone because they are server-side.
-- active Android sends SHA-256 card identifier, not raw UID.
-- DO NOT modify v0.7.1 in place; next Android change = new version.
+- BYTT = immediate logout.
+- card users/bindings are server-side and survive reinstall/another terminal using same backend.
+- Android sends SHA-256 card identifier, not raw UID.
+- DO NOT modify v0.7.1 in place; next Android change = new version/branch.
 
-NFC SECURITY CLEANUP COMPLETED:
-- old Web NFC raw-UID prototype archived/inert;
-- legacy raw UID DB rows/log UID values cleared;
+NFC SECURITY:
+- old raw-UID browser prototype archived/inert;
+- legacy raw UID DB rows/log values cleared;
 - legacy raw UID RPC access revoked;
-- live card table direct anon/auth access revoked;
-- current live bindings are SHA-256 only.
-- old public Git history is not rewritten; do not reintroduce raw UID anywhere.
+- direct anon/auth access to live card table revoked;
+- current live card bindings are SHA-256 identifiers;
+- public Git history is not rewritten; do not reintroduce raw UID.
 
-UT KONTOR:
-- bestilling.html = WORKING v37.3.
-- Brukere / Tilganger button remains active.
-- New option A implemented ONLY for one selected NEW order:
-  FLYTT HELE ORDREN TIL RAMPE · UTEN SKANNING
-- NEVER move whole warehouse.
-- Backend RPC: office_stage_order_without_scanning(uuid)
-- UI module: ut-kontor-stage-all-no-scan.js
-- Existing Nordic TIL RAMPE V2.9.7 is frozen and untouched.
+UT KONTOR CURRENT:
+- `bestilling.html` = WORKING v37.6.
+- BRUKERE / TILGANGER remains active -> `florivo-terminal-users.html`.
+- Current no-scan option is accepted OPTION A only:
+  `FLYTT HELE ORDREN TIL RAMPE · UTEN SKANNING`
+- scope = exact still-required quantity for one selected NEW order only.
+- NEVER whole warehouse.
+- UI module: `ut-kontor-stage-all-no-scan.js`
+- backend RPC: `office_stage_order_without_scanning(uuid)`
+- existing Nordic TIL RAMPE V2.9.7 remains frozen and separate.
+- feature implemented, but PHYSICAL PASS still pending controlled real test.
 
-NEXT PHYSICAL PASS:
-UT KONTOR NO-SCAN WHOLE ORDER — PHYSICAL PASS.
-Create/use one small NEW order, note stock before, press the no-scan button, confirm, then verify exactly that order quantity becomes staged and no unrelated stock/order changes.
+INVENTORY CURRENT:
+- active scanner/manual: `florivo-inventory-v012-dev.html`
+- PC/web: `florivo-inventeringer.html`
+- shared TEST server snapshots in `public.florivo_inventory_events`
+- no automatic WORK stock correction.
+See `FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md` and `NEXT_CHAT_FLORIVO_INVENTORY.txt`.
 
-Do not call this new no-scan option stable/physical PASS until the real phone/web + real database test succeeds.
+SECURITY REVIEW NOTE 24.08.2026:
+Supabase Advisor reports multiple `SECURITY DEFINER` RPCs currently executable by anon/authenticated and mutable search_path on `set_ut_updated_at`.
+Do NOT blindly revoke grants because some are required by current browser flows. First map active page -> RPC -> required role -> mutation scope, then change only proven excess permissions with regression testing.
+See `FLORIVO_ACTIVE_STATE_AUDIT_2026-08-24.md`.
+
+NEXT PHYSICAL PASS FOR NO-SCAN:
+Use one small NEW order, note stock/order/ramp before, run no-scan whole-order action, then verify exactly that order quantity is staged and no unrelated stock/order changed.
+
+Never call a new path PHYSICAL PASS without explicit real-device/real-database confirmation.
