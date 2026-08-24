@@ -2,6 +2,7 @@
 
 Status: ACTIVE
 Fixed: 2026-08-21 Europe/Oslo
+Updated: 2026-08-24 Europe/Oslo
 
 ## Purpose
 This file defines which project documents win when multiple protocols, archives, DEV notes, audit snapshots, or old implementation details disagree.
@@ -79,3 +80,23 @@ Before changing an existing subsystem:
 6. query live DB state when the task depends on current stock/schema.
 
 This is mandatory specifically to prevent old archived decisions from overriding newer project-wide rules.
+
+## 8. Technical development log maintenance — ACTIVE RULE
+The public technical development log is governed by:
+`FLORIVO_TECHNICAL_VERSION_LOG_PROTOCOL.md`.
+
+After every significant new version or technical milestone, the change must be evaluated for inclusion in the technical development log.
+
+Rules:
+- do not rebuild the entire history from scratch for every update;
+- append/update the existing curated history incrementally using current protocols + Git evidence;
+- update Norwegian and Ukrainian log content together;
+- do not create separate entries for every small commit, cache bust, text correction, color/spacing change, or deployment-only rebuild;
+- group nearby versions when they represent the same development direction;
+- never mark a version `STABIL` / `PHYSICAL PASS` without explicit evidence;
+- visible technical log remains neutral: no old project/company name, no current product/project brand, no calendar dates, no clock times, and no presentation/analytics history.
+
+The stable public entry remains:
+`teknisk-versjonslogg.html`.
+
+The same log is linked from both the normal main page and the presentation main page, so one log-content update serves both entry points.
