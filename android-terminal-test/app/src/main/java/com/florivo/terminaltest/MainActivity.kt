@@ -83,17 +83,32 @@ private data class UserSession(
 }
 
 private data class Product(val key: String, val name: String, val icon: String, val wide: Boolean = false)
+
+private fun plainNumber(value: String): String {
+    val trimmed = value.trim().removePrefix("F-").trimStart('0')
+    return trimmed.ifBlank { "0" }
+}
+
 private data class RegisterResult(
     val quantity: Int,
     val firstDisplayNumber: String,
     val lastDisplayNumber: String
 ) {
-    val displayRange: String
-        get() = if (firstDisplayNumber == lastDisplayNumber) {
-            "F-$firstDisplayNumber"
-        } else {
-            "F-$firstDisplayNumber – F-$lastDisplayNumber"
-        }
+    val plainFirst: String get() = plainNumber(firstDisplayNumber)
+    val plainLast: String get() = plainNumber(lastDisplayNumber)
+    val plainRange: String
+        get() = if (plainFirst == plainLast) plainFirst else "$plainFirst–$plainLast"
+}
+
+private data class RecentRegistration(
+    val time: String,
+    val productKey: String,
+    val quantity: Int,
+    val firstNumber: Long,
+    val lastNumber: Long
+) {
+    val numberText: String
+        get() = if (firstNumber == lastNumber) firstNumber.toString() else "$firstNumber–$lastNumber"
 }
 
 enum class GateState { WAITING, CHECKING, UNKNOWN, ERROR }
@@ -110,7 +125,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = FlorivoBg) {
-                    FlorivoV07App(
+                    FlorivoV08App(
                         session = session,
                         gateState = gateState,
                         gateMessage = gateMessage,
@@ -177,7 +192,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun FlorivoV07App(
+private fun FlorivoV08App(
     session: UserSession?,
     gateState: GateState,
     gateMessage: String,
@@ -243,7 +258,7 @@ private fun NfcGate(state: GateState, message: String, nfcAvailable: Boolean, nf
                 Text("Kortnummer / UID vises ikke. Florivo bruker kun en SHA-256 hash av kort-ID mot serveren.", color = Muted, fontSize = 13.sp, lineHeight = 18.sp)
             }
             Spacer(Modifier.weight(1f))
-            Text("Florivo Android v0.7.1 ROLE + ANTALL FIX + IDLE LOGOUT · 21.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
+            Text("Florivo Android v0.8.0 LAST 3 + PLAIN NUMBER · 24.08.2026", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, textAlign = TextAlign.Center)
         }
     }
 }
@@ -260,6 +275,21 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
     var autoLogoutSignal by remember { mutableIntStateOf(0) }
     var idleSignal by remember { mutableIntStateOf(0) }
     var graceActive by remember { mutableStateOf(false) }
+    var recent by remember { mutableStateOf<List<RecentRegistration>>(emptyList()) }
+
+    fun refreshRecent() {
+        scope.launch {
+            try {
+                recent = fetchLast3Today(session.id)
+            } catch (_: Exception) {
+                // History must never block warehouse registration.
+            }
+        }
+    }
+
+    LaunchedEffect(session.id) {
+        refreshRecent()
+    }
 
     LaunchedEffect(idleSignal, selected, sending) {
         if (selected == null && !sending) {
@@ -324,11 +354,12 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                 lastResult = result
                 selected = product
                 status = if (result.quantity == 1) {
-                    "PÅ LAGER · ${result.displayRange}"
+                    "PÅ LAGER · ${result.plainRange}"
                 } else {
-                    "PÅ LAGER · +${result.quantity} ${product.name} · ${result.displayRange}"
+                    "PÅ LAGER · +${result.quantity} ${product.name} · ${result.plainRange}"
                 }
                 if (session.canEnterQuantity) quantityText = ""
+                refreshRecent()
                 autoLogoutSignal++
             } catch (e: Exception) {
                 status = "FEIL · ${e.message ?: "ukjent feil"}"
@@ -395,6 +426,7 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                     }
                 }
             }
+
             Text(
                 if (graceActive) "4 SEK · velg nytt produkt eller økten avsluttes" else status,
                 modifier = Modifier.fillMaxWidth(),
@@ -404,7 +436,10 @@ private fun FlorivoLiveStockApp(session: UserSession, onLogout: () -> Unit) {
                 textAlign = TextAlign.Center,
                 maxLines = 1
             )
+
+            RecentRegistrationsCard(recent)
         }
+
         if (selected != null && lastResult != null) {
             ConfirmationOverlay(selected!!, lastResult!!, selected!!.key.startsWith("vrak_"))
         }
@@ -436,6 +471,51 @@ private fun EmployeeCard(session: UserSession, onLogout: () -> Unit) {
         }
         Text("BYTT", color = GreenEdge, fontSize = 10.sp, fontWeight = FontWeight.Black)
     }
+}
+
+@Composable
+private fun RecentRegistrationsCard(items: List<RecentRegistration>) {
+    val shape = RoundedCornerShape(18.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth().background(Color(0x332C6849), shape).border(1.dp, Color(0x557FB394), shape).padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("◷", color = Yellow, fontSize = 18.sp, fontWeight = FontWeight.Black)
+            Text("SISTE 3 I DAG", modifier = Modifier.padding(start = 8.dp), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Black)
+        }
+
+        if (items.isEmpty()) {
+            Text("Ingen registreringer i dag", color = Color.White.copy(alpha = 0.68f), fontSize = 11.sp)
+        } else {
+            items.forEachIndexed { index, item ->
+                if (index > 0) {
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.10f)))
+                }
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(item.time, color = Color.White, fontSize = 11.sp)
+                    Text(" · ", color = Color.White.copy(alpha = 0.65f), fontSize = 11.sp)
+                    Text(productLabel(item.productKey), modifier = Modifier.weight(1f), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                    Text(if (item.quantity >= 0) "+${item.quantity}" else item.quantity.toString(), color = Color(0xFF83D78F), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                    Text(" · ", color = Color.White.copy(alpha = 0.65f), fontSize = 11.sp)
+                    Text(item.numberText, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+private fun productLabel(key: String): String = when (key) {
+    "bunner" -> "BUNNER"
+    "hyller30" -> "HYLLER x30"
+    "hyller60" -> "HYLLER x60"
+    "forlengere_korte" -> "FORLENGERE KORTE"
+    "forlengere_lange" -> "FORLENGERE LANGE"
+    "forlengere_plast" -> "FORLENGERE PLAST"
+    "vrak_bunner" -> "VRAK BUNNER"
+    "vrak_hyller" -> "VRAK HYLLER"
+    "bunner_uten_brikk" -> "BUNNER UTEN BRIKK"
+    else -> key.uppercase()
 }
 
 @Composable
@@ -515,9 +595,9 @@ private fun ConfirmationOverlay(product: Product, result: RegisterResult, danger
             Text("REGISTRERT PÅ LAGER", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
             if (result.quantity > 1) {
                 Text("+${result.quantity} stk", color = Color.White, fontSize = 44.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 6.dp))
-                Text(result.displayRange, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                Text(result.plainRange, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             } else {
-                Text(result.displayRange, color = Color.White, fontSize = 50.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 6.dp))
+                Text(result.plainRange, color = Color.White, fontSize = 58.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(vertical = 6.dp))
             }
             Text(product.name, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             Text("mode=live · NFC-bruker · 8 sek + 4 sek til auto-utlogging", color = Color.White.copy(alpha = 0.90f), fontSize = 11.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp))
@@ -591,4 +671,39 @@ private suspend fun registerStockLiveQty(
         firstDisplayNumber = row.optString("first_display_number", "------"),
         lastDisplayNumber = row.optString("last_display_number", "------")
     )
+}
+
+private suspend fun fetchLast3Today(userId: String): List<RecentRegistration> = withContext(Dispatchers.IO) {
+    val url = URL("$SUPABASE_URL/rest/v1/rpc/florivo_terminal_last3_today")
+    val connection = (url.openConnection() as HttpURLConnection).apply {
+        requestMethod = "POST"
+        connectTimeout = 10000
+        readTimeout = 10000
+        doOutput = true
+        setRequestProperty("Content-Type", "application/json")
+        setRequestProperty("Accept", "application/json")
+        setRequestProperty("apikey", SUPABASE_PUBLISHABLE_KEY)
+    }
+    val payload = JSONObject().put("p_user_id", userId).put("p_mode", MODE).toString()
+    connection.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) }
+    val code = connection.responseCode
+    val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+    val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+    connection.disconnect()
+    if (code !in 200..299) throw IllegalStateException("HTTP $code")
+    val array = JSONArray(body)
+    buildList {
+        for (i in 0 until array.length()) {
+            val row = array.getJSONObject(i)
+            add(
+                RecentRegistration(
+                    time = row.optString("local_time", "--:--"),
+                    productKey = row.optString("product_key", ""),
+                    quantity = row.optInt("qty", 1),
+                    firstNumber = row.optLong("first_number", 0L),
+                    lastNumber = row.optLong("last_number", row.optLong("first_number", 0L))
+                )
+            )
+        }
+    }
 }
