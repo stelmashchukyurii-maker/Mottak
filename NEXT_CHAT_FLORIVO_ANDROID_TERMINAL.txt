@@ -18,7 +18,7 @@ READ FIRST FROM GITHUB MAIN:
 9. FLORIVO_RAMP_NO_SCAN_BULK_PROTOCOL.md
 
 STABLE ANDROID BASELINE:
-- Florivo Android v0.7.1 is the stable TEST baseline.
+- Florivo Android v0.7.1 remains the stable TEST baseline.
 - branch: florivo-v07-role-quantity-autologout
 - commit: 9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d
 - NFC login physically works.
@@ -29,7 +29,31 @@ STABLE ANDROID BASELINE:
 - BYTT = immediate logout.
 - card users/bindings are server-side and survive reinstall/another terminal using same backend.
 - Android sends SHA-256 card identifier, not raw UID.
-- DO NOT modify v0.7.1 in place; next Android change = new version/branch.
+- DO NOT modify v0.7.1 in place.
+
+ANDROID v0.8.0 PREPARED:
+- branch: florivo-v08-last3-plain-number
+- versionCode: 8
+- worker-facing Florivo number now designed/implemented without `F-` and without leading zeros: `F-000093` -> `93`.
+- bulk display uses plain range, e.g. `63–92`.
+- each logged-in user sees only their own latest 3 registrations for the current Europe/Oslo day.
+- compact format: `18:23 · VRAK BUNNER · +1 · 93`.
+- server RPC `florivo_terminal_last3_today` created and verified against real current-day data.
+- GitHub Actions build completed successfully.
+- workflow run: 32754428199
+- artifact: Florivo-Android-v0.8.0
+- APK uploaded to Google Drive folder `Florivo Android App`.
+- Drive file id: 1OSuRF9R2kNdEMVIWoJxzhjpq-1Fn7Gm-
+- file name: Florivo-Android-v0.8.0.apk
+
+IMPORTANT v0.8 STATUS:
+- BUILD COMPLETE.
+- NOT PHYSICAL PASS.
+- First install attempt on current phone failed with Android `Program not installed` after Play Protect/package installer flow.
+- Likely debug signing mismatch with already installed older Florivo Terminal, but root cause is not yet physically confirmed.
+- Next physical test: uninstall old Florivo Terminal, then clean-install v0.8.0.
+- Server-side users/card bindings survive reinstall.
+- Long-term fix: one persistent APK signing key for in-place updates.
 
 NFC SECURITY:
 - old raw-UID browser prototype archived/inert;
@@ -63,7 +87,13 @@ Supabase Advisor reports multiple `SECURITY DEFINER` RPCs currently executable b
 Do NOT blindly revoke grants because some are required by current browser flows. First map active page -> RPC -> required role -> mutation scope, then change only proven excess permissions with regression testing.
 See `FLORIVO_ACTIVE_STATE_AUDIT_2026-08-24.md`.
 
-NEXT PHYSICAL PASS FOR NO-SCAN:
-Use one small NEW order, note stock/order/ramp before, run no-scan whole-order action, then verify exactly that order quantity is staged and no unrelated stock/order changed.
+NEXT ANDROID PHYSICAL STEP:
+1. Remove currently installed older Florivo Terminal from test phone.
+2. Install Florivo-Android-v0.8.0.apk from Drive.
+3. Confirm NFC login still works.
+4. Confirm confirmation overlay shows plain number, e.g. `93`, not `F-000093`.
+5. Confirm `SISTE 3 I DAG` shows only that logged-in user's latest 3 current-day registrations.
+6. Confirm successful new registration immediately refreshes the last-3 list.
+Only then mark Android v0.8.0 PHYSICAL PASS / consider new stable baseline.
 
 Never call a new path PHYSICAL PASS without explicit real-device/real-database confirmation.
