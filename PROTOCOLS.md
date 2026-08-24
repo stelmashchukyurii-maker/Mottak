@@ -238,14 +238,44 @@ Any future LIVE discrepancy correction remains separate, audited and human-appro
 Current menu/entry uses `camera-live-v4.html`, which redirects to its working camera implementation.
 Do not infer a newer camera file is production merely because it exists. Promotion requires explicit physical acceptance.
 
-## 11. Presentation analytics — ACTIVE ISOLATED MODULE
+## 11. Technical development log + presentation analytics — ACTIVE ISOLATED DOCUMENTATION/ANALYTICS
+
+### Technical development log
+Read:
+- `FLORIVO_TECHNICAL_VERSION_LOG_PROTOCOL.md`
+
+Stable public entry:
+`teknisk-versjonslogg.html`
+
+Language pages:
+- `teknisk-versjonslogg-no.html`
+- `teknisk-versjonslogg-uk.html`
+
+Rules:
+- visible log is neutral/unbranded;
+- no visible calendar dates or clock times;
+- no presentation/video/statistics history inside the technical log;
+- it is a curated list of main versions and technical milestones, not every Git commit;
+- nearby versions may be grouped;
+- NO and UK content must stay aligned;
+- every significant new version/milestone must be evaluated for incremental log update after implementation/verification;
+- do not rebuild historical data from scratch on every update.
+
+`📘 VERSJONSLOGG` is linked from both `index.html` and `presentasjon-hovedmeny.html` to the same stable entry.
+
+### Presentation analytics
 Read:
 - `FLORIVO_PRESENTATION_VISIT_PROTOCOL.md`
 - `FLORIVO_PRESENTATION_INSIGHTS_PROTOCOL.md`
+- `NEXT_CHAT_FLORIVO_VISITS.txt`
 - `NEXT_CHAT_FLORIVO_STAT_REPORT.txt`
 
 Visit/click logging is isolated from Nordic/stock/orders. Internal statistics page: `florivo-besok-oversikt.html`.
 For current statistics query live Supabase; do not quote old snapshots.
+
+Tracked presentation clicks: 6 destinations, including `versjonslogg`.
+`versjonslogg` is a separate click counter and is intentionally excluded from the five-destination work-content funnel.
+Opening the version log from normal `index.html` or directly by URL does not count as a presentation click.
 
 ## 12. GitHub / Android build — ACTIVE
 Workflow:
