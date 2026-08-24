@@ -11,8 +11,8 @@ android {
         applicationId = "com.florivo.terminaltest"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.7-role-quantity-autologout"
+        versionCode = 8
+        versionName = "0.8-last3-plain-number"
     }
 
     buildFeatures { compose = true }
@@ -35,4 +35,4 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
 
-// Florivo Android v0.7 ROLE + ANTALL + AUTO LOGOUT — 2026-08-21
+// Florivo Android v0.8.0 — last 3 today + plain Florivo number — 2026-08-24
