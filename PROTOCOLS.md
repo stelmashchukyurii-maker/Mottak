@@ -23,8 +23,9 @@ Canonical TEST/LIVE:
 
 TEST ніколи не повинен впливати на LIVE stock, production orders/statistics, Nordic WORK, reservations, staging, dispatch або availability.
 
-Поточний factual reconciliation:
+Останній великий factual reconciliation:
 `FLORIVO_ACTIVE_STATE_AUDIT_2026-08-24.md`.
+Пізніші явно зафіксовані зміни цього дня можуть мати новішу версію, ніж snapshot audit.
 
 ## 1. Nordic / RFID — ACTIVE + FROZEN production behavior
 Read:
@@ -54,9 +55,17 @@ TIL LAGER:
 Do not rewrite frozen Nordic production logic as part of unrelated work.
 
 ## 2. Product / RFID identity — ACTIVE RULE
-Product model:
-RFID: `bunner`, `hyller30`, `hyller60`, `forlengere_korte`, `forlengere_lange`, `vrak_bunner`, `vrak_hyller`.
-Quantity-only: `forlengere_plast`.
+RFID products:
+- `bunner`
+- `hyller30`
+- `hyller60`
+- `forlengere_korte`
+- `forlengere_lange`
+- `vrak_bunner`
+- `vrak_hyller`
+
+Quantity-only:
+- `forlengere_plast`
 
 Identity:
 - full real EPC -> `scanner_code`;
@@ -75,6 +84,9 @@ Counters:
 2. available stock = physical - still-unfulfilled active order demand.
 
 Create/edit order reduces available immediately; staging must not double-subtract.
+Manual quantity overlay is part of canonical physical stock and therefore must be respected by every operational stock display.
+A page must not present raw RFID row count as factual stock when a manual overlay exists.
+
 Never treat an old protocol stock snapshot as current stock; query live.
 
 Quantity architecture:
@@ -86,50 +98,82 @@ Quantity architecture:
 
 ## 4. UT Kontor — ACTIVE WORKING
 Current wrapper:
-`bestilling.html` = **UT Kontor WORKING v37.6**.
+`bestilling.html` = **UT Kontor WORKING v37.8**.
 
 Current active modules include:
 - products / vrak products;
 - history visuals;
-- stock summary;
+- canonical 8-product stock summary;
 - extra stock;
 - NO language layer;
 - `BRUKERE / TILGANGER` -> `florivo-terminal-users.html`;
-- `ut-kontor-stage-all-no-scan.js`.
+- `ut-kontor-stage-all-no-scan.js`;
+- `ut-kontor-manual-correction.js`.
 
-No-scan Option A is implemented:
+### Manual stock correction — ACTIVE DEV
+Protocol:
+`UT_KONTOR_MANUAL_CORRECTION_PROTOCOL.md`
+
+Current simple WORK correction supports all 8 canonical stock products:
+- `-1`
+- `+1`
+- `SETT FAKTISK`
+
+Current phase intentionally has no Admin-code. Browser never receives `SUPABASE_SERVICE_ROLE_KEY`; mutation is server-side through Edge Function `ut-kontor-manual-correction` and RPC `ut_kontor_manual_correct_work`.
+
+Every actual correction is audited in `mottak_quantity_stock_events` with server-generated human reference `A001`, `A002`, ... .
+No fake RFID/EPC/lower is created.
+
+Important separation:
+- wrong order -> `Rediger bestilling`;
+- wrong factual warehouse count -> `MANUELL KORRIGERING`.
+
+### No-scan Option A
+Implemented action:
 `FLYTT HELE ORDREN TIL RAMPE · UTEN SKANNING`
 
 Meaning:
-- only the exact still-required quantities for one selected NEW order;
+- only exact still-required quantities for one selected NEW order;
 - never whole warehouse;
 - backend RPC `office_stage_order_without_scanning(uuid)` exists;
-- if an order already has scanning/confirmation progress, the no-scan path must refuse rather than mix paths;
+- if an order already has scanning/confirmation progress, refuse rather than mix paths;
 - frozen Nordic TIL RAMPE remains untouched.
 
-Status: implemented/server present, but this no-scan path is NOT PHYSICAL PASS until the controlled real test is explicitly accepted.
+Status: implemented/server present, but this no-scan path is NOT PHYSICAL PASS until controlled real test is explicitly accepted.
+Read: `FLORIVO_RAMP_NO_SCAN_BULK_PROTOCOL.md`.
 
-Read: `FLORIVO_RAMP_NO_SCAN_BULK_PROTOCOL.md` and latest Android/session handoff.
+## 5. UT Lager / Bekreft rampe — ACTIVE WORKING
+Current wrapper:
+`utsending.html`.
 
-## 5. Lager Admin — ACTIVE WORK SERVER/UI
+Stock counter rule as of 24.08.2026:
+- compact `B / H×30 / H×60` counter uses canonical `bama_stock_summary()`;
+- it displays `available_count`, i.e. factual physical stock including manual overlay minus still-unfulfilled active orders;
+- it must not independently count raw `mottak_scans` rows;
+- this prevents divergence between UT Kontor and UT Lager and prevents double subtraction after staging.
+
+Frozen Nordic TIL RAMPE production logic remains separate and unchanged.
+
+## 6. Lager Admin — ACTIVE WORK SERVER/UI
 Protocol: `LAGER_ADMIN_DEV_PROTOCOL.md`.
 Entry: `lager-admin.html` WORK v2.0.
 
-Verified current backend:
-- Supabase Edge Function `lager-admin-work` v1 ACTIVE;
-- page calls that function directly;
-- custom Admin key is checked server-side;
+Verified backend:
+- Supabase Edge Function `lager-admin-work` ACTIVE;
+- custom Admin key checked server-side;
 - browser does not receive service-role key;
 - manual quantity overlay only, no fake RFID;
 - audit actions `admin_adjust_work`, `admin_set_work`.
 
 Status: SERVER/UI DEPLOY PASS; WORK physical mutation PASS still pending unless separately confirmed later.
 
-## 6. Florivo Android Terminal — STABLE TEST BASELINE + CONTROLLED LIVE PILOT
+The separate Lager Admin remains available; the simpler UT Kontor correction path is a later explicit workflow for quick office correction and does not delete the Lager Admin architecture.
+
+## 7. Florivo Android Terminal — STABLE TEST BASELINE + CONTROLLED LIVE PILOT
 Protocol: `FLORIVO_ANDROID_TERMINAL_PROTOCOL.md`.
 Stable baseline: v0.7.1, branch `florivo-v07-role-quantity-autologout`, commit `9ed66f1bce18e90957e8d8c4eff3ad1911c3f14d`.
 
-Physically verified in current baseline:
+Physically verified:
 - NFC card login;
 - server-side user/card mapping;
 - active Android sends SHA-256 card identifier, not raw UID;
@@ -138,8 +182,7 @@ Physically verified in current baseline:
 - 12 s idle logout;
 - result 8 s + 4 s grace; BYTT immediate logout.
 
-Current live backend RPC family exists, including user/card resolution, quantity registration, normal stock registration and FIFO RFID binding.
-
+Current live backend RPC family exists for user/card resolution and stock registration.
 Do not modify v0.7.1 in place; new Android changes require a new version/branch.
 
 Read also:
@@ -147,42 +190,38 @@ Read also:
 - `FLORIVO_ANDROID_TERMINAL_PROGRESS_LOG.md`
 - `FLORIVO_NFC_SECURITY_AUDIT_2026-08-21.md`
 
-## 7. Florivo Android Scanner — CONCEPT ONLY
+## 8. Florivo Android Scanner — CONCEPT ONLY
 Protocol: `FLORIVO_ANDROID_SCANNER_CONCEPT_PROTOCOL.md`.
 
-This remains architecture, not current production implementation.
-Server-first rules are still valid design constraints:
+Server-first design constraints remain:
 - scanner reads and requests;
 - server validates/decides;
 - UT Kontor remains source of order/customer/destination;
 - no `service_role`, Admin code or permanent universal production secret inside APK;
 - future scanner pairing must be revocable/server-controlled.
 
-Do not list concept pairing/device flow as already deployed.
+Do not present concept pairing/device flow as deployed.
 
-## 8. Florivo Inventory / Inventering — ACTIVE DEV V0.12 SERVER SYNC
+## 9. Florivo Inventory / Inventering — ACTIVE DEV V0.12 SERVER SYNC
 Protocol: `FLORIVO_INVENTORY_CONCEPT_PROTOCOL.md`.
 Handoff: `NEXT_CHAT_FLORIVO_INVENTORY.txt`.
 
 Current active scanner/manual path:
 `florivo-inventory-v012-dev.html`
 
-`florivo-inventory-sync.html` currently redirects to that V0.12 path.
-
-Current PC/web page:
+PC/web:
 `florivo-inventeringer.html`
 
 Current implementation:
 - shared server-synced TEST inventory through `public.florivo_inventory_events`;
 - append-only full-session snapshot events;
 - current client writes `mode='test'`, `source='florivo-inventory'`, `event_type='snapshot'`;
-- RLS enabled; current SELECT + INSERT policies verified; no UPDATE/DELETE policy;
+- RLS enabled with current SELECT + INSERT policies;
 - localStorage remains fallback/cache;
-- PC polls latest server session approximately every 2.5 s;
-- server/local reconciliation supports the current shared session;
+- PC polls latest server session;
 - no automatic LIVE/WORK stock mutation.
 
-Current implemented zones:
+Current zones:
 - Plukk
 - Varm
 - Kald
@@ -192,62 +231,40 @@ Current implemented zones:
 
 Ramps 28–34 are visual orientation references matching UT Kontor numbering.
 
-Implemented UX includes:
-- NO/UK;
-- zone selection and current-zone state;
-- Nordic/RFID path;
-- MAN-xxx manual path;
-- simulated RFID for non-Nordic testing;
-- remembered product;
-- zone journal/counters;
-- FULLFØR;
-- RECOUNT with revision;
-- manual batch counting without fabricated RFID;
-- PC visual map + table + printable A4 inventory report.
+Current status: ACTIVE DEV / TEST server sync. Full Nordic physical server-sync flow still requires explicit PHYSICAL PASS.
+Any future LIVE discrepancy correction remains separate, audited and human-approved; current Inventory must not silently mutate production stock.
 
-Status: ACTIVE DEV / TEST server sync. Full Nordic physical server-sync flow still requires explicit PHYSICAL PASS.
-
-Next active development only after current physical verification:
-- inventory history list;
-- SERVER EXPECTED <-> FAKTISK / AVVIK;
-- normalized sessions/observations only if concurrency/multi-scanner requirements justify it;
-- separate audited LIVE correction flow after review.
-
-## 9. Camera — CURRENT ENTRY PRESERVED
+## 10. Camera — CURRENT ENTRY PRESERVED
 Current menu/entry uses `camera-live-v4.html`, which redirects to its working camera implementation.
-Do not infer a newer camera file is production merely because it exists in repository. Camera promotion requires the same explicit physical acceptance rule as other working flows.
+Do not infer a newer camera file is production merely because it exists. Promotion requires explicit physical acceptance.
 
-## 10. Presentation analytics — ACTIVE ISOLATED MODULE
+## 11. Presentation analytics — ACTIVE ISOLATED MODULE
 Read:
 - `FLORIVO_PRESENTATION_VISIT_PROTOCOL.md`
 - `FLORIVO_PRESENTATION_INSIGHTS_PROTOCOL.md`
 - `NEXT_CHAT_FLORIVO_STAT_REPORT.txt`
 
-Current presentation visit/click logging is isolated from Nordic/stock/orders. Internal statistics page remains `florivo-besok-oversikt.html`.
-For current statistics always query live Supabase; do not quote old snapshots.
+Visit/click logging is isolated from Nordic/stock/orders. Internal statistics page: `florivo-besok-oversikt.html`.
+For current statistics query live Supabase; do not quote old snapshots.
 
-## 11. GitHub / Android build — ACTIVE
+## 12. GitHub / Android build — ACTIVE
 Workflow:
 `.github/workflows/florivo-android-build.yml`
 
-It builds Android debug APK for Android-terminal source/workflow changes and uploads the artifact. The workflow does not reference the old classic PAT `BaMaMottak`.
+It builds Android debug APK for Android-terminal source/workflow changes and uploads the artifact. It does not reference the old classic PAT `BaMaMottak`.
 
-## 12. Security — ACTIVE FINDINGS / DO NOT BLINDLY CHANGE
-Completed NFC cleanup remains governed by `FLORIVO_NFC_SECURITY_AUDIT_2026-08-21.md`.
-Raw UID must not be reintroduced in active UI/logs/docs.
+## 13. Security — ACTIVE FINDINGS / DO NOT BLINDLY CHANGE
+Raw NFC UID must not be reintroduced in active UI/logs/docs.
 
 Security audit 24.08.2026 found Supabase Advisor warnings for multiple browser-executable `SECURITY DEFINER` functions and mutable `search_path` on `set_ut_updated_at`.
+Do not revoke blindly. First map:
+`active page -> RPC -> required role -> read/mutation scope`, then remove only proven excess privileges and regression-test frozen WORK flows.
 
-This does NOT mean revoke everything immediately. Some RPCs are current browser API by design. Before permission changes create an exact dependency allowlist:
-`active page -> RPC -> required role -> read/mutation scope`.
-Then remove only proven excess/unused privileges and regression-test frozen WORK flows.
+The current UT Kontor manual correction deliberately has no Admin-code in its first simple phase. This is an explicit usability decision, not a claim of strong authentication. Its server mutation surface must stay restricted to the defined products/actions until later authorization work.
 
-See `FLORIVO_ACTIVE_STATE_AUDIT_2026-08-24.md`.
+## 14. Protocol governance / active-state rule
+Canonical current-state documents describe what is actually active, deployed, physically passed, or implemented-but-explicitly-pending-PASS.
 
-## 13. Protocol governance / active-state rule
-Canonical current-state documents should describe what is actually active, in use, deployed, physically passed, or implemented-but-explicitly-pending-PASS.
-
-Legacy prototypes, rollback copies, abandoned routes and concepts must not be presented as current working state. Keep them in archives/feature history only when needed for rollback or evidence.
-
+Legacy prototypes, rollback copies, abandoned routes and concepts must not be presented as current working state.
 Never promote `implemented` to `PHYSICAL PASS` without explicit physical confirmation.
 Never change frozen working behavior solely to make old documentation look consistent.
