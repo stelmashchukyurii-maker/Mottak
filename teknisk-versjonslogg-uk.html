@@ -144,6 +144,16 @@
     </div>
   </section>
 
+  <section class="section">
+    <div class="section-head"><h2>7. Android-термінал і доступ</h2><p>Native-реєстрація, NFC-ідентичність і контрольована сесія користувача</p></div>
+    <div class="timeline">
+      <article class="entry"><div><div class="ver">Android v0.4</div><div class="module">Мобільна складська реєстрація</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>Реальна складська реєстрація з native Android</h3><ul><li>Native-застосунок фізично зареєстрував реальний товар на складі через сервер.</li><li>Сервер призначив товару постійний внутрішній послідовний номер.</li><li>Внутрішня ідентичність товару та фізична RFID-ідентичність зберігаються як окремі дані.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Android v0.6</div><div class="module">NFC / доступ</div><div class="status"><span class="tag stabil">PHYSICAL PASS</span></div></div><div><h3>NFC-вхід користувача із серверним зв’язуванням</h3><ul><li>Native NFC-зчитування прив’язує картку доступу до користувача та ролі на сервері.</li><li>Зв’язок картки й користувача зберігається після перевстановлення і може працювати з іншим терміналом через той самий backend.</li><li>Веб-адміністрування підтримує створення користувача, вибір ролі та контрольоване підключення картки.</li><li>Сирий ID картки не показується; термінал передає на сервер SHA-256-ідентифікатор.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Android v0.7.1</div><div class="module">Ролі / склад</div><div class="status"><span class="tag stabil">СТАБІЛЬНА ТЕСТОВА БАЗА</span></div></div><div><h3>Рольова реєстрація й автоматичний вихід</h3><ul><li>Роль складу реєструє +1, а виробництво й admin можуть вводити кількість 1–500; правило також контролюється сервером.</li><li>Масова реєстрація звичайних продуктів створює реальні складські одиниці та внутрішні номери, а quantity-only продукт залишається у своєму кількісному реєстрі.</li><li>Короткий показ результату, grace-період і автоматичний вихід при бездіяльності формують контрольовану коротку сесію; BYTT виконує негайний вихід.</li><li>Версію збережено як стабільну тестову та rollback-базу для подальшої Android-розробки.</li></ul></div></article>
+      <article class="entry"><div><div class="ver">Android build pipeline</div><div class="module">CI / release</div><div class="status"><span class="tag work">АКТИВНО</span></div></div><div><h3>Автоматизоване складання APK</h3><ul><li>GitHub Actions автоматично збирає Android debug-APK при релевантних змінах термінала.</li><li>Артефакт збірки зберігається для кожного запуску, тому версії можна відтворювано тестувати й порівнювати.</li><li>Стабільні гілки версій зберігаються окремо від наступних гілок розробки.</li></ul></div></article>
+    </div>
+  </section>
+
   <div class="footer">Технічний журнал розробки · основні версії та технічні етапи · без дат і часу</div>
 </main>
 </body>
