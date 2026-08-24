@@ -1,8 +1,12 @@
 FLORIVO-VISITS-HANDOFF-2026-08-14
+UPDATED 24.08.2026 Europe/Oslo
 
 Прочитай у репозиторії `stelmashchukyurii-maker/Mottak`:
+- `PROJECT_CANONICAL_RULES.md`
+- `PROTOCOLS.md`
 - `FLORIVO_PRESENTATION_VISIT_PROTOCOL.md`
 - `FLORIVO_PRESENTATION_INSIGHTS_PROTOCOL.md`
+- `FLORIVO_TECHNICAL_VERSION_LOG_PROTOCOL.md`
 
 Ця розмова призначена для перевірки приватної аналітики презентаційної сторінки Florivo:
 `presentasjon-hovedmeny.html`
@@ -63,6 +67,12 @@ Supabase project ref:
 
 Воронка — це огляд інтересу за унікальними браузерами, а НЕ доказ строгої послідовності кроків. Людина може пропустити відео і одразу відкрити UT Kontor або Scanner Home.
 
+Інтерпретація `VERSJONSLOGG`:
+- клік може означати інтерес до технічної історії/архітектури;
+- не можна стверджувати, що це був IT-фахівець;
+- не можна стверджувати, що журнал прочитали повністю;
+- не можна робити висновок «схвалили» лише з цього кліку.
+
 `visitor_id` — анонімний випадковий UUID браузера, а не особа.
 Не робити висновок «схвалили / відхилили» тільки з кліків або їх відсутності.
 
@@ -70,6 +80,11 @@ Supabase project ref:
 Окрема внутрішня сторінка агрегованої статистики:
 `florivo-besok-oversikt.html`
 Вона ніде не підключена до меню Florivo.
+
+Технічний журнал версій:
+`teknisk-versjonslogg.html`
+
+Важливо: це окремий технічний документ. Його правила змісту/мов/оновлення описані в `FLORIVO_TECHNICAL_VERSION_LOG_PROTOCOL.md`.
 
 Не збирати і не додавати ім’я, телефон, email чи інші персональні дані.
 Не прив’язувати аналітику до Nordic ID, WORK/TEST, складу, UT-замовлень або відправки.
