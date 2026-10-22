@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <title>Camera Live — тест реального видалення</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#151c30;--dark:#0d1426;--text:#f5f7ff;--muted:#aab4ce;--accent:#f4c430;--ok:#48d597;--bad:#ff6b6b;--line:#303b59}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),#11182a)}button,input{font:inherit}.app{width:min(900px,100%);margin:auto;padding:14px 12px 45px}h1{margin:0 0 6px;font-size:clamp(27px,7vw,42px)}h2{margin:0 0 12px;font-size:20px}.muted{color:var(--muted);line-height:1.45}.version{font-size:12px;color:var(--muted)}.card{margin:12px 0;padding:15px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+    .grid3,.grid2{display:grid;gap:9px}.grid3{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:repeat(2,1fr)}button,.file-button,a.button{min-height:50px;padding:11px 13px;border:0;border-radius:12px;font-weight:800;cursor:pointer;text-align:center}button:disabled{opacity:.45;cursor:not-allowed}.choice,.secondary{color:var(--text);background:var(--dark);border:2px solid var(--line)}.choice.active{color:#17130a;background:var(--accent);border-color:var(--accent)}.primary{color:#17130a;background:var(--accent)}.success{color:#062418;background:var(--ok)}.danger{width:100%;margin-top:10px;color:white;background:#c62828;border:2px solid #ff8a8a;font-size:17px}.button{display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--text);background:#2c395c}
+    input[type=password]{width:100%;min-height:48px;padding:11px;border:1px solid var(--line);border-radius:11px;background:#070b14;color:var(--text)}input[type=file]{display:none}.preview{display:none;margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#070b14}.preview img{display:block;width:100%;max-height:60vh;object-fit:contain}.status{min-height:28px;margin-top:10px;padding:9px;border-radius:10px;color:var(--muted);white-space:pre-wrap;background:#0c1324}.status.ok{color:var(--ok);border:1px solid #267356}.status.bad{color:#ff9f9f;border:1px solid #8f3030}.status.warn{color:#ffd08a;border:1px solid #7f5a25}
+    .result{display:grid;grid-template-columns:1fr 1fr;gap:10px}.box{padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--dark)}.box span{display:block;color:var(--muted);font-size:12px}.box strong{display:block;margin-top:5px;font:900 clamp(28px,8vw,42px) Consolas,monospace;letter-spacing:.07em}.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.item{padding:11px;border:1px solid var(--line);border-radius:14px;background:var(--dark)}.item img{display:block;width:100%;height:190px;object-fit:cover;border-radius:10px;background:#070b14}.codes{margin-top:9px;font:900 18px Consolas,monospace}.small{margin-top:5px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}.empty{padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}.warning{padding:11px;border:1px solid #7f5a25;border-radius:12px;background:#221b0c;color:#ffe1a6;line-height:1.45}
+    @media(max-width:620px){.grid3,.grid2,.result,.gallery{grid-template-columns:1fr}.item img{height:auto;max-height:48vh}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <h1>Camera Live Mottak</h1>
+  <div class="version">Delete Test v1.2 · updated 01.08.2026 22:46 Europe/Oslo</div>
+  <p class="muted">Окрема тестова версія: фотографування, розпізнавання, збереження та справжнє видалення запису і фотографії.</p>
+
+  <section class="card">
+    <h2>1. Виберіть продукт</h2>
+    <div class="grid3" id="products">
+      <button class="choice active" data-product="bunner">Bunner</button>
+      <button class="choice" data-product="hyller30">Hyller x30</button>
+      <button class="choice" data-product="hyller60">Hyller x60</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Gemini API Key</h2>
+    <input id="apiKey" type="password" autocomplete="off" placeholder="Вставте Gemini API Key">
+    <p class="muted">Ключ зберігається лише в цій вкладці браузера.</p>
+  </section>
+
+  <section class="card">
+    <h2>3. Зробіть фото бірки</h2>
+    <label class="file-button primary" for="photoInput">📷 Зробити фото</label>
+    <input id="photoInput" type="file" accept="image/*" capture="environment">
+    <div class="preview" id="previewWrap"><img id="preview" alt="Попередній перегляд"></div>
+    <div class="grid2" style="margin-top:10px">
+      <button class="primary" id="recognizeButton" disabled>Розпізнати номер</button>
+      <button class="secondary" id="newPhotoButton" disabled>Нове фото</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. Перевірте та збережіть</h2>
+    <div class="result">
+      <div class="box"><span>Верхній номер</span><strong id="upperValue">------</strong></div>
+      <div class="box"><span>Нижній номер</span><strong id="lowerValue">------</strong></div>
+    </div>
+    <p class="muted" id="confidence"></p>
+    <button class="success" id="saveButton" disabled>Зберегти фото і номери в хмару</button>
+  </section>
+
+  <section class="card">
+    <div class="grid2">
+      <a class="button" href="mottak-live-v2.html">Відкрити Nordic ID</a>
+      <button class="secondary" id="refreshButton">Оновити список</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Останні фотографії Mottak</h2>
+    <div class="warning">Кнопка <b>«ВИДАЛИТИ ЗАПИС І ФОТО»</b> спочатку видаляє запис із <code>mottak_scans</code>, перевіряє, що він зник, а потім видаляє файл із <code>mottak-photos</code>.</div>
+    <div class="gallery" id="gallery" style="margin-top:12px"></div>
+  </section>
+</main>
+<canvas id="canvas" hidden></canvas>
+<script>
+"use strict";
+const SUPABASE_URL="https://hzjsatehehhpgpskckfi.supabase.co";
+const SUPABASE_KEY="sb_publishable_5swzjbs4yq7N8sDNR00FHA_n1xbnMya";
+const TABLE="mottak_scans",BUCKET="mottak-photos";
+const GEMINI_URL="https://generativelanguage.googleapis.com/v1beta/interactions",GEMINI_MODEL="gemini-3.6-flash";
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+const PRODUCTS={bunner:"Bunner",hyller30:"Hyller x30",hyller60:"Hyller x60"};
+const $=id=>document.getElementById(id);
+let product=localStorage.getItem("camera_live_product")||"bunner",imageData=null,result=null;
+const deviceId=(()=>{let value=localStorage.getItem("camera_live_device");if(!value){value=`camera-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;localStorage.setItem("camera_live_device",value)}return value})();
+
+function setStatus(text,type=""){$("status").textContent=text;$("status").className=`status ${type}`}
+function esc(value){return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char])}
+function renderProduct(){document.querySelectorAll("[data-product]").forEach(button=>button.classList.toggle("active",button.dataset.product===product))}
+function renderResult(){$("upperValue").textContent=result?.line1||"------";$("lowerValue").textContent=result?.line2||"------";$("confidence").textContent=result?`Впевненість: ${Math.round(result.confidence*100)}%`:"";$("saveButton").disabled=!(result?.valid&&imageData)}
+function resetPhoto(){imageData=null;result=null;$("photoInput").value="";$("preview").removeAttribute("src");$("previewWrap").style.display="none";$("recognizeButton").disabled=true;$("newPhotoButton").disabled=true;renderResult();setStatus("")}
+function loadImage(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Не вдалося відкрити фотографію"))};img.src=url})}
+async function compress(file){const img=await loadImage(file),max=1600,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight)),width=Math.max(1,Math.round(img.naturalWidth*scale)),height=Math.max(1,Math.round(img.naturalHeight*scale)),canvas=$("canvas");canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d",{alpha:false});ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);const dataUrl=canvas.toDataURL("image/jpeg",.82),blob=await(await fetch(dataUrl)).blob();return{dataUrl,base64:dataUrl.split(",")[1],blob,mimeType:"image/jpeg"}}
+function extractText(data){if(typeof data.output_text==="string"&&data.output_text.trim())return data.output_text.trim();const output=[];for(const step of data.steps||[])for(const content of step.content||[])if(content.type==="text"&&typeof content.text==="string")output.push(content.text);return output.join("").trim()}
+function validate(value){const line1=String(value.line1||"").trim(),line2=String(value.line2||"").trim().toUpperCase(),confidence=Number(value.confidence);return{line1,line2,confidence:Number.isFinite(confidence)?Math.min(1,Math.max(0,confidence)):0,valid:/^\d{6}$/.test(line1)&&/^[A-Z0-9]{6}$/.test(line2)}}
+
+async function recognize(){const key=$("apiKey").value.trim();if(!key){setStatus("Вставте Gemini API Key.","bad");$("apiKey").focus();return}if(!imageData)return;$("recognizeButton").disabled=true;setStatus("Gemini аналізує бірку…");const body={model:GEMINI_MODEL,store:false,input:[{type:"text",text:"Find the yellow warehouse tag and the grey sticker directly above the QR code. Read exactly two printed lines. line1 must be exactly 6 digits. line2 must be exactly 6 uppercase A-Z or 0-9 characters. Ignore and do not decode the QR code. Return only JSON."},{type:"image",data:imageData.base64,mime_type:imageData.mimeType}],response_format:{type:"text",mime_type:"application/json",schema:{type:"object",properties:{line1:{type:"string"},line2:{type:"string"},confidence:{type:"number",minimum:0,maximum:1}},required:["line1","line2","confidence"],additionalProperties:false}},generation_config:{max_output_tokens:120,thinking_level:"minimal"}};try{const response=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify(body)}),data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data?.error?.message||`HTTP ${response.status}`);result=validate(JSON.parse(extractText(data)));renderResult();setStatus(result.valid?"Номери розпізнано. Перевірте їх і збережіть.":"Результат неповний: потрібно 6 цифр + 6 символів A-Z/0-9.",result.valid?"ok":"bad")}catch(error){result=null;renderResult();setStatus(`Помилка розпізнавання:\n${error.message||error}`,"bad")}finally{$("recognizeButton").disabled=!imageData}}
+function uuid(){return crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`}
+
+async function saveCloud(){if(!(result?.valid&&imageData))return;$("saveButton").disabled=true;setStatus("Завантажую фотографію та зберігаю запис…");const day=new Date().toISOString().slice(0,10),path=`camera/${day}/${deviceId}-${uuid()}.jpg`;try{const upload=await client.storage.from(BUCKET).upload(path,imageData.blob,{contentType:"image/jpeg",upsert:false});if(upload.error)throw upload.error;const photoUrl=client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl,found=await client.from(TABLE).select("id,scanner_code,status,source").eq("upper_number",result.line1).eq("lower_number",result.line2).order("created_at",{ascending:false}).limit(1).maybeSingle();if(found.error)throw found.error;const database=found.data?await client.from(TABLE).update({product,photo_url:photoUrl,photo_path:path,confidence:result.confidence,source:found.data.scanner_code?found.data.source:"camera"}).eq("id",found.data.id):await client.from(TABLE).insert({product,scanner_code:"",upper_number:result.line1,lower_number:result.line2,status:"pending",source:"camera",device_id:deviceId,raw_data:"camera-photo",photo_url:photoUrl,photo_path:path,confidence:result.confidence});if(database.error)throw database.error;setStatus("Фотографію і запис збережено у хмарі.","ok");await loadRecent()}catch(error){setStatus(`Не вдалося зберегти у хмарі:\n${error.message||error}`,"bad");$("saveButton").disabled=false}}
+
+async function loadRecent(){const query=await client.from(TABLE).select("id,created_at,product,scanner_code,upper_number,lower_number,status,source,photo_url,photo_path").order("created_at",{ascending:false}).limit(40);if(query.error){$("gallery").innerHTML=`<div class="empty">Не вдалося завантажити записи.<br><code>${esc(query.error.message)}</code></div>`;return}const rows=query.data||[];if(!rows.length){$("gallery").innerHTML='<div class="empty">У базі немає записів.</div>';return}$("gallery").innerHTML=rows.map(row=>`<article class="item" data-card-id="${esc(row.id)}">${row.photo_url?`<img loading="lazy" src="${esc(row.photo_url)}" alt="Mottak photo">`:'<div class="empty">Без фото</div>'}<div class="codes">${esc(row.upper_number)} ${esc(row.lower_number)}</div><div class="small">${esc(PRODUCTS[row.product]||row.product)} · ${esc(row.scanner_code||row.source)} · ${esc(new Date(row.created_at).toLocaleString())}</div><div class="small">ID: ${esc(row.id)}</div><button class="danger" type="button" data-delete-id="${esc(row.id)}" data-photo-path="${esc(row.photo_path||"")}" data-upper="${esc(row.upper_number)}" data-lower="${esc(row.lower_number)}">🗑 ВИДАЛИТИ ЗАПИС І ФОТО</button></article>`).join("")}
+
+async function deleteRecord(button){const id=button.dataset.deleteId,path=button.dataset.photoPath||"",upper=button.dataset.upper||"",lower=button.dataset.lower||"",card=button.closest(".item");if(!id||!confirm(`Назавжди видалити ${upper} ${lower}?`))return;button.disabled=true;setStatus("Видаляю запис із бази…");try{const deletion=await client.from(TABLE).delete().eq("id",id);if(deletion.error)throw deletion.error;const verification=await client.from(TABLE).select("id").eq("id",id).maybeSingle();if(verification.error)throw verification.error;if(verification.data)throw new Error("Запис досі є в базі. DELETE заблокований політикою Supabase.");setStatus("Запис видалено. Видаляю файл фотографії…","warn");if(path){const storageDeletion=await client.storage.from(BUCKET).remove([path]);if(storageDeletion.error){card?.remove();setStatus(`Запис видалено, але файл фотографії не вдалося видалити:\n${storageDeletion.error.message}`,"warn");return}}card?.remove();setStatus("Запис і файл фотографії справді видалено.","ok");if(!$("gallery").querySelector(".item"))$("gallery").innerHTML='<div class="empty">У базі немає записів.</div>'}catch(error){button.disabled=false;const message=String(error.message||error),hint=/permission|policy|row-level|rls|denied|42501/i.test(message)?"\nЗапустіть supabase-delete-test-setup.sql у Supabase SQL Editor.":"";setStatus(`Помилка видалення:\n${message}${hint}`,"bad")}}
+
+$("apiKey").value=sessionStorage.getItem("gemini_api_key")||"";$("apiKey").addEventListener("input",()=>sessionStorage.setItem("gemini_api_key",$("apiKey").value.trim()));
+$("photoInput").addEventListener("change",async()=>{const file=$("photoInput").files?.[0];if(!file)return;setStatus("Обробляю фотографію…");result=null;renderResult();try{imageData=await compress(file);$("preview").src=imageData.dataUrl;$("previewWrap").style.display="block";$("recognizeButton").disabled=false;$("newPhotoButton").disabled=false;setStatus("Фото готове. Натисніть «Розпізнати номер».","ok")}catch(error){resetPhoto();setStatus(String(error.message||error),"bad")}});
+$("recognizeButton").addEventListener("click",recognize);$("newPhotoButton").addEventListener("click",resetPhoto);$("saveButton").addEventListener("click",saveCloud);$("refreshButton").addEventListener("click",loadRecent);$("gallery").addEventListener("click",event=>{const button=event.target.closest("[data-delete-id]");if(button)deleteRecord(button)});$("products").addEventListener("click",event=>{const button=event.target.closest("[data-product]");if(!button)return;product=button.dataset.product;localStorage.setItem("camera_live_product",product);renderProduct()});
+renderProduct();renderResult();loadRecent();
+</script>
+</body>
+</html>
