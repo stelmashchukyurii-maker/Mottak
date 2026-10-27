@@ -183,6 +183,17 @@ Physically verified:
 - result 8 s + 4 s grace; BYTT immediate logout.
 
 Current live backend RPC family exists for user/card resolution and stock registration.
+
+User administration:
+- `florivo-terminal-users.html` = Brukere / Tilganger v0.2;
+- existing-user role change supports exactly `lager / produksjon / admin / test`;
+- role mutation is protected by Edge Function `florivo-terminal-user-admin` using the established Admin-code mechanism;
+- service-role key is never sent to browser;
+- every real role change is audited in `florivo_terminal_user_admin_events`;
+- role change takes effect on the user's next NFC login/session;
+- deployment itself changed no user roles and created no role-change audit event;
+- status: SERVER/UI DEPLOY PASS, physical role-change test still pending.
+
 Do not modify v0.7.1 in place; new Android changes require a new version/branch.
 
 Read also:
