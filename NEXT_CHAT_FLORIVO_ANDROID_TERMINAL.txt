@@ -63,6 +63,17 @@ NFC SECURITY:
 - current live card bindings are SHA-256 identifiers;
 - public Git history is not rewritten; do not reintroduce raw UID.
 
+USERS / ACCESS CURRENT:
+- `florivo-terminal-users.html` = Brukere / Tilganger v0.2.
+- Existing user role can be changed among `lager / produksjon / admin / test`.
+- Role change is NOT a public browser RPC.
+- Protected Edge Function: `florivo-terminal-user-admin`.
+- Uses the established Admin-code mechanism via `x-admin-key`; plaintext code is not stored in HTML/repository.
+- Audit table: `public.florivo_terminal_user_admin_events`.
+- Card binding, active flag and historical registrations are not changed by a role edit.
+- New role is read from server on the next NFC login/session.
+- SERVER/UI DEPLOY PASS; physical role-change test pending.
+
 UT KONTOR CURRENT:
 - `bestilling.html` = WORKING v37.6.
 - BRUKERE / TILGANGER remains active -> `florivo-terminal-users.html`.
