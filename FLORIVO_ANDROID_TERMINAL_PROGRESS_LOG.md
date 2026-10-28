@@ -94,3 +94,15 @@ Important status:
 ## Next idea accepted for design
 Add a separate web option for moving goods from warehouse to ramp without RFID scanning: one-button bulk move. This must remain an explicit alternative path and must not modify frozen Nordic TIL RAMPE V2.9.7 scan behavior.
 Open design point: button scope should be the current/selected order or ramp requirement, not blindly the whole warehouse, unless explicitly chosen.
+
+
+## WISHLIST — USER SELF-UNDO OF RECENT REGISTRATION
+Status: DESIGN LATER / NOT IMPLEMENTED.
+
+User requested a future Android-terminal function for cases where a worker accidentally registers the wrong item/quantity:
+- allow the logged-in worker to reverse their own last operation, or possibly one of their last two operations;
+- scope must be limited to that same user's own recent registrations;
+- correction must NOT delete history;
+- correction should be implemented as an explicit compensating/reversal event linked to the original event, preserving audit trail;
+- exact UX, confirmation step, time window and role restrictions are still to be designed;
+- no implementation now.
