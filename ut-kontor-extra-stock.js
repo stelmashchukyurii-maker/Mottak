@@ -44,8 +44,8 @@
 
   function copy() {
     return isUk()
-      ? { physical: "На складі", ordering: "Замовляєте зараз", remaining: "Залишиться на складі", missing: "Бракує", waiting: "чекає на INN" }
-      : { physical: "På lager", ordering: "Bestiller nå", remaining: "Igjen på lager", missing: "Mangler", waiting: "venter på INN" };
+      ? { physical: "Доступно", ordering: "Замовляєте зараз", remaining: "Залишиться доступно", missing: "Бракує", waiting: "чекає на INN" }
+      : { physical: "Tilgjengelig", ordering: "Bestiller nå", remaining: "Igjen tilgjengelig", missing: "Mangler", waiting: "venter på INN" };
   }
 
   function injectStyle() {
@@ -108,7 +108,7 @@
     if (!output) return;
     const card = output.closest(".ramp-product");
     const c = copy();
-    const warehouse = Math.max(0, n(row?.physical_count));
+    const warehouse = Math.max(0, n(row?.available_count));
     const ordering = currentOrderQty(id);
     const remaining = warehouse - ordering;
     const shortage = remaining < 0;
@@ -126,7 +126,7 @@
     injectStyle();
     document.querySelectorAll(".ut-extra-stock-info").forEach(el => el.remove());
     const map = new Map((rows() || []).map(row => [String(row.product_id), row]));
-    ALL_IDS.forEach(id => renderOne(id, map.get(id) || { product_id: id, physical_count: 0 }));
+    ALL_IDS.forEach(id => renderOne(id, map.get(id) || { product_id: id, available_count: 0 }));
   }
 
   window.addEventListener("bama-stock-summary-updated", event => {
