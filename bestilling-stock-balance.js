@@ -27,26 +27,22 @@
     renderStockBalance();
   };
 
-  const originalLoadInn = loadInn;
-  loadInn = async function loadInnWithStock() {
-    await originalLoadInn();
-    try {
-      const rows = await request("mottak_scans?select=product,status,stock_status&limit=10000") || [];
-      // Visible model: På lager includes in_stock + reserved because reserved goods are
-      // still physically in the warehouse. They disappear only when moved to the ramp.
-      const warehouse = rows.filter((row) =>
-        row.status === "verified" && ["in_stock", "reserved"].includes(row.stock_status || "in_stock")
-      );
-      stock.bunner = warehouse.filter((row) => row.product === "bunner").length;
-      stock.h30 = warehouse.filter((row) => row.product === "hyller30").length;
-      stock.h60 = warehouse.filter((row) => row.product === "hyller60").length;
-      stock.loaded = true;
-      renderStockBalance();
-    } catch {
-      stock.loaded = false;
-      renderStockBalance();
-    }
-  };
+  // Use the same available balance as the eight-product stock summary.
+  // Do not derive orderable stock from raw scan counts.
+  function applyAvailableRows(rows) {
+    if (!Array.isArray(rows) || !rows.length) return;
+    const byId = new Map(rows.map(row => [String(row.product_id), row]));
+    stock.bunner = Math.max(0, Number(byId.get("bunner")?.available_count) || 0);
+    stock.h30 = Math.max(0, Number(byId.get("hyller30")?.available_count) || 0);
+    stock.h60 = Math.max(0, Number(byId.get("hyller60")?.available_count) || 0);
+    stock.loaded = true;
+    renderStockBalance();
+  }
+
+  window.addEventListener("bama-stock-summary-updated", event => {
+    applyAvailableRows(event.detail?.rows);
+  });
+  applyAvailableRows(window.BAMA_STOCK_SUMMARY_8?.getRows?.());
 
   function plural(value, one, many) {
     return Math.abs(value) === 1 ? one : many;
@@ -70,7 +66,7 @@
 
     if (!stock.loaded) {
       output.className = "stock-balance";
-      output.innerHTML = '<span class="stock-now">På lager: laster…</span><span class="stock-after">Igjen: —</span>';
+      output.innerHTML = '<span class="stock-now">Tilgjengelig: laster…</span><span class="stock-after">Igjen: —</span>';
       card?.classList.remove("over-stock");
       return;
     }
@@ -82,9 +78,9 @@
 
     output.className = "stock-balance";
     output.innerHTML = `
-      <span class="stock-now">På lager: ${balanceText(key, warehouse)}</span>
+      <span class="stock-now">Tilgjengelig: ${balanceText(key, warehouse)}</span>
       <span class="stock-demand">Bestiller nå: ${balanceText(key, ordering)}</span>
-      <span class="stock-after ${shortage ? "warn" : ""}">${shortage ? `Mangler: ${balanceText(key, Math.abs(remaining))} · venter på INN` : `Igjen på lager: ${balanceText(key, remaining)}`}</span>
+      <span class="stock-after ${shortage ? "warn" : ""}">${shortage ? `Mangler: ${balanceText(key, Math.abs(remaining))} · venter på INN` : `Igjen tilgjengelig: ${balanceText(key, remaining)}`}</span>
     `;
     card?.classList.toggle("over-stock", shortage);
   }
@@ -98,5 +94,5 @@
   }
 
   renderStockBalance();
-  loadInn().catch(() => {});
+
 })();
